@@ -19,9 +19,15 @@ function RootNavigator() {
   const { onboardingConcluido, carregando: carregandoPet } = usePet();
   const router = useRouter();
   const segments = useSegments();
+
   const ehTutor = sessao?.perfil === 'TUTOR';
   const ehVeterinario = sessao?.perfil === 'VETERINARIO';
+
   const carregando = carregandoAuth || (ehTutor && carregandoPet);
+
+  // Rotas fora dos grupos (tutor)/(vet) — modais e telas de detalhe abertas
+  // por cima das tabs. Precisam ficar de fora da checagem de grupo abaixo,
+  // senão o guard bate essas navegações de volta assim que elas abrem.
   const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente'];
 
   useEffect(() => {
