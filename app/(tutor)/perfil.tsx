@@ -38,7 +38,7 @@ export default function PerfilScreen() {
   );
   const total = eventosComStatus.length;
   const concluidos = eventosComStatus.filter(e => e.statusExibicao === 'CONCLUIDO').length;
-  const pendentes = eventosComStatus.filter(e => e.statusExibicao === 'SOLICITADO' || e.statusExibicao === 'CONFIRMADO').length;
+  const pendentes = eventosComStatus.filter(e => e.statusExibicao === 'AGENDADO').length;
   const atrasados = eventosComStatus.filter(e => e.statusExibicao === 'ATRASADO').length;
   const especieInfo = ESPECIES.find(e => e.valor === petAtivo?.especie);
 

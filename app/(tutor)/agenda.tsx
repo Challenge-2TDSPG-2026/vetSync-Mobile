@@ -109,7 +109,7 @@ export default function AgendaScreen() {
     } catch {
       alertar(
         'Não foi possível remover',
-        'Só é possível remover eventos que ainda não foram respondidos pelo veterinário.'
+        'Só é possível remover eventos que ainda estão agendados.'
       );
     }
   }
@@ -176,8 +176,8 @@ export default function AgendaScreen() {
           eventosDoDia.map(item => {
             const visual = obterVisualTipoEvento(item.nomeTipoEvento);
             const sb = STATUS_EXIBICAO_BADGE[item.statusExibicao];
-            const podeCancelar = item.status === 'SOLICITADO' || item.status === 'CONFIRMADO';
-            const podeRemover = item.status === 'SOLICITADO';
+            const podeCancelar = item.status === 'AGENDADO';
+            const podeRemover = item.status === 'AGENDADO';
             const cancelandoEste = cancelarMutation.isPending && eventoParaCancelar?.id === item.id;
             const removendoEste = removerMutation.isPending && removerMutation.variables === item.id;
 

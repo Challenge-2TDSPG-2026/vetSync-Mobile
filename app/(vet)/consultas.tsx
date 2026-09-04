@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
-import { alertar } from '../../utils/alert';
 
 const C = {
   g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52', g500: '#22a06b', g50: '#edfaf3', g200: '#a8e6c7',
@@ -13,43 +12,14 @@ const C = {
   danger: '#dc3545', warn: '#e67e22', info: '#2563eb',
 };
 
-type Filtro = 'solicitados' | 'confirmados';
-
 export default function ConsultasScreen() {
   const router = useRouter();
-  const { eventosSolicitados, eventosConfirmados, confirmarEvento, carregando } = useVet();
-  const [filtro, setFiltro] = useState<Filtro>('solicitados');
-  const [confirmandoId, setConfirmandoId] = useState<string | null>(null);
+  const { eventosAgendados, carregando } = useVet();
 
-  const lista = filtro === 'solicitados' ? eventosSolicitados : eventosConfirmados;
-  const listaOrdenada = [...lista].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
-
-  async function handleConfirmar(id: string) {
-    setConfirmandoId(id);
-    try {
-      await confirmarEvento(id);
-    } catch {
-      alertar('Não foi possível confirmar', 'Tente novamente em instantes.');
-    } finally {
-      setConfirmandoId(null);
-    }
-  }
+  const listaOrdenada = [...eventosAgendados].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
 
   return (
     <View style={s.container}>
-      <View style={s.filtroBar}>
-        <Pressable style={[s.filtroBtn, filtro === 'solicitados' && s.filtroBtnAtivo]} onPress={() => setFiltro('solicitados')}>
-          <Text style={[s.filtroText, filtro === 'solicitados' && s.filtroTextAtivo]}>
-            Aguardando ({eventosSolicitados.length})
-          </Text>
-        </Pressable>
-        <Pressable style={[s.filtroBtn, filtro === 'confirmados' && s.filtroBtnAtivo]} onPress={() => setFiltro('confirmados')}>
-          <Text style={[s.filtroText, filtro === 'confirmados' && s.filtroTextAtivo]}>
-            Confirmados ({eventosConfirmados.length})
-          </Text>
-        </Pressable>
-      </View>
-
       <ScrollView contentContainerStyle={s.content}>
         {carregando ? (
           <View style={s.empty}><ActivityIndicator color={C.g600} /></View>
@@ -57,17 +27,15 @@ export default function ConsultasScreen() {
           <View style={s.empty}>
             <AppIcon name="checkmark-done-outline" set="Ionicons" size={40} color={C.muted} style={{ marginBottom: 12 }} />
             <Text style={s.emptyTitle}>Nada por aqui</Text>
-            <Text style={s.emptySub}>
-              {filtro === 'solicitados' ? 'Nenhuma solicitação aguardando confirmação.' : 'Nenhum atendimento confirmado no momento.'}
-            </Text>
+            <Text style={s.emptySub}>Nenhuma consulta agendada no momento.</Text>
           </View>
         ) : (
           listaOrdenada.map(item => {
             const visual = obterVisualTipoEvento(item.nomeTipoEvento);
             const sb = STATUS_EXIBICAO_BADGE[statusExibicao(item)];
             return (
-              <View key={item.id} style={s.card}>
-                <Pressable style={s.cardRow} onPress={() => router.push(`/paciente/${item.petId}`)}>
+              <Pressable key={item.id} style={s.card} onPress={() => router.push(`/paciente/${item.petId}`)}>
+                <View style={s.cardRow}>
                   <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
                     <AppIcon name={visual.icon} set={visual.iconSet} size={18} color={C.white} />
                   </View>
@@ -76,30 +44,16 @@ export default function ConsultasScreen() {
                     <Text style={s.eventoMeta}>{formatarDataHoraEvento(item.data)}</Text>
                     {item.observacao ? <Text style={s.eventoObs} numberOfLines={2}>{item.observacao}</Text> : null}
                   </View>
-                </Pressable>
+                </View>
                 <View style={s.cardFooter}>
                   <View style={[s.badge, { backgroundColor: sb.bg }]}>
                     <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
                   </View>
-                  {filtro === 'solicitados' ? (
-                    <Pressable
-                      style={s.btnConfirmar}
-                      onPress={() => handleConfirmar(item.id)}
-                      disabled={confirmandoId === item.id}
-                    >
-                      {confirmandoId === item.id ? (
-                        <ActivityIndicator size="small" color={C.white} />
-                      ) : (
-                        <Text style={s.btnConfirmarText}>Confirmar</Text>
-                      )}
-                    </Pressable>
-                  ) : (
-                    <Pressable style={s.btnFicha} onPress={() => router.push(`/paciente/${item.petId}`)}>
-                      <Text style={s.btnFichaText}>Ver ficha</Text>
-                    </Pressable>
-                  )}
+                  <Pressable style={s.btnFicha} onPress={() => router.push(`/paciente/${item.petId}`)}>
+                    <Text style={s.btnFichaText}>Ver ficha</Text>
+                  </Pressable>
                 </View>
-              </View>
+              </Pressable>
             );
           })
         )}
@@ -110,11 +64,6 @@ export default function ConsultasScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
-  filtroBar: { flexDirection: 'row', backgroundColor: C.white, borderBottomWidth: 1, borderBottomColor: C.border, padding: 10, gap: 8 },
-  filtroBtn: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: 'center', backgroundColor: C.w50, borderWidth: 1.5, borderColor: C.border },
-  filtroBtnAtivo: { backgroundColor: C.g800, borderColor: C.g800 },
-  filtroText: { fontSize: 12, fontWeight: '700', color: C.text },
-  filtroTextAtivo: { color: C.white },
 
   content: { padding: 16, paddingBottom: 40 },
   empty: { alignItems: 'center', paddingVertical: 56 },
@@ -132,8 +81,6 @@ const s = StyleSheet.create({
   cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 10, backgroundColor: C.w50 },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 11, fontWeight: '700' },
-  btnConfirmar: { backgroundColor: C.g600, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8, minWidth: 84, alignItems: 'center' },
-  btnConfirmarText: { color: C.white, fontSize: 12, fontWeight: '700' },
   btnFicha: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8, borderWidth: 1.5, borderColor: C.border },
   btnFichaText: { color: C.text, fontSize: 12, fontWeight: '600' },
 });

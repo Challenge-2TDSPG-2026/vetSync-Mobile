@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import type { Evento, FaixaDisponibilidade, BloqueioAgenda } from '../types';
 import { useAuth } from './AuthContext';
-import { useEventos, useConfirmarEvento, useConcluirEvento, useCancelarEvento } from '../hooks/useEventos';
+import { useEventos, useConcluirEvento } from '../hooks/useEventos';
 import { usePetsPorIds } from '../hooks/usePets';
 import {
   useVeterinarioAtual,
@@ -12,7 +12,7 @@ import {
   useAdicionarBloqueio,
   useRemoverBloqueio,
 } from '../hooks/useVeterinario';
-import { statusExibicao, parseDataEvento } from '../utils/eventoStatus';
+import { parseDataEvento } from '../utils/eventoStatus';
 
 export interface PacienteComHistorico {
   pet: { id: string; nome: string; especie: string; raca: string; dataNascimento: string; peso: string };
@@ -25,12 +25,9 @@ type VetContextValue = {
   carregando: boolean;
 
   eventos: Evento[];
-  eventosSolicitados: Evento[];
-  eventosConfirmados: Evento[];
+  eventosAgendados: Evento[];
   eventosDeHoje: Evento[];
-  confirmarEvento: (id: string) => Promise<void>;
   concluirEvento: (id: string, observacao?: string, custo?: number) => Promise<void>;
-  cancelarEvento: (id: string, motivo: string) => Promise<void>;
 
   pacientes: PacienteComHistorico[];
 
@@ -54,12 +51,11 @@ export function VetProvider({ children }: { children: React.ReactNode }) {
   const { data: veterinarioAtivo = null, isLoading: carregandoVet } = useVeterinarioAtual(veterinarioAtivoId, habilitado);
   const { data: eventos = [], isLoading: carregandoEventos } = useEventos(habilitado);
 
-  const confirmarMutation = useConfirmarEvento();
   const concluirMutation = useConcluirEvento();
-  const cancelarMutation = useCancelarEvento();
 
-  const eventosSolicitados = useMemo(() => eventos.filter(e => e.status === 'SOLICITADO'), [eventos]);
-  const eventosConfirmados = useMemo(() => eventos.filter(e => e.status === 'CONFIRMADO'), [eventos]);
+  // Desde que o backend passou a agendar direto (sem etapa de confirmação),
+  // todo evento que ainda não foi concluído nem cancelado está 'AGENDADO'.
+  const eventosAgendados = useMemo(() => eventos.filter(e => e.status === 'AGENDADO'), [eventos]);
 
   const eventosDeHoje = useMemo(() => {
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
@@ -72,14 +68,8 @@ export function VetProvider({ children }: { children: React.ReactNode }) {
       .sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime());
   }, [eventos]);
 
-  const confirmarEvento = async (id: string) => {
-    await confirmarMutation.mutateAsync(id);
-  };
   const concluirEvento = async (id: string, observacao?: string, custo?: number) => {
     await concluirMutation.mutateAsync({ id, observacao, custo });
-  };
-  const cancelarEvento = async (id: string, motivo: string) => {
-    await cancelarMutation.mutateAsync({ id, motivo });
   };
 
   const idsPetsUnicos = useMemo(() => [...new Set(eventos.map(e => e.petId).filter(Boolean))], [eventos]);
@@ -111,12 +101,9 @@ export function VetProvider({ children }: { children: React.ReactNode }) {
         veterinarioAtivo,
         carregando,
         eventos,
-        eventosSolicitados,
-        eventosConfirmados,
+        eventosAgendados,
         eventosDeHoje,
-        confirmarEvento,
         concluirEvento,
-        cancelarEvento,
         pacientes,
         disponibilidade,
         adicionarFaixaDisponibilidade: async faixa => { await adicionarFaixaMutation.mutateAsync(faixa); },

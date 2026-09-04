@@ -12,7 +12,7 @@ export interface ConquistaComStatus {
 }
 
 function eventoEstaAtrasado(evento: Evento): boolean {
-  if (evento.status !== 'SOLICITADO' && evento.status !== 'CONFIRMADO') return false;
+  if (evento.status !== 'AGENDADO') return false;
   const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
   const data = new Date(evento.data); data.setHours(0, 0, 0, 0);
   return data < hoje;

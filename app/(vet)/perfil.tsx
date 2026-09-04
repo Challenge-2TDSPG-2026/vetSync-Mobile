@@ -13,7 +13,7 @@ const C = {
 };
 
 export default function VetPerfilScreen() {
-  const { veterinarioAtivo, pacientes, eventosSolicitados, eventosConfirmados } = useVet();
+  const { veterinarioAtivo, pacientes, eventosAgendados } = useVet();
   const { sessao, logout } = useAuth();
 
   function handleSair() {
@@ -40,8 +40,7 @@ export default function VetPerfilScreen() {
 
       <View style={s.statsRow}>
         <StatCard valor={pacientes.length} label="Pacientes" />
-        <StatCard valor={eventosSolicitados.length} label="Aguardando" />
-        <StatCard valor={eventosConfirmados.length} label="Confirmados" />
+        <StatCard valor={eventosAgendados.length} label="Agendados" />
       </View>
 
       <Text style={s.secLabel}>Dados profissionais</Text>

@@ -40,18 +40,10 @@ interface SolicitarEventoInput {
   observacao?: string;
 }
 
-export function useSolicitarEvento() {
+export function useAgendarEvento() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: SolicitarEventoInput) => eventoService.solicitarEvento(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
-  });
-}
-
-export function useConfirmarEvento() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => eventoService.confirmarEvento(id),
+    mutationFn: (input: SolicitarEventoInput) => eventoService.agendarEvento(input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
   });
 }
@@ -68,8 +60,8 @@ export function useConcluirEvento() {
 export function useCancelarEvento() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, motivo }: { id: string; motivo: string }) =>
-      eventoService.cancelarEvento(id, motivo),
+    mutationFn: ({ id, motivo, reagendarPara }: { id: string; motivo: string; reagendarPara?: string }) =>
+      eventoService.cancelarEvento(id, motivo, reagendarPara),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
   });
 }

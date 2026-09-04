@@ -34,7 +34,7 @@ export default function DashboardScreen() {
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
     [eventos]
   );
-  const pendentes = eventosComStatus.filter(e => e.statusExibicao === 'SOLICITADO' || e.statusExibicao === 'CONFIRMADO');
+  const pendentes = eventosComStatus.filter(e => e.statusExibicao === 'AGENDADO');
   const concluidos = eventosComStatus.filter(e => e.statusExibicao === 'CONCLUIDO');
   const atrasados = eventosComStatus.filter(e => e.statusExibicao === 'ATRASADO');
   const proximos = [...pendentes, ...atrasados]

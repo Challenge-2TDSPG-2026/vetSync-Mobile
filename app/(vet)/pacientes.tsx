@@ -49,7 +49,7 @@ export default function PacientesScreen() {
         ) : (
           pacientesFiltrados.map(({ pet, eventos }) => {
             const especieInfo = ESPECIES.find(e => e.valor === pet.especie);
-            const emAberto = eventos.filter(e => e.status === 'SOLICITADO' || e.status === 'CONFIRMADO').length;
+            const emAberto = eventos.filter(e => e.status === 'AGENDADO').length;
             return (
               <Pressable key={pet.id} style={s.card} onPress={() => router.push(`/paciente/${pet.id}`)}>
                 <View style={s.avatar}>

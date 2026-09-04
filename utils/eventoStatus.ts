@@ -12,8 +12,7 @@ export function statusExibicao(evento: Evento): StatusEventoExibicao {
 }
 
 export const STATUS_EXIBICAO_BADGE: Record<StatusEventoExibicao, { bg: string; color: string; label: string }> = {
-  SOLICITADO: { bg: '#fef3c7', color: '#92400e', label: 'Aguardando confirmação' },
-  CONFIRMADO: { bg: '#dbeafe', color: '#1e40af', label: 'Confirmado' },
+  AGENDADO: { bg: '#dbeafe', color: '#1e40af', label: 'Agendado' },
   CONCLUIDO: { bg: '#dcfce7', color: '#166534', label: 'Realizado' },
   CANCELADO: { bg: '#f0ece5', color: '#7a6a5e', label: 'Cancelado' },
   ATRASADO: { bg: '#fee2e2', color: '#991b1b', label: 'Atrasado' },

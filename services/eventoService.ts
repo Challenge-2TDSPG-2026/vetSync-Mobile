@@ -14,6 +14,11 @@ interface EventoResponseApi {
   idPet: number | null;
 }
 
+interface EventoCancelarResponseApi {
+  eventoCancelado: EventoResponseApi;
+  novoEvento: EventoResponseApi | null;
+}
+
 function paraEventoApp(dto: EventoResponseApi, idTipoEvento: string, idVeterinario: string): Evento {
   return {
     id: String(dto.idEvento),
@@ -46,7 +51,7 @@ export const eventoService = {
     return dtos.map(dto => paraEventoApp(dto, '', ''));
   },
 
-  async solicitarEvento(input: SolicitarEventoInput): Promise<Evento> {
+  async agendarEvento(input: SolicitarEventoInput): Promise<Evento> {
     const dto = await api.post<EventoResponseApi>('/eventos', {
       idPet: Number(input.idPet),
       idTipoEvento: Number(input.idTipoEvento),
@@ -57,11 +62,6 @@ export const eventoService = {
     return paraEventoApp(dto, input.idTipoEvento, input.idVeterinario);
   },
 
-  async confirmarEvento(id: string): Promise<Evento> {
-    const dto = await api.patch<EventoResponseApi>(`/eventos/${id}/confirmar`);
-    return paraEventoApp(dto, '', '');
-  },
-
   async concluirEvento(id: string, observacao?: string, custo?: number): Promise<Evento> {
     const dto = await api.patch<EventoResponseApi>(`/eventos/${id}/concluir`, {
       dsObservacao: observacao ?? null,
@@ -70,9 +70,15 @@ export const eventoService = {
     return paraEventoApp(dto, '', '');
   },
 
-  async cancelarEvento(id: string, motivo: string): Promise<Evento> {
-    const dto = await api.patch<EventoResponseApi>(`/eventos/${id}/cancelar`, { motivo });
-    return paraEventoApp(dto, '', '');
+  async cancelarEvento(id: string, motivo: string, reagendarPara?: string): Promise<{ eventoCancelado: Evento; novoEvento: Evento | null }> {
+    const dto = await api.patch<EventoCancelarResponseApi>(`/eventos/${id}/cancelar`, {
+      motivo,
+      reagendarPara: reagendarPara ?? null,
+    });
+    return {
+      eventoCancelado: paraEventoApp(dto.eventoCancelado, '', ''),
+      novoEvento: dto.novoEvento ? paraEventoApp(dto.novoEvento, '', '') : null,
+    };
   },
 
   async removerEvento(id: string): Promise<void> {

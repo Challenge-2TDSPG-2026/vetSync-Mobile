@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { usePet } from '../context/PetContext';
-import { useTiposEvento, useVeterinarios, useSolicitarEvento } from '../hooks/useEventos';
+import { useTiposEvento, useVeterinarios, useAgendarEvento } from '../hooks/useEventos';
 import { obterVisualTipoEvento } from '../constants';
 import { AppIcon } from '../components/AppIcon';
 import { ApiError } from '../services/api/httpClient';
@@ -42,7 +42,7 @@ export default function AddEventoScreen() {
 
   const { data: tiposEvento = [], isLoading: carregandoTipos } = useTiposEvento(true);
   const { data: veterinarios = [], isLoading: carregandoVets } = useVeterinarios(true);
-  const solicitarMutation = useSolicitarEvento();
+  const agendarMutation = useAgendarEvento();
 
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoEvento | null>(null);
   const [vetSelecionado, setVetSelecionado] = useState<Veterinario | null>(null);
@@ -62,7 +62,7 @@ export default function AddEventoScreen() {
   async function handleSalvar() {
     if (!validar() || !petAtivo || !tipoSelecionado || !vetSelecionado) return;
     try {
-      await solicitarMutation.mutateAsync({
+      await agendarMutation.mutateAsync({
         idPet: petAtivo.id,
         idTipoEvento: tipoSelecionado.id,
         idVeterinario: vetSelecionado.id,
@@ -71,7 +71,7 @@ export default function AddEventoScreen() {
       });
       router.back();
     } catch (e) {
-      alertar('Não foi possível solicitar o evento', mensagemDeErro(e, 'Tente novamente em instantes.'));
+      alertar('Não foi possível agendar o evento', mensagemDeErro(e, 'Tente novamente em instantes.'));
     }
   }
 
@@ -81,7 +81,7 @@ export default function AddEventoScreen() {
   return (
     <>
       <Stack.Screen options={{
-        title: 'Solicitar Evento de Saúde',
+        title: 'Agendar Evento de Saúde',
         headerStyle: { backgroundColor: C.g800 },
         headerTintColor: C.white,
         headerTitleStyle: { fontWeight: '700' },
@@ -198,16 +198,16 @@ export default function AddEventoScreen() {
               <Text style={s.btnCancelarText}>Cancelar</Text>
             </Pressable>
             <Pressable
-              style={[s.btnSalvar, { backgroundColor: visualTipo?.cor ?? C.g600 }, solicitarMutation.isPending && { opacity: 0.6 }]}
+              style={[s.btnSalvar, { backgroundColor: visualTipo?.cor ?? C.g600 }, agendarMutation.isPending && { opacity: 0.6 }]}
               onPress={handleSalvar}
-              disabled={solicitarMutation.isPending}
+              disabled={agendarMutation.isPending}
             >
-              {solicitarMutation.isPending ? (
-                <Text style={s.btnSalvarText}>Solicitando...</Text>
+              {agendarMutation.isPending ? (
+                <Text style={s.btnSalvarText}>Agendando...</Text>
               ) : (
                 <>
                   <AppIcon name={visualTipo?.icon ?? 'document-text-outline'} set={visualTipo?.iconSet ?? 'Ionicons'} size={16} color={C.white} style={{ marginRight: 6 }} />
-                  <Text style={s.btnSalvarText}>Solicitar Evento</Text>
+                  <Text style={s.btnSalvarText}>Agendar Evento</Text>
                 </>
               )}
             </Pressable>

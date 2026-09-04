@@ -15,7 +15,7 @@ const C = {
   danger: '#dc3545', info: '#2563eb',
 };
 
-type ModalTipo = 'concluir' | 'cancelar' | null;
+type ModalTipo = 'concluir' | null;
 
 function calcularIdade(d: string): string {
   const nasc = new Date(d), hoje = new Date();
@@ -29,7 +29,7 @@ function calcularIdade(d: string): string {
 export default function FichaPacienteScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { pacientes, confirmarEvento, concluirEvento, cancelarEvento } = useVet();
+  const { pacientes, concluirEvento } = useVet();
 
   const [modalTipo, setModalTipo] = useState<ModalTipo>(null);
   const [eventoSelecionadoId, setEventoSelecionadoId] = useState<string | null>(null);
@@ -42,7 +42,7 @@ export default function FichaPacienteScreen() {
 
   const total = eventosDoPaciente.length;
   const concluidos = eventosDoPaciente.filter(e => e.status === 'CONCLUIDO').length;
-  const pendentes = eventosDoPaciente.filter(e => e.status === 'SOLICITADO' || e.status === 'CONFIRMADO').length;
+  const pendentes = eventosDoPaciente.filter(e => e.status === 'AGENDADO').length;
   const cancelados = eventosDoPaciente.filter(e => e.status === 'CANCELADO').length;
 
   const especieInfo = ESPECIES.find(e => e.valor === pet?.especie);
@@ -62,31 +62,14 @@ export default function FichaPacienteScreen() {
   async function handleConfirmarModal() {
     if (!eventoSelecionadoId) return;
 
-    if (modalTipo === 'cancelar' && !textoModal.trim()) {
-      alertar('Motivo obrigatório', 'Informe o motivo do cancelamento antes de continuar.');
-      return;
-    }
-
     setEnviando(true);
     try {
-      if (modalTipo === 'concluir') {
-        await concluirEvento(eventoSelecionadoId, textoModal.trim() || undefined);
-      } else if (modalTipo === 'cancelar') {
-        await cancelarEvento(eventoSelecionadoId, textoModal.trim());
-      }
+      await concluirEvento(eventoSelecionadoId, textoModal.trim() || undefined);
       fecharModal();
     } catch {
-      alertar('Não foi possível concluir a ação', 'Tente novamente em instantes.');
+      alertar('Não foi possível concluir a consulta', 'Tente novamente em instantes.');
     } finally {
       setEnviando(false);
-    }
-  }
-
-  async function handleConfirmar(eventoId: string) {
-    try {
-      await confirmarEvento(eventoId);
-    } catch {
-      alertar('Não foi possível confirmar', 'Tente novamente em instantes.');
     }
   }
 
@@ -171,22 +154,11 @@ export default function FichaPacienteScreen() {
                     <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
                   </View>
 
-                  {(item.status === 'SOLICITADO' || item.status === 'CONFIRMADO') && (
+                  {item.status === 'AGENDADO' && (
                     <View style={s.acoes}>
-                      <Pressable style={s.btnAcaoDanger} onPress={() => abrirModal('cancelar', item.id)}>
-                        <Text style={s.btnAcaoDangerText}>
-                          {item.status === 'SOLICITADO' ? 'Recusar' : 'Cancelar'}
-                        </Text>
+                      <Pressable style={s.btnAcaoPrimaria} onPress={() => abrirModal('concluir', item.id)}>
+                        <Text style={s.btnAcaoPrimariaText}>Concluir</Text>
                       </Pressable>
-                      {item.status === 'SOLICITADO' ? (
-                        <Pressable style={s.btnAcaoPrimaria} onPress={() => handleConfirmar(item.id)}>
-                          <Text style={s.btnAcaoPrimariaText}>Confirmar</Text>
-                        </Pressable>
-                      ) : (
-                        <Pressable style={s.btnAcaoPrimaria} onPress={() => abrirModal('concluir', item.id)}>
-                          <Text style={s.btnAcaoPrimariaText}>Concluir</Text>
-                        </Pressable>
-                      )}
                     </View>
                   )}
                 </View>
@@ -200,41 +172,31 @@ export default function FichaPacienteScreen() {
       <Modal visible={modalTipo !== null} transparent animationType="fade" onRequestClose={fecharModal}>
         <View style={s.modalOverlay}>
           <View style={s.modalCard}>
-            <Text style={s.modalTitulo}>
-              {modalTipo === 'concluir' ? 'Concluir consulta' : 'Cancelar consulta'}
-            </Text>
-            <Text style={s.modalLabel}>
-              {modalTipo === 'concluir' ? 'Observações (opcional)' : 'Motivo do cancelamento *'}
-            </Text>
+            <Text style={s.modalTitulo}>Concluir consulta</Text>
+            <Text style={s.modalLabel}>Observações (opcional)</Text>
             <TextInput
               style={s.modalInput}
               value={textoModal}
               onChangeText={setTextoModal}
-              placeholder={
-                modalTipo === 'concluir'
-                  ? 'Diagnóstico, procedimentos realizados, recomendações...'
-                  : 'Ex: tutor solicitou reagendamento'
-              }
+              placeholder="Diagnóstico, procedimentos realizados, recomendações..."
               placeholderTextColor={C.muted}
               multiline
               numberOfLines={4}
             />
-            {modalTipo === 'concluir' && (
-              <Text style={s.modalHint}>
-                Essa observação substitui a observação original da solicitação (mesmo campo no sistema).
-              </Text>
-            )}
+            <Text style={s.modalHint}>
+              Essa observação substitui a observação original da solicitação (mesmo campo no sistema).
+            </Text>
             <View style={s.modalAcoes}>
               <Pressable style={s.modalBtnVoltar} onPress={fecharModal} disabled={enviando}>
                 <Text style={s.modalBtnVoltarText}>Voltar</Text>
               </Pressable>
               <Pressable
-                style={[s.modalBtnConfirmar, modalTipo === 'cancelar' && { backgroundColor: C.danger }, enviando && { opacity: 0.6 }]}
+                style={[s.modalBtnConfirmar, enviando && { opacity: 0.6 }]}
                 onPress={handleConfirmarModal}
                 disabled={enviando}
               >
                 <Text style={s.modalBtnConfirmarText}>
-                  {enviando ? 'Enviando...' : modalTipo === 'concluir' ? 'Concluir consulta' : 'Confirmar cancelamento'}
+                  {enviando ? 'Enviando...' : 'Concluir consulta'}
                 </Text>
               </Pressable>
             </View>

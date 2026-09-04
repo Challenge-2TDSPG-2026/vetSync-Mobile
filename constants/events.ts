@@ -56,8 +56,7 @@ export const SUGESTOES_TITULO: Record<string, Record<string, string[]>> = {
 };
 
 export const STATUS_EVENTO: Record<StatusEventoExibicao, { label: string; bg: string; color: string }> = {
-  SOLICITADO: { label: 'Aguardando confirmação', bg: '#fef3c7', color: '#92400e' },
-  CONFIRMADO: { label: 'Confirmada', bg: '#dbeafe', color: '#1e40af' },
+  AGENDADO: { label: 'Agendado', bg: '#dbeafe', color: '#1e40af' },
   CONCLUIDO: { label: 'Realizado', bg: '#dcfce7', color: '#166534' },
   CANCELADO: { label: 'Cancelada', bg: '#f3f4f6', color: '#4b5563' },
   ATRASADO: { label: 'Atrasado', bg: '#fee2e2', color: '#991b1b' },

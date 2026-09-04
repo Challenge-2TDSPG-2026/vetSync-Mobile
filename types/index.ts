@@ -7,7 +7,7 @@ export interface Pet {
   peso: string;
 }
 
-export type StatusEvento = 'SOLICITADO' | 'CONFIRMADO' | 'CONCLUIDO' | 'CANCELADO';
+export type StatusEvento = 'AGENDADO' | 'CONCLUIDO' | 'CANCELADO';
 export type StatusEventoExibicao = StatusEvento | 'ATRASADO';
 export interface TipoEvento {
   id: string;

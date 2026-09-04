@@ -19,7 +19,7 @@ const C = {
 export default function VetDashboardScreen() {
   const router = useRouter();
   const { sessao } = useAuth();
-  const { veterinarioAtivo, eventosSolicitados, eventosConfirmados, eventosDeHoje, carregando } = useVet();
+  const { veterinarioAtivo, eventosAgendados, eventosDeHoje, carregando } = useVet();
   const { data: resgates = [] } = useMeusResgates(true);
   const resgatesPendentes = resgates.filter(r => r.status === 'PENDENTE');
 
@@ -47,8 +47,7 @@ export default function VetDashboardScreen() {
       </View>
 
       <View style={s.statsRow}>
-        <StatCard valor={eventosSolicitados.length} label="Aguardando" accentColor={C.warn} />
-        <StatCard valor={eventosConfirmados.length} label="Confirmados" accentColor={C.info} />
+        <StatCard valor={eventosAgendados.length} label="Agendados" accentColor={C.info} />
         <StatCard valor={eventosDeHoje.length} label="Hoje" accentColor={C.g500} />
       </View>
 
@@ -64,19 +63,22 @@ export default function VetDashboardScreen() {
 
       <View style={s.card}>
         <View style={s.cardHead}>
-          <Text style={s.cardTitle}>Solicitações aguardando confirmação</Text>
+          <Text style={s.cardTitle}>Próximos agendamentos</Text>
           <Pressable onPress={() => router.push('/(vet)/consultas')}>
             <Text style={s.linkVer}>Ver todas</Text>
           </Pressable>
         </View>
 
-        {eventosSolicitados.length === 0 ? (
+        {eventosAgendados.length === 0 ? (
           <View style={s.empty}>
             <AppIcon name="checkmark-done-outline" set="Ionicons" size={32} color={C.muted} style={{ marginBottom: 8 }} />
-            <Text style={s.emptyTitle}>Nenhuma solicitação pendente</Text>
+            <Text style={s.emptyTitle}>Nenhum atendimento agendado</Text>
           </View>
         ) : (
-          eventosSolicitados.slice(0, 5).map((e, idx, arr) => {
+          [...eventosAgendados]
+            .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
+            .slice(0, 5)
+            .map((e, idx, arr) => {
             const visual = obterVisualTipoEvento(e.nomeTipoEvento);
             const sb = STATUS_EXIBICAO_BADGE[statusExibicao(e)];
             return (
