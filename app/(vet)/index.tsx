@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
+import { useMeusResgates } from '../../hooks/useRecompensas';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
@@ -19,6 +20,8 @@ export default function VetDashboardScreen() {
   const router = useRouter();
   const { sessao } = useAuth();
   const { veterinarioAtivo, eventosSolicitados, eventosConfirmados, eventosDeHoje, carregando } = useVet();
+  const { data: resgates = [] } = useMeusResgates(true);
+  const resgatesPendentes = resgates.filter(r => r.status === 'PENDENTE');
 
   if (carregando) {
     return (
@@ -48,6 +51,16 @@ export default function VetDashboardScreen() {
         <StatCard valor={eventosConfirmados.length} label="Confirmados" accentColor={C.info} />
         <StatCard valor={eventosDeHoje.length} label="Hoje" accentColor={C.g500} />
       </View>
+
+      {resgatesPendentes.length > 0 && (
+        <Pressable style={s.alertaResgates} onPress={() => router.push('/(vet)/resgates')}>
+          <AppIcon name="gift" set="Ionicons" size={18} color={C.white} />
+          <Text style={s.alertaResgatesText}>
+            {resgatesPendentes.length} resgate{resgatesPendentes.length > 1 ? 's' : ''} aguardando validação
+          </Text>
+          <AppIcon name="chevron-forward" set="Ionicons" size={16} color={C.white} />
+        </Pressable>
+      )}
 
       <View style={s.card}>
         <View style={s.cardHead}>
@@ -167,6 +180,13 @@ const s = StyleSheet.create({
   },
   statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: C.muted, marginBottom: 6 },
   statVal: { fontSize: 26, fontWeight: '700', lineHeight: 28 },
+
+  alertaResgates: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: '#c99a2e', borderRadius: 12,
+    paddingHorizontal: 16, paddingVertical: 13, marginBottom: 20,
+  },
+  alertaResgatesText: { flex: 1, fontSize: 13, fontWeight: '700', color: C.white },
 
   card: { backgroundColor: C.white, borderWidth: 1, borderColor: C.border, borderRadius: 16, marginBottom: 16, overflow: 'hidden' },
   cardHead: {

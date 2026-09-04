@@ -61,6 +61,16 @@ export default function VetTabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="resgates"
+        options={{
+          title: 'Resgates',
+          headerTitle: 'Resgates Pendentes',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="gift" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="perfil"
         options={{
           title: 'Perfil',
