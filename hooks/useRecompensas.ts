@@ -40,3 +40,14 @@ export function useResgatar() {
     },
   });
 }
+
+export function useValidarResgate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ idResgate, aprovado }: { idResgate: string; aprovado: boolean }) =>
+      recompensaService.validarResgate(idResgate, aprovado),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CHAVE_RESGATES });
+    },
+  });
+}

@@ -60,4 +60,9 @@ export const recompensaService = {
     const dto = await api.patch<ResgateResponseApi>(`/recompensas/${idRecompensa}/resgatar`);
     return paraResgateApp(dto);
   },
+
+  async validarResgate(idResgate: string, aprovado: boolean): Promise<Resgate> {
+    const dto = await api.patch<ResgateResponseApi>(`/recompensas/resgates/${idResgate}/validar`, { aprovado });
+    return paraResgateApp(dto);
+  },
 };
