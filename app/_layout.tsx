@@ -28,7 +28,7 @@ function RootNavigator() {
   // Rotas fora dos grupos (tutor)/(vet) — modais e telas de detalhe abertas
   // por cima das tabs. Precisam ficar de fora da checagem de grupo abaixo,
   // senão o guard bate essas navegações de volta assim que elas abrem.
-  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente'];
+  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente'];
 
   useEffect(() => {
     if (carregando) return;
@@ -69,6 +69,15 @@ function RootNavigator() {
       <Stack.Screen name="add-evento" options={{ presentation: 'modal', headerShown: false }} />
       <Stack.Screen name="add-pet" options={{ presentation: 'modal', headerShown: false }} />
       <Stack.Screen name="paciente/[id]" options={{ headerShown: true }} />
+      <Stack.Screen
+        name="assistente"
+        options={{
+          presentation: 'transparentModal',
+          animation: 'none',
+          headerShown: false,
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      />
     </Stack>
   );
 }
