@@ -1,23 +1,21 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CORES } from '../../constants';
+import { ClyvoTabBar } from '../../components/navigation/ClyvoTabBar';
+import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAction';
 
 export default function VetTabsLayout() {
   return (
     <Tabs
+      tabBar={(props) => <ClyvoTabBar {...props} />}
       screenOptions={{
         tabBarActiveTintColor: CORES.primaria,
         tabBarInactiveTintColor: CORES.textoSecundario,
-        tabBarStyle: {
-          backgroundColor: CORES.fundoCard,
-          borderTopColor: CORES.borda,
-          paddingBottom: 4,
-          height: 60,
-        },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
         headerStyle: { backgroundColor: CORES.primaria },
         headerTintColor: '#fff',
+        headerTitleAlign: 'left',
         headerTitleStyle: { fontWeight: '700' },
+        headerRight: () => <AccountHeaderAction href="/(vet)/perfil" />,
       }}
     >
       <Tabs.Screen
@@ -75,6 +73,7 @@ export default function VetTabsLayout() {
         options={{
           title: 'Perfil',
           headerTitle: 'Perfil',
+          href: null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),
