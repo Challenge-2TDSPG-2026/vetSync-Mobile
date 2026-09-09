@@ -25,8 +25,6 @@
       "package": "com.vetsync.app",
       "permissions": ["READ_CALENDAR", "WRITE_CALENDAR", "SCHEDULE_EXACT_ALARM", "POST_NOTIFICATIONS"]
     },
-      "package": "com.vetsync.app"
-    },
     "web": {
       "bundler": "metro",
       "output": "single",
@@ -35,7 +33,7 @@
     "plugins": [
       "expo-router",
       ["expo-calendar", { "calendarPermission": "Precisamos acessar seu calendário para adicionar os eventos de saúde do seu pet." }],
-      ["expo-notifications", { "icon": "./assets/logo.png", "color": "#22a06b" }
+      ["expo-notifications", { "icon": "./assets/logo.png", "color": "#22a06b" }]
     ]
-  ]
+  }
 }
