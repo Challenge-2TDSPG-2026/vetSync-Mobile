@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,7 +8,9 @@ import { authService } from '../../services/authService';
 import { AppIcon } from '../../components/AppIcon';
 import { alertar, confirmar } from '../../utils/alert';
 import { statusExibicao } from '../../utils/eventoStatus';
-import type { Evento } from '../../types';
+import type { Pet } from '../../types';
+import { WalletStack } from '../../components/carteira/WalletStack';
+import { CarteiraModal } from '../../components/carteira/CarteiraModal';
 
 const C = {
   g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
@@ -20,6 +22,7 @@ const C = {
 
 export default function PerfilScreen() {
   const router = useRouter();
+  const [petCarteira, setPetCarteira] = useState<Pet | null>(null);
   const {
     pets,
     petAtivo,
@@ -41,6 +44,13 @@ export default function PerfilScreen() {
   const pendentes = eventosComStatus.filter(e => e.statusExibicao === 'AGENDADO').length;
   const atrasados = eventosComStatus.filter(e => e.statusExibicao === 'ATRASADO').length;
   const especieInfo = ESPECIES.find(e => e.valor === petAtivo?.especie);
+
+  function abrirCarteira(pet: Pet) {
+    // O contexto mantém os eventos escopados ao pet ativo. Selecionar a carteira
+    // também atualiza esse escopo com um pet que já veio da lista autorizada.
+    selecionarPet(pet.id);
+    setPetCarteira(pet);
+  }
 
   function handleResetar() {
     confirmar(
@@ -93,6 +103,7 @@ export default function PerfilScreen() {
   const iniciais = petAtivo?.nome ? petAtivo.nome[0].toUpperCase() : '?';
 
   return (
+    <>
     <ScrollView style={s.container} contentContainerStyle={s.content}>
 
       {/* Banner do usuário */}
@@ -117,6 +128,17 @@ export default function PerfilScreen() {
         <StatCard valor={pendentes} label="Pendentes" accentColor={C.warn} />
         <StatCard valor={atrasados} label="Atrasados" accentColor={C.danger} />
       </View>
+
+      <View style={s.secLabelRow}>
+        <Text style={s.secLabel}>Carteiras de vacinação</Text>
+        {pets.length > 1 && <Text style={s.secLabelContagem}>{pets.length} carteiras</Text>}
+      </View>
+      <WalletStack
+        pets={pets}
+        petAtivoId={petAtivoId}
+        onSelecionar={abrirCarteira}
+        onTrocarPetAtivo={selecionarPet}
+      />
 
       {/* Meus Pets */}
       <View style={s.secLabelRow}>
@@ -210,24 +232,6 @@ export default function PerfilScreen() {
         />
       </View>
 
-      {/* Sobre */}
-      <Text style={s.secLabel}>Sobre</Text>
-      <View style={s.card}>
-        {[
-          ['Aplicativo', 'ClyvoVet'],
-          ['Versão', '1.0.0'],
-          ['Desafio', 'FIAP Challenge 2026'],
-          ['Expo SDK', '~54.0.0'],
-        ].map(([label, valor], i, arr) => (
-          <View key={label}>
-            <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{label}</Text>
-              <Text style={s.infoValor}>{valor}</Text>
-            </View>
-            {i < arr.length - 1 && <View style={s.divisor} />}
-          </View>
-        ))}
-      </View>
 
       {/* Sair */}
       <Pressable style={s.btnSair} onPress={handleSair}>
@@ -242,6 +246,12 @@ export default function PerfilScreen() {
       </Pressable>
 
     </ScrollView>
+    <CarteiraModal
+      pet={petCarteira}
+      eventos={petCarteira ? eventos.filter(evento => evento.petId === petCarteira.id) : []}
+      onFechar={() => setPetCarteira(null)}
+    />
+    </>
   );
 }
 
