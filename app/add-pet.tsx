@@ -17,6 +17,11 @@ const C = {
   danger: '#dc3545',
 };
 
+const SEXOS = [
+  { valor: 'macho', label: 'Macho', icon: 'gender-male' },
+  { valor: 'femea', label: 'Fêmea', icon: 'gender-female' },
+] as const;
+
 function formatarData(text: string): string {
   const n = text.replace(/\D/g, '');
   if (n.length <= 2) return n;
@@ -33,6 +38,7 @@ export default function AddPetScreen() {
   const { adicionarPet, salvandoPet } = usePet();
   const [nome, setNome] = useState('');
   const [especie, setEspecie] = useState<Pet['especie']>('cachorro');
+  const [sexo, setSexo] = useState<Pet['sexo']>('macho');
   const [raca, setRaca] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
   const [peso, setPeso] = useState('');
@@ -42,6 +48,7 @@ export default function AddPetScreen() {
     const e: Record<string, string> = {};
     if (!nome.trim()) e.nome = 'Nome é obrigatório';
     if (!raca.trim()) e.raca = 'Raça é obrigatória';
+    if (!sexo) e.sexo = 'Sexo é obrigatório';
     if (dataNascimento.length < 10) e.dataNascimento = 'Data inválida (DD/MM/AAAA)';
     if (!peso.trim() || isNaN(Number(peso.replace(',', '.')))) e.peso = 'Peso inválido';
     setErros(e);
@@ -58,11 +65,11 @@ export default function AddPetScreen() {
     try {
       const pet: Pet = {
         id: '', // gerado pela API — ignorado no payload de criação
-        nome: nome.trim(), especie, raca: raca.trim(),
+        nome: nome.trim(), especie, sexo, raca: raca.trim(),
         dataNascimento: parsarData(dataNascimento), peso: peso.trim(),
       };
       await adicionarPet(pet);
-      router.back();
+      router.replace('/(tutor)');
     } catch (e) {
       alertar('Não foi possível cadastrar o pet', mensagemDeErro(e, 'Tente novamente em instantes.'));
     }
@@ -116,6 +123,30 @@ export default function AddPetScreen() {
                 </Pressable>
               ))}
             </View>
+          </View>
+
+          <View style={s.fg}>
+            <Text style={s.fl}>Sexo *</Text>
+            <View style={s.especieRow}>
+              {SEXOS.map(sx => (
+                <Pressable
+                  key={sx.valor}
+                  style={[s.especieBtn, sexo === sx.valor && s.especieBtnAtivo]}
+                  onPress={() => setSexo(sx.valor as Pet['sexo'])}
+                >
+                  <AppIcon
+                    name={sx.icon}
+                    set="MaterialCommunityIcons"
+                    size={20}
+                    color={sexo === sx.valor ? C.white : C.muted}
+                  />
+                  <Text style={[s.especieLabel, sexo === sx.valor && s.especieLabelAtivo]}>
+                    {sx.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            {erros.sexo ? <Text style={s.textoErro}>{erros.sexo}</Text> : null}
           </View>
 
           <View style={s.fr}>
