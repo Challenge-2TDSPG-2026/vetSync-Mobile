@@ -2,6 +2,7 @@ export interface Pet {
   id: string;
   nome: string;
   especie: 'cachorro' | 'gato' | 'pássaro' | 'outro';
+  sexo: 'macho' | 'femea';
   raca: string;
   dataNascimento: string;
   peso: string;
