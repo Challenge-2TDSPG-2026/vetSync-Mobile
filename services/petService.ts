@@ -9,6 +9,11 @@ const ESPECIE_APP_PARA_API: Record<Pet['especie'], string> = {
   outro: 'OUTRO',
 };
 
+const SEXO_APP_PARA_API: Record<Pet['sexo'], string> = {
+  macho: 'M',
+  femea: 'F',
+};
+
 function especieApiParaApp(nmEspecie: string | null | undefined): Pet['especie'] {
   const chave = (nmEspecie ?? '').trim().toLowerCase();
   if (chave === 'cão' || chave === 'cao') return 'cachorro';
@@ -17,10 +22,17 @@ function especieApiParaApp(nmEspecie: string | null | undefined): Pet['especie']
   return 'outro';
 }
 
+function sexoApiParaApp(sexo: string | null | undefined): Pet['sexo'] {
+  const chave = (sexo ?? '').trim().toLowerCase();
+  if (chave === 'femea' || chave === 'fêmea' || chave === 'f') return 'femea';
+  return 'macho';
+}
+
 interface PetResponseApi {
   idPet: number;
   nmPet: string;
   especie: string | null;
+  sexo: string | null;
   raca: string | null;
   dtNascimento: string;
   idadeAnos: number;
@@ -33,6 +45,7 @@ function paraPetApp(dto: PetResponseApi): Pet {
     id: String(dto.idPet),
     nome: dto.nmPet,
     especie: especieApiParaApp(dto.especie),
+    sexo: sexoApiParaApp(dto.sexo),
     raca: dto.raca ?? '',
     dataNascimento: dto.dtNascimento,
     peso: dto.peso != null ? String(dto.peso) : '',
@@ -44,6 +57,7 @@ function paraRequestApi(pet: Pet) {
     nmPet: pet.nome,
     especie: ESPECIE_APP_PARA_API[pet.especie],
     especieOutro: pet.especie === 'outro' ? (pet.raca || 'Outro') : undefined,
+    sexo: SEXO_APP_PARA_API[pet.sexo],
     raca: pet.raca,
     dtNascimento: pet.dataNascimento.slice(0, 10),
     peso: pet.peso ? parseFloat(pet.peso.replace(',', '.')) : null,
