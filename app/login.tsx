@@ -16,11 +16,6 @@ const C = {
   danger: '#dc3545',
 };
 
-// ⚠️ DEV ONLY — contas seedadas pelo MockData.java, só existem em ambiente de dev/teste real
-const EMAIL_TESTE_TUTOR = 'maria@email.com';
-const EMAIL_TESTE_VET = 'ana.vet@clyvovet.com';
-const SENHA_TESTE = 'senha123';
-
 function mensagemDeErro(e: unknown, fallback: string): string {
   return e instanceof ApiError ? e.message : fallback;
 }
@@ -56,21 +51,6 @@ export default function LoginScreen() {
     }
   }
 
-  // ⚠️ DEV ONLY — preenche com contas reais seedadas pelo MockData.java
-  async function handleEntrarDev(emailDev: string) {
-    setEmail(emailDev);
-    setSenha(SENHA_TESTE);
-    setErrosConta({});
-    setAutenticando(true);
-    try {
-      await login(emailDev, SENHA_TESTE);
-    } catch (e) {
-      alertar('Não foi possível entrar', mensagemDeErro(e, 'Verifique se a API está rodando e com os dados seedados.'));
-    } finally {
-      setAutenticando(false);
-    }
-  }
-
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: C.g900 }}
@@ -101,27 +81,6 @@ export default function LoginScreen() {
                 conta é quem determina para onde você vai.
               </Text>
             </View>
-
-            {__DEV__ && (
-              <View style={s.devRow}>
-                <Pressable
-                  style={[s.btnDev, autenticando && { opacity: 0.6 }]}
-                  onPress={() => handleEntrarDev(EMAIL_TESTE_TUTOR)}
-                  disabled={autenticando}
-                >
-                  <AppIcon name="paw" set="MaterialCommunityIcons" size={14} color="#e67e22" />
-                  <Text style={s.btnDevText}>Entrar como tutor (dev)</Text>
-                </Pressable>
-                <Pressable
-                  style={[s.btnDev, autenticando && { opacity: 0.6 }]}
-                  onPress={() => handleEntrarDev(EMAIL_TESTE_VET)}
-                  disabled={autenticando}
-                >
-                  <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={14} color="#e67e22" />
-                  <Text style={s.btnDevText}>Entrar como vet (dev)</Text>
-                </Pressable>
-              </View>
-            )}
 
             <Campo
               label="E-mail *"
@@ -217,23 +176,6 @@ const s = StyleSheet.create({
 
   authForm: { padding: 24 },
 
-  devRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  btnDev: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderWidth: 1.5,
-    borderColor: '#e67e22',
-    borderStyle: 'dashed',
-    borderRadius: 10,
-    paddingVertical: 9,
-    paddingHorizontal: 6,
-    backgroundColor: '#fff8f0',
-  },
-  btnDevText: { fontSize: 11, fontWeight: '700', color: '#e67e22', textAlign: 'center' },
-
   fg: { marginBottom: 16 },
   fl: {
     fontSize: 11, fontWeight: '700', letterSpacing: 0.6,
@@ -280,4 +222,4 @@ const s = StyleSheet.create({
     textAlign: 'center',
     marginTop: 12,
   },
-});
+}); 
