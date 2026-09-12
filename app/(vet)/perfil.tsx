@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
 import { AppIcon } from '../../components/AppIcon';
@@ -13,13 +14,21 @@ const C = {
 };
 
 export default function VetPerfilScreen() {
+  const router = useRouter();
   const { veterinarioAtivo, pacientes, eventosAgendados } = useVet();
   const { sessao, logout } = useAuth();
 
   function handleSair() {
     confirmar('Sair da conta?', 'Você precisará entrar novamente para acessar sua agenda.', [
       { texto: 'Cancelar', estilo: 'cancel' },
-      { texto: 'Sair', estilo: 'destructive', aoConfirmar: () => logout() },
+      {
+        texto: 'Sair',
+        estilo: 'destructive',
+        aoConfirmar: async () => {
+          await logout();
+          router.replace('/login');
+        },
+      },
     ]);
   }
 

@@ -35,7 +35,11 @@ export function useCriarPet() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (pet: Pet) => petService.criarPet(pet),
-    onSuccess: () => {
+    onSuccess: (novoPet) => {
+      queryClient.setQueryData<Pet[]>(CHAVE_PETS, (antigos = []) => {
+        const existe = antigos.some(p => p.id === novoPet.id);
+        return existe ? antigos : [...antigos, novoPet];
+      });
       queryClient.invalidateQueries({ queryKey: CHAVE_PETS });
     },
   });
@@ -45,7 +49,10 @@ export function useAtualizarPet() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (pet: Pet) => petService.atualizarPet(pet),
-    onSuccess: () => {
+    onSuccess: (petAtualizado) => {
+      queryClient.setQueryData<Pet[]>(CHAVE_PETS, (antigos = []) =>
+        antigos.map(p => (p.id === petAtualizado.id ? petAtualizado : p))
+      );
       queryClient.invalidateQueries({ queryKey: CHAVE_PETS });
     },
   });
@@ -55,7 +62,10 @@ export function useRemoverPet() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => petService.removerPet(id),
-    onSuccess: () => {
+    onSuccess: (_, idRemovido) => {
+      queryClient.setQueryData<Pet[]>(CHAVE_PETS, (antigos = []) =>
+        antigos.filter(p => p.id !== idRemovido)
+      );
       queryClient.invalidateQueries({ queryKey: CHAVE_PETS });
     },
   });

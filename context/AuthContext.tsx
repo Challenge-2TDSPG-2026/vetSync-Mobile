@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQueryClient } from '@tanstack/react-query';
 import { STORAGE_KEYS } from '../constants';
 import { ApiError } from '../services/api/httpClient';
 import { authService } from '../services/authService';
@@ -50,6 +51,7 @@ async function carregarSessaoSalva(): Promise<Sessao | null> {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const [sessao, setSessao] = useState<Sessao | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -90,14 +92,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    try {
-      await authService.logout();
-    } catch {
-      // mesmo se a chamada falhar (ex: sem conexão), a sessão local é limpa
-    }
+    // 1. Limpa sessão local e notifica o app imediatamente
     await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
     setSessao(null);
-  }, []);
+    // 2. Limpa cache do React Query
+    queryClient.clear();
+    // 3. Notifica backend em segundo plano (não trava a saída do usuário)
+    authService.logout().catch(() => {});
+  }, [queryClient]);
 
   const limparErro = useCallback(() => setErro(null), []);
 

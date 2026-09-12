@@ -6,8 +6,9 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { ESPECIES } from '../constants';
 import { usePet } from '../context/PetContext';
+import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
-import { alertar } from '../utils/alert';
+import { alertar, confirmar } from '../utils/alert';
 import { AppIcon } from '../components/AppIcon';
 import type { Pet } from '../types';
 
@@ -36,6 +37,10 @@ function mensagemDeErro(e: unknown, fallback: string): string {
 export default function AddPetScreen() {
   const router = useRouter();
   const { adicionarPet, salvandoPet } = usePet();
+  const { logout } = useAuth();
+  const [salvandoLocal, setSalvandoLocal] = useState(false);
+  const estaSalvando = salvandoPet || salvandoLocal;
+
   const [nome, setNome] = useState('');
   const [especie, setEspecie] = useState<Pet['especie']>('cachorro');
   const [sexo, setSexo] = useState<Pet['sexo']>('macho');
@@ -61,7 +66,9 @@ export default function AddPetScreen() {
   }
 
   async function handleSalvar() {
+    if (estaSalvando) return;
     if (!validar()) return;
+    setSalvandoLocal(true);
     try {
       const pet: Pet = {
         id: '', // gerado pela API — ignorado no payload de criação
@@ -69,10 +76,30 @@ export default function AddPetScreen() {
         dataNascimento: parsarData(dataNascimento), peso: peso.trim(),
       };
       await adicionarPet(pet);
-      router.replace('/(tutor)');
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/(tutor)');
+      }
     } catch (e) {
       alertar('Não foi possível cadastrar o pet', mensagemDeErro(e, 'Tente novamente em instantes.'));
+    } finally {
+      setSalvandoLocal(false);
     }
+  }
+
+  function handleSairConta() {
+    confirmar('Sair da conta?', 'Você precisará entrar novamente para acessar o aplicativo.', [
+      { texto: 'Cancelar', estilo: 'cancel' },
+      {
+        texto: 'Sair',
+        estilo: 'destructive',
+        aoConfirmar: async () => {
+          await logout();
+          router.replace('/login');
+        },
+      },
+    ]);
   }
 
   const especieInfo = ESPECIES.find(e => e.valor === especie);
@@ -81,9 +108,20 @@ export default function AddPetScreen() {
     <>
       <Stack.Screen options={{
         title: 'Cadastrar Novo Pet',
+        headerShown: true,
         headerStyle: { backgroundColor: C.g800 },
         headerTintColor: C.white,
         headerTitleStyle: { fontWeight: '700' },
+        headerLeft: router.canGoBack() ? () => (
+          <Pressable onPress={() => router.back()} hitSlop={10} style={{ marginRight: 10 }}>
+            <AppIcon name="close" set="Ionicons" size={22} color={C.white} />
+          </Pressable>
+        ) : undefined,
+        headerRight: () => (
+          <Pressable onPress={handleSairConta} hitSlop={10}>
+            <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>Sair</Text>
+          </Pressable>
+        ),
       }} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView style={s.container} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
@@ -175,12 +213,21 @@ export default function AddPetScreen() {
           </View>
 
           <Pressable
-            style={[s.btnSalvar, salvandoPet && { opacity: 0.6 }]}
+            style={[s.btnSalvar, estaSalvando && { opacity: 0.6 }]}
             onPress={handleSalvar}
-            disabled={salvandoPet}
+            disabled={estaSalvando}
           >
             <Text style={s.btnSalvarText}>
-              {salvandoPet ? 'Salvando...' : 'Cadastrar pet →'}
+              {estaSalvando ? 'Salvando...' : 'Cadastrar pet →'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={s.btnSecundario}
+            onPress={router.canGoBack() ? () => router.back() : handleSairConta}
+          >
+            <Text style={s.btnSecundarioText}>
+              {router.canGoBack() ? 'Cancelar' : 'Sair da conta'}
             </Text>
           </Pressable>
 
@@ -267,4 +314,10 @@ const s = StyleSheet.create({
     marginTop: 4,
   },
   btnSalvarText: { color: C.white, fontSize: 14, fontWeight: '700' },
+  btnSecundario: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  btnSecundarioText: { color: C.muted, fontSize: 13, fontWeight: '600' },
 });
