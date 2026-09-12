@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, ScrollView, Pressable, Image,
   StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
 import { alertar } from '../utils/alert';
@@ -26,6 +26,7 @@ export default function LoginScreen() {
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [errosConta, setErrosConta] = useState<Record<string, string>>({});
   const [autenticando, setAutenticando] = useState(false);
 
@@ -96,7 +97,9 @@ export default function LoginScreen() {
               value={senha}
               onChangeText={setSenha}
               placeholder="••••••••"
-              secureTextEntry
+              isPassword
+              showPassword={mostrarSenha}
+              onTogglePassword={() => setMostrarSenha(v => !v)}
               erro={errosConta.senha}
             />
 
@@ -108,9 +111,16 @@ export default function LoginScreen() {
               <Text style={s.btnAuthText}>{autenticando ? 'Entrando...' : 'Entrar →'}</Text>
             </Pressable>
 
-            <Text style={s.loginNota}>
-              Não tem conta? Fale com a administração para criar seu acesso.
-            </Text>
+            <Link href="/cadastro" asChild>
+              <Pressable
+                style={s.btnCadastrar}
+                disabled={autenticando}
+              >
+                <Text style={s.btnCadastrarText}>
+                  Não tem conta? <Text style={s.btnCadastrarDestaque}>Cadastre-se como tutor</Text>
+                </Text>
+              </Pressable>
+            </Link>
 
           </View>
         </View>
@@ -120,21 +130,42 @@ export default function LoginScreen() {
   );
 }
 
-function Campo({ label, value, onChangeText, placeholder, keyboardType, maxLength, erro, secureTextEntry }: any) {
+function Campo({
+  label, value, onChangeText, placeholder, keyboardType, maxLength,
+  erro, secureTextEntry, autoCapitalize, isPassword, showPassword, onTogglePassword,
+}: any) {
   return (
     <View style={s.campo}>
       <Text style={s.fl}>{label}</Text>
-      <TextInput
-        style={[s.fi, erro && s.fiErro]}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={C.muted}
-        keyboardType={keyboardType}
-        maxLength={maxLength}
-        secureTextEntry={secureTextEntry}
-        autoCapitalize={secureTextEntry ? 'none' : undefined}
-      />
+      <View style={[s.inputWrap, erro && s.fiErro]}>
+        <TextInput
+          style={s.fi}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={C.muted}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          secureTextEntry={isPassword ? !showPassword : secureTextEntry}
+          autoCapitalize={autoCapitalize ?? (isPassword || secureTextEntry ? 'none' : undefined)}
+        />
+        {isPassword && (
+          <Pressable
+            onPress={onTogglePassword}
+            style={s.btnOlho}
+            hitSlop={8}
+            accessibilityLabel={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+            accessibilityRole="button"
+          >
+            <AppIcon
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              set="Ionicons"
+              size={20}
+              color={C.muted}
+            />
+          </Pressable>
+        )}
+      </View>
       {erro ? <Text style={s.textoErro}>{erro}</Text> : null}
     </View>
   );
@@ -182,15 +213,26 @@ const s = StyleSheet.create({
     textTransform: 'uppercase', color: C.muted, marginBottom: 6,
   },
   campo: { flex: 1, marginBottom: 16 },
-  fi: {
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: C.white,
     borderWidth: 1.5,
     borderColor: C.border,
     borderRadius: 10,
     paddingHorizontal: 13,
+  },
+  fi: {
+    flex: 1,
     paddingVertical: 10,
     fontSize: 14,
     color: C.text,
+  },
+  btnOlho: {
+    paddingLeft: 8,
+    paddingVertical: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   fiErro: { borderColor: C.danger },
   textoErro: { color: C.danger, fontSize: 12, marginTop: 4 },
@@ -216,10 +258,19 @@ const s = StyleSheet.create({
     borderColor: C.border,
   },
   loginIntroText: { flex: 1, fontSize: 12, color: C.muted },
-  loginNota: {
-    fontSize: 11,
+  btnCadastrar: {
+    marginTop: 18,
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  btnCadastrarText: {
+    fontSize: 13,
     color: C.muted,
     textAlign: 'center',
     marginTop: 12,
+  },
+  btnCadastrarDestaque: {
+    color: C.g600,
+    fontWeight: '700',
   },
 }); 

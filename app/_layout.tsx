@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, usePathname } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PetProvider, usePet } from '../context/PetContext';
@@ -20,22 +20,24 @@ function RootNavigator() {
   const { onboardingConcluido, carregando: carregandoPet, erroPets, recarregarPets } = usePet();
   const router = useRouter();
   const segments = useSegments();
+  const pathname = usePathname();
   const ehTutor = sessao?.perfil === 'TUTOR';
   const ehVeterinario = sessao?.perfil === 'VETERINARIO';
   const carregando = carregandoAuth || (ehTutor && carregandoPet);
-  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente'];
+  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente', 'cadastro'];
 
   useEffect(() => {
     if (carregando) return;
 
-    const inLogin = segments[0] === 'login';
-    const inTutor = segments[0] === '(tutor)';
-    const inVet = segments[0] === '(vet)';
-    const inAddPet = segments[0] === 'add-pet';
-    const inRotaLivre = ROTAS_FORA_DO_GRUPO.includes(segments[0] as string);
+    const inLogin = segments.includes('login') || pathname === '/login' || pathname.startsWith('/login');
+    const inCadastro = segments.includes('cadastro') || pathname === '/cadastro' || pathname.startsWith('/cadastro');
+    const inTutor = segments.includes('(tutor)') || pathname.startsWith('/(tutor)');
+    const inVet = segments.includes('(vet)') || pathname.startsWith('/(vet)');
+    const inAddPet = segments.includes('add-pet') || pathname === '/add-pet';
+    const inRotaLivre = ROTAS_FORA_DO_GRUPO.some(r => segments.includes(r) || pathname.includes(r));
 
     if (!autenticado) {
-      if (!inLogin) router.replace('/login');
+      if (!inLogin && !inCadastro) router.replace('/login');
       return;
     }
 
@@ -55,8 +57,8 @@ function RootNavigator() {
       return;
     }
 
-    if (!inLogin) router.replace('/login');
-  }, [autenticado, ehTutor, ehVeterinario, onboardingConcluido, carregando, segments]);
+    if (!inLogin && !inCadastro) router.replace('/login');
+  }, [autenticado, ehTutor, ehVeterinario, onboardingConcluido, carregando, segments, pathname]);
 
   return (
     <>
@@ -71,6 +73,7 @@ function RootNavigator() {
       )}
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="login" />
+        <Stack.Screen name="cadastro" />
         <Stack.Screen name="(tutor)" />
         <Stack.Screen name="(vet)" />
         <Stack.Screen name="add-evento" options={{ presentation: 'modal', headerShown: false }} />
