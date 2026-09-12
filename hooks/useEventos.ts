@@ -37,6 +37,7 @@ interface SolicitarEventoInput {
   idTipoEvento: string;
   idVeterinario: string;
   data: string;
+  hora: string;
   observacao?: string;
 }
 

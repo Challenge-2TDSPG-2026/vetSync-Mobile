@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
 import { ESPECIES } from '../../constants';
-import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 import { AppIcon } from '../../components/AppIcon';
 import { alertar, confirmar } from '../../utils/alert';
 import { statusExibicao } from '../../utils/eventoStatus';
@@ -23,6 +23,7 @@ const C = {
 export default function PerfilScreen() {
   const router = useRouter();
   const [petCarteira, setPetCarteira] = useState<Pet | null>(null);
+  const { logout } = useAuth();
   const {
     pets,
     petAtivo,
@@ -46,8 +47,6 @@ export default function PerfilScreen() {
   const especieInfo = ESPECIES.find(e => e.valor === petAtivo?.especie);
 
   function abrirCarteira(pet: Pet) {
-    // O contexto mantém os eventos escopados ao pet ativo. Selecionar a carteira
-    // também atualiza esse escopo com um pet que já veio da lista autorizada.
     selecionarPet(pet.id);
     setPetCarteira(pet);
   }
@@ -78,7 +77,7 @@ export default function PerfilScreen() {
         texto: 'Sair',
         estilo: 'destructive',
         aoConfirmar: async () => {
-          await authService.logout();
+          await logout();
           router.replace('/login');
         },
       },

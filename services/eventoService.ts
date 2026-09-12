@@ -8,6 +8,7 @@ interface EventoResponseApi {
   dsCategoria: Evento['categoriaTipoEvento'];
   nmVeterinario: string | null;
   dtEvento: string;
+  hrEvento: string | null;
   dsObservacao: string | null;
   motivoCancelamento: string | null;
   vlCusto: number | null;
@@ -41,6 +42,7 @@ interface SolicitarEventoInput {
   idTipoEvento: string;
   idVeterinario: string;
   data: string;
+  hora: string;
   observacao?: string;
 }
 
@@ -57,6 +59,7 @@ export const eventoService = {
       idTipoEvento: Number(input.idTipoEvento),
       idVeterinario: Number(input.idVeterinario),
       dtEvento: input.data,
+      hrEvento: input.hora,
       dsObservacao: input.observacao ?? null,
     });
     return paraEventoApp(dto, input.idTipoEvento, input.idVeterinario);
