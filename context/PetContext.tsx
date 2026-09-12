@@ -23,7 +23,6 @@ export interface NivelInfo {
 }
 
 type PetContextValue = {
-  // --- Pets (API) ---
   pets: Pet[];
   petAtivo: Pet | null;
   petAtivoId: string | null;
@@ -32,20 +31,19 @@ type PetContextValue = {
   removerPet: (id: string) => Promise<void>;
   salvandoPet: boolean;
 
-  // --- Eventos do pet ativo (API) ---
   eventos: Evento[];
   carregandoEventos: boolean;
 
-  // --- Preferências locais de UI ---
+  erroPets: boolean;
+  recarregarPets: () => void;
+
   preferencias: Record<string, boolean>;
   atualizarPreferencias: (prefs: Record<string, boolean>) => Promise<void>;
 
-  // --- Estado geral ---
   onboardingConcluido: boolean;
   carregando: boolean;
   resetarPreferencias: () => Promise<void>;
 
-  // --- Nível/XP (do pet ativo) ---
   nivelInfo: NivelInfo;
 };
 
@@ -62,7 +60,6 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
   });
   const [carregandoLocal, setCarregandoLocal] = useState(true);
 
-  // Preferências e pet ativo salvo são só UI local — carregados uma vez no mount.
   useEffect(() => {
     async function carregarLocal() {
       const [ativoSalvo, prefsSalvas] = await Promise.all([
@@ -78,15 +75,12 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
 
   const habilitado = autenticado && !carregandoAuth;
 
-  const { data: pets = [], isLoading: carregandoPets } = usePets(habilitado);
+  const { data: pets = [], isLoading: carregandoPets, isError: erroPets, refetch: recarregarPets } = usePets(habilitado);
   const { data: eventosTodos = [], isLoading: carregandoEventos } = useEventos(habilitado);
 
   const criarPetMutation = useCriarPet();
   const removerPetMutation = useRemoverPet();
 
-  // Garante que petAtivoId sempre aponte para um pet que realmente existe:
-  // corrige tanto o carregamento inicial (id salvo de sessão anterior que já
-  // não existe mais) quanto remoções (pet ativo removido -> escolhe outro).
   useEffect(() => {
     if (carregandoPets) return;
     const aindaExiste = petAtivoId !== null && pets.some(p => p.id === petAtivoId);
@@ -114,11 +108,8 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
 
   const removerPet = useCallback(async (id: string) => {
     await removerPetMutation.mutateAsync(id);
-    // A reatribuição do pet ativo (se este era o ativo) é feita pelo
-    // useEffect acima assim que a lista de pets for revalidada.
   }, [removerPetMutation]);
 
-  // --- Eventos escopados ao pet ativo ---
   const eventos = useMemo(
     () => eventosTodos.filter(e => e.petId === petAtivoId),
     [eventosTodos, petAtivoId]
@@ -135,14 +126,11 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
     setPreferencias({ ativas: true, lembrete7: true, lembreteAntes: true });
   }, []);
 
-  // Onboarding concluído é derivado de haver pelo menos 1 pet cadastrado na
-  // API — não é mais uma flag local, para não divergir do estado real do
-  // servidor (ex: tutor que já cadastrou pet em outro dispositivo).
-  const onboardingConcluido = pets.length > 0;
+
+  const onboardingConcluido = pets.length > 0 || erroPets;
 
   const carregando = carregandoAuth || carregandoLocal || (habilitado && carregandoPets);
 
-  // --- Nível / XP (do pet ativo) ---
   const eventosConcluidosTotal = useMemo(
     () => eventos.filter(e => e.status === 'CONCLUIDO').length,
     [eventos]
@@ -186,6 +174,8 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
         salvandoPet: criarPetMutation.isPending,
         eventos,
         carregandoEventos,
+        erroPets,
+        recarregarPets: () => { recarregarPets(); },
         preferencias,
         atualizarPreferencias,
         onboardingConcluido,
