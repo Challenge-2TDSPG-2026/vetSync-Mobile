@@ -1,43 +1,54 @@
-# ClyvoVet - Mobile Application
+# ClyvoVet (VetSync) — Mobile Application
 
-**FIAP Challenge 2026 - 2º Ano ADS - 3° Semestre**
-**Disciplina: Mobile Application Development**
+**FIAP Challenge 2026 — 2º Ano ADS — 3º Semestre**
+**Disciplina: Mobile Application Development — Entrega Sprint 3**
 
-Aplicativo mobile desenvolvido em React Native com Expo para o desafio proposto pela CLYVO VET, como parte da avaliação prática do 1º semestre de 2026.
+Aplicativo mobile em React Native (Expo Router) para o desafio proposto pela **CLYVO VET**, com experiências completas de **Tutor** e **Veterinário** integradas a um backend real em Spring Boot.
+
+---
+
+## 🎥 Vídeo de Demonstração
+
+> **[INSERIR LINK DO VÍDEO NO YOUTUBE AQUI]**
+
+O vídeo demonstra: navegação entre telas, autenticação (login de tutor e veterinário), integração com a API backend (agendamento, conclusão e cancelamento de eventos, CRUD de pets) e o app rodando em dispositivo/emulador real.
 
 ---
 
 ## Sobre o Projeto
 
-O ClyvoVet é um protótipo funcional de aplicativo de saúde para animais de estimação, criado para endereçar a descontinuidade do cuidado veterinário. A solução permite que tutores organizem, acompanhem e gerenciem a jornada de saúde do seu animal em um só lugar, de forma proativa e personalizada.
+O problema atacado pela CLYVO VET é a **descontinuidade do cuidado veterinário**: o tutor normalmente só aciona a clínica em emergências ou gatilhos óbvios (vacinação), negligenciando o acompanhamento preventivo contínuo.
 
-O aplicativo resolve um problema real do mercado veterinário brasileiro: o responsável pelo animal normalmente aciona a clínica apenas em situações de urgência ou gatilhos óbvios (como vacinação), negligenciando o cuidado preventivo contínuo.
+O **ClyvoVet** resolve isso unificando, em um único aplicativo, a jornada de saúde do pet e a rotina da clínica:
+
+- O **tutor** cadastra pets, agenda e acompanha eventos de saúde (vacinas, consultas, vermífugos, check-ups), consulta a carteira de vacinação digital e participa de um programa de fidelidade com pontos e recompensas.
+- O **veterinário** enxerga sua agenda, atende pacientes, conclui ou cancela consultas, define horários de disponibilidade/bloqueios e valida resgates de recompensas.
+
+Diferente do protótipo da Sprint 1 e 2 (dados mockados em `AsyncStorage`), a Sprint 3 substitui toda a persistência local por **chamadas HTTP reais** a uma API Spring Boot, com autenticação por sessão, estados de carregamento e atualização automática de dados via TanStack Query.
 
 ---
 
 ## Funcionalidades Principais
 
-- **Onboarding:** Cadastro inicial do animal com validação de campos (nome, espécie, raça, data de nascimento e peso).
-- **Dashboard:** Visão geral com estatísticas de eventos pendentes, realizados e atrasados, além dos próximos eventos agendados.
-- **Agenda de Saúde:** Listagem completa de eventos com filtros por tipo (vacina, vermífugo, consulta, medicamento, check-up) e por status (atrasados), com ações de concluir e remover.
-- **Adicionar Evento:** Formulário para cadastro de novos eventos clínicos contendo tipo, título, descrição e data.
-- **Histórico Clínico:** Linha do tempo agrupada por mês com taxa de conclusão e barra de progresso.
-- **Perfil:** Dados do animal, preferências de notificação e opção de reinicialização completa do aplicativo (reset).
+### Área do Tutor
+- **Login e sessão persistente** — perfil determina automaticamente o destino (Tutor ou Veterinário).
+- **Multi-pet** — troca rápida entre pets cadastrados (`PetSwitcher`), cadastro de novo pet.
+- **Dashboard** — pendentes, realizados, atrasados e próximos eventos.
+- **Agenda de Saúde** — calendário mensal, filtros por categoria (Preventivo, Terapêutico, Bem-estar, Emergência) e por atraso, cancelamento com motivo, remoção de eventos ainda agendados.
+- **Agendamento de evento** — seleção de tipo de evento e veterinário vindos da API, data/hora, observação.
+- **Histórico Clínico** — linha do tempo agrupada por mês com taxa de conclusão.
+- **Carteira de Vacinação digital** — histórico de vacinas por pet.
+- **Programa de Fidelidade (Recompensas)** — pontos por evento concluído, catálogo de benefícios, resgate, conquistas e progressão por nível/XP.
+- **SIA (assistente de IA)** — chat contextual com o pet ativo, acionável de qualquer tela via tab bar.
+- **Perfil** — dados do pet, preferências de notificação, gerenciamento de múltiplos pets, logout.
 
----
-
-## Fluxo de Navegação
-
-O aplicativo utiliza o Expo Router contendo 6 rotas navegáveis:
-
-| Rota | Descrição |
-|---|---|
-| `/onboarding` | Cadastro inicial do animal |
-| `/(tabs)/index` | Dashboard (tela inicial) |
-| `/(tabs)/agenda` | Agenda de eventos com filtros |
-| `/(tabs)/historico` | Histórico clínico agrupado por mês |
-| `/(tabs)/perfil` | Perfil do animal e configurações |
-| `/add-evento` | Formulário de adição de evento |
+### Área do Veterinário
+- **Painel** — agendados, atendimentos de hoje, alertas de resgates pendentes.
+- **Fila de Consultas** — lista de eventos agendados ordenada por data.
+- **Pacientes** — busca por nome/raça, ficha clínica completa por pet com histórico de eventos.
+- **Conclusão de consulta** — observações clínicas e custo.
+- **Disponibilidade** — horários fixos de atendimento por dia da semana e bloqueios de agenda (férias, imprevistos).
+- **Resgates** — validação (aprovação/negação) de resgates de recompensa solicitados por tutores.
 
 ---
 
@@ -47,186 +58,150 @@ O aplicativo utiliza o Expo Router contendo 6 rotas navegáveis:
 |---|---|---|
 | React Native | 0.81.5 | Framework mobile |
 | Expo | ~54.0.0 | Plataforma e toolchain |
-| Expo Router | ~6.0.23 | Navegação baseada em arquivos |
+| Expo Router | ~6.0.23 | Navegação baseada em arquivos, com grupos `(tutor)` e `(vet)` |
 | TypeScript | ~5.9.2 | Tipagem estática |
-| AsyncStorage | 2.2.0 | Persistência local de dados |
-| @expo/vector-icons | ^15.0.3 | Ícones nativos (Ionicons) |
-| React Navigation | ^7.0.14 | Navegação nativa |
+| TanStack Query | ^5.90.5 | Cache, requisições HTTP, invalidação e refetch automático |
+| AsyncStorage | 2.2.0 | Persistência local de sessão e preferências |
+| @expo/vector-icons | ^15.0.3 | Ícones (Ionicons, MaterialCommunityIcons) |
+| expo-calendar / expo-notifications | ~15.0.8 / ~0.32.17 | Integração com calendário nativo e lembretes locais |
+| React Navigation | ^7.0.14 | Base de navegação sob o Expo Router |
+
+Backend consumido: **VetSync Java** (Spring Boot + Flyway + Oracle), repositório separado.
 
 ---
 
-## Estrutura do Projeto
+## Arquitetura
+
+O projeto separa claramente interface, estado, regra de negócio e acesso a dados:
 
 ```text
-clyvovet/
-├── app/
-│   ├── _layout.tsx          # Layout raiz com PetProvider
-│   ├── onboarding.tsx       # Tela de cadastro
-│   ├── add-evento.tsx       # Formulário de novo evento
-│   └── (tabs)/
-│       ├── _layout.tsx      # Navegação em abas (Tab navigator)
-│       ├── index.tsx        # Dashboard
-│       ├── agenda.tsx       # Agenda de eventos
-│       ├── historico.tsx    # Histórico clínico
-│       └── perfil.tsx       # Configurações do perfil
-├── context/
-│   └── PetContext.tsx       # Context API global
-├── storage/
-│   └── petStorage.ts        # Persistência AsyncStorage
-├── types/
-│   └── index.ts             # Interfaces do domínio (Pet e Evento)
-├── constants/
-│   └── index.ts             # Constantes globais
-├── app.json                 # Configurações do Expo
-├── package.json             # Dependências do projeto
-└── tsconfig.json            # Configuração TypeScript
+app/                        # Rotas (Expo Router)
+├── _layout.tsx              # Stack raiz + providers + redirecionamento por perfil/onboarding
+├── login.tsx
+├── assistente.tsx            # Modal transparente da SIA
+├── add-pet.tsx / add-evento.tsx  # Modais de criação
+├── paciente/[id].tsx         # Ficha clínica (rota dinâmica, uso do veterinário)
+├── (tutor)/                  # Grupo de abas do tutor
+│   ├── index.tsx  agenda.tsx  historico.tsx  recompensas.tsx  perfil.tsx
+└── (vet)/                    # Grupo de abas do veterinário
+    ├── index.tsx  consultas.tsx  pacientes.tsx  disponibilidade.tsx  resgates.tsx  perfil.tsx
+
+context/          # Estado global: AuthContext, PetContext, VetContext
+hooks/            # useEventos, usePets, useVeterinario, useRecompensas, useConquistas (TanStack Query)
+services/         # authService, petService, eventoService, veterinarioService,
+                  # recompensaService, catalogoService, calendarService, iaService
+services/api/     # httpClient.ts — cliente HTTP único, tratamento de erros (ApiError)
+components/       # AppIcon, PetSwitcher, Calendario, navegação (ClyvoTabBar, AccountHeaderAction), carteira
+utils/            # eventoStatus (regras de status/atraso), alert (Alert.alert cross-platform)
+constants/        # api, storage, theme, events, gamification, vet
+types/            # Modelos de domínio (Pet, Evento, Veterinario, Recompensa, Resgate...)
+storage/          # petStorage.ts — únicas chaves ainda locais (pet ativo, onboarding, preferências)
 ```
-
----
-
-## Arquitetura de Software
-
-### Persistência de Dados
-Todos os dados são salvos localmente no dispositivo utilizando a biblioteca `@react-native-async-storage/async-storage`. A restauração ocorre automaticamente na inicialização do aplicativo.
-
-| Chave de Armazenamento | Descrição dos Dados |
-|---|---|
-| `@petcare:pet` | Dados cadastrais do animal (nome, espécie, raça, nascimento, peso) |
-| `@petcare:eventos` | Lista integral de eventos de saúde e histórico clínico |
-| `@petcare:onboarding` | Indicador de conclusão do cadastro inicial |
-| `@petcare:notificacoes` | Configurações e preferências do usuário |
 
 ### Gerenciamento de Estado
-O estado global da aplicação é gerenciado nativamente através da Context API (`PetContext`), expondo a seguinte estrutura:
+- **AuthContext** — sessão (JWT + perfil TUTOR/VETERINARIO/ADMIN), login/registro/logout, restauração automática via `AsyncStorage`.
+- **PetContext** — pets do tutor, pet ativo, eventos do pet ativo, nível/XP de gamificação.
+- **VetContext** — dados do veterinário logado, agenda, pacientes agregados a partir dos eventos, disponibilidade e bloqueios.
+- Toda leitura/escrita remota passa por **hooks dedicados com TanStack Query** (`useQuery`/`useMutation`), nunca diretamente em componentes de tela.
 
-```typescript
-{
-  pet: Pet | null;
-  eventos: Evento[];
-  preferencias: Record<string, boolean>;
-  onboardingConcluido: boolean;
-  carregando: boolean;
-  salvarNovoPet: (pet: Pet) => Promise<void>;
-  adicionarEvento: (evento: Evento) => Promise<void>;
-  concluirEvento: (id: string) => Promise<void>;
-  removerEvento: (id: string) => Promise<void>;
-  atualizarPreferencias: (prefs: Record<string, boolean>) => Promise<void>;
-  resetar: () => Promise<void>;
-}
-```
+### Integração com a API
+- Cliente HTTP único (`services/api/httpClient.ts`) injeta o token Bearer salvo em `AsyncStorage`, trata timeout, erros de rede e erros de validação (`ApiError`, com mapeamento de mensagens por campo).
+- Nenhum dado mockado: pets, eventos, veterinários, tipos de evento, recompensas e resgates vêm exclusivamente da API.
+- Mutações (`useAgendarEvento`, `useConcluirEvento`, `useCancelarEvento`, `useRemoverEvento`, `useCriarPet`, `useRemoverPet`, `useResgatar`, `useValidarResgate`, `useAdicionarFaixaDisponibilidade`, etc.) invalidam automaticamente as queries relacionadas — a interface atualiza sem recarregar o app.
+- Estados de carregamento (`ActivityIndicator`) em todas as telas que dependem de dados remotos.
 
-### Modelagem de Dados
-
-```typescript
-interface Pet {
-  id: string;
-  nome: string;
-  especie: 'cachorro' | 'gato' | 'pássaro' | 'outro';
-  raca: string;
-  dataNascimento: string; 
-  peso: string;
-}
-
-interface Evento {
-  id: string;
-  petId: string;
-  tipo: 'vacina' | 'vermifugo' | 'consulta' | 'medicamento' | 'checkup' | 'outro';
-  titulo: string;
-  descricao?: string;
-  data: string; 
-  status: 'pendente' | 'concluido' | 'atrasado';
-  criadoEm: string;
-}
-```
+### Autenticação
+- Login via API real (`POST /auth/login`), sem usuários fixos no código.
+- Sessão persistida em `AsyncStorage` e restaurada automaticamente na abertura do app.
+- Redirecionamento automático por perfil e bloqueio de rotas internas para usuários não autenticados, controlado em `app/_layout.tsx`.
+- Logout limpa sessão local, cache do TanStack Query e notifica o backend.
 
 ---
 
 ## Configuração e Execução
 
 ### Pré-requisitos
-- Node.js (versão 18 ou superior)
-- Gerenciador de pacotes (NPM ou Yarn)
-- Expo CLI (`npm install -g expo-cli`)
-- Aplicativo Expo Go no dispositivo físico ou emulador (Android/iOS) devidamente configurado
+- Node.js 18+
+- Expo CLI / Expo Go (ou emulador Android/iOS)
+- Backend **VetSync Java** rodando localmente (porta `8080`) — ver repositório do backend para instruções
 
-### Instruções de Instalação
+### Passo a passo
 
-1. Clone o repositório do projeto:
 ```bash
-git clone https://github.com/Challenge-2TDSPG-2026/Mobile-Application-Development.git
+git clone https://github.com/thubrito/Mobile-Application-Development.git
 cd Mobile-Application-Development
-```
-
-2. Instale as dependências:
-```bash
 npm install
-```
-
-3. Inicie o servidor local:
-```bash
 npx expo start
 ```
 
-### Execução no Dispositivo
-
-Para iniciar o aplicativo via linha de comando:
+Execução direta por plataforma:
 
 ```bash
-# Para Android (emulador ou dispositivo físico via Expo Go)
-npm run android
-
-# Para iOS (exclusivo para ambiente macOS)
-npm run ios
+npm run android   # Android (emulador ou dispositivo via Expo Go)
+npm run ios       # iOS (apenas macOS)
+npm run web       # Navegador
 ```
 
+> A URL da API é resolvida automaticamente em `constants/api.ts`: `http://localhost:8080` para iOS/Web e `http://10.0.2.2:8080` para o emulador Android — não precisa configurar nada manualmente ao rodar localmente.
+
+### Contas de teste
+
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Tutor | `maria@email.com` | `senha123` |
+| Veterinário | `ana.vet@clyvovet.com` | `senha123` |
+| Conta de demonstração | `victor150@gmail.com` | `senha123` |
+
 ---
 
-## Detalhamento das Interfaces
+## Fluxo de Navegação (principais rotas)
 
-- **Onboarding:** Formulário com validação restrita de dados (Bean Validation mobile), exigindo preenchimento de nome, raça, data de nascimento formatada (DD/MM/AAAA) e peso numérico.
-- **Dashboard:** Apresentação da interface inicial com painéis totalizadores (pendentes, realizados, atrasados), resumo do cadastro e exibição dos 5 eventos mais próximos.
-- **Agenda de Saúde:** Navegação em lista com filtros de categorias e situação temporal. Integra botões de ação rápida para conclusão e exclusão de eventos, além de botão flutuante para nova inserção.
-- **Formulário de Eventos:** Interface para detalhamento de ocorrências veterinárias com classificação tipada, campos descritivos e seleção de datas.
-- **Histórico Clínico:** Visualização estruturada do passado clínico do animal, agrupada mensalmente e acompanhada de indicadores de completude do cronograma de saúde.
-- **Configurações do Perfil:** Central de controle contendo o resumo do cadastro, gerenciamento de permissões de notificação e rotina de exclusão de dados da base local.
-
----
-
-## Atendimento de Requisitos
-
-| Requisito Avaliativo | Status de Conclusão |
+| Rota | Descrição |
 |---|---|
-| Implementação de roteamento (Expo Router) | Concluído |
-| Disponibilização de no mínimo 5 rotas | Concluído (6 rotas entregues) |
-| Protótipo visual responsivo e funcional | Concluído |
-| Gerenciamento de estado em formulários (useState) | Concluído |
-| Persistência local (AsyncStorage) | Concluído |
-| Restauração de sessão de usuário | Concluído |
-| Demonstração gravada em vídeo | Concluído |
-| Controle de versão e repositório (GitHub) | Concluído |
-| Documentação técnica (README) | Concluído |
+| `/login` | Autenticação |
+| `/(tutor)` | Dashboard do tutor |
+| `/(tutor)/agenda` | Agenda de saúde com calendário e filtros |
+| `/(tutor)/historico` | Histórico clínico agrupado por mês |
+| `/(tutor)/recompensas` | Programa de fidelidade |
+| `/(tutor)/perfil` | Perfil, pets e preferências |
+| `/(vet)` | Painel do veterinário |
+| `/(vet)/consultas` | Fila de consultas agendadas |
+| `/(vet)/pacientes` | Busca e ficha de pacientes |
+| `/(vet)/disponibilidade` | Horários e bloqueios de agenda |
+| `/(vet)/resgates` | Validação de resgates |
+| `/add-pet`, `/add-evento` | Modais de cadastro |
+| `/paciente/[id]` | Ficha clínica (rota dinâmica) |
+| `/assistente` | SIA — assistente de IA (modal transparente) |
 
 ---
 
-## Contextualização do Desafio Corporativo
+## Atendimento aos Requisitos da Sprint 3
 
-O desafio técnico proposto pela CLYVO VET almeja a transição da gestão da saúde animal de um paradigma reativo e focado na urgência para uma metodologia preventiva, unificada e contínua.
-
-Este sistema concentra-se na experiência do usuário (tutor do animal), consolidando as informações em um histórico longitudinal. O software possibilita a organização eficiente de intervenções médicas repetitivas e procedimentos essenciais adequados a cada ciclo de vida do paciente.
+| Requisito | Status |
+|---|---|
+| Navegação com biblioteca dedicada (Expo Router) e rotas explícitas | ✅ |
+| Mínimo de 6 telas distintas | ✅ (16+ rotas funcionais) |
+| Integração real com API via TanStack Query | ✅ |
+| CRUD completo acessível pela interface | ✅ Eventos (agendar / listar / concluir-cancelar / remover) |
+| Estados de carregamento e atualização automática (sem reiniciar o app) | ✅ |
+| Autenticação real com persistência de sessão | ✅ |
+| Proteção de rotas por perfil | ✅ |
+| Logout funcional | ✅ |
+| Arquitetura com separação de responsabilidades | ✅ |
 
 ---
 
-## Autores do Projeto
+## Autores
 
-| Nome | Registro (RM) |
+| Nome | RM |
 |---|---|
 | Arthur Brito da Silva | RM562085 |
 | Luiz Felipe Flosi dos Santos | RM563197 |
-| Pedro Henrique Brum Lopes | RM571780 |
+| Pedro Henrique Brum Lopes | RM561780 |
 
 ---
 
 ## Informações Adicionais
 
-- **Licenciamento:** Projeto desenvolvido exclusivamente com fins acadêmicos e avaliativos para o FIAP Challenge 2026.
-- **Demonstração em Vídeo:** [Acessar apresentação no YouTube](https://youtu.be/j1JywTFRrR4)
+- Projeto desenvolvido exclusivamente com fins acadêmicos e avaliativos para o FIAP Challenge 2026.
+- Repositório do backend: **VetSync Java** — `github.com/Challenge-2TDSPG-2026/vetSync-java`
