@@ -1,13 +1,13 @@
 # ClyvoVet (VetSync) — Mobile Application
 
-**FIAP Challenge 2026 — 2º Ano ADS — 3º Semestre**
+**FIAP Challenge 2026 — 2º Ano ADS — 4º Semestre**
 **Disciplina: Mobile Application Development — Entrega Sprint 3**
 
 Aplicativo mobile em React Native (Expo Router) para o desafio proposto pela **CLYVO VET**, com experiências completas de **Tutor** e **Veterinário** integradas a um backend real em Spring Boot.
 
 ---
 
-## 🎥 Vídeo de Demonstração
+## Vídeo de Demonstração
 
 > **[INSERIR LINK DO VÍDEO NO YOUTUBE AQUI]**
 

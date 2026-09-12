@@ -69,7 +69,7 @@ export default function LoginScreen() {
             <View style={s.authLogo}>
               <Image source={require('../assets/logo.png')} style={s.authLogoImg} resizeMode="contain" />
             </View>
-            <Text style={s.authName}>ClyvoVet</Text>
+            <Text style={s.authName}>VetSync</Text>
             <Text style={s.authSub}>Plataforma de Saúde Animal</Text>
           </View>
 
