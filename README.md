@@ -9,7 +9,7 @@ Aplicativo mobile em React Native (Expo Router) para o desafio proposto pela **C
 
 ## Vídeo de Demonstração
 
-> **[INSERIR LINK DO VÍDEO NO YOUTUBE AQUI]**
+> **Link: https://youtu.be/LDCI2De3tXw**
 
 O vídeo demonstra: navegação entre telas, autenticação (login de tutor e veterinário), integração com a API backend (agendamento, conclusão e cancelamento de eventos, CRUD de pets) e o app rodando em dispositivo/emulador real.
 
