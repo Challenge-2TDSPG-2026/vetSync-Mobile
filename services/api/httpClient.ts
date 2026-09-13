@@ -62,7 +62,7 @@ export async function apiRequest<T = unknown>({
   body,
   autenticado = true,
   baseUrl = API_BASE_URL,
-  timeoutMs = 15_000,
+  timeoutMs = 60_000,
 }: RequestOptions): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
