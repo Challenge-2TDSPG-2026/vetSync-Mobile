@@ -117,7 +117,7 @@ export default function LoginScreen() {
                 disabled={autenticando}
               >
                 <Text style={s.btnCadastrarText}>
-                  Não tem conta? <Text style={s.btnCadastrarDestaque}>Cadastre-se como tutor</Text>
+                  Não tem conta? <Text style={s.btnCadastrarDestaque}>Cadastre-se</Text>
                 </Text>
               </Pressable>
             </Link>
