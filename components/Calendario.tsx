@@ -44,27 +44,28 @@ interface CalendarioProps {
     marcadores: Record<string, string[]>; // dateKey -> cores dos pontinhos (até 3)
     onSelecionar: (d: Date) => void;
     onMudarMes: (offset: number) => void;
+    idoso?: boolean;
 }
 
-export function Calendario({ mesRef, selecionado, marcadores, onSelecionar, onMudarMes }: CalendarioProps) {
+export function Calendario({ mesRef, selecionado, marcadores, onSelecionar, onMudarMes, idoso }: CalendarioProps) {
     const dias = useMemo(() => gerarMatrizMes(mesRef), [mesRef]);
     const hoje = new Date();
 
     return (
         <View style={s.container}>
-            <View style={s.header}>
-                <Pressable style={s.navBtn} onPress={() => onMudarMes(-1)}>
-                    <AppIcon name="chevron-back-outline" set="Ionicons" size={18} color={C.white} />
+            <View style={[s.header, idoso && sIdoso.header]}>
+                <Pressable style={s.navBtn} onPress={() => onMudarMes(-1)} hitSlop={8}>
+                    <AppIcon name="chevron-back-outline" set="Ionicons" size={idoso ? 24 : 18} color={C.white} />
                 </Pressable>
-                <Text style={s.mesLabel}>{MESES[mesRef.getMonth()]} {mesRef.getFullYear()}</Text>
-                <Pressable style={s.navBtn} onPress={() => onMudarMes(1)}>
-                    <AppIcon name="chevron-forward-outline" set="Ionicons" size={18} color={C.white} />
+                <Text style={[s.mesLabel, idoso && sIdoso.mesLabel]}>{MESES[mesRef.getMonth()]} {mesRef.getFullYear()}</Text>
+                <Pressable style={s.navBtn} onPress={() => onMudarMes(1)} hitSlop={8}>
+                    <AppIcon name="chevron-forward-outline" set="Ionicons" size={idoso ? 24 : 18} color={C.white} />
                 </Pressable>
             </View>
 
             <View style={s.semanaHead}>
                 {DIAS_SEMANA.map((d, i) => (
-                    <Text key={i} style={s.semanaHeadText}>{d}</Text>
+                    <Text key={i} style={[s.semanaHeadText, idoso && sIdoso.semanaHeadText]}>{d}</Text>
                 ))}
             </View>
 
@@ -75,14 +76,16 @@ export function Calendario({ mesRef, selecionado, marcadores, onSelecionar, onMu
                     const isSelecionado = mesmoDia(d, selecionado);
                     const cores = marcadores[dateKey(d)] ?? [];
                     return (
-                        <Pressable key={i} style={s.celula} onPress={() => onSelecionar(d)}>
+                        <Pressable key={i} style={[s.celula, idoso && sIdoso.celula]} onPress={() => onSelecionar(d)}>
                             <View style={[
                                 s.diaCirculo,
+                                idoso && sIdoso.diaCirculo,
                                 isSelecionado && s.diaCirculoSelecionado,
                                 isHoje && !isSelecionado && s.diaCirculoHoje,
                             ]}>
                                 <Text style={[
                                     s.diaTexto,
+                                    idoso && sIdoso.diaTexto,
                                     foraDoMes && s.diaTextoFora,
                                     isSelecionado && s.diaTextoSelecionado,
                                     isHoje && !isSelecionado && s.diaTextoHoje,
@@ -127,4 +130,14 @@ const s = StyleSheet.create({
 
     dotsRow: { flexDirection: 'row', gap: 2, marginTop: 2, height: 5 },
     dot: { width: 4, height: 4, borderRadius: 2 },
+});
+
+/** Overrides do modo idoso: cabeçalho, dias e alvos de toque maiores. */
+const sIdoso = StyleSheet.create({
+    header: { paddingVertical: 16 },
+    mesLabel: { fontSize: 17 },
+    semanaHeadText: { fontSize: 13 },
+    celula: { paddingVertical: 6 },
+    diaCirculo: { width: 36, height: 36, borderRadius: 18 },
+    diaTexto: { fontSize: 15 },
 });
