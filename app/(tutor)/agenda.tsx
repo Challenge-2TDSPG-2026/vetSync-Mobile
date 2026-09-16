@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, Modal, TextInput, Activi
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
+import { useAccessibility } from '../../context/AccessibilityContext';
 import { useCancelarEvento, useRemoverEvento } from '../../hooks/useEventos';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
@@ -38,6 +39,7 @@ function formatarDataLonga(d: Date): string {
 export default function AgendaScreen() {
   const router = useRouter();
   const { petAtivo, eventos, carregandoEventos } = usePet();
+  const { modoIdoso } = useAccessibility();
   const cancelarMutation = useCancelarEvento();
   const removerMutation = useRemoverEvento();
 
@@ -126,17 +128,17 @@ export default function AgendaScreen() {
         {FILTROS.map(f => (
           <Pressable
             key={f.valor}
-            style={[s.filtroBtn, filtro === f.valor && s.filtroBtnAtivo]}
+            style={[s.filtroBtn, modoIdoso && sIdoso.filtroBtn, filtro === f.valor && s.filtroBtnAtivo]}
             onPress={() => setFiltro(f.valor)}
           >
             <AppIcon
               name={f.icon}
               set={f.iconSet}
-              size={14}
+              size={modoIdoso ? 17 : 14}
               color={filtro === f.valor ? C.white : C.text}
               style={{ marginRight: 5 }}
             />
-            <Text style={[s.filtroText, filtro === f.valor && s.filtroTextAtivo]}>{f.label}</Text>
+            <Text style={[s.filtroText, modoIdoso && sIdoso.filtroText, filtro === f.valor && s.filtroTextAtivo]}>{f.label}</Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -151,10 +153,11 @@ export default function AgendaScreen() {
           marcadores={marcadores}
           onSelecionar={setSelecionado}
           onMudarMes={handleMudarMes}
+          idoso={modoIdoso}
         />
 
         <View style={s.diaHeader}>
-          <Text style={s.diaHeaderTexto}>{formatarDataLonga(selecionado)}</Text>
+          <Text style={[s.diaHeaderTexto, modoIdoso && sIdoso.diaHeaderTexto]}>{formatarDataLonga(selecionado)}</Text>
           {eventosDoDia.length > 0 && (
             <View style={s.diaHeaderBadge}>
               <Text style={s.diaHeaderBadgeText}>{eventosDoDia.length}</Text>
@@ -183,19 +186,23 @@ export default function AgendaScreen() {
 
             return (
               <View key={item.id} style={s.card}>
-                <View style={s.cardRow}>
-                  <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
-                    <AppIcon name={visual.icon} set={visual.iconSet} size={18} color={C.white} />
+                <View style={[s.cardRow, modoIdoso && sIdoso.cardRow]}>
+                  <View style={[s.eventoIcone, modoIdoso && sIdoso.eventoIcone, { backgroundColor: visual.cor }]}>
+                    <AppIcon name={visual.icon} set={visual.iconSet} size={modoIdoso ? 22 : 18} color={C.white} />
                   </View>
                   <View style={s.eventoInfo}>
-                    <Text style={s.eventoTitulo}>{item.nomeTipoEvento}</Text>
-                    <View style={s.eventoMetaRow}>
-                      <AppIcon name="time-outline" set="Ionicons" size={11} color={C.muted} />
-                      <Text style={s.eventoMeta}>{formatarDataEvento(item.data)}</Text>
-                      <Text style={s.eventoMetaDot}>•</Text>
-                      <AppIcon name="medical-outline" set="Ionicons" size={11} color={C.muted} />
-                      <Text style={s.eventoMeta}>{item.nomeVeterinario}</Text>
-                    </View>
+                    <Text style={[s.eventoTitulo, modoIdoso && sIdoso.eventoTitulo]}>{item.nomeTipoEvento}</Text>
+                    {!modoIdoso ? (
+                      <View style={s.eventoMetaRow}>
+                        <AppIcon name="time-outline" set="Ionicons" size={11} color={C.muted} />
+                        <Text style={s.eventoMeta}>{formatarDataEvento(item.data)}</Text>
+                        <Text style={s.eventoMetaDot}>•</Text>
+                        <AppIcon name="medical-outline" set="Ionicons" size={11} color={C.muted} />
+                        <Text style={s.eventoMeta}>{item.nomeVeterinario}</Text>
+                      </View>
+                    ) : (
+                      <Text style={[s.eventoMeta, sIdoso.eventoMeta]}>{formatarDataEvento(item.data)} • {item.nomeVeterinario}</Text>
+                    )}
                     {item.observacao ? <Text style={s.eventoObs}>{item.observacao}</Text> : null}
                     {item.status === 'CANCELADO' && item.motivoCancelamento ? (
                       <Text style={s.eventoMotivoCancelamento}>Motivo: {item.motivoCancelamento}</Text>
@@ -203,7 +210,7 @@ export default function AgendaScreen() {
                   </View>
                 </View>
 
-                <View style={s.cardFooter}>
+                <View style={[s.cardFooter, modoIdoso && sIdoso.cardFooter]}>
                   <View style={s.badges}>
                     <View style={[s.badge, { backgroundColor: sb.bg }]}>
                       <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
@@ -212,7 +219,7 @@ export default function AgendaScreen() {
                   <View style={s.acoes}>
                     {podeCancelar && (
                       <Pressable
-                        style={[s.btnAcao, s.btnAcaoDanger]}
+                        style={[s.btnAcao, s.btnAcaoDanger, modoIdoso && sIdoso.btnAcao]}
                         onPress={() => abrirCancelamento(item)}
                         disabled={cancelandoEste}
                       >
@@ -220,15 +227,15 @@ export default function AgendaScreen() {
                           <ActivityIndicator size="small" color={C.danger} />
                         ) : (
                           <>
-                            <Ionicons name="close-circle-outline" size={14} color={C.danger} />
-                            <Text style={[s.btnAcaoText, { color: C.danger }]}>Cancelar</Text>
+                            <Ionicons name="close-circle-outline" size={modoIdoso ? 18 : 14} color={C.danger} />
+                            <Text style={[s.btnAcaoText, modoIdoso && sIdoso.btnAcaoText, { color: C.danger }]}>Cancelar</Text>
                           </>
                         )}
                       </Pressable>
                     )}
                     {podeRemover && (
                       <Pressable
-                        style={s.btnAcao}
+                        style={[s.btnAcao, modoIdoso && sIdoso.btnAcao]}
                         onPress={() => handleRemover(item)}
                         disabled={removendoEste}
                       >
@@ -236,8 +243,8 @@ export default function AgendaScreen() {
                           <ActivityIndicator size="small" color={C.muted} />
                         ) : (
                           <>
-                            <Ionicons name="trash-outline" size={14} color={C.muted} />
-                            <Text style={[s.btnAcaoText, { color: C.muted }]}>Remover</Text>
+                            <Ionicons name="trash-outline" size={modoIdoso ? 18 : 14} color={C.muted} />
+                            <Text style={[s.btnAcaoText, modoIdoso && sIdoso.btnAcaoText, { color: C.muted }]}>Remover</Text>
                           </>
                         )}
                       </Pressable>
@@ -250,19 +257,19 @@ export default function AgendaScreen() {
         )}
       </ScrollView>
 
-      <Pressable style={s.fab} onPress={() => router.push('/add-evento')}>
-        <Ionicons name="add" size={28} color="#fff" />
+      <Pressable style={[s.fab, modoIdoso && sIdoso.fab]} onPress={() => router.push('/add-evento')}>
+        <Ionicons name="add" size={modoIdoso ? 34 : 28} color="#fff" />
       </Pressable>
 
       <Modal visible={eventoParaCancelar !== null} transparent animationType="fade" onRequestClose={() => setEventoParaCancelar(null)}>
         <View style={s.modalOverlay}>
           <View style={s.modalCard}>
-            <Text style={s.modalTitulo}>Cancelar evento</Text>
-            <Text style={s.modalSub}>
+            <Text style={[s.modalTitulo, modoIdoso && sIdoso.modalTitulo]}>Cancelar evento</Text>
+            <Text style={[s.modalSub, modoIdoso && sIdoso.modalSub]}>
               {eventoParaCancelar?.nomeTipoEvento} — {eventoParaCancelar ? formatarDataEvento(eventoParaCancelar.data) : ''}
             </Text>
             <TextInput
-              style={s.modalInput}
+              style={[s.modalInput, modoIdoso && sIdoso.modalInput]}
               value={motivoCancelamento}
               onChangeText={setMotivoCancelamento}
               placeholder="Motivo do cancelamento"
@@ -272,15 +279,15 @@ export default function AgendaScreen() {
               autoFocus
             />
             <View style={s.modalAcoes}>
-              <Pressable style={s.modalBtnCancelar} onPress={() => setEventoParaCancelar(null)}>
-                <Text style={s.modalBtnCancelarText}>Voltar</Text>
+              <Pressable style={[s.modalBtnCancelar, modoIdoso && sIdoso.modalBtnCancelar]} onPress={() => setEventoParaCancelar(null)}>
+                <Text style={[s.modalBtnCancelarText, modoIdoso && sIdoso.modalBtnCancelarText]}>Voltar</Text>
               </Pressable>
               <Pressable
-                style={[s.modalBtnConfirmar, cancelarMutation.isPending && { opacity: 0.6 }]}
+                style={[s.modalBtnConfirmar, modoIdoso && sIdoso.modalBtnCancelar, cancelarMutation.isPending && { opacity: 0.6 }]}
                 onPress={confirmarCancelamento}
                 disabled={cancelarMutation.isPending}
               >
-                <Text style={s.modalBtnConfirmarText}>
+                <Text style={[s.modalBtnConfirmarText, modoIdoso && sIdoso.modalBtnCancelarText]}>
                   {cancelarMutation.isPending ? 'Cancelando...' : 'Confirmar cancelamento'}
                 </Text>
               </Pressable>
@@ -429,4 +436,29 @@ const s = StyleSheet.create({
   modalBtnCancelarText: { fontSize: 13, fontWeight: '600', color: C.muted },
   modalBtnConfirmar: { backgroundColor: C.danger, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
   modalBtnConfirmarText: { color: C.white, fontSize: 13, fontWeight: '700' },
+});
+
+/** Overrides aplicados por cima de `s` quando o modo idoso está ativo. */
+const sIdoso = StyleSheet.create({
+  filtroBtn: { paddingHorizontal: 16, paddingVertical: 10 },
+  filtroText: { fontSize: 14 },
+
+  diaHeaderTexto: { fontSize: 16 },
+
+  cardRow: { padding: 16 },
+  eventoIcone: { width: 50, height: 50, borderRadius: 25 },
+  eventoTitulo: { fontSize: 17 },
+  eventoMeta: { fontSize: 13, marginTop: 3 },
+
+  cardFooter: { paddingVertical: 12 },
+  btnAcao: { paddingHorizontal: 12, paddingVertical: 8 },
+  btnAcaoText: { fontSize: 14 },
+
+  fab: { width: 64, height: 64, borderRadius: 32 },
+
+  modalTitulo: { fontSize: 18 },
+  modalSub: { fontSize: 14 },
+  modalInput: { fontSize: 15, minHeight: 96 },
+  modalBtnCancelar: { paddingHorizontal: 18, paddingVertical: 14 },
+  modalBtnCancelarText: { fontSize: 15 },
 });
