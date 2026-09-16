@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { usePet } from '../../context/PetContext';
+import { useAccessibility } from '../../context/AccessibilityContext';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
@@ -24,6 +25,7 @@ function formatarDataCurta(iso: string): string {
 
 export default function HistoricoScreen() {
   const { eventos, carregandoEventos } = usePet();
+  const { modoIdoso } = useAccessibility();
 
   const eventosComStatus = useMemo(
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
@@ -55,27 +57,27 @@ export default function HistoricoScreen() {
 
       <PetSwitcher />
 
-      <View style={s.statsRow}>
-        <StatCard valor={total} label="Total" accentColor={C.info} />
-        <StatCard valor={concluidos} label="Realizados" accentColor={C.g500} />
-        <StatCard valor={emAberto} label="Em aberto" accentColor={C.warn} />
+      <View style={[s.statsRow, modoIdoso && sIdoso.statsRow]}>
+        <StatCard valor={total} label="Total" accentColor={C.info} idoso={modoIdoso} />
+        <StatCard valor={concluidos} label="Realizados" accentColor={C.g500} idoso={modoIdoso} />
+        <StatCard valor={emAberto} label="Em aberto" accentColor={C.warn} idoso={modoIdoso} />
       </View>
 
-      <View style={s.progressoCard}>
+      <View style={[s.progressoCard, modoIdoso && sIdoso.progressoCard]}>
         <View style={s.progressoHead}>
           <View>
-            <Text style={s.progressoLbl}>Taxa de conclusão</Text>
-            <Text style={s.progressoPct}>{pct}%</Text>
+            <Text style={[s.progressoLbl, modoIdoso && sIdoso.progressoLbl]}>Taxa de conclusão</Text>
+            <Text style={[s.progressoPct, modoIdoso && sIdoso.progressoPct]}>{pct}%</Text>
           </View>
           <View style={s.progressoMeta}>
-            <Text style={s.progressoMetaText}>{concluidos} realizados</Text>
-            <Text style={s.progressoMetaText}>{emAberto} em aberto</Text>
+            <Text style={[s.progressoMetaText, modoIdoso && sIdoso.progressoMetaText]}>{concluidos} realizados</Text>
+            <Text style={[s.progressoMetaText, modoIdoso && sIdoso.progressoMetaText]}>{emAberto} em aberto</Text>
           </View>
         </View>
-        <View style={s.barraTrack}>
+        <View style={[s.barraTrack, modoIdoso && sIdoso.barraTrack]}>
           <View style={[s.barraFill, { width: `${pct}%` as any }]} />
         </View>
-        <Text style={s.progressoHint}>
+        <Text style={[s.progressoHint, modoIdoso && sIdoso.progressoHint]}>
           {total} evento{total !== 1 ? 's' : ''} no total{cancelados > 0 ? ` · ${cancelados} cancelado${cancelados !== 1 ? 's' : ''}` : ''}
         </Text>
       </View>
@@ -94,22 +96,47 @@ export default function HistoricoScreen() {
         Object.entries(agrupados).map(([mes, evts]) => (
           <View key={mes} style={s.grupo}>
             <View style={s.mesRow}>
-              <Text style={s.mesTitulo}>{mes}</Text>
+              <Text style={[s.mesTitulo, modoIdoso && sIdoso.mesTitulo]}>{mes}</Text>
               <View style={s.mesBadge}>
                 <Text style={s.mesBadgeText}>{evts.length}</Text>
               </View>
             </View>
 
             <View style={s.tabelaCard}>
-              <View style={s.tabelaHead}>
-                <Text style={[s.thText, { flex: 2 }]}>Evento</Text>
-                <Text style={[s.thText, { flex: 1, textAlign: 'center' }]}>Data</Text>
-                <Text style={[s.thText, { flex: 1, textAlign: 'right' }]}>Status</Text>
-              </View>
+              {!modoIdoso && (
+                <View style={s.tabelaHead}>
+                  <Text style={[s.thText, { flex: 2 }]}>Evento</Text>
+                  <Text style={[s.thText, { flex: 1, textAlign: 'center' }]}>Data</Text>
+                  <Text style={[s.thText, { flex: 1, textAlign: 'right' }]}>Status</Text>
+                </View>
+              )}
               {evts.map((evento, idx) => {
                 const visual = obterVisualTipoEvento(evento.nomeTipoEvento);
                 const sb = STATUS_EXIBICAO_BADGE[evento.statusExibicao];
                 const isLast = idx === evts.length - 1;
+
+                if (modoIdoso) {
+                  return (
+                    <View key={evento.id} style={[sIdoso.linhaIdoso, !isLast && s.tabelaRowBorder]}>
+                      <View style={sIdoso.linhaIdosoTopo}>
+                        <View style={[s.rowIcone, sIdoso.rowIcone, { backgroundColor: visual.cor }]}>
+                          <AppIcon name={visual.icon} set={visual.iconSet} size={18} color={C.white} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={sIdoso.rowTitulo} numberOfLines={2}>{evento.nomeTipoEvento}</Text>
+                          <Text style={sIdoso.rowVet} numberOfLines={1}>{evento.nomeVeterinario}</Text>
+                        </View>
+                      </View>
+                      <View style={sIdoso.linhaIdosoRodape}>
+                        <Text style={sIdoso.tdData}>{formatarDataCurta(evento.data)}</Text>
+                        <View style={[s.statusBadge, sIdoso.statusBadge, { backgroundColor: sb.bg }]}>
+                          <Text style={[s.statusText, sIdoso.statusText, { color: sb.color }]}>{sb.label}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                }
+
                 return (
                   <View key={evento.id} style={[s.tabelaRow, !isLast && s.tabelaRowBorder]}>
                     <View style={[s.tdEvento, { flex: 2 }]}>
@@ -140,11 +167,11 @@ export default function HistoricoScreen() {
   );
 }
 
-function StatCard({ valor, label, accentColor }: { valor: number; label: string; accentColor: string }) {
+function StatCard({ valor, label, accentColor, idoso }: { valor: number; label: string; accentColor: string; idoso?: boolean }) {
   return (
-    <View style={[s.statCard, { borderBottomColor: accentColor }]}>
-      <Text style={s.statLabel}>{label}</Text>
-      <Text style={[s.statVal, { color: accentColor }]}>{valor}</Text>
+    <View style={[s.statCard, idoso && sIdoso.statCard, { borderBottomColor: accentColor }]}>
+      <Text style={[s.statLabel, idoso && sIdoso.statLabel]}>{label}</Text>
+      <Text style={[s.statVal, idoso && sIdoso.statVal, { color: accentColor }]}>{valor}</Text>
     </View>
   );
 }
@@ -209,4 +236,31 @@ const s = StyleSheet.create({
   tdStatus: { alignItems: 'flex-end' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
   statusText: { fontSize: 11, fontWeight: '700' },
+});
+
+/** Overrides do modo idoso. No histórico, a tabela de 3 colunas vira uma lista empilhada (mais legível). */
+const sIdoso = StyleSheet.create({
+  statsRow: { flexWrap: 'wrap' },
+  statCard: { minWidth: '47%', flexBasis: '47%' },
+  statLabel: { fontSize: 11 },
+  statVal: { fontSize: 30, lineHeight: 32 },
+
+  progressoCard: { padding: 24 },
+  progressoLbl: { fontSize: 13 },
+  progressoPct: { fontSize: 42, lineHeight: 46 },
+  progressoMetaText: { fontSize: 14 },
+  barraTrack: { height: 12, borderRadius: 6 },
+  progressoHint: { fontSize: 14 },
+
+  mesTitulo: { fontSize: 16 },
+
+  linhaIdoso: { paddingHorizontal: 16, paddingVertical: 14, gap: 10 },
+  linhaIdosoTopo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  linhaIdosoRodape: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 52 },
+  rowIcone: { width: 40, height: 40, borderRadius: 20 },
+  rowTitulo: { fontSize: 16, fontWeight: '700', color: C.text, marginBottom: 2 },
+  rowVet: { fontSize: 13, color: C.muted },
+  tdData: { fontSize: 14, fontWeight: '600', color: C.muted },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4 },
+  statusText: { fontSize: 13 },
 });
