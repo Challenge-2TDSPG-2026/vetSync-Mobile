@@ -127,7 +127,7 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
 
-  const onboardingConcluido = pets.length > 0 || erroPets;
+  const onboardingConcluido = pets.length > 0;
 
   const carregando = carregandoAuth || carregandoLocal || (habilitado && carregandoPets);
 

@@ -102,6 +102,11 @@ export async function apiRequest<T = unknown>({
     corpo = texto;
   }
 
+  if (resposta.status === 401) {
+    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+    throw new ApiError(401, 'Sua sessão expirou. Entre novamente.');
+  }
+
   if (!resposta.ok) {
     throw extrairErro(resposta.status, corpo);
   }

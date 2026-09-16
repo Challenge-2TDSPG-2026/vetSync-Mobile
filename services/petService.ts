@@ -1,12 +1,22 @@
-import { api } from './api/httpClient';
+﻿import { api } from './api/httpClient';
 import { salvarPetAtivoId, carregarPetAtivoId } from '../storage/petStorage';
 import type { Pet } from '../types';
 
-const ESPECIE_APP_PARA_API: Record<Pet['especie'], string> = {
+export const ESPECIE_APP_PARA_API: Record<Pet['especie'], string> = {
   cachorro: 'CAO',
   gato: 'GATO',
-  pássaro: 'AVE',
-  outro: 'OUTRO',
+  equino: 'EQUINO',
+  bovino: 'BOVINO',
+  suino: 'SUINO',
+  ovino: 'OVINO',
+  caprino: 'CAPRINO',
+  ave: 'AVE',
+  reptil: 'REPTIL',
+  anfibio: 'ANFIBIO',
+  peixe: 'PEIXE',
+  roedor: 'ROEDOR',
+  coelho: 'COELHO',
+  furao: 'FURAO',
 };
 
 const SEXO_APP_PARA_API: Record<Pet['sexo'], string> = {
@@ -14,12 +24,29 @@ const SEXO_APP_PARA_API: Record<Pet['sexo'], string> = {
   femea: 'F',
 };
 
+function semAcento(valor: string): string {
+  return valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function especieApiParaApp(nmEspecie: string | null | undefined): Pet['especie'] {
-  const chave = (nmEspecie ?? '').trim().toLowerCase();
-  if (chave === 'cão' || chave === 'cao') return 'cachorro';
-  if (chave === 'gato') return 'gato';
-  if (chave === 'ave') return 'pássaro';
-  return 'outro';
+  const chave = semAcento((nmEspecie ?? '').trim().toLowerCase());
+  const mapa: Record<string, Pet['especie']> = {
+    cao: 'cachorro',
+    gato: 'gato',
+    equino: 'equino',
+    bovino: 'bovino',
+    suino: 'suino',
+    ovino: 'ovino',
+    caprino: 'caprino',
+    ave: 'ave',
+    reptil: 'reptil',
+    anfibio: 'anfibio',
+    peixe: 'peixe',
+    roedor: 'roedor',
+    coelho: 'coelho',
+    furao: 'furao',
+  };
+  return mapa[chave] ?? 'cachorro';
 }
 
 function sexoApiParaApp(sexo: string | null | undefined): Pet['sexo'] {
@@ -56,7 +83,6 @@ function paraRequestApi(pet: Pet) {
   return {
     nmPet: pet.nome,
     especie: ESPECIE_APP_PARA_API[pet.especie],
-    especieOutro: pet.especie === 'outro' ? (pet.raca || 'Outro') : undefined,
     sexo: SEXO_APP_PARA_API[pet.sexo],
     raca: pet.raca,
     dtNascimento: pet.dataNascimento.slice(0, 10),

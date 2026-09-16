@@ -1,5 +1,6 @@
-import { api } from './api/httpClient';
-import type { TipoEvento, Veterinario } from '../types';
+﻿import { api } from './api/httpClient';
+import type { TipoEvento, Veterinario, Pet } from '../types';
+import { ESPECIE_APP_PARA_API } from './petService';
 
 interface TipoEventoResponseApi {
   idTipoEvento: number;
@@ -37,5 +38,12 @@ export const catalogoService = {
       idClinica: dto.idClinica != null ? String(dto.idClinica) : null,
       nomeClinica: dto.nmClinica,
     }));
+  },
+
+  async sugerirRacas(especie: Pet['especie'], texto?: string): Promise<string[]> {
+    const especieApi = ESPECIE_APP_PARA_API[especie];
+    const params = new URLSearchParams({ especie: especieApi });
+    if (texto && texto.trim()) params.set('q', texto.trim());
+    return api.get<string[]>(`/pets/racas?${params.toString()}`);
   },
 };

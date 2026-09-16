@@ -72,7 +72,7 @@ function RootNavigator() {
           </Pressable>
         </View>
       )}
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack initialRouteName="login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="login" />
         <Stack.Screen name="cadastro" />
         <Stack.Screen name="(tutor)" />
