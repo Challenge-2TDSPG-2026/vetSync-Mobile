@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PetProvider, usePet } from '../context/PetContext';
 import { VetProvider } from '../context/VetContext';
+import { AccessibilityProvider } from '../context/AccessibilityContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -119,13 +120,15 @@ const s = StyleSheet.create({
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <PetProvider>
-          <VetProvider>
-            <RootNavigator />
-          </VetProvider>
-        </PetProvider>
-      </AuthProvider>
+      <AccessibilityProvider>
+        <AuthProvider>
+          <PetProvider>
+            <VetProvider>
+              <RootNavigator />
+            </VetProvider>
+          </PetProvider>
+        </AuthProvider>
+      </AccessibilityProvider>
     </QueryClientProvider>
   );
 }
