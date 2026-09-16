@@ -24,6 +24,7 @@ export const STORAGE_KEYS = {
   ONBOARDING_CONCLUIDO: '@petcare:onboarding',
   NOTIFICACOES: '@petcare:notificacoes',
   SESSAO: '@petcare:sessao',
+  MODO_IDOSO: '@petcare:modo_idoso',
 };
 
 export const XP_POR_EVENTO = 10;
