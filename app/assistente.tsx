@@ -120,7 +120,7 @@ export default function AssistenteScreen() {
 
 const s = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(10,34,24,0.35)' },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(10,34,24,0.35)' },
   sheet: { width: '100%', maxWidth: 680, height: '86%', backgroundColor: C.white, borderTopLeftRadius: 28, borderTopRightRadius: 28, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 16, shadowOffset: { width: 0, height: -4 }, elevation: 16 },
   handle: { width: 42, height: 5, borderRadius: 3, backgroundColor: '#b7b3c2', alignSelf: 'center', marginTop: 10 },
   header: { minHeight: 76, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.border },

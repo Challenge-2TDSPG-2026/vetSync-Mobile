@@ -99,7 +99,7 @@ export default function DashboardScreen() {
       {/* Pet card */}
       <View style={s.card}>
         <View style={s.cardHead}>
-          <Text style={[s.cardTitle, modoIdoso && sIdoso.cardTitle]}>Meu Pet — Visão Geral</Text>
+          <Text style={[s.cardTitle, modoIdoso && sIdoso.cardTitle]}>Visão Geral do {petAtivo.nome}</Text>
         </View>
         <View style={[s.petRow, modoIdoso && sIdoso.petRow]}>
           <View style={[s.petAvatar, modoIdoso && sIdoso.petAvatar]}>
