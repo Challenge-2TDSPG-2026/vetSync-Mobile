@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
 import { ESPECIES } from '../../constants';
 import { useAuth } from '../../context/AuthContext';
+import { useAccessibility } from '../../context/AccessibilityContext';
 import { AppIcon } from '../../components/AppIcon';
 import { alertar, confirmar } from '../../utils/alert';
 import { statusExibicao } from '../../utils/eventoStatus';
@@ -24,6 +25,7 @@ export default function PerfilScreen() {
   const router = useRouter();
   const [petCarteira, setPetCarteira] = useState<Pet | null>(null);
   const { logout } = useAuth();
+  const { modoIdoso, alternarModoIdoso } = useAccessibility();
   const {
     pets,
     petAtivo,
@@ -107,29 +109,41 @@ export default function PerfilScreen() {
 
       {/* Banner do usuário */}
       <View style={s.banner}>
-        <View style={s.avatar}>
-          <Text style={s.avatarText}>{iniciais}</Text>
+        <View style={[s.avatar, modoIdoso && sIdoso.avatar]}>
+          <Text style={[s.avatarText, modoIdoso && sIdoso.avatarText]}>{iniciais}</Text>
         </View>
         <View style={s.bannerInfo}>
-          <Text style={s.bannerNome}>{petAtivo?.nome ?? '–'}</Text>
-          <Text style={s.bannerRole}>{especieInfo?.label ?? '–'}{petAtivo?.raca ? ` • ${petAtivo.raca}` : ''}</Text>
+          <Text style={[s.bannerNome, modoIdoso && sIdoso.bannerNome]}>{petAtivo?.nome ?? '–'}</Text>
+          <Text style={[s.bannerRole, modoIdoso && sIdoso.bannerRole]}>{especieInfo?.label ?? '–'}{petAtivo?.raca ? ` • ${petAtivo.raca}` : ''}</Text>
         </View>
         <View style={s.bannerStat}>
-          <Text style={s.bannerStatVal}>{total}</Text>
+          <Text style={[s.bannerStatVal, modoIdoso && sIdoso.bannerStatVal]}>{total}</Text>
           <Text style={s.bannerStatLbl}>eventos</Text>
         </View>
       </View>
 
       {/* Stats row */}
-      <View style={s.statsRow}>
-        <StatCard valor={total} label="Total" accentColor={C.info} />
-        <StatCard valor={concluidos} label="Realizados" accentColor={C.g500} />
-        <StatCard valor={pendentes} label="Pendentes" accentColor={C.warn} />
-        <StatCard valor={atrasados} label="Atrasados" accentColor={C.danger} />
+      <View style={[s.statsRow, modoIdoso && sIdoso.statsRow]}>
+        <StatCard valor={total} label="Total" accentColor={C.info} idoso={modoIdoso} />
+        <StatCard valor={concluidos} label="Realizados" accentColor={C.g500} idoso={modoIdoso} />
+        <StatCard valor={pendentes} label="Pendentes" accentColor={C.warn} idoso={modoIdoso} />
+        <StatCard valor={atrasados} label="Atrasados" accentColor={C.danger} idoso={modoIdoso} />
+      </View>
+
+      {/* Acessibilidade */}
+      <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Acessibilidade</Text>
+      <View style={s.card}>
+        <PrefSwitch
+          label="Modo idoso"
+          desc="Tela mais limpa, com textos e botões maiores"
+          valor={modoIdoso}
+          onToggle={alternarModoIdoso}
+          idoso={modoIdoso}
+        />
       </View>
 
       <View style={s.secLabelRow}>
-        <Text style={s.secLabel}>Carteiras de vacinação</Text>
+        <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Carteiras de vacinação</Text>
         {pets.length > 1 && <Text style={s.secLabelContagem}>{pets.length} carteiras</Text>}
       </View>
       <WalletStack
@@ -141,7 +155,7 @@ export default function PerfilScreen() {
 
       {/* Meus Pets */}
       <View style={s.secLabelRow}>
-        <Text style={s.secLabel}>Meus Pets</Text>
+        <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Meus Pets</Text>
         <Text style={s.secLabelContagem}>{pets.length}</Text>
       </View>
       <View style={s.card}>
@@ -150,18 +164,20 @@ export default function PerfilScreen() {
           const ativo = p.id === petAtivoId;
           return (
             <View key={p.id}>
-              <Pressable style={s.petRow} onPress={() => selecionarPet(p.id)}>
-                <View style={[s.petRowAvatar, ativo && s.petRowAvatarAtivo]}>
+              <Pressable style={[s.petRow, modoIdoso && sIdoso.petRow]} onPress={() => selecionarPet(p.id)}>
+                <View style={[s.petRowAvatar, ativo && s.petRowAvatarAtivo, modoIdoso && sIdoso.petRowAvatar]}>
                   <AppIcon
                     name={info?.icon ?? 'paw'}
                     set={info?.iconSet ?? 'MaterialCommunityIcons'}
-                    size={18}
+                    size={modoIdoso ? 22 : 18}
                     color={ativo ? C.white : C.muted}
                   />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={s.petRowNome}>{p.nome}</Text>
-                  <Text style={s.petRowDetalhe}>{info?.label}{p.raca ? ` • ${p.raca}` : ''}</Text>
+                  <Text style={[s.petRowNome, modoIdoso && sIdoso.petRowNome]}>{p.nome}</Text>
+                  {!modoIdoso && (
+                    <Text style={s.petRowDetalhe}>{info?.label}{p.raca ? ` • ${p.raca}` : ''}</Text>
+                  )}
                 </View>
                 {ativo && (
                   <View style={s.petRowBadge}>
@@ -173,7 +189,7 @@ export default function PerfilScreen() {
                   onPress={() => handleRemoverPet(p.id, p.nome)}
                   hitSlop={8}
                 >
-                  <Ionicons name="trash-outline" size={16} color={C.danger} />
+                  <Ionicons name="trash-outline" size={modoIdoso ? 20 : 16} color={C.danger} />
                 </Pressable>
               </Pressable>
               {i < pets.length - 1 && <View style={s.divisor} />}
@@ -181,25 +197,28 @@ export default function PerfilScreen() {
           );
         })}
         <View style={s.divisor} />
-        <Pressable style={s.btnAddPet} onPress={() => router.push('/add-pet')}>
-          <Ionicons name="add-circle-outline" size={18} color={C.g600} />
-          <Text style={s.btnAddPetText}>Adicionar novo pet</Text>
+        <Pressable style={[s.btnAddPet, modoIdoso && sIdoso.btnAddPet]} onPress={() => router.push('/add-pet')}>
+          <Ionicons name="add-circle-outline" size={modoIdoso ? 22 : 18} color={C.g600} />
+          <Text style={[s.btnAddPetText, modoIdoso && sIdoso.btnAddPetText]}>Adicionar novo pet</Text>
         </Pressable>
       </View>
 
-      {/* Dados do pet ativo */}
-      <Text style={s.secLabel}>Dados do Pet</Text>
+      {/* Dados do pet ativo — no modo idoso, só o essencial */}
+      <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Dados do Pet</Text>
       <View style={s.card}>
-        {[
-          ['Nome', petAtivo?.nome ?? '–'],
-          ['Espécie', especieInfo?.label ?? '–'],
-          ['Raça', petAtivo?.raca ?? '–'],
-          ['Peso', petAtivo?.peso ? `${petAtivo.peso} kg` : '–'],
-        ].map(([label, valor], i, arr) => (
+        {(modoIdoso
+          ? [['Nome', petAtivo?.nome ?? '–'], ['Espécie', especieInfo?.label ?? '–']]
+          : [
+              ['Nome', petAtivo?.nome ?? '–'],
+              ['Espécie', especieInfo?.label ?? '–'],
+              ['Raça', petAtivo?.raca ?? '–'],
+              ['Peso', petAtivo?.peso ? `${petAtivo.peso} kg` : '–'],
+            ]
+        ).map(([label, valor], i, arr) => (
           <View key={label}>
-            <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{label}</Text>
-              <Text style={s.infoValor}>{valor}</Text>
+            <View style={[s.infoRow, modoIdoso && sIdoso.infoRow]}>
+              <Text style={[s.infoLabel, modoIdoso && sIdoso.infoLabel]}>{label}</Text>
+              <Text style={[s.infoValor, modoIdoso && sIdoso.infoValor]}>{valor}</Text>
             </View>
             {i < arr.length - 1 && <View style={s.divisor} />}
           </View>
@@ -207,13 +226,14 @@ export default function PerfilScreen() {
       </View>
 
       {/* Notificações */}
-      <Text style={s.secLabel}>Notificações</Text>
+      <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Notificações</Text>
       <View style={s.card}>
         <PrefSwitch
           label="Ativar notificações"
           desc="Receba lembretes de eventos"
           valor={preferencias.ativas ?? true}
           onToggle={v => atualizarPreferencias({ ...preferencias, ativas: v })}
+          idoso={modoIdoso}
         />
         <View style={s.divisor} />
         <PrefSwitch
@@ -221,6 +241,7 @@ export default function PerfilScreen() {
           desc="Aviso com antecedência"
           valor={preferencias.lembrete7 ?? true}
           onToggle={v => atualizarPreferencias({ ...preferencias, lembrete7: v })}
+          idoso={modoIdoso}
         />
         <View style={s.divisor} />
         <PrefSwitch
@@ -228,20 +249,21 @@ export default function PerfilScreen() {
           desc="Aviso na véspera"
           valor={preferencias.lembreteAntes ?? true}
           onToggle={v => atualizarPreferencias({ ...preferencias, lembreteAntes: v })}
+          idoso={modoIdoso}
         />
       </View>
 
 
       {/* Sair */}
-      <Pressable style={s.btnSair} onPress={handleSair}>
-        <Ionicons name="log-out-outline" size={16} color={C.g700} />
-        <Text style={s.btnSairText}>Sair da conta</Text>
+      <Pressable style={[s.btnSair, modoIdoso && sIdoso.btnSair]} onPress={handleSair}>
+        <Ionicons name="log-out-outline" size={modoIdoso ? 20 : 16} color={C.g700} />
+        <Text style={[s.btnSairText, modoIdoso && sIdoso.btnSairText]}>Sair da conta</Text>
       </Pressable>
 
       {/* Resetar */}
-      <Pressable style={s.btnResetar} onPress={handleResetar}>
-        <Ionicons name="trash-outline" size={16} color="#fff" />
-        <Text style={s.btnResetarText}>Resetar preferências</Text>
+      <Pressable style={[s.btnResetar, modoIdoso && sIdoso.btnSair]} onPress={handleResetar}>
+        <Ionicons name="trash-outline" size={modoIdoso ? 20 : 16} color="#fff" />
+        <Text style={[s.btnResetarText, modoIdoso && sIdoso.btnSairText]}>Resetar preferências</Text>
       </Pressable>
 
     </ScrollView>
@@ -254,27 +276,28 @@ export default function PerfilScreen() {
   );
 }
 
-function StatCard({ valor, label, accentColor }: { valor: number; label: string; accentColor: string }) {
+function StatCard({ valor, label, accentColor, idoso }: { valor: number; label: string; accentColor: string; idoso?: boolean }) {
   return (
-    <View style={[s.statCard, { borderBottomColor: accentColor }]}>
-      <Text style={s.statLabel}>{label}</Text>
-      <Text style={[s.statVal, { color: accentColor }]}>{valor}</Text>
+    <View style={[s.statCard, idoso && sIdoso.statCard, { borderBottomColor: accentColor }]}>
+      <Text style={[s.statLabel, idoso && sIdoso.statLabel]}>{label}</Text>
+      <Text style={[s.statVal, idoso && sIdoso.statVal, { color: accentColor }]}>{valor}</Text>
     </View>
   );
 }
 
-function PrefSwitch({ label, desc, valor, onToggle }: { label: string; desc: string; valor: boolean; onToggle: (v: boolean) => void }) {
+function PrefSwitch({ label, desc, valor, onToggle, idoso }: { label: string; desc: string; valor: boolean; onToggle: (v: boolean) => void; idoso?: boolean }) {
   return (
-    <View style={s.prefRow}>
+    <View style={[s.prefRow, idoso && sIdoso.prefRow]}>
       <View style={s.prefInfo}>
-        <Text style={s.prefLabel}>{label}</Text>
-        <Text style={s.prefDesc}>{desc}</Text>
+        <Text style={[s.prefLabel, idoso && sIdoso.prefLabel]}>{label}</Text>
+        <Text style={[s.prefDesc, idoso && sIdoso.prefDesc]}>{desc}</Text>
       </View>
       <Switch
         value={valor}
         onValueChange={onToggle}
         trackColor={{ false: C.border, true: C.g500 }}
         thumbColor={C.white}
+        style={idoso ? sIdoso.switch : undefined}
       />
     </View>
   );
@@ -396,4 +419,39 @@ const s = StyleSheet.create({
     gap: 8,
   },
   btnResetarText: { color: C.white, fontSize: 14, fontWeight: '700' },
+});
+
+/** Overrides aplicados por cima de `s` quando o modo idoso está ativo: textos maiores, mais espaçamento, alvos de toque maiores. */
+const sIdoso = StyleSheet.create({
+  avatar: { width: 56, height: 56, borderRadius: 28 },
+  avatarText: { fontSize: 20 },
+  bannerNome: { fontSize: 19 },
+  bannerRole: { fontSize: 14 },
+  bannerStatVal: { fontSize: 26 },
+
+  statsRow: { flexWrap: 'wrap' },
+  statCard: { minWidth: '47%', flexBasis: '47%', paddingVertical: 14 },
+  statLabel: { fontSize: 11 },
+  statVal: { fontSize: 28, lineHeight: 30 },
+
+  secLabel: { fontSize: 14 },
+
+  infoRow: { paddingVertical: 17 },
+  infoLabel: { fontSize: 16 },
+  infoValor: { fontSize: 16 },
+
+  prefRow: { paddingVertical: 18 },
+  prefLabel: { fontSize: 17 },
+  prefDesc: { fontSize: 14 },
+  switch: { transform: [{ scale: 1.2 }] },
+
+  petRow: { paddingVertical: 16 },
+  petRowAvatar: { width: 44, height: 44, borderRadius: 22 },
+  petRowNome: { fontSize: 17 },
+
+  btnAddPet: { paddingVertical: 18 },
+  btnAddPetText: { fontSize: 16 },
+
+  btnSair: { paddingVertical: 18 },
+  btnSairText: { fontSize: 16 },
 });
