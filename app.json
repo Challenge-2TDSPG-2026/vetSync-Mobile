@@ -21,9 +21,17 @@
       }
     },
     "android": {
-      "adaptiveIcon": { "foregroundImage": "./assets/logo.png", "backgroundColor": "#1A5276" },
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#1A5276"
+      },
       "package": "com.vetsync.app",
-      "permissions": ["READ_CALENDAR", "WRITE_CALENDAR", "SCHEDULE_EXACT_ALARM", "POST_NOTIFICATIONS"]
+      "permissions": [
+        "READ_CALENDAR",
+        "WRITE_CALENDAR",
+        "SCHEDULE_EXACT_ALARM",
+        "POST_NOTIFICATIONS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -32,8 +40,20 @@
     },
     "plugins": [
       "expo-router",
-      ["expo-calendar", { "calendarPermission": "Precisamos acessar seu calendário para adicionar os eventos de saúde do seu pet." }],
-      ["expo-notifications", { "icon": "./assets/logo.png", "color": "#22a06b" }]
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Precisamos acessar seu calendário para adicionar os eventos de saúde do seu pet."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo.png",
+          "color": "#22a06b"
+        }
+      ],
+      "expo-status-bar"
     ]
   }
 }
