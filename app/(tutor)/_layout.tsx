@@ -3,8 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { CORES } from '../../constants';
 import { ClyvoTabBar } from '../../components/navigation/ClyvoTabBar';
 import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAction';
+import { useAccessibility } from '../../context/AccessibilityContext';
 
 export default function TabsLayout() {
+  const { modoIdoso } = useAccessibility();
   return (
     <Tabs
       tabBar={(props) => <ClyvoTabBar {...props} />}
@@ -14,7 +16,7 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: CORES.primaria },
         headerTintColor: '#fff',
         headerTitleAlign: 'left',
-        headerTitleStyle: { fontWeight: '700' },
+        headerTitleStyle: { fontWeight: '700', fontSize: modoIdoso ? 20 : 17 },
         headerRight: () => <AccountHeaderAction href="/(tutor)/perfil" />,
       }}
     >
