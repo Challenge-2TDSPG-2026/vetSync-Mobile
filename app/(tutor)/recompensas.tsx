@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { usePet } from '../../context/PetContext';
+import { useAccessibility } from '../../context/AccessibilityContext';
 import { useAuth } from '../../context/AuthContext';
 import {
   useCatalogoRecompensas,
@@ -31,6 +32,7 @@ function formatarData(iso: string): string {
 
 export default function RecompensasScreen() {
   const { petAtivo, eventos, nivelInfo } = usePet();
+  const { modoIdoso } = useAccessibility();
   const { autenticado } = useAuth();
 
   const { data: catalogo = [], isLoading: carregandoCatalogo } = useCatalogoRecompensas(autenticado);
@@ -84,47 +86,47 @@ export default function RecompensasScreen() {
 
       <PetSwitcher />
 
-      <View style={s.banner}>
-        <View style={s.bannerIconWrap}>
-          <AppIcon name="gift-outline" set="Ionicons" size={30} color={C.white} />
+      <View style={[s.banner, modoIdoso && sIdoso.banner]}>
+        <View style={[s.bannerIconWrap, modoIdoso && sIdoso.bannerIconWrap]}>
+          <AppIcon name="gift-outline" set="Ionicons" size={modoIdoso ? 38 : 30} color={C.white} />
         </View>
-        <Text style={s.bannerTitulo}>Programa de Fidelidade</Text>
-        <Text style={s.bannerSub}>
+        <Text style={[s.bannerTitulo, modoIdoso && sIdoso.bannerTitulo]}>Programa de Fidelidade</Text>
+        <Text style={[s.bannerSub, modoIdoso && sIdoso.bannerSub]}>
           Acumule pontos em cada atendimento e resgate benefícios exclusivos para {petAtivo?.nome ?? 'seu pet'}.
         </Text>
       </View>
 
-      <View style={s.nivelCard}>
+      <View style={[s.nivelCard, modoIdoso && sIdoso.nivelCard]}>
         <View style={s.nivelHead}>
-          <View style={s.nivelBadge}>
-            <Text style={s.nivelBadgeNumero}>{nivelInfo.nivel}</Text>
+          <View style={[s.nivelBadge, modoIdoso && sIdoso.nivelBadge]}>
+            <Text style={[s.nivelBadgeNumero, modoIdoso && sIdoso.nivelBadgeNumero]}>{nivelInfo.nivel}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={s.nivelTitulo}>{nivelInfo.titulo}</Text>
-            <Text style={s.nivelSub}>Nível {nivelInfo.nivel} • {nivelInfo.xpAtual} XP</Text>
+            <Text style={[s.nivelTitulo, modoIdoso && sIdoso.nivelTitulo]}>{nivelInfo.titulo}</Text>
+            <Text style={[s.nivelSub, modoIdoso && sIdoso.nivelSub]}>Nível {nivelInfo.nivel} • {nivelInfo.xpAtual} XP</Text>
           </View>
         </View>
 
-        <View style={s.barraTrackRoxo}>
+        <View style={[s.barraTrackRoxo, modoIdoso && sIdoso.barraTrackRoxo]}>
           <View style={[s.barraFillRoxo, { width: `${nivelInfo.progressoPct}%` as any }]} />
         </View>
-        <Text style={s.nivelHint}>
+        <Text style={[s.nivelHint, modoIdoso && sIdoso.nivelHint]}>
           {nivelInfo.xpFaltaProximoNivel !== null
             ? `Faltam ${nivelInfo.xpFaltaProximoNivel} XP para o próximo nível`
             : 'Nível máximo alcançado! 🏆'}
         </Text>
-        <Text style={s.nivelDica}>Cada evento de saúde concluído vale 10 XP</Text>
+        {!modoIdoso && <Text style={s.nivelDica}>Cada evento de saúde concluído vale 10 XP</Text>}
       </View>
 
-      <View style={s.progressoCard}>
+      <View style={[s.progressoCard, modoIdoso && sIdoso.nivelCard]}>
         <View style={s.progressoHead}>
-          <Text style={s.progressoLbl}>Ciclo de atendimentos</Text>
-          <Text style={s.progressoContagem}>{consultasNoCicloAtual}/{metaConsultas}</Text>
+          <Text style={[s.progressoLbl, modoIdoso && sIdoso.progressoLbl]}>Ciclo de atendimentos</Text>
+          <Text style={[s.progressoContagem, modoIdoso && sIdoso.progressoContagem]}>{consultasNoCicloAtual}/{metaConsultas}</Text>
         </View>
-        <View style={s.barraTrack}>
+        <View style={[s.barraTrack, modoIdoso && sIdoso.barraTrackRoxo]}>
           <View style={[s.barraFill, { width: `${pct}%` as any }]} />
         </View>
-        <Text style={s.progressoHint}>
+        <Text style={[s.progressoHint, modoIdoso && sIdoso.nivelHint]}>
           {faltam === 0
             ? 'Meta do ciclo atingida! Parabéns pelo cuidado contínuo 🎉'
             : `Faltam ${faltam} evento${faltam !== 1 ? 's' : ''} concluído${faltam !== 1 ? 's' : ''} para completar o ciclo`}
@@ -134,10 +136,10 @@ export default function RecompensasScreen() {
           {Array.from({ length: metaConsultas }).map((_, i) => (
             <View
               key={i}
-              style={[s.dotConsulta, i < consultasNoCicloAtual && s.dotConsultaPreenchida]}
+              style={[s.dotConsulta, modoIdoso && sIdoso.dotConsulta, i < consultasNoCicloAtual && s.dotConsultaPreenchida]}
             >
               {i < consultasNoCicloAtual && (
-                <AppIcon name="checkmark" set="Ionicons" size={12} color={C.white} />
+                <AppIcon name="checkmark" set="Ionicons" size={modoIdoso ? 16 : 12} color={C.white} />
               )}
             </View>
           ))}
@@ -145,7 +147,7 @@ export default function RecompensasScreen() {
       </View>
 
       <View style={s.secLabelRow}>
-        <Text style={s.secLabel}>Benefícios do Catálogo</Text>
+        <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Benefícios do Catálogo</Text>
         <Text style={s.secLabelContagem}>Saldo: {saldoPontos} pts</Text>
       </View>
 
@@ -165,25 +167,25 @@ export default function RecompensasScreen() {
           const isPending = resgatarMutation.isPending && resgatarMutation.variables === r.id;
 
           return (
-            <View key={r.id} style={s.cupomCard}>
-              <View style={s.cupomIconWrap}>
-                <AppIcon name="gift" set="Ionicons" size={22} color={C.ouro} />
+            <View key={r.id} style={[s.cupomCard, modoIdoso && sIdoso.cupomCard]}>
+              <View style={[s.cupomIconWrap, modoIdoso && sIdoso.cupomIconWrap]}>
+                <AppIcon name="gift" set="Ionicons" size={modoIdoso ? 28 : 22} color={C.ouro} />
               </View>
               <View style={s.cupomInfo}>
-                <Text style={s.cupomTitulo}>{r.nome}</Text>
-                <Text style={s.cupomSub}>
+                <Text style={[s.cupomTitulo, modoIdoso && sIdoso.cupomTitulo]}>{r.nome}</Text>
+                <Text style={[s.cupomSub, modoIdoso && sIdoso.cupomSub]}>
                   {r.descricao ? `${r.descricao} • ` : ''}{r.custoPontos} pontos
                 </Text>
               </View>
               <Pressable
-                style={[s.btnResgatar, (!podeResgatar || isPending) && { opacity: 0.5 }]}
+                style={[s.btnResgatar, modoIdoso && sIdoso.btnResgatar, (!podeResgatar || isPending) && { opacity: 0.5 }]}
                 onPress={() => handleResgatar(r)}
                 disabled={!podeResgatar || isPending}
               >
                 {isPending ? (
                   <ActivityIndicator size="small" color={C.white} />
                 ) : (
-                  <Text style={s.btnResgatarText}>Resgatar</Text>
+                  <Text style={[s.btnResgatarText, modoIdoso && sIdoso.btnResgatarText]}>Resgatar</Text>
                 )}
               </Pressable>
             </View>
@@ -192,46 +194,46 @@ export default function RecompensasScreen() {
       )}
 
       <View style={s.secLabelRow}>
-        <Text style={s.secLabel}>Conquistas</Text>
+        <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Conquistas</Text>
         <Text style={s.secLabelContagem}>{conquistasDesbloqueadas.length}/{conquistas.length}</Text>
       </View>
-      <View style={s.conquistasGrid}>
+      <View style={[s.conquistasGrid, modoIdoso && sIdoso.conquistasGrid]}>
         {conquistas.map(c => (
           <View
             key={c.id}
-            style={[s.conquistaCard, !c.desbloqueada && s.conquistaCardBloqueada]}
+            style={[s.conquistaCard, modoIdoso && sIdoso.conquistaCard, !c.desbloqueada && s.conquistaCardBloqueada]}
           >
-            <View style={[s.conquistaIconWrap, c.desbloqueada && s.conquistaIconWrapAtiva]}>
+            <View style={[s.conquistaIconWrap, modoIdoso && sIdoso.conquistaIconWrap, c.desbloqueada && s.conquistaIconWrapAtiva]}>
               <AppIcon
                 name={c.desbloqueada ? c.icon : 'lock-closed-outline'}
                 set={c.desbloqueada ? c.iconSet : 'Ionicons'}
-                size={20}
+                size={modoIdoso ? 26 : 20}
                 color={c.desbloqueada ? C.white : C.muted}
               />
             </View>
-            <Text style={[s.conquistaTitulo, !c.desbloqueada && s.conquistaTituloBloqueada]} numberOfLines={2}>
+            <Text style={[s.conquistaTitulo, modoIdoso && sIdoso.conquistaTitulo, !c.desbloqueada && s.conquistaTituloBloqueada]} numberOfLines={2}>
               {c.titulo}
             </Text>
-            <Text style={s.conquistaDescricao} numberOfLines={2}>{c.descricao}</Text>
+            {!modoIdoso && <Text style={s.conquistaDescricao} numberOfLines={2}>{c.descricao}</Text>}
           </View>
         ))}
       </View>
 
-      <Text style={s.secLabel}>Estatísticas</Text>
+      <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Estatísticas</Text>
       <View style={s.statsCard}>
         <View style={s.statItem}>
-          <Text style={s.statValor}>{consultasConcluidasTotal}</Text>
-          <Text style={s.statLabel}>Eventos concluídos</Text>
+          <Text style={[s.statValor, modoIdoso && sIdoso.statValor]}>{consultasConcluidasTotal}</Text>
+          <Text style={[s.statLabel, modoIdoso && sIdoso.statLabelBig]}>Eventos concluídos</Text>
         </View>
         <View style={s.statDivisor} />
         <View style={s.statItem}>
-          <Text style={s.statValor}>{saldoPontos}</Text>
-          <Text style={s.statLabel}>Pontos disponíveis</Text>
+          <Text style={[s.statValor, modoIdoso && sIdoso.statValor]}>{saldoPontos}</Text>
+          <Text style={[s.statLabel, modoIdoso && sIdoso.statLabelBig]}>Pontos disponíveis</Text>
         </View>
         <View style={s.statDivisor} />
         <View style={s.statItem}>
-          <Text style={s.statValor}>{historico.length}</Text>
-          <Text style={s.statLabel}>Resgates realizados</Text>
+          <Text style={[s.statValor, modoIdoso && sIdoso.statValor]}>{historico.length}</Text>
+          <Text style={[s.statLabel, modoIdoso && sIdoso.statLabelBig]}>Resgates realizados</Text>
         </View>
       </View>
 
@@ -241,23 +243,23 @@ export default function RecompensasScreen() {
         </View>
       ) : historico.length > 0 && (
         <>
-          <Text style={s.secLabel}>Histórico de resgates</Text>
+          <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Histórico de resgates</Text>
           <View style={s.historicoCard}>
             {historico.map((r, idx) => (
-              <View key={r.id} style={[s.historicoRow, idx < historico.length - 1 && s.historicoRowBorder]}>
+              <View key={r.id} style={[s.historicoRow, modoIdoso && sIdoso.historicoRow, idx < historico.length - 1 && s.historicoRowBorder]}>
                 <AppIcon
                   name={r.status === 'VALIDADO' ? 'checkmark-circle' : r.status === 'PENDENTE' ? 'time-outline' : 'close-circle'}
                   set="Ionicons"
-                  size={18}
+                  size={modoIdoso ? 24 : 18}
                   color={r.status === 'VALIDADO' ? C.g500 : r.status === 'PENDENTE' ? C.ouro : C.danger}
                 />
                 <View style={{ flex: 1 }}>
-                  <Text style={s.historicoTitulo}>{r.nomeRecompensa}</Text>
-                  <Text style={s.historicoData}>
+                  <Text style={[s.historicoTitulo, modoIdoso && sIdoso.historicoTitulo]}>{r.nomeRecompensa}</Text>
+                  <Text style={[s.historicoData, modoIdoso && sIdoso.historicoData]}>
                     {formatarData(r.dataResgate)} • {r.status}
                   </Text>
                 </View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: C.muted }}>-{r.custoPontos} pts</Text>
+                <Text style={{ fontSize: modoIdoso ? 14 : 12, fontWeight: '700', color: C.muted }}>-{r.custoPontos} pts</Text>
               </View>
             ))}
           </View>
@@ -409,4 +411,45 @@ const s = StyleSheet.create({
   historicoRowBorder: { borderBottomWidth: 1, borderBottomColor: C.border },
   historicoTitulo: { fontSize: 13, fontWeight: '600', color: C.text },
   historicoData: { fontSize: 11, color: C.muted, marginTop: 2 },
+});
+
+/** Overrides do modo idoso: textos e alvos de toque maiores; conquistas em grade 2x em vez de 3x. */
+const sIdoso = StyleSheet.create({
+  banner: { padding: 26 },
+  bannerIconWrap: { width: 68, height: 68, borderRadius: 34 },
+  bannerTitulo: { fontSize: 20 },
+  bannerSub: { fontSize: 14 },
+
+  nivelCard: { padding: 22 },
+  nivelBadge: { width: 54, height: 54, borderRadius: 27 },
+  nivelBadgeNumero: { fontSize: 21 },
+  nivelTitulo: { fontSize: 18 },
+  nivelSub: { fontSize: 14 },
+  barraTrackRoxo: { height: 12, borderRadius: 6 },
+  nivelHint: { fontSize: 14 },
+
+  progressoLbl: { fontSize: 13 },
+  progressoContagem: { fontSize: 21 },
+  dotConsulta: { width: 34, height: 34, borderRadius: 17 },
+
+  secLabel: { fontSize: 14 },
+
+  cupomCard: { padding: 16 },
+  cupomIconWrap: { width: 52, height: 52, borderRadius: 26 },
+  cupomTitulo: { fontSize: 16 },
+  cupomSub: { fontSize: 13 },
+  btnResgatar: { paddingHorizontal: 18, paddingVertical: 12 },
+  btnResgatarText: { fontSize: 14 },
+
+  conquistasGrid: { gap: 12 },
+  conquistaCard: { width: '47%', padding: 14 },
+  conquistaIconWrap: { width: 48, height: 48, borderRadius: 24, marginBottom: 8 },
+  conquistaTitulo: { fontSize: 13 },
+
+  statValor: { fontSize: 26 },
+  statLabelBig: { fontSize: 12 },
+
+  historicoRow: { padding: 16 },
+  historicoTitulo: { fontSize: 15 },
+  historicoData: { fontSize: 13 },
 });
