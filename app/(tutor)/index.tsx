@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
+import { useAccessibility } from '../../context/AccessibilityContext';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
@@ -28,6 +29,7 @@ function calcularIdade(d: string): string {
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const { modoIdoso } = useAccessibility();
   const { pets, petAtivo, eventos, carregandoEventos, carregando } = usePet();
 
   const eventosComStatus = useMemo(
@@ -71,48 +73,48 @@ export default function DashboardScreen() {
       <PetSwitcher />
 
       {/* Welcome banner */}
-      <View style={s.welcome}>
+      <View style={[s.welcome, modoIdoso && sIdoso.welcome]}>
         <AppIcon
           name={especieInfo?.icon ?? 'paw'}
           set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
-          size={36}
+          size={modoIdoso ? 44 : 36}
           color={C.white}
         />
         <View style={s.welcomeInfo}>
-          <Text style={s.welcomeNome}>Olá, {petAtivo.nome}!</Text>
-          <Text style={s.welcomeSub}>Gerencie a saúde do seu pet em um só lugar.</Text>
+          <Text style={[s.welcomeNome, modoIdoso && sIdoso.welcomeNome]}>Olá, {petAtivo.nome}!</Text>
+          <Text style={[s.welcomeSub, modoIdoso && sIdoso.welcomeSub]}>Gerencie a saúde do seu pet em um só lugar.</Text>
         </View>
-        <Pressable style={s.welcomeBtn} onPress={() => router.push('/add-evento')}>
-          <Text style={s.welcomeBtnText}>+ Evento</Text>
+        <Pressable style={[s.welcomeBtn, modoIdoso && sIdoso.welcomeBtn]} onPress={() => router.push('/add-evento')}>
+          <Text style={[s.welcomeBtnText, modoIdoso && sIdoso.welcomeBtnText]}>+ Evento</Text>
         </Pressable>
       </View>
 
       {/* Stats */}
-      <View style={s.statsRow}>
-        <StatCard valor={pendentes.length} label="Pendentes" accentColor={C.warn} />
-        <StatCard valor={concluidos.length} label="Realizados" accentColor={C.g500} />
-        <StatCard valor={atrasados.length} label="Atrasados" accentColor={C.danger} />
+      <View style={[s.statsRow, modoIdoso && sIdoso.statsRow]}>
+        <StatCard valor={pendentes.length} label="Pendentes" accentColor={C.warn} idoso={modoIdoso} />
+        <StatCard valor={concluidos.length} label="Realizados" accentColor={C.g500} idoso={modoIdoso} />
+        <StatCard valor={atrasados.length} label="Atrasados" accentColor={C.danger} idoso={modoIdoso} />
       </View>
 
       {/* Pet card */}
       <View style={s.card}>
         <View style={s.cardHead}>
-          <Text style={s.cardTitle}>Meu Pet — Visão Geral</Text>
+          <Text style={[s.cardTitle, modoIdoso && sIdoso.cardTitle]}>Meu Pet — Visão Geral</Text>
         </View>
-        <View style={s.petRow}>
-          <View style={s.petAvatar}>
+        <View style={[s.petRow, modoIdoso && sIdoso.petRow]}>
+          <View style={[s.petAvatar, modoIdoso && sIdoso.petAvatar]}>
             <AppIcon
               name={especieInfo?.icon ?? 'paw'}
               set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
-              size={22}
+              size={modoIdoso ? 28 : 22}
               color={C.g600}
             />
           </View>
           <View style={s.petInfo}>
-            <Text style={s.petNome}>{petAtivo.nome}</Text>
-            <Text style={s.petDetalhe}>{petAtivo.especie}{petAtivo.raca ? ` • ${petAtivo.raca}` : ''}</Text>
-            <Text style={s.petDetalhe}>Idade: {calcularIdade(petAtivo.dataNascimento)}</Text>
-            <Text style={s.petDetalhe}>Peso: {petAtivo.peso ? `${petAtivo.peso} kg` : '—'}</Text>
+            <Text style={[s.petNome, modoIdoso && sIdoso.petNome]}>{petAtivo.nome}</Text>
+            <Text style={[s.petDetalhe, modoIdoso && sIdoso.petDetalhe]}>{petAtivo.especie}{petAtivo.raca ? ` • ${petAtivo.raca}` : ''}</Text>
+            <Text style={[s.petDetalhe, modoIdoso && sIdoso.petDetalhe]}>Idade: {calcularIdade(petAtivo.dataNascimento)}</Text>
+            <Text style={[s.petDetalhe, modoIdoso && sIdoso.petDetalhe]}>Peso: {petAtivo.peso ? `${petAtivo.peso} kg` : '—'}</Text>
           </View>
           <Pressable style={s.btnProntuario} onPress={() => router.push('/(tutor)/agenda')}>
             <AppIcon name="pulse-outline" set="Ionicons" size={14} color={C.text} style={{ marginRight: 4 }} />
@@ -124,9 +126,9 @@ export default function DashboardScreen() {
       {/* Próximos eventos */}
       <View style={s.card}>
         <View style={s.cardHead}>
-          <Text style={s.cardTitle}>Próximos Eventos</Text>
+          <Text style={[s.cardTitle, modoIdoso && sIdoso.cardTitle]}>Próximos Eventos</Text>
           <Pressable onPress={() => router.push('/(tutor)/agenda')}>
-            <Text style={s.linkVer}>Ver todos</Text>
+            <Text style={[s.linkVer, modoIdoso && sIdoso.linkVer]}>Ver todos</Text>
           </Pressable>
         </View>
 
@@ -146,13 +148,13 @@ export default function DashboardScreen() {
             const sb = STATUS_EXIBICAO_BADGE[e.statusExibicao];
             const isLast = idx === proximos.length - 1;
             return (
-              <View key={e.id} style={[s.eventoRow, !isLast && s.eventoRowBorder]}>
-                <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
-                  <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={C.white} />
+              <View key={e.id} style={[s.eventoRow, modoIdoso && sIdoso.eventoRow, !isLast && s.eventoRowBorder]}>
+                <View style={[s.eventoIcone, modoIdoso && sIdoso.eventoIcone, { backgroundColor: visual.cor }]}>
+                  <AppIcon name={visual.icon} set={visual.iconSet} size={modoIdoso ? 20 : 16} color={C.white} />
                 </View>
                 <View style={s.eventoInfo}>
-                  <Text style={s.eventoTitulo}>{e.nomeTipoEvento}</Text>
-                  <Text style={s.eventoData}>{formatarDataEvento(e.data)}</Text>
+                  <Text style={[s.eventoTitulo, modoIdoso && sIdoso.eventoTitulo]}>{e.nomeTipoEvento}</Text>
+                  <Text style={[s.eventoData, modoIdoso && sIdoso.eventoData]}>{formatarDataEvento(e.data)}</Text>
                 </View>
                 <View style={[s.badge, { backgroundColor: sb.bg }]}>
                   <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
@@ -164,20 +166,20 @@ export default function DashboardScreen() {
       </View>
 
       {/* CTA button */}
-      <Pressable style={s.btnAdd} onPress={() => router.push('/add-evento')}>
-        <Ionicons name="add-circle-outline" size={18} color="#fff" />
-        <Text style={s.btnAddText}>Adicionar evento de saúde</Text>
+      <Pressable style={[s.btnAdd, modoIdoso && sIdoso.btnAdd]} onPress={() => router.push('/add-evento')}>
+        <Ionicons name="add-circle-outline" size={modoIdoso ? 22 : 18} color="#fff" />
+        <Text style={[s.btnAddText, modoIdoso && sIdoso.btnAddText]}>Adicionar evento de saúde</Text>
       </Pressable>
 
     </ScrollView>
   );
 }
 
-function StatCard({ valor, label, accentColor }: { valor: number; label: string; accentColor: string }) {
+function StatCard({ valor, label, accentColor, idoso }: { valor: number; label: string; accentColor: string; idoso?: boolean }) {
   return (
-    <View style={[s.statCard, { borderBottomColor: accentColor }]}>
-      <Text style={s.statLabel}>{label}</Text>
-      <Text style={[s.statVal, { color: accentColor }]}>{valor}</Text>
+    <View style={[s.statCard, idoso && sIdoso.statCard, { borderBottomColor: accentColor }]}>
+      <Text style={[s.statLabel, idoso && sIdoso.statLabel]}>{label}</Text>
+      <Text style={[s.statVal, idoso && sIdoso.statVal, { color: accentColor }]}>{valor}</Text>
     </View>
   );
 }
@@ -289,4 +291,34 @@ const s = StyleSheet.create({
     gap: 8,
   },
   btnAddText: { color: C.white, fontSize: 14, fontWeight: '700' },
+});
+
+/** Overrides aplicados por cima de `s` quando o modo idoso está ativo. */
+const sIdoso = StyleSheet.create({
+  welcome: { padding: 22 },
+  welcomeNome: { fontSize: 22 },
+  welcomeSub: { fontSize: 14 },
+  welcomeBtn: { paddingHorizontal: 14, paddingVertical: 10 },
+  welcomeBtnText: { fontSize: 14 },
+
+  statsRow: { flexWrap: 'wrap' },
+  statCard: { minWidth: '47%', flexBasis: '47%' },
+  statLabel: { fontSize: 11 },
+  statVal: { fontSize: 32, lineHeight: 34 },
+
+  cardTitle: { fontSize: 17 },
+  linkVer: { fontSize: 15 },
+
+  petRow: { padding: 20 },
+  petAvatar: { width: 56, height: 56, borderRadius: 28 },
+  petNome: { fontSize: 18 },
+  petDetalhe: { fontSize: 14 },
+
+  eventoRow: { paddingVertical: 16 },
+  eventoIcone: { width: 46, height: 46, borderRadius: 23 },
+  eventoTitulo: { fontSize: 16 },
+  eventoData: { fontSize: 14 },
+
+  btnAdd: { paddingVertical: 18 },
+  btnAddText: { fontSize: 16 },
 });
