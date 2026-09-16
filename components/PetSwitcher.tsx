@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { usePet } from '../context/PetContext';
+import { useAccessibility } from '../context/AccessibilityContext';
 import { AppIcon } from './AppIcon';
 import { ESPECIES } from '../constants';
 
@@ -13,6 +14,7 @@ const C = {
 export function PetSwitcher() {
   const router = useRouter();
   const { pets, petAtivoId, selecionarPet } = usePet();
+  const { modoIdoso } = useAccessibility();
 
   if (pets.length === 0) return null;
 
@@ -29,24 +31,24 @@ export function PetSwitcher() {
         return (
           <Pressable
             key={p.id}
-            style={[s.chip, ativo && s.chipAtivo]}
+            style={[s.chip, modoIdoso && sIdoso.chip, ativo && s.chipAtivo]}
             onPress={() => selecionarPet(p.id)}
           >
             <AppIcon
               name={especieInfo?.icon ?? 'paw'}
               set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
-              size={16}
+              size={modoIdoso ? 20 : 16}
               color={ativo ? C.white : C.muted}
             />
-            <Text style={[s.chipText, ativo && s.chipTextAtivo]} numberOfLines={1}>
+            <Text style={[s.chipText, modoIdoso && sIdoso.chipText, ativo && s.chipTextAtivo]} numberOfLines={1}>
               {p.nome}
             </Text>
           </Pressable>
         );
       })}
-      <Pressable style={s.addBtn} onPress={() => router.push('/add-pet')}>
-        <AppIcon name="add" set="Ionicons" size={16} color={C.g600} />
-        <Text style={s.addBtnText}>Novo pet</Text>
+      <Pressable style={[s.addBtn, modoIdoso && sIdoso.chip]} onPress={() => router.push('/add-pet')}>
+        <AppIcon name="add" set="Ionicons" size={modoIdoso ? 20 : 16} color={C.g600} />
+        <Text style={[s.addBtnText, modoIdoso && sIdoso.chipText]}>Novo pet</Text>
       </Pressable>
     </ScrollView>
   );
@@ -70,4 +72,10 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: C.g500, borderStyle: 'dashed',
   },
   addBtnText: { fontSize: 12, fontWeight: '700', color: C.g600 },
+});
+
+/** Overrides do modo idoso: chips maiores, com maior alvo de toque, mesmo maxWidth relativo. */
+const sIdoso = StyleSheet.create({
+  chip: { paddingHorizontal: 16, paddingVertical: 12, maxWidth: 180 },
+  chipText: { fontSize: 15 },
 });
