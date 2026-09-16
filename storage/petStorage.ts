@@ -35,3 +35,12 @@ export async function resetarPreferenciasLocais(): Promise<void> {
     STORAGE_KEYS.NOTIFICACOES,
   ]);
 }
+
+export async function salvarModoIdoso(ativo: boolean): Promise<void> {
+  await AsyncStorage.setItem(STORAGE_KEYS.MODO_IDOSO, ativo ? 'true' : 'false');
+}
+
+export async function carregarModoIdoso(): Promise<boolean> {
+  const val = await AsyncStorage.getItem(STORAGE_KEYS.MODO_IDOSO);
+  return val === 'true';
+}
