@@ -102,11 +102,23 @@ export const CONQUISTAS = [
 ] as const;
 
 export const ESPECIES = [
-  { valor: 'cachorro', label: 'Cão', icon: 'dog', iconSet: 'MaterialCommunityIcons' },
-  { valor: 'gato', label: 'Gato', icon: 'cat', iconSet: 'MaterialCommunityIcons' },
-  { valor: 'pássaro', label: 'Ave', icon: 'bird', iconSet: 'MaterialCommunityIcons' },
-  { valor: 'outro', label: 'Outro', icon: 'paw', iconSet: 'MaterialCommunityIcons' },
+  { valor: 'cachorro', label: 'Cão', icon: 'dog', iconSet: 'MaterialCommunityIcons', grupo: 'Companhia' },
+  { valor: 'gato', label: 'Gato', icon: 'cat', iconSet: 'MaterialCommunityIcons', grupo: 'Companhia' },
+  { valor: 'coelho', label: 'Coelho', icon: 'rabbit', iconSet: 'MaterialCommunityIcons', grupo: 'Companhia' },
+  { valor: 'equino', label: 'Equino', icon: 'horse', iconSet: 'MaterialCommunityIcons', grupo: 'Produção' },
+  { valor: 'bovino', label: 'Bovino', icon: 'cow', iconSet: 'MaterialCommunityIcons', grupo: 'Produção' },
+  { valor: 'suino', label: 'Suíno', icon: 'pig', iconSet: 'MaterialCommunityIcons', grupo: 'Produção' },
+  { valor: 'ovino', label: 'Ovino', icon: 'sheep', iconSet: 'MaterialCommunityIcons', grupo: 'Produção' },
+  { valor: 'caprino', label: 'Caprino', icon: 'goat', iconSet: 'MaterialCommunityIcons', grupo: 'Produção' },
+  { valor: 'ave', label: 'Ave', icon: 'bird', iconSet: 'MaterialCommunityIcons', grupo: 'Outros' },
+  { valor: 'reptil', label: 'Réptil', icon: 'turtle', iconSet: 'MaterialCommunityIcons', grupo: 'Outros' },
+  { valor: 'anfibio', label: 'Anfíbio', icon: 'frog', iconSet: 'MaterialCommunityIcons', grupo: 'Outros' },
+  { valor: 'peixe', label: 'Peixe', icon: 'fish', iconSet: 'MaterialCommunityIcons', grupo: 'Outros' },
+  { valor: 'roedor', label: 'Roedor', icon: 'rodent', iconSet: 'MaterialCommunityIcons', grupo: 'Outros' },
+  { valor: 'furao', label: 'Furão', icon: 'ferret', iconSet: 'MaterialCommunityIcons', grupo: 'Outros' },
 ] as const;
+
+export const GRUPOS_ESPECIE = ['Companhia', 'Produção', 'Outros'] as const;
 
 interface VisualTipoEvento {
   icon: string;

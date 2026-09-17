@@ -1,7 +1,7 @@
 export interface Pet {
   id: string;
   nome: string;
-  especie: 'cachorro' | 'gato' | 'pássaro' | 'outro';
+  especie: 'cachorro' | 'gato' | 'equino' | 'bovino' | 'suino' | 'ovino' | 'caprino' | 'ave' | 'reptil' | 'anfibio' | 'peixe' | 'roedor' | 'coelho' | 'furao';
   sexo: 'macho' | 'femea';
   raca: string;
   dataNascimento: string;
