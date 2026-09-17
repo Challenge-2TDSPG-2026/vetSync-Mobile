@@ -1,13 +1,13 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CORES } from '../../constants';
-import { ClyvoTabBar } from '../../components/navigation/ClyvoTabBar';
+import { VetSyncTabBar } from '../../components/navigation/VetSyncTabBar';
 import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAction';
 
 export default function VetTabsLayout() {
   return (
     <Tabs
-      tabBar={(props) => <ClyvoTabBar {...props} />}
+      tabBar={(props) => <VetSyncTabBar {...props} />}
       screenOptions={{
         tabBarActiveTintColor: CORES.primaria,
         tabBarInactiveTintColor: CORES.textoSecundario,
