@@ -68,6 +68,8 @@ export default function DashboardScreen() {
 
   if (!petAtivo) return null;
 
+  const artigoPet = petAtivo.sexo === 'femea' ? 'a' : 'o';
+
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
 
@@ -82,7 +84,7 @@ export default function DashboardScreen() {
           color={C.white}
         />
         <View style={s.welcomeInfo}>
-          <Text style={[s.welcomeNome, modoSimples && sSimples.welcomeNome]}>Olá, {petAtivo.nome}!</Text>
+          <Text style={[s.welcomeNome, modoSimples && sSimples.welcomeNome]}>Como está {artigoPet} {petAtivo.nome} hoje?</Text>
           {!modoSimples && <Text style={s.welcomeSub}>Gerencie a saúde do seu pet em um só lugar.</Text>}
         </View>
         <Pressable style={[s.welcomeBtn, modoSimples && sSimples.welcomeBtn]} onPress={() => router.push('/add-evento')}>
