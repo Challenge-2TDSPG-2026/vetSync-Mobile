@@ -18,7 +18,7 @@ export const CONQUISTAS = [
   {
     id: 'primeiro-cadastro',
     titulo: 'Primeiros Passos',
-    descricao: 'Cadastrou este pet no ClyvoVet',
+    descricao: 'Cadastrou este pet no VetSync',
     icon: 'paw',
     iconSet: 'MaterialCommunityIcons',
   },
