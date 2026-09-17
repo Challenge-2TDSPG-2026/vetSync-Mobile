@@ -35,7 +35,6 @@ export default function PerfilScreen() {
     eventos,
     preferencias,
     atualizarPreferencias,
-    resetarPreferencias,
   } = usePet();
 
   const eventosComStatus = useMemo(
@@ -52,25 +51,6 @@ export default function PerfilScreen() {
   function abrirCarteira(pet: Pet) {
     selecionarPet(pet.id);
     setPetCarteira(pet);
-  }
-
-  function handleResetar() {
-    confirmar(
-      'Resetar configurações?',
-      'Isso redefine as preferências locais de notificação do aplicativo. Sua conta e seus pets continuam salvos normalmente.',
-      [
-        { texto: 'Cancelar', estilo: 'cancel' },
-        {
-          texto: 'Resetar',
-          estilo: 'destructive',
-          aoConfirmar: () => {
-            resetarPreferencias().catch(() =>
-              alertar('Não foi possível resetar', 'Tente novamente em instantes.')
-            );
-          },
-        },
-      ]
-    );
   }
 
   function handleSair() {
@@ -123,7 +103,7 @@ export default function PerfilScreen() {
           </View>
         </View>
 
-        {/* Stats row — some no modo simples, para deixar a tela mais enxuta */}
+        {/* Stats row — some no modo simples */}
         {!modoSimples && (
           <View style={s.statsRow}>
             <StatCard valor={total} label="Total" accentColor={C.info} />
@@ -156,7 +136,7 @@ export default function PerfilScreen() {
           onTrocarPetAtivo={selecionarPet}
         />
 
-        {/* Meus Pets — no modo simples, some quando só há 1 pet */}
+        {/* Meus Pets */}
         {mostrarListaPets && (
           <>
             <View style={s.secLabelRow}>
@@ -210,7 +190,7 @@ export default function PerfilScreen() {
           </>
         )}
 
-        {/* Dados do pet ativo — no modo simples, só o essencial */}
+        {/* Dados do pet ativo */}
         <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Dados do Pet</Text>
         <View style={s.card}>
           {(modoSimples
@@ -260,17 +240,10 @@ export default function PerfilScreen() {
           />
         </View>
 
-
         {/* Sair */}
         <Pressable style={[s.btnSair, modoSimples && sSimples.btnSair]} onPress={handleSair}>
           <Ionicons name="log-out-outline" size={modoSimples ? 26 : 20} color={C.g700} />
           <Text style={[s.btnSairText, modoSimples && sSimples.btnSairText]}>Sair da conta</Text>
-        </Pressable>
-
-        {/* Resetar */}
-        <Pressable style={[s.btnResetar, modoSimples && sSimples.btnSair]} onPress={handleResetar}>
-          <Ionicons name="trash-outline" size={modoSimples ? 26 : 20} color="#fff" />
-          <Text style={[s.btnResetarText, modoSimples && sSimples.btnSairText]}>Resetar preferências</Text>
         </Pressable>
 
       </ScrollView>
@@ -310,7 +283,6 @@ function PrefSwitch({ label, desc, valor, onToggle, simples }: { label: string; 
   );
 }
 
-/** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
   content: { padding: 16, paddingBottom: 40 },
@@ -416,23 +388,10 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 9,
-    marginBottom: 12,
   },
   btnSairText: { color: C.g700, fontSize: 16, fontWeight: '700' },
-
-  btnResetar: {
-    backgroundColor: C.danger,
-    paddingVertical: 18,
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 9,
-  },
-  btnResetarText: { color: C.white, fontSize: 16, fontWeight: '700' },
 });
 
-/** Modo simples: ~35% maior que o padrão, sem a linha de estatísticas e sem a lista de pets quando há só 1. */
 const sSimples = StyleSheet.create({
   avatar: { width: 76, height: 76, borderRadius: 38 },
   avatarText: { fontSize: 27 },
