@@ -44,28 +44,28 @@ interface CalendarioProps {
     marcadores: Record<string, string[]>; // dateKey -> cores dos pontinhos (até 3)
     onSelecionar: (d: Date) => void;
     onMudarMes: (offset: number) => void;
-    idoso?: boolean;
+    simples?: boolean;
 }
 
-export function Calendario({ mesRef, selecionado, marcadores, onSelecionar, onMudarMes, idoso }: CalendarioProps) {
+export function Calendario({ mesRef, selecionado, marcadores, onSelecionar, onMudarMes, simples }: CalendarioProps) {
     const dias = useMemo(() => gerarMatrizMes(mesRef), [mesRef]);
     const hoje = new Date();
 
     return (
         <View style={s.container}>
-            <View style={[s.header, idoso && sIdoso.header]}>
+            <View style={[s.header, simples && sSimples.header]}>
                 <Pressable style={s.navBtn} onPress={() => onMudarMes(-1)} hitSlop={8}>
-                    <AppIcon name="chevron-back-outline" set="Ionicons" size={idoso ? 24 : 18} color={C.white} />
+                    <AppIcon name="chevron-back-outline" set="Ionicons" size={simples ? 28 : 22} color={C.white} />
                 </Pressable>
-                <Text style={[s.mesLabel, idoso && sIdoso.mesLabel]}>{MESES[mesRef.getMonth()]} {mesRef.getFullYear()}</Text>
+                <Text style={[s.mesLabel, simples && sSimples.mesLabel]}>{MESES[mesRef.getMonth()]} {mesRef.getFullYear()}</Text>
                 <Pressable style={s.navBtn} onPress={() => onMudarMes(1)} hitSlop={8}>
-                    <AppIcon name="chevron-forward-outline" set="Ionicons" size={idoso ? 24 : 18} color={C.white} />
+                    <AppIcon name="chevron-forward-outline" set="Ionicons" size={simples ? 28 : 22} color={C.white} />
                 </Pressable>
             </View>
 
             <View style={s.semanaHead}>
                 {DIAS_SEMANA.map((d, i) => (
-                    <Text key={i} style={[s.semanaHeadText, idoso && sIdoso.semanaHeadText]}>{d}</Text>
+                    <Text key={i} style={[s.semanaHeadText, simples && sSimples.semanaHeadText]}>{d}</Text>
                 ))}
             </View>
 
@@ -76,16 +76,16 @@ export function Calendario({ mesRef, selecionado, marcadores, onSelecionar, onMu
                     const isSelecionado = mesmoDia(d, selecionado);
                     const cores = marcadores[dateKey(d)] ?? [];
                     return (
-                        <Pressable key={i} style={[s.celula, idoso && sIdoso.celula]} onPress={() => onSelecionar(d)}>
+                        <Pressable key={i} style={[s.celula, simples && sSimples.celula]} onPress={() => onSelecionar(d)}>
                             <View style={[
                                 s.diaCirculo,
-                                idoso && sIdoso.diaCirculo,
+                                simples && sSimples.diaCirculo,
                                 isSelecionado && s.diaCirculoSelecionado,
                                 isHoje && !isSelecionado && s.diaCirculoHoje,
                             ]}>
                                 <Text style={[
                                     s.diaTexto,
-                                    idoso && sIdoso.diaTexto,
+                                    simples && sSimples.diaTexto,
                                     foraDoMes && s.diaTextoFora,
                                     isSelecionado && s.diaTextoSelecionado,
                                     isHoje && !isSelecionado && s.diaTextoHoje,
@@ -106,24 +106,25 @@ export function Calendario({ mesRef, selecionado, marcadores, onSelecionar, onMu
     );
 }
 
+/** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const s = StyleSheet.create({
-    container: { backgroundColor: C.white, borderRadius: 16, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 16 },
+    container: { backgroundColor: C.white, borderRadius: 16, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 18 },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        backgroundColor: C.g800, paddingVertical: 12, paddingHorizontal: 16,
+        backgroundColor: C.g800, paddingVertical: 16, paddingHorizontal: 16,
     },
-    navBtn: { padding: 4 },
-    mesLabel: { color: C.white, fontSize: 14, fontWeight: '700', textTransform: 'capitalize' },
+    navBtn: { padding: 6 },
+    mesLabel: { color: C.white, fontSize: 17, fontWeight: '700', textTransform: 'capitalize' },
 
-    semanaHead: { flexDirection: 'row', paddingTop: 10, paddingHorizontal: 4, backgroundColor: C.cream },
-    semanaHeadText: { width: '14.28%', textAlign: 'center', fontSize: 11, fontWeight: '700', color: C.muted },
+    semanaHead: { flexDirection: 'row', paddingTop: 12, paddingHorizontal: 4, backgroundColor: C.cream },
+    semanaHeadText: { width: '14.28%', textAlign: 'center', fontSize: 13, fontWeight: '700', color: C.muted },
 
-    grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 4, paddingBottom: 10, backgroundColor: C.cream },
-    celula: { width: '14.28%', alignItems: 'center', paddingVertical: 4 },
-    diaCirculo: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 4, paddingBottom: 12, backgroundColor: C.cream },
+    celula: { width: '14.28%', alignItems: 'center', paddingVertical: 6 },
+    diaCirculo: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
     diaCirculoSelecionado: { backgroundColor: C.g600 },
     diaCirculoHoje: { borderWidth: 1.5, borderColor: C.g500 },
-    diaTexto: { fontSize: 13, color: C.text, fontWeight: '600' },
+    diaTexto: { fontSize: 15, color: C.text, fontWeight: '600' },
     diaTextoFora: { color: C.border },
     diaTextoSelecionado: { color: C.white },
     diaTextoHoje: { color: C.g600 },
@@ -132,12 +133,16 @@ const s = StyleSheet.create({
     dot: { width: 4, height: 4, borderRadius: 2 },
 });
 
-/** Overrides do modo idoso: cabeçalho, dias e alvos de toque maiores. */
-const sIdoso = StyleSheet.create({
-    header: { paddingVertical: 16 },
-    mesLabel: { fontSize: 17 },
-    semanaHeadText: { fontSize: 13 },
-    celula: { paddingVertical: 6 },
-    diaCirculo: { width: 36, height: 36, borderRadius: 18 },
-    diaTexto: { fontSize: 15 },
+/**
+ * Modo simples: ~35% maior que o padrão. O círculo do dia cresce menos que os
+ * 35% dos demais elementos (36 → 42, não 48) porque a grade tem só 7 colunas
+ * fixas — um círculo maior que isso encostaria nas células vizinhas.
+ */
+const sSimples = StyleSheet.create({
+    header: { paddingVertical: 21 },
+    mesLabel: { fontSize: 22 },
+    semanaHeadText: { fontSize: 17 },
+    celula: { paddingVertical: 8 },
+    diaCirculo: { width: 42, height: 42, borderRadius: 21 },
+    diaTexto: { fontSize: 18 },
 });
