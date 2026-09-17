@@ -1,22 +1,22 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CORES } from '../../constants';
-import { ClyvoTabBar } from '../../components/navigation/ClyvoTabBar';
+import { VetSyncTabBar } from '../../components/navigation/VetSyncTabBar';
 import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAction';
 import { useAccessibility } from '../../context/AccessibilityContext';
 
 export default function TabsLayout() {
-  const { modoIdoso } = useAccessibility();
+  const { modoSimples } = useAccessibility();
   return (
     <Tabs
-      tabBar={(props) => <ClyvoTabBar {...props} />}
+      tabBar={(props) => <VetSyncTabBar {...props} />}
       screenOptions={{
         tabBarActiveTintColor: CORES.primaria,
         tabBarInactiveTintColor: CORES.textoSecundario,
         headerStyle: { backgroundColor: CORES.primaria },
         headerTintColor: '#fff',
         headerTitleAlign: 'left',
-        headerTitleStyle: { fontWeight: '700', fontSize: modoIdoso ? 20 : 17 },
+        headerTitleStyle: { fontWeight: '700', fontSize: modoSimples ? 27 : 20 },
         headerRight: () => <AccountHeaderAction href="/(tutor)/perfil" />,
       }}
     >
