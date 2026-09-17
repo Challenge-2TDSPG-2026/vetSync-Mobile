@@ -311,8 +311,8 @@ export default function AgendaScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
 
-  filtroBar: { flexGrow: 0, backgroundColor: C.white, borderBottomWidth: 1, borderBottomColor: C.border },
-  filtroContent: { padding: 14, gap: 10 },
+  filtroBar: { flexGrow: 0, flexShrink: 0, minHeight: 72, backgroundColor: C.white, borderBottomWidth: 1, borderBottomColor: C.border },
+  filtroContent: { alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
   filtroBtn: {
     flexDirection: 'row',
     alignItems: 'center',
