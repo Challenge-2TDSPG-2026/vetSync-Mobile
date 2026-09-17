@@ -16,7 +16,6 @@ type Mensagem = { id: number; autoria: 'usuario' | 'sia'; texto: string; categor
 
 const SUGESTOES_TUTOR = [
   { icon: 'calendar-outline' as const, texto: 'Quero agendar uma consulta para meu pet' },
-  { icon: 'medkit-outline' as const, texto: 'Meu pet está com sintomas e preciso de orientação' },
   { icon: 'heart-outline' as const, texto: 'Quero informar como está a recuperação do meu pet' },
 ];
 
@@ -80,7 +79,10 @@ export default function AssistenteScreen() {
     }
   }
 
-  return <KeyboardAvoidingView style={s.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+  return <KeyboardAvoidingView
+    style={s.overlay}
+    behavior={Platform.select({ ios: 'padding', android: 'height' })}
+  >
     <Animated.View pointerEvents="none" style={[s.backdrop, { opacity: opacidadeFundo }]} />
     <Pressable style={StyleSheet.absoluteFill} onPress={fechar} accessibilityLabel="Fechar SIA" />
     <Animated.View style={[s.sheet, { paddingBottom: Math.max(insets.bottom, 8), transform: [{ translateY: deslocamento }] }]}>
