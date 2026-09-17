@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
 import { AppIcon } from '../../components/AppIcon';
-import { confirmar } from '../../utils/alert';
+import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
 
 const C = {
   g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
@@ -17,64 +17,68 @@ export default function VetPerfilScreen() {
   const router = useRouter();
   const { veterinarioAtivo, pacientes, eventosAgendados } = useVet();
   const { sessao, logout } = useAuth();
+  const [modalSairVisivel, setModalSairVisivel] = useState(false);
 
   function handleSair() {
-    confirmar('Sair da conta?', 'Você precisará entrar novamente para acessar sua agenda.', [
-      { texto: 'Cancelar', estilo: 'cancel' },
-      {
-        texto: 'Sair',
-        estilo: 'destructive',
-        aoConfirmar: async () => {
-          await logout();
-          router.replace('/login');
-        },
-      },
-    ]);
+    setModalSairVisivel(true);
+  }
+
+  async function confirmarLogout() {
+    setModalSairVisivel(false);
+    await logout();
+    router.replace('/login');
   }
 
   const iniciais = (veterinarioAtivo?.nome ?? sessao?.nome ?? '?')[0]?.toUpperCase() ?? '?';
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
+    <>
+      <ScrollView style={s.container} contentContainerStyle={s.content}>
 
-      <View style={s.banner}>
-        <View style={s.avatar}>
-          <Text style={s.avatarText}>{iniciais}</Text>
-        </View>
-        <View style={s.bannerInfo}>
-          <Text style={s.bannerNome}>{veterinarioAtivo?.nome ?? sessao?.nome}</Text>
-          <Text style={s.bannerRole}>{sessao?.email}</Text>
-        </View>
-      </View>
-
-      <View style={s.statsRow}>
-        <StatCard valor={pacientes.length} label="Pacientes" />
-        <StatCard valor={eventosAgendados.length} label="Agendados" />
-      </View>
-
-      <Text style={s.secLabel}>Dados profissionais</Text>
-      <View style={s.card}>
-        {[
-          ['CRMV', veterinarioAtivo?.crmv ?? '–'],
-          ['Clínica', veterinarioAtivo?.nomeClinica ?? '–'],
-          ['Perfil', 'Veterinário'],
-        ].map(([label, valor], i, arr) => (
-          <View key={label}>
-            <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{label}</Text>
-              <Text style={s.infoValor}>{valor}</Text>
-            </View>
-            {i < arr.length - 1 && <View style={s.divisor} />}
+        <View style={s.banner}>
+          <View style={s.avatar}>
+            <Text style={s.avatarText}>{iniciais}</Text>
           </View>
-        ))}
-      </View>
+          <View style={s.bannerInfo}>
+            <Text style={s.bannerNome}>{veterinarioAtivo?.nome ?? sessao?.nome}</Text>
+            <Text style={s.bannerRole}>{sessao?.email}</Text>
+          </View>
+        </View>
 
-      <Pressable style={s.btnSair} onPress={handleSair}>
-        <Ionicons name="log-out-outline" size={16} color="#fff" />
-        <Text style={s.btnSairText}>Sair da conta</Text>
-      </Pressable>
+        <View style={s.statsRow}>
+          <StatCard valor={pacientes.length} label="Pacientes" />
+          <StatCard valor={eventosAgendados.length} label="Agendados" />
+        </View>
 
-    </ScrollView>
+        <Text style={s.secLabel}>Dados profissionais</Text>
+        <View style={s.card}>
+          {[
+            ['CRMV', veterinarioAtivo?.crmv ?? '–'],
+            ['Clínica', veterinarioAtivo?.nomeClinica ?? '–'],
+            ['Perfil', 'Veterinário'],
+          ].map(([label, valor], i, arr) => (
+            <View key={label}>
+              <View style={s.infoRow}>
+                <Text style={s.infoLabel}>{label}</Text>
+                <Text style={s.infoValor}>{valor}</Text>
+              </View>
+              {i < arr.length - 1 && <View style={s.divisor} />}
+            </View>
+          ))}
+        </View>
+
+        <Pressable style={s.btnSair} onPress={handleSair}>
+          <Ionicons name="log-out-outline" size={16} color="#fff" />
+          <Text style={s.btnSairText}>Sair da conta</Text>
+        </Pressable>
+
+      </ScrollView>
+      <LogoutConfirmationModal
+        visivel={modalSairVisivel}
+        onFechar={() => setModalSairVisivel(false)}
+        onConfirmarSair={confirmarLogout}
+      />
+    </>
   );
 }
 

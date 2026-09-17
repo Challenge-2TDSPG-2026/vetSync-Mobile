@@ -12,6 +12,7 @@ import { statusExibicao } from '../../utils/eventoStatus';
 import type { Pet } from '../../types';
 import { WalletStack } from '../../components/carteira/WalletStack';
 import { CarteiraModal } from '../../components/carteira/CarteiraModal';
+import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
 
 const C = {
   g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
@@ -24,6 +25,7 @@ const C = {
 export default function PerfilScreen() {
   const router = useRouter();
   const [petCarteira, setPetCarteira] = useState<Pet | null>(null);
+  const [modalSairVisivel, setModalSairVisivel] = useState(false);
   const { logout } = useAuth();
   const { modoSimples, alternarModoSimples } = useAccessibility();
   const {
@@ -54,17 +56,13 @@ export default function PerfilScreen() {
   }
 
   function handleSair() {
-    confirmar('Sair da conta?', 'Você precisará entrar novamente para acessar seus pets e eventos.', [
-      { texto: 'Cancelar', estilo: 'cancel' },
-      {
-        texto: 'Sair',
-        estilo: 'destructive',
-        aoConfirmar: async () => {
-          await logout();
-          router.replace('/login');
-        },
-      },
-    ]);
+    setModalSairVisivel(true);
+  }
+
+  async function confirmarLogout() {
+    setModalSairVisivel(false);
+    await logout();
+    router.replace('/login');
   }
 
   function handleRemoverPet(id: string, nome: string) {
@@ -251,6 +249,11 @@ export default function PerfilScreen() {
         pet={petCarteira}
         eventos={petCarteira ? eventos.filter(evento => evento.petId === petCarteira.id) : []}
         onFechar={() => setPetCarteira(null)}
+      />
+      <LogoutConfirmationModal
+        visivel={modalSairVisivel}
+        onFechar={() => setModalSairVisivel(false)}
+        onConfirmarSair={confirmarLogout}
       />
     </>
   );
