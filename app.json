@@ -52,8 +52,7 @@
           "icon": "./assets/logo.png",
           "color": "#22a06b"
         }
-      ],
-      "expo-status-bar"
+      ]
     ]
   }
 }
