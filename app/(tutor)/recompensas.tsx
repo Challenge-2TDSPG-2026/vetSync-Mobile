@@ -32,7 +32,7 @@ function formatarData(iso: string): string {
 
 export default function RecompensasScreen() {
   const { petAtivo, eventos, nivelInfo } = usePet();
-  const { modoIdoso } = useAccessibility();
+  const { modoSimples } = useAccessibility();
   const { autenticado } = useAuth();
 
   const { data: catalogo = [], isLoading: carregandoCatalogo } = useCatalogoRecompensas(autenticado);
@@ -51,10 +51,11 @@ export default function RecompensasScreen() {
   const faltam = Math.max(0, metaConsultas - consultasNoCicloAtual);
   const pct = Math.min(100, Math.round((consultasNoCicloAtual / metaConsultas) * 100));
 
-  const historico = useMemo(
+  const historicoCompleto = useMemo(
     () => [...resgates].sort((a, b) => new Date(b.dataResgate).getTime() - new Date(a.dataResgate).getTime()),
     [resgates]
   );
+  const historico = modoSimples ? historicoCompleto.slice(0, 3) : historicoCompleto;
 
   function handleResgatar(r: Recompensa) {
     if (saldoPontos < r.custoPontos) {
@@ -86,68 +87,74 @@ export default function RecompensasScreen() {
 
       <PetSwitcher />
 
-      <View style={[s.banner, modoIdoso && sIdoso.banner]}>
-        <View style={[s.bannerIconWrap, modoIdoso && sIdoso.bannerIconWrap]}>
-          <AppIcon name="gift-outline" set="Ionicons" size={modoIdoso ? 38 : 30} color={C.white} />
+      {/* Banner — some no modo simples */}
+      {!modoSimples && (
+        <View style={s.banner}>
+          <View style={s.bannerIconWrap}>
+            <AppIcon name="gift-outline" set="Ionicons" size={30} color={C.white} />
+          </View>
+          <Text style={s.bannerTitulo}>Programa de Fidelidade</Text>
+          <Text style={s.bannerSub}>
+            Acumule pontos em cada atendimento e resgate benefícios exclusivos para {petAtivo?.nome ?? 'seu pet'}.
+          </Text>
         </View>
-        <Text style={[s.bannerTitulo, modoIdoso && sIdoso.bannerTitulo]}>Programa de Fidelidade</Text>
-        <Text style={[s.bannerSub, modoIdoso && sIdoso.bannerSub]}>
-          Acumule pontos em cada atendimento e resgate benefícios exclusivos para {petAtivo?.nome ?? 'seu pet'}.
-        </Text>
-      </View>
+      )}
 
-      <View style={[s.nivelCard, modoIdoso && sIdoso.nivelCard]}>
+      <View style={[s.nivelCard, modoSimples && sSimples.nivelCard]}>
         <View style={s.nivelHead}>
-          <View style={[s.nivelBadge, modoIdoso && sIdoso.nivelBadge]}>
-            <Text style={[s.nivelBadgeNumero, modoIdoso && sIdoso.nivelBadgeNumero]}>{nivelInfo.nivel}</Text>
+          <View style={[s.nivelBadge, modoSimples && sSimples.nivelBadge]}>
+            <Text style={[s.nivelBadgeNumero, modoSimples && sSimples.nivelBadgeNumero]}>{nivelInfo.nivel}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[s.nivelTitulo, modoIdoso && sIdoso.nivelTitulo]}>{nivelInfo.titulo}</Text>
-            <Text style={[s.nivelSub, modoIdoso && sIdoso.nivelSub]}>Nível {nivelInfo.nivel} • {nivelInfo.xpAtual} XP</Text>
+            <Text style={[s.nivelTitulo, modoSimples && sSimples.nivelTitulo]}>{nivelInfo.titulo}</Text>
+            <Text style={[s.nivelSub, modoSimples && sSimples.nivelSub]}>Nível {nivelInfo.nivel} • {nivelInfo.xpAtual} XP</Text>
           </View>
         </View>
 
-        <View style={[s.barraTrackRoxo, modoIdoso && sIdoso.barraTrackRoxo]}>
+        <View style={[s.barraTrackRoxo, modoSimples && sSimples.barraTrackRoxo]}>
           <View style={[s.barraFillRoxo, { width: `${nivelInfo.progressoPct}%` as any }]} />
         </View>
-        <Text style={[s.nivelHint, modoIdoso && sIdoso.nivelHint]}>
+        <Text style={[s.nivelHint, modoSimples && sSimples.nivelHint]}>
           {nivelInfo.xpFaltaProximoNivel !== null
             ? `Faltam ${nivelInfo.xpFaltaProximoNivel} XP para o próximo nível`
             : 'Nível máximo alcançado! 🏆'}
         </Text>
-        {!modoIdoso && <Text style={s.nivelDica}>Cada evento de saúde concluído vale 10 XP</Text>}
+        {!modoSimples && <Text style={s.nivelDica}>Cada evento de saúde concluído vale 10 XP</Text>}
       </View>
 
-      <View style={[s.progressoCard, modoIdoso && sIdoso.nivelCard]}>
-        <View style={s.progressoHead}>
-          <Text style={[s.progressoLbl, modoIdoso && sIdoso.progressoLbl]}>Ciclo de atendimentos</Text>
-          <Text style={[s.progressoContagem, modoIdoso && sIdoso.progressoContagem]}>{consultasNoCicloAtual}/{metaConsultas}</Text>
-        </View>
-        <View style={[s.barraTrack, modoIdoso && sIdoso.barraTrackRoxo]}>
-          <View style={[s.barraFill, { width: `${pct}%` as any }]} />
-        </View>
-        <Text style={[s.progressoHint, modoIdoso && sIdoso.nivelHint]}>
-          {faltam === 0
-            ? 'Meta do ciclo atingida! Parabéns pelo cuidado contínuo 🎉'
-            : `Faltam ${faltam} evento${faltam !== 1 ? 's' : ''} concluído${faltam !== 1 ? 's' : ''} para completar o ciclo`}
-        </Text>
+      {/* Ciclo de atendimentos — some no modo simples */}
+      {!modoSimples && (
+        <View style={s.progressoCard}>
+          <View style={s.progressoHead}>
+            <Text style={s.progressoLbl}>Ciclo de atendimentos</Text>
+            <Text style={s.progressoContagem}>{consultasNoCicloAtual}/{metaConsultas}</Text>
+          </View>
+          <View style={s.barraTrack}>
+            <View style={[s.barraFill, { width: `${pct}%` as any }]} />
+          </View>
+          <Text style={s.progressoHint}>
+            {faltam === 0
+              ? 'Meta do ciclo atingida! Parabéns pelo cuidado contínuo 🎉'
+              : `Faltam ${faltam} evento${faltam !== 1 ? 's' : ''} concluído${faltam !== 1 ? 's' : ''} para completar o ciclo`}
+          </Text>
 
-        <View style={s.dotsRow}>
-          {Array.from({ length: metaConsultas }).map((_, i) => (
-            <View
-              key={i}
-              style={[s.dotConsulta, modoIdoso && sIdoso.dotConsulta, i < consultasNoCicloAtual && s.dotConsultaPreenchida]}
-            >
-              {i < consultasNoCicloAtual && (
-                <AppIcon name="checkmark" set="Ionicons" size={modoIdoso ? 16 : 12} color={C.white} />
-              )}
-            </View>
-          ))}
+          <View style={s.dotsRow}>
+            {Array.from({ length: metaConsultas }).map((_, i) => (
+              <View
+                key={i}
+                style={[s.dotConsulta, i < consultasNoCicloAtual && s.dotConsultaPreenchida]}
+              >
+                {i < consultasNoCicloAtual && (
+                  <AppIcon name="checkmark" set="Ionicons" size={12} color={C.white} />
+                )}
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
+      )}
 
       <View style={s.secLabelRow}>
-        <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Benefícios do Catálogo</Text>
+        <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Benefícios do Catálogo</Text>
         <Text style={s.secLabelContagem}>Saldo: {saldoPontos} pts</Text>
       </View>
 
@@ -167,25 +174,25 @@ export default function RecompensasScreen() {
           const isPending = resgatarMutation.isPending && resgatarMutation.variables === r.id;
 
           return (
-            <View key={r.id} style={[s.cupomCard, modoIdoso && sIdoso.cupomCard]}>
-              <View style={[s.cupomIconWrap, modoIdoso && sIdoso.cupomIconWrap]}>
-                <AppIcon name="gift" set="Ionicons" size={modoIdoso ? 28 : 22} color={C.ouro} />
+            <View key={r.id} style={[s.cupomCard, modoSimples && sSimples.cupomCard]}>
+              <View style={[s.cupomIconWrap, modoSimples && sSimples.cupomIconWrap]}>
+                <AppIcon name="gift" set="Ionicons" size={modoSimples ? 30 : 24} color={C.ouro} />
               </View>
               <View style={s.cupomInfo}>
-                <Text style={[s.cupomTitulo, modoIdoso && sIdoso.cupomTitulo]}>{r.nome}</Text>
-                <Text style={[s.cupomSub, modoIdoso && sIdoso.cupomSub]}>
+                <Text style={[s.cupomTitulo, modoSimples && sSimples.cupomTitulo]}>{r.nome}</Text>
+                <Text style={[s.cupomSub, modoSimples && sSimples.cupomSub]}>
                   {r.descricao ? `${r.descricao} • ` : ''}{r.custoPontos} pontos
                 </Text>
               </View>
               <Pressable
-                style={[s.btnResgatar, modoIdoso && sIdoso.btnResgatar, (!podeResgatar || isPending) && { opacity: 0.5 }]}
+                style={[s.btnResgatar, modoSimples && sSimples.btnResgatar, (!podeResgatar || isPending) && { opacity: 0.5 }]}
                 onPress={() => handleResgatar(r)}
                 disabled={!podeResgatar || isPending}
               >
                 {isPending ? (
                   <ActivityIndicator size="small" color={C.white} />
                 ) : (
-                  <Text style={[s.btnResgatarText, modoIdoso && sIdoso.btnResgatarText]}>Resgatar</Text>
+                  <Text style={[s.btnResgatarText, modoSimples && sSimples.btnResgatarText]}>Resgatar</Text>
                 )}
               </Pressable>
             </View>
@@ -193,49 +200,59 @@ export default function RecompensasScreen() {
         })
       )}
 
-      <View style={s.secLabelRow}>
-        <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Conquistas</Text>
-        <Text style={s.secLabelContagem}>{conquistasDesbloqueadas.length}/{conquistas.length}</Text>
-      </View>
-      <View style={[s.conquistasGrid, modoIdoso && sIdoso.conquistasGrid]}>
-        {conquistas.map(c => (
-          <View
-            key={c.id}
-            style={[s.conquistaCard, modoIdoso && sIdoso.conquistaCard, !c.desbloqueada && s.conquistaCardBloqueada]}
-          >
-            <View style={[s.conquistaIconWrap, modoIdoso && sIdoso.conquistaIconWrap, c.desbloqueada && s.conquistaIconWrapAtiva]}>
-              <AppIcon
-                name={c.desbloqueada ? c.icon : 'lock-closed-outline'}
-                set={c.desbloqueada ? c.iconSet : 'Ionicons'}
-                size={modoIdoso ? 26 : 20}
-                color={c.desbloqueada ? C.white : C.muted}
-              />
-            </View>
-            <Text style={[s.conquistaTitulo, modoIdoso && sIdoso.conquistaTitulo, !c.desbloqueada && s.conquistaTituloBloqueada]} numberOfLines={2}>
-              {c.titulo}
-            </Text>
-            {!modoIdoso && <Text style={s.conquistaDescricao} numberOfLines={2}>{c.descricao}</Text>}
+      {/* Conquistas — somem no modo simples */}
+      {!modoSimples && (
+        <>
+          <View style={s.secLabelRow}>
+            <Text style={s.secLabel}>Conquistas</Text>
+            <Text style={s.secLabelContagem}>{conquistasDesbloqueadas.length}/{conquistas.length}</Text>
           </View>
-        ))}
-      </View>
+          <View style={s.conquistasGrid}>
+            {conquistas.map(c => (
+              <View
+                key={c.id}
+                style={[s.conquistaCard, !c.desbloqueada && s.conquistaCardBloqueada]}
+              >
+                <View style={[s.conquistaIconWrap, c.desbloqueada && s.conquistaIconWrapAtiva]}>
+                  <AppIcon
+                    name={c.desbloqueada ? c.icon : 'lock-closed-outline'}
+                    set={c.desbloqueada ? c.iconSet : 'Ionicons'}
+                    size={20}
+                    color={c.desbloqueada ? C.white : C.muted}
+                  />
+                </View>
+                <Text style={[s.conquistaTitulo, !c.desbloqueada && s.conquistaTituloBloqueada]} numberOfLines={2}>
+                  {c.titulo}
+                </Text>
+                <Text style={s.conquistaDescricao} numberOfLines={2}>{c.descricao}</Text>
+              </View>
+            ))}
+          </View>
+        </>
+      )}
 
-      <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Estatísticas</Text>
-      <View style={s.statsCard}>
-        <View style={s.statItem}>
-          <Text style={[s.statValor, modoIdoso && sIdoso.statValor]}>{consultasConcluidasTotal}</Text>
-          <Text style={[s.statLabel, modoIdoso && sIdoso.statLabelBig]}>Eventos concluídos</Text>
-        </View>
-        <View style={s.statDivisor} />
-        <View style={s.statItem}>
-          <Text style={[s.statValor, modoIdoso && sIdoso.statValor]}>{saldoPontos}</Text>
-          <Text style={[s.statLabel, modoIdoso && sIdoso.statLabelBig]}>Pontos disponíveis</Text>
-        </View>
-        <View style={s.statDivisor} />
-        <View style={s.statItem}>
-          <Text style={[s.statValor, modoIdoso && sIdoso.statValor]}>{historico.length}</Text>
-          <Text style={[s.statLabel, modoIdoso && sIdoso.statLabelBig]}>Resgates realizados</Text>
-        </View>
-      </View>
+      {/* Estatísticas — some no modo simples */}
+      {!modoSimples && (
+        <>
+          <Text style={s.secLabel}>Estatísticas</Text>
+          <View style={s.statsCard}>
+            <View style={s.statItem}>
+              <Text style={s.statValor}>{consultasConcluidasTotal}</Text>
+              <Text style={s.statLabel}>Eventos concluídos</Text>
+            </View>
+            <View style={s.statDivisor} />
+            <View style={s.statItem}>
+              <Text style={s.statValor}>{saldoPontos}</Text>
+              <Text style={s.statLabel}>Pontos disponíveis</Text>
+            </View>
+            <View style={s.statDivisor} />
+            <View style={s.statItem}>
+              <Text style={s.statValor}>{historicoCompleto.length}</Text>
+              <Text style={s.statLabel}>Resgates realizados</Text>
+            </View>
+          </View>
+        </>
+      )}
 
       {carregandoResgates ? (
         <View style={s.emptyCard}>
@@ -243,23 +260,25 @@ export default function RecompensasScreen() {
         </View>
       ) : historico.length > 0 && (
         <>
-          <Text style={[s.secLabel, modoIdoso && sIdoso.secLabel]}>Histórico de resgates</Text>
+          <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>
+            {modoSimples ? 'Últimos resgates' : 'Histórico de resgates'}
+          </Text>
           <View style={s.historicoCard}>
             {historico.map((r, idx) => (
-              <View key={r.id} style={[s.historicoRow, modoIdoso && sIdoso.historicoRow, idx < historico.length - 1 && s.historicoRowBorder]}>
+              <View key={r.id} style={[s.historicoRow, modoSimples && sSimples.historicoRow, idx < historico.length - 1 && s.historicoRowBorder]}>
                 <AppIcon
                   name={r.status === 'VALIDADO' ? 'checkmark-circle' : r.status === 'PENDENTE' ? 'time-outline' : 'close-circle'}
                   set="Ionicons"
-                  size={modoIdoso ? 24 : 18}
+                  size={modoSimples ? 28 : 20}
                   color={r.status === 'VALIDADO' ? C.g500 : r.status === 'PENDENTE' ? C.ouro : C.danger}
                 />
                 <View style={{ flex: 1 }}>
-                  <Text style={[s.historicoTitulo, modoIdoso && sIdoso.historicoTitulo]}>{r.nomeRecompensa}</Text>
-                  <Text style={[s.historicoData, modoIdoso && sIdoso.historicoData]}>
+                  <Text style={[s.historicoTitulo, modoSimples && sSimples.historicoTitulo]}>{r.nomeRecompensa}</Text>
+                  <Text style={[s.historicoData, modoSimples && sSimples.historicoData]}>
                     {formatarData(r.dataResgate)} • {r.status}
                   </Text>
                 </View>
-                <Text style={{ fontSize: modoIdoso ? 14 : 12, fontWeight: '700', color: C.muted }}>-{r.custoPontos} pts</Text>
+                <Text style={{ fontSize: modoSimples ? 16 : 13, fontWeight: '700', color: C.muted }}>-{r.custoPontos} pts</Text>
               </View>
             ))}
           </View>
@@ -270,66 +289,67 @@ export default function RecompensasScreen() {
   );
 }
 
+/** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
-  content: { padding: 16, paddingBottom: 40 },
+  content: { padding: 16, paddingBottom: 42 },
 
   banner: {
     backgroundColor: C.g800,
     borderRadius: 16,
-    padding: 20,
+    padding: 22,
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   bannerIconWrap: {
-    width: 56, height: 56, borderRadius: 28,
+    width: 60, height: 60, borderRadius: 30,
     backgroundColor: 'rgba(255,255,255,0.14)',
     justifyContent: 'center', alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 11,
   },
-  bannerTitulo: { fontSize: 17, fontWeight: '700', color: C.white, marginBottom: 4 },
-  bannerSub: { fontSize: 12, color: 'rgba(255,255,255,0.7)', textAlign: 'center', paddingHorizontal: 12 },
+  bannerTitulo: { fontSize: 19, fontWeight: '700', color: C.white, marginBottom: 5 },
+  bannerSub: { fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center', paddingHorizontal: 12 },
 
   nivelCard: {
     backgroundColor: C.white,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: C.border,
-    padding: 18,
-    marginBottom: 16,
+    padding: 20,
+    marginBottom: 18,
   },
-  nivelHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
+  nivelHead: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 15 },
   nivelBadge: {
-    width: 46, height: 46, borderRadius: 23,
+    width: 52, height: 52, borderRadius: 26,
     backgroundColor: C.roxo,
     justifyContent: 'center', alignItems: 'center',
   },
-  nivelBadgeNumero: { fontSize: 18, fontWeight: '700', color: C.white },
-  nivelTitulo: { fontSize: 15, fontWeight: '700', color: C.text },
-  nivelSub: { fontSize: 12, color: C.muted, marginTop: 2 },
-  barraTrackRoxo: { height: 8, backgroundColor: C.roxoClaro, borderRadius: 4, overflow: 'hidden', marginBottom: 8 },
-  barraFillRoxo: { height: '100%', backgroundColor: C.roxo, borderRadius: 4 },
-  nivelHint: { fontSize: 12, color: C.text, fontWeight: '600', marginBottom: 2 },
-  nivelDica: { fontSize: 11, color: C.muted },
+  nivelBadgeNumero: { fontSize: 20, fontWeight: '700', color: C.white },
+  nivelTitulo: { fontSize: 17, fontWeight: '700', color: C.text },
+  nivelSub: { fontSize: 14, color: C.muted, marginTop: 3 },
+  barraTrackRoxo: { height: 10, backgroundColor: C.roxoClaro, borderRadius: 5, overflow: 'hidden', marginBottom: 9 },
+  barraFillRoxo: { height: '100%', backgroundColor: C.roxo, borderRadius: 5 },
+  nivelHint: { fontSize: 14, color: C.text, fontWeight: '600', marginBottom: 2 },
+  nivelDica: { fontSize: 12, color: C.muted },
 
   progressoCard: {
     backgroundColor: C.white,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: C.border,
-    padding: 18,
-    marginBottom: 20,
+    padding: 20,
+    marginBottom: 22,
   },
-  progressoHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  progressoLbl: { fontSize: 12, fontWeight: '700', color: C.muted, textTransform: 'uppercase', letterSpacing: 0.4 },
-  progressoContagem: { fontSize: 18, fontWeight: '700', color: C.g700 },
-  barraTrack: { height: 10, backgroundColor: C.w100, borderRadius: 5, overflow: 'hidden', marginBottom: 10 },
-  barraFill: { height: '100%', backgroundColor: C.g500, borderRadius: 5 },
-  progressoHint: { fontSize: 12, color: C.muted, marginBottom: 14 },
+  progressoHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 11 },
+  progressoLbl: { fontSize: 13, fontWeight: '700', color: C.muted, textTransform: 'uppercase', letterSpacing: 0.4 },
+  progressoContagem: { fontSize: 20, fontWeight: '700', color: C.g700 },
+  barraTrack: { height: 11, backgroundColor: C.w100, borderRadius: 6, overflow: 'hidden', marginBottom: 11 },
+  barraFill: { height: '100%', backgroundColor: C.g500, borderRadius: 6 },
+  progressoHint: { fontSize: 13, color: C.muted, marginBottom: 15 },
 
-  dotsRow: { flexDirection: 'row', gap: 8, justifyContent: 'center' },
+  dotsRow: { flexDirection: 'row', gap: 9, justifyContent: 'center' },
   dotConsulta: {
-    width: 28, height: 28, borderRadius: 14,
+    width: 30, height: 30, borderRadius: 15,
     borderWidth: 1.5, borderColor: C.border,
     backgroundColor: C.w50,
     justifyContent: 'center', alignItems: 'center',
@@ -337,42 +357,42 @@ const s = StyleSheet.create({
   dotConsultaPreenchida: { backgroundColor: C.g500, borderColor: C.g500 },
 
   secLabel: {
-    fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase',
-    color: C.muted, marginBottom: 10, marginTop: 4, paddingLeft: 2,
+    fontSize: 14, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase',
+    color: C.muted, marginBottom: 11, marginTop: 5, paddingLeft: 2,
   },
   secLabelRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 2,
   },
-  secLabelContagem: { fontSize: 11, fontWeight: '700', color: C.g600, marginBottom: 10 },
+  secLabelContagem: { fontSize: 12, fontWeight: '700', color: C.g600, marginBottom: 11 },
 
   emptyCard: {
     backgroundColor: C.white, borderRadius: 12, borderWidth: 1, borderColor: C.border,
-    padding: 24, alignItems: 'center', marginBottom: 20,
+    padding: 26, alignItems: 'center', marginBottom: 22,
   },
   emptyTitle: { fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 4 },
   emptySub: { fontSize: 12, color: C.muted, textAlign: 'center' },
 
   cupomCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 13,
     backgroundColor: C.ouroClaro, borderRadius: 12,
     borderWidth: 1.5, borderColor: C.ouro,
-    padding: 14, marginBottom: 10,
+    padding: 16, marginBottom: 11,
   },
   cupomIconWrap: {
-    width: 42, height: 42, borderRadius: 21,
+    width: 48, height: 48, borderRadius: 24,
     backgroundColor: C.white, justifyContent: 'center', alignItems: 'center',
     borderWidth: 1, borderColor: C.ouro,
   },
   cupomInfo: { flex: 1 },
-  cupomTitulo: { fontSize: 14, fontWeight: '700', color: C.text },
-  cupomSub: { fontSize: 11, color: C.muted, marginTop: 2 },
+  cupomTitulo: { fontSize: 16, fontWeight: '700', color: C.text },
+  cupomSub: { fontSize: 13, color: C.muted, marginTop: 3 },
   btnResgatar: {
-    backgroundColor: C.ouro, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 8,
+    backgroundColor: C.ouro, paddingHorizontal: 16, paddingVertical: 11, borderRadius: 8,
   },
-  btnResgatarText: { color: C.white, fontSize: 12, fontWeight: '700' },
+  btnResgatarText: { color: C.white, fontSize: 14, fontWeight: '700' },
 
   conquistasGrid: {
-    flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20,
+    flexDirection: 'row', flexWrap: 'wrap', gap: 11, marginBottom: 22,
   },
   conquistaCard: {
     width: '31%',
@@ -380,7 +400,7 @@ const s = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: C.g200,
-    padding: 10,
+    padding: 11,
     alignItems: 'center',
   },
   conquistaCardBloqueada: { borderColor: C.border, opacity: 0.55 },
@@ -397,59 +417,42 @@ const s = StyleSheet.create({
 
   statsCard: {
     flexDirection: 'row', backgroundColor: C.white, borderRadius: 12,
-    borderWidth: 1, borderColor: C.border, marginBottom: 20, overflow: 'hidden',
+    borderWidth: 1, borderColor: C.border, marginBottom: 22, overflow: 'hidden',
   },
-  statItem: { flex: 1, alignItems: 'center', paddingVertical: 16 },
-  statValor: { fontSize: 22, fontWeight: '700', color: C.g700 },
-  statLabel: { fontSize: 10, color: C.muted, textAlign: 'center', marginTop: 4, paddingHorizontal: 4 },
+  statItem: { flex: 1, alignItems: 'center', paddingVertical: 17 },
+  statValor: { fontSize: 23, fontWeight: '700', color: C.g700 },
+  statLabel: { fontSize: 11, color: C.muted, textAlign: 'center', marginTop: 4, paddingHorizontal: 4 },
   statDivisor: { width: 1, backgroundColor: C.border },
 
   historicoCard: {
     backgroundColor: C.white, borderRadius: 12, borderWidth: 1, borderColor: C.border, overflow: 'hidden',
   },
-  historicoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14 },
+  historicoRow: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 16 },
   historicoRowBorder: { borderBottomWidth: 1, borderBottomColor: C.border },
-  historicoTitulo: { fontSize: 13, fontWeight: '600', color: C.text },
-  historicoData: { fontSize: 11, color: C.muted, marginTop: 2 },
+  historicoTitulo: { fontSize: 14, fontWeight: '600', color: C.text },
+  historicoData: { fontSize: 12, color: C.muted, marginTop: 2 },
 });
 
-/** Overrides do modo idoso: textos e alvos de toque maiores; conquistas em grade 2x em vez de 3x. */
-const sIdoso = StyleSheet.create({
-  banner: { padding: 26 },
-  bannerIconWrap: { width: 68, height: 68, borderRadius: 34 },
-  bannerTitulo: { fontSize: 20 },
-  bannerSub: { fontSize: 14 },
+/** Modo simples: ~35% maior que o padrão. Sem banner, sem ciclo de atendimentos, sem conquistas e sem estatísticas. */
+const sSimples = StyleSheet.create({
+  nivelCard: { padding: 27 },
+  nivelBadge: { width: 70, height: 70, borderRadius: 35 },
+  nivelBadgeNumero: { fontSize: 27 },
+  nivelTitulo: { fontSize: 23 },
+  nivelSub: { fontSize: 19 },
+  barraTrackRoxo: { height: 14, borderRadius: 7 },
+  nivelHint: { fontSize: 19 },
 
-  nivelCard: { padding: 22 },
-  nivelBadge: { width: 54, height: 54, borderRadius: 27 },
-  nivelBadgeNumero: { fontSize: 21 },
-  nivelTitulo: { fontSize: 18 },
-  nivelSub: { fontSize: 14 },
-  barraTrackRoxo: { height: 12, borderRadius: 6 },
-  nivelHint: { fontSize: 14 },
+  secLabel: { fontSize: 19 },
 
-  progressoLbl: { fontSize: 13 },
-  progressoContagem: { fontSize: 21 },
-  dotConsulta: { width: 34, height: 34, borderRadius: 17 },
+  cupomCard: { padding: 22 },
+  cupomIconWrap: { width: 65, height: 65, borderRadius: 33 },
+  cupomTitulo: { fontSize: 22 },
+  cupomSub: { fontSize: 18 },
+  btnResgatar: { paddingHorizontal: 22, paddingVertical: 15 },
+  btnResgatarText: { fontSize: 19 },
 
-  secLabel: { fontSize: 14 },
-
-  cupomCard: { padding: 16 },
-  cupomIconWrap: { width: 52, height: 52, borderRadius: 26 },
-  cupomTitulo: { fontSize: 16 },
-  cupomSub: { fontSize: 13 },
-  btnResgatar: { paddingHorizontal: 18, paddingVertical: 12 },
-  btnResgatarText: { fontSize: 14 },
-
-  conquistasGrid: { gap: 12 },
-  conquistaCard: { width: '47%', padding: 14 },
-  conquistaIconWrap: { width: 48, height: 48, borderRadius: 24, marginBottom: 8 },
-  conquistaTitulo: { fontSize: 13 },
-
-  statValor: { fontSize: 26 },
-  statLabelBig: { fontSize: 12 },
-
-  historicoRow: { padding: 16 },
-  historicoTitulo: { fontSize: 15 },
-  historicoData: { fontSize: 13 },
+  historicoRow: { padding: 22 },
+  historicoTitulo: { fontSize: 20 },
+  historicoData: { fontSize: 17 },
 });
