@@ -1,32 +1,32 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { salvarModoIdoso, carregarModoIdoso } from '../storage/petStorage';
+import { salvarModoSimples, carregarModoSimples } from '../storage/petStorage';
 
 type AccessibilityContextValue = {
-  modoIdoso: boolean;
-  alternarModoIdoso: (ativo: boolean) => Promise<void>;
+  modoSimples: boolean;
+  alternarModoSimples: (ativo: boolean) => Promise<void>;
   carregando: boolean;
 };
 
 const AccessibilityContext = createContext<AccessibilityContextValue | undefined>(undefined);
 
 export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
-  const [modoIdoso, setModoIdoso] = useState(false);
+  const [modoSimples, setModoSimples] = useState(false);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    carregarModoIdoso().then(valor => {
-      setModoIdoso(valor);
+    carregarModoSimples().then(valor => {
+      setModoSimples(valor);
       setCarregando(false);
     });
   }, []);
 
-  const alternarModoIdoso = useCallback(async (ativo: boolean) => {
-    setModoIdoso(ativo);
-    await salvarModoIdoso(ativo);
+  const alternarModoSimples = useCallback(async (ativo: boolean) => {
+    setModoSimples(ativo);
+    await salvarModoSimples(ativo);
   }, []);
 
   return (
-    <AccessibilityContext.Provider value={{ modoIdoso, alternarModoIdoso, carregando }}>
+    <AccessibilityContext.Provider value={{ modoSimples, alternarModoSimples, carregando }}>
       {children}
     </AccessibilityContext.Provider>
   );
