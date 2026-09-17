@@ -19,11 +19,12 @@
 };
 
 export const STORAGE_KEYS = {
-  PET_ATIVO: '@petcare:pet_ativo',
-  ONBOARDING_CONCLUIDO: '@petcare:onboarding',
-  NOTIFICACOES: '@petcare:notificacoes',
-  SESSAO: '@petcare:sessao',
-  MODO_IDOSO: '@petcare:modo_idoso',
+
+  PET_ATIVO: '@vetsync:pet_ativo',
+  ONBOARDING_CONCLUIDO: '@vetsync:onboarding',
+  NOTIFICACOES: '@vetsync:notificacoes',
+  SESSAO: '@vetsync:sessao',
+  MODO_SIMPLES: '@vetsync:modo_simples',
 };
 
 export const XP_POR_EVENTO = 10;
@@ -45,7 +46,7 @@ export const CONQUISTAS = [
   {
     id: 'primeiro-cadastro',
     titulo: 'Primeiros Passos',
-    descricao: 'Cadastrou este pet no ClyvoVet',
+    descricao: 'Cadastrou este pet no VetSync',
     icon: 'paw',
     iconSet: 'MaterialCommunityIcons',
   },
@@ -101,32 +102,10 @@ export const CONQUISTAS = [
 ] as const;
 
 export const ESPECIES = [
-  { valor: 'cachorro', label: 'Cão', icon: 'dog', iconSet: 'MaterialCommunityIcons', grupo: 'Domésticos' },
-  { valor: 'gato', label: 'Gato', icon: 'cat', iconSet: 'MaterialCommunityIcons', grupo: 'Domésticos' },
-  { valor: 'coelho', label: 'Coelho', icon: 'rabbit', iconSet: 'MaterialCommunityIcons', grupo: 'Domésticos' },
-  { valor: 'furao', label: 'Furão', icon: 'paw', iconSet: 'MaterialCommunityIcons', grupo: 'Domésticos' },
-
-  { valor: 'equino', label: 'Equino', icon: 'horse', iconSet: 'MaterialCommunityIcons', grupo: 'Equinos' },
-
-  { valor: 'bovino', label: 'Bovino', icon: 'cow', iconSet: 'MaterialCommunityIcons', grupo: 'Bovinos' },
-
-  { valor: 'suino', label: 'Suíno', icon: 'pig', iconSet: 'MaterialCommunityIcons', grupo: 'Fazenda' },
-  { valor: 'ovino', label: 'Ovino', icon: 'sheep', iconSet: 'MaterialCommunityIcons', grupo: 'Fazenda' },
-  { valor: 'caprino', label: 'Caprino', icon: 'sheep', iconSet: 'MaterialCommunityIcons', grupo: 'Fazenda' },
-
-  { valor: 'ave', label: 'Ave', icon: 'bird', iconSet: 'MaterialCommunityIcons', grupo: 'Aves e pequenos animais' },
-  { valor: 'reptil', label: 'Réptil', icon: 'turtle', iconSet: 'MaterialCommunityIcons', grupo: 'Aves e pequenos animais' },
-  { valor: 'anfibio', label: 'Anfíbio', icon: 'paw', iconSet: 'MaterialCommunityIcons', grupo: 'Aves e pequenos animais' },
-  { valor: 'peixe', label: 'Peixe', icon: 'fish', iconSet: 'MaterialCommunityIcons', grupo: 'Aves e pequenos animais' },
-  { valor: 'roedor', label: 'Roedor', icon: 'paw', iconSet: 'MaterialCommunityIcons', grupo: 'Aves e pequenos animais' },
-] as const;
-
-export const GRUPOS_ESPECIE = [
-  'Domésticos',
-  'Equinos',
-  'Bovinos',
-  'Fazenda',
-  'Aves e pequenos animais',
+  { valor: 'cachorro', label: 'Cão', icon: 'dog', iconSet: 'MaterialCommunityIcons' },
+  { valor: 'gato', label: 'Gato', icon: 'cat', iconSet: 'MaterialCommunityIcons' },
+  { valor: 'pássaro', label: 'Ave', icon: 'bird', iconSet: 'MaterialCommunityIcons' },
+  { valor: 'outro', label: 'Outro', icon: 'paw', iconSet: 'MaterialCommunityIcons' },
 ] as const;
 
 interface VisualTipoEvento {
