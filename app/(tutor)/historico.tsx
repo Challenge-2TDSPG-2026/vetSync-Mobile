@@ -25,7 +25,7 @@ function formatarDataCurta(iso: string): string {
 
 export default function HistoricoScreen() {
   const { eventos, carregandoEventos } = usePet();
-  const { modoIdoso } = useAccessibility();
+  const { modoSimples } = useAccessibility();
 
   const eventosComStatus = useMemo(
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
@@ -57,30 +57,34 @@ export default function HistoricoScreen() {
 
       <PetSwitcher />
 
-      <View style={[s.statsRow, modoIdoso && sIdoso.statsRow]}>
-        <StatCard valor={total} label="Total" accentColor={C.info} idoso={modoIdoso} />
-        <StatCard valor={concluidos} label="Realizados" accentColor={C.g500} idoso={modoIdoso} />
-        <StatCard valor={emAberto} label="Em aberto" accentColor={C.warn} idoso={modoIdoso} />
+      {/* Stats — no modo simples, só Total */}
+      <View style={[s.statsRow, modoSimples && sSimples.statsRow]}>
+        <StatCard valor={total} label="Total" accentColor={C.info} simples={modoSimples} />
+        {!modoSimples && <StatCard valor={concluidos} label="Realizados" accentColor={C.g500} />}
+        {!modoSimples && <StatCard valor={emAberto} label="Em aberto" accentColor={C.warn} />}
       </View>
 
-      <View style={[s.progressoCard, modoIdoso && sIdoso.progressoCard]}>
-        <View style={s.progressoHead}>
-          <View>
-            <Text style={[s.progressoLbl, modoIdoso && sIdoso.progressoLbl]}>Taxa de conclusão</Text>
-            <Text style={[s.progressoPct, modoIdoso && sIdoso.progressoPct]}>{pct}%</Text>
+      {/* Taxa de conclusão — some no modo simples */}
+      {!modoSimples && (
+        <View style={s.progressoCard}>
+          <View style={s.progressoHead}>
+            <View>
+              <Text style={s.progressoLbl}>Taxa de conclusão</Text>
+              <Text style={s.progressoPct}>{pct}%</Text>
+            </View>
+            <View style={s.progressoMeta}>
+              <Text style={s.progressoMetaText}>{concluidos} realizados</Text>
+              <Text style={s.progressoMetaText}>{emAberto} em aberto</Text>
+            </View>
           </View>
-          <View style={s.progressoMeta}>
-            <Text style={[s.progressoMetaText, modoIdoso && sIdoso.progressoMetaText]}>{concluidos} realizados</Text>
-            <Text style={[s.progressoMetaText, modoIdoso && sIdoso.progressoMetaText]}>{emAberto} em aberto</Text>
+          <View style={s.barraTrack}>
+            <View style={[s.barraFill, { width: `${pct}%` as any }]} />
           </View>
+          <Text style={s.progressoHint}>
+            {total} evento{total !== 1 ? 's' : ''} no total{cancelados > 0 ? ` · ${cancelados} cancelado${cancelados !== 1 ? 's' : ''}` : ''}
+          </Text>
         </View>
-        <View style={[s.barraTrack, modoIdoso && sIdoso.barraTrack]}>
-          <View style={[s.barraFill, { width: `${pct}%` as any }]} />
-        </View>
-        <Text style={[s.progressoHint, modoIdoso && sIdoso.progressoHint]}>
-          {total} evento{total !== 1 ? 's' : ''} no total{cancelados > 0 ? ` · ${cancelados} cancelado${cancelados !== 1 ? 's' : ''}` : ''}
-        </Text>
-      </View>
+      )}
 
       {carregandoEventos ? (
         <View style={s.empty}>
@@ -96,14 +100,14 @@ export default function HistoricoScreen() {
         Object.entries(agrupados).map(([mes, evts]) => (
           <View key={mes} style={s.grupo}>
             <View style={s.mesRow}>
-              <Text style={[s.mesTitulo, modoIdoso && sIdoso.mesTitulo]}>{mes}</Text>
+              <Text style={[s.mesTitulo, modoSimples && sSimples.mesTitulo]}>{mes}</Text>
               <View style={s.mesBadge}>
                 <Text style={s.mesBadgeText}>{evts.length}</Text>
               </View>
             </View>
 
             <View style={s.tabelaCard}>
-              {!modoIdoso && (
+              {!modoSimples && (
                 <View style={s.tabelaHead}>
                   <Text style={[s.thText, { flex: 2 }]}>Evento</Text>
                   <Text style={[s.thText, { flex: 1, textAlign: 'center' }]}>Data</Text>
@@ -115,22 +119,19 @@ export default function HistoricoScreen() {
                 const sb = STATUS_EXIBICAO_BADGE[evento.statusExibicao];
                 const isLast = idx === evts.length - 1;
 
-                if (modoIdoso) {
+                if (modoSimples) {
                   return (
-                    <View key={evento.id} style={[sIdoso.linhaIdoso, !isLast && s.tabelaRowBorder]}>
-                      <View style={sIdoso.linhaIdosoTopo}>
-                        <View style={[s.rowIcone, sIdoso.rowIcone, { backgroundColor: visual.cor }]}>
-                          <AppIcon name={visual.icon} set={visual.iconSet} size={18} color={C.white} />
+                    <View key={evento.id} style={[sSimples.linhaSimples, !isLast && s.tabelaRowBorder]}>
+                      <View style={sSimples.linhaSimplesTopo}>
+                        <View style={[s.rowIcone, sSimples.rowIcone, { backgroundColor: visual.cor }]}>
+                          <AppIcon name={visual.icon} set={visual.iconSet} size={24} color={C.white} />
                         </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={sIdoso.rowTitulo} numberOfLines={2}>{evento.nomeTipoEvento}</Text>
-                          <Text style={sIdoso.rowVet} numberOfLines={1}>{evento.nomeVeterinario}</Text>
-                        </View>
+                        <Text style={sSimples.rowTitulo} numberOfLines={2}>{evento.nomeTipoEvento}</Text>
                       </View>
-                      <View style={sIdoso.linhaIdosoRodape}>
-                        <Text style={sIdoso.tdData}>{formatarDataCurta(evento.data)}</Text>
-                        <View style={[s.statusBadge, sIdoso.statusBadge, { backgroundColor: sb.bg }]}>
-                          <Text style={[s.statusText, sIdoso.statusText, { color: sb.color }]}>{sb.label}</Text>
+                      <View style={sSimples.linhaSimplesRodape}>
+                        <Text style={sSimples.tdData}>{formatarDataCurta(evento.data)}</Text>
+                        <View style={[s.statusBadge, sSimples.statusBadge, { backgroundColor: sb.bg }]}>
+                          <Text style={[s.statusText, sSimples.statusText, { color: sb.color }]}>{sb.label}</Text>
                         </View>
                       </View>
                     </View>
@@ -141,7 +142,7 @@ export default function HistoricoScreen() {
                   <View key={evento.id} style={[s.tabelaRow, !isLast && s.tabelaRowBorder]}>
                     <View style={[s.tdEvento, { flex: 2 }]}>
                       <View style={[s.rowIcone, { backgroundColor: visual.cor }]}>
-                        <AppIcon name={visual.icon} set={visual.iconSet} size={13} color={C.white} />
+                        <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={C.white} />
                       </View>
                       <View>
                         <Text style={s.rowTitulo} numberOfLines={1}>{evento.nomeTipoEvento}</Text>
@@ -167,22 +168,25 @@ export default function HistoricoScreen() {
   );
 }
 
-function StatCard({ valor, label, accentColor, idoso }: { valor: number; label: string; accentColor: string; idoso?: boolean }) {
+function StatCard({ valor, label, accentColor, simples }: { valor: number; label: string; accentColor: string; simples?: boolean }) {
   return (
-    <View style={[s.statCard, idoso && sIdoso.statCard, { borderBottomColor: accentColor }]}>
-      <Text style={[s.statLabel, idoso && sIdoso.statLabel]}>{label}</Text>
-      <Text style={[s.statVal, idoso && sIdoso.statVal, { color: accentColor }]}>{valor}</Text>
+    <View style={[s.statCard, simples && sSimples.statCard, { borderBottomColor: accentColor }]}>
+      <Text style={[s.statLabel, simples && sSimples.statLabel]}>{label}</Text>
+      <Text style={[s.statVal, simples && sSimples.statVal, { color: accentColor }]}>{valor}</Text>
     </View>
   );
 }
 
+/** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
-  content: { padding: 16, paddingBottom: 32 },
+  content: { padding: 16, paddingBottom: 36 },
 
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
+  statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 18 },
   statCard: {
-    flex: 1,
+    minWidth: '47%',
+    flexBasis: '47%',
+    flexGrow: 1,
     backgroundColor: C.white,
     borderWidth: 1,
     borderColor: C.border,
@@ -190,27 +194,27 @@ const s = StyleSheet.create({
     padding: 14,
     borderBottomWidth: 3,
   },
-  statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: C.muted, marginBottom: 6 },
-  statVal: { fontSize: 26, fontWeight: '700', lineHeight: 28 },
+  statLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: C.muted, marginBottom: 6 },
+  statVal: { fontSize: 30, fontWeight: '700', lineHeight: 32 },
 
-  progressoCard: { backgroundColor: C.g800, borderRadius: 16, padding: 20, marginBottom: 24 },
-  progressoHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
-  progressoLbl: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: 'rgba(168,230,199,0.8)', marginBottom: 4 },
-  progressoPct: { fontSize: 36, fontWeight: '700', color: C.white, lineHeight: 40 },
+  progressoCard: { backgroundColor: C.g800, borderRadius: 16, padding: 24, marginBottom: 26 },
+  progressoHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15 },
+  progressoLbl: { fontSize: 13, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: 'rgba(168,230,199,0.8)', marginBottom: 4 },
+  progressoPct: { fontSize: 42, fontWeight: '700', color: C.white, lineHeight: 46 },
   progressoMeta: { alignItems: 'flex-end', gap: 4 },
-  progressoMetaText: { fontSize: 12, color: 'rgba(255,255,255,0.65)' },
-  barraTrack: { height: 8, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 4, overflow: 'hidden', marginBottom: 10 },
-  barraFill: { height: '100%', backgroundColor: C.g400, borderRadius: 4 },
-  progressoHint: { fontSize: 12, color: 'rgba(255,255,255,0.5)' },
+  progressoMetaText: { fontSize: 14, color: 'rgba(255,255,255,0.65)' },
+  barraTrack: { height: 12, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 6, overflow: 'hidden', marginBottom: 11 },
+  barraFill: { height: '100%', backgroundColor: C.g400, borderRadius: 6 },
+  progressoHint: { fontSize: 14, color: 'rgba(255,255,255,0.5)' },
 
   empty: { alignItems: 'center', paddingVertical: 56 },
   emptyIcon: { marginBottom: 12 },
   emptyTitle: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 4 },
   emptySub: { fontSize: 13, color: C.muted, textAlign: 'center' },
 
-  grupo: { marginBottom: 22 },
-  mesRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
-  mesTitulo: { fontSize: 13, fontWeight: '700', color: C.text, textTransform: 'capitalize', flex: 1 },
+  grupo: { marginBottom: 24 },
+  mesRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 11 },
+  mesTitulo: { fontSize: 16, fontWeight: '700', color: C.text, textTransform: 'capitalize', flex: 1 },
   mesBadge: { backgroundColor: C.w100, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: C.border },
   mesBadgeText: { fontSize: 11, fontWeight: '700', color: C.muted },
 
@@ -238,29 +242,21 @@ const s = StyleSheet.create({
   statusText: { fontSize: 11, fontWeight: '700' },
 });
 
-/** Overrides do modo idoso. No histórico, a tabela de 3 colunas vira uma lista empilhada (mais legível). */
-const sIdoso = StyleSheet.create({
+/** Modo simples: ~35% maior que o padrão. Sem card de progresso, só o total nos stats, e sem o nome do veterinário na lista. */
+const sSimples = StyleSheet.create({
   statsRow: { flexWrap: 'wrap' },
-  statCard: { minWidth: '47%', flexBasis: '47%' },
-  statLabel: { fontSize: 11 },
-  statVal: { fontSize: 30, lineHeight: 32 },
+  statCard: { minWidth: '100%', flexBasis: '100%', paddingVertical: 18 },
+  statLabel: { fontSize: 15 },
+  statVal: { fontSize: 46, lineHeight: 49 },
 
-  progressoCard: { padding: 24 },
-  progressoLbl: { fontSize: 13 },
-  progressoPct: { fontSize: 42, lineHeight: 46 },
-  progressoMetaText: { fontSize: 14 },
-  barraTrack: { height: 12, borderRadius: 6 },
-  progressoHint: { fontSize: 14 },
+  mesTitulo: { fontSize: 22 },
 
-  mesTitulo: { fontSize: 16 },
-
-  linhaIdoso: { paddingHorizontal: 16, paddingVertical: 14, gap: 10 },
-  linhaIdosoTopo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  linhaIdosoRodape: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 52 },
-  rowIcone: { width: 40, height: 40, borderRadius: 20 },
-  rowTitulo: { fontSize: 16, fontWeight: '700', color: C.text, marginBottom: 2 },
-  rowVet: { fontSize: 13, color: C.muted },
-  tdData: { fontSize: 14, fontWeight: '600', color: C.muted },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4 },
-  statusText: { fontSize: 13 },
+  linhaSimples: { paddingHorizontal: 18, paddingVertical: 18, gap: 12 },
+  linhaSimplesTopo: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  linhaSimplesRodape: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 62 },
+  rowIcone: { width: 48, height: 48, borderRadius: 24 },
+  rowTitulo: { fontSize: 20, fontWeight: '700', color: C.text, flexShrink: 1 },
+  tdData: { fontSize: 18, fontWeight: '600', color: C.muted },
+  statusBadge: { paddingHorizontal: 12, paddingVertical: 5 },
+  statusText: { fontSize: 16 },
 });
