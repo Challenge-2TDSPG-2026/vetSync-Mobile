@@ -14,7 +14,7 @@ const C = {
 export function PetSwitcher() {
   const router = useRouter();
   const { pets, petAtivoId, selecionarPet } = usePet();
-  const { modoIdoso } = useAccessibility();
+  const { modoSimples } = useAccessibility();
 
   if (pets.length === 0) return null;
 
@@ -31,51 +31,52 @@ export function PetSwitcher() {
         return (
           <Pressable
             key={p.id}
-            style={[s.chip, modoIdoso && sIdoso.chip, ativo && s.chipAtivo]}
+            style={[s.chip, modoSimples && sSimples.chip, ativo && s.chipAtivo]}
             onPress={() => selecionarPet(p.id)}
           >
             <AppIcon
               name={especieInfo?.icon ?? 'paw'}
               set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
-              size={modoIdoso ? 20 : 16}
+              size={modoSimples ? 27 : 20}
               color={ativo ? C.white : C.muted}
             />
-            <Text style={[s.chipText, modoIdoso && sIdoso.chipText, ativo && s.chipTextAtivo]} numberOfLines={1}>
+            <Text style={[s.chipText, modoSimples && sSimples.chipText, ativo && s.chipTextAtivo]} numberOfLines={1}>
               {p.nome}
             </Text>
           </Pressable>
         );
       })}
-      <Pressable style={[s.addBtn, modoIdoso && sIdoso.chip]} onPress={() => router.push('/add-pet')}>
-        <AppIcon name="add" set="Ionicons" size={modoIdoso ? 20 : 16} color={C.g600} />
-        <Text style={[s.addBtnText, modoIdoso && sIdoso.chipText]}>Novo pet</Text>
+      <Pressable style={[s.addBtn, modoSimples && sSimples.chip]} onPress={() => router.push('/add-pet')}>
+        <AppIcon name="add" set="Ionicons" size={modoSimples ? 27 : 20} color={C.g600} />
+        <Text style={[s.addBtnText, modoSimples && sSimples.chipText]}>Novo pet</Text>
       </Pressable>
     </ScrollView>
   );
 }
 
+/** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const s = StyleSheet.create({
-  container: { flexGrow: 0, marginBottom: 14 },
-  content: { gap: 8, paddingRight: 4 },
+  container: { flexGrow: 0, marginBottom: 16 },
+  content: { gap: 10, paddingRight: 4 },
   chip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20,
+    flexDirection: 'row', alignItems: 'center', gap: 7,
+    paddingHorizontal: 16, paddingVertical: 12, borderRadius: 22,
     backgroundColor: C.w50, borderWidth: 1.5, borderColor: C.border,
-    maxWidth: 140,
+    maxWidth: 180,
   },
   chipAtivo: { backgroundColor: C.g600, borderColor: C.g600 },
-  chipText: { fontSize: 12, fontWeight: '600', color: C.text },
+  chipText: { fontSize: 15, fontWeight: '600', color: C.text },
   chipTextAtivo: { color: C.white },
   addBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20,
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 16, paddingVertical: 12, borderRadius: 22,
     borderWidth: 1.5, borderColor: C.g500, borderStyle: 'dashed',
   },
-  addBtnText: { fontSize: 12, fontWeight: '700', color: C.g600 },
+  addBtnText: { fontSize: 15, fontWeight: '700', color: C.g600 },
 });
 
-/** Overrides do modo idoso: chips maiores, com maior alvo de toque, mesmo maxWidth relativo. */
-const sIdoso = StyleSheet.create({
-  chip: { paddingHorizontal: 16, paddingVertical: 12, maxWidth: 180 },
-  chipText: { fontSize: 15 },
+/** Modo simples: ~35% maior que o padrão. */
+const sSimples = StyleSheet.create({
+  chip: { paddingHorizontal: 22, paddingVertical: 16, maxWidth: 230 },
+  chipText: { fontSize: 20 },
 });
