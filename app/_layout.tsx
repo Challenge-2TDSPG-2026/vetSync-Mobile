@@ -6,6 +6,9 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PetProvider, usePet } from '../context/PetContext';
 import { VetProvider } from '../context/VetContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
+import { lockFontScaling } from '../utils/lockFontScaling';
+
+lockFontScaling();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -72,7 +75,7 @@ function RootNavigator() {
           </Pressable>
         </View>
       )}
-      <Stack initialRouteName="login" screenOptions={{ headerShown: false }}>
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="login" />
         <Stack.Screen name="cadastro" />
         <Stack.Screen name="(tutor)" />
