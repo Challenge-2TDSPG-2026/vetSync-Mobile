@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Easing, KeyboardAvoidingView, PanResponder, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,6 +40,16 @@ export default function AssistenteScreen() {
   const [carregando, setCarregando] = useState(false);
   const nome = sessao?.nome?.trim().split(/\s+/)[0] ?? 'tudo bem';
   const sugestoes = sessao?.perfil === 'VETERINARIO' ? SUGESTOES_VET : SUGESTOES_TUTOR;
+  const gestoAlca = useRef(PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gesto) => gesto.dy > 6 && Math.abs(gesto.dy) > Math.abs(gesto.dx),
+    onPanResponderGrant: () => deslocamento.stopAnimation(),
+    onPanResponderMove: (_, gesto) => deslocamento.setValue(Math.max(0, gesto.dy)),
+    onPanResponderRelease: (_, gesto) => {
+      if (gesto.dy > 110 || gesto.vy > 0.8) fechar();
+      else restaurarPosicao();
+    },
+    onPanResponderTerminate: restaurarPosicao,
+  })).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -60,6 +70,10 @@ export default function AssistenteScreen() {
       Animated.timing(deslocamento, { toValue: 720, duration: 240, easing: Easing.in(Easing.cubic), useNativeDriver: true }),
       Animated.timing(opacidadeFundo, { toValue: 0, duration: 190, useNativeDriver: true }),
     ]).start(() => router.back());
+  }
+
+  function restaurarPosicao() {
+    Animated.spring(deslocamento, { toValue: 0, useNativeDriver: true }).start();
   }
 
   async function enviar(textoDireto?: string) {
@@ -86,7 +100,9 @@ export default function AssistenteScreen() {
     <Animated.View pointerEvents="none" style={[s.backdrop, { opacity: opacidadeFundo }]} />
     <Pressable style={StyleSheet.absoluteFill} onPress={fechar} accessibilityLabel="Fechar SIA" />
     <Animated.View style={[s.sheet, { paddingBottom: Math.max(insets.bottom, 8), transform: [{ translateY: deslocamento }] }]}>
-      <View style={s.handle} />
+      <View {...gestoAlca.panHandlers} style={s.handleArea} accessibilityLabel="Arraste para baixo para fechar a SIA">
+        <View style={s.handle} />
+      </View>
       <View style={s.header}>
         <Pressable onPress={fechar} hitSlop={10} style={s.headerButton} accessibilityLabel="Voltar"><Ionicons name="chevron-down" size={22} color={C.green700} /></Pressable>
         <View style={s.headerCopy}><Text style={s.headerTitle}>SIA</Text><Text style={s.headerSubtitle}>Sync Inteligência Artificial</Text></View>
@@ -124,7 +140,7 @@ const s = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(10,34,24,0.35)' },
   sheet: { width: '100%', maxWidth: 680, height: '86%', backgroundColor: C.white, borderTopLeftRadius: 28, borderTopRightRadius: 28, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 16, shadowOffset: { width: 0, height: -4 }, elevation: 16 },
-  handle: { width: 42, height: 5, borderRadius: 3, backgroundColor: '#b7b3c2', alignSelf: 'center', marginTop: 10 },
+  handleArea: { height: 28, alignItems: 'center', justifyContent: 'center' }, handle: { width: 42, height: 5, borderRadius: 3, backgroundColor: '#b7b3c2' },
   header: { minHeight: 76, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.border },
   headerButton: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f5f2' }, disabled: { opacity: 0.38 },
   headerCopy: { flex: 1, alignItems: 'center', paddingHorizontal: 8 }, headerTitle: { color: C.text, fontSize: 19, fontWeight: '800' }, headerSubtitle: { color: C.muted, fontSize: 9, fontWeight: '700', marginTop: 2 },
