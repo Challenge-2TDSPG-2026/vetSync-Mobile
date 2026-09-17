@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
@@ -34,6 +34,7 @@ export default function RecompensasScreen() {
   const { petAtivo, eventos, nivelInfo } = usePet();
   const { modoSimples } = useAccessibility();
   const { autenticado } = useAuth();
+  const [mostrarCatalogoCompleto, setMostrarCatalogoCompleto] = useState(false);
 
   const { data: catalogo = [], isLoading: carregandoCatalogo } = useCatalogoRecompensas(autenticado);
   const { data: saldoPontos = 0 } = useSaldoRecompensas(autenticado);
@@ -56,6 +57,7 @@ export default function RecompensasScreen() {
     [resgates]
   );
   const historico = modoSimples ? historicoCompleto.slice(0, 3) : historicoCompleto;
+  const recompensasVisiveis = mostrarCatalogoCompleto ? catalogo : catalogo.slice(0, 3);
 
   function handleResgatar(r: Recompensa) {
     if (saldoPontos < r.custoPontos) {
@@ -169,7 +171,8 @@ export default function RecompensasScreen() {
           <Text style={s.emptySub}>Novas recompensas aparecerão aqui em breve.</Text>
         </View>
       ) : (
-        catalogo.map(r => {
+        <>
+          {recompensasVisiveis.map(r => {
           const podeResgatar = saldoPontos >= r.custoPontos;
           const isPending = resgatarMutation.isPending && resgatarMutation.variables === r.id;
 
@@ -197,7 +200,19 @@ export default function RecompensasScreen() {
               </Pressable>
             </View>
           );
-        })
+          })}
+          {catalogo.length > 3 && (
+            <Pressable
+              style={s.verMaisCatalogo}
+              onPress={() => setMostrarCatalogoCompleto(anterior => !anterior)}
+              accessibilityRole="button"
+              accessibilityLabel={mostrarCatalogoCompleto ? 'Mostrar menos benefícios' : 'Ver mais benefícios'}
+            >
+              <Text style={s.verMaisCatalogoTexto}>{mostrarCatalogoCompleto ? 'Mostrar menos benefícios' : 'Ver mais benefícios'}</Text>
+              <AppIcon name={mostrarCatalogoCompleto ? 'chevron-up' : 'chevron-down'} set="Ionicons" size={20} color={C.g700} />
+            </Pressable>
+          )}
+        </>
       )}
 
       {/* Conquistas — somem no modo simples */}
@@ -309,6 +324,9 @@ const s = StyleSheet.create({
   },
   bannerTitulo: { fontSize: 19, fontWeight: '700', color: C.white, marginBottom: 5 },
   bannerSub: { fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center', paddingHorizontal: 12 },
+
+  verMaisCatalogo: { minHeight: 48, marginTop: -2, marginBottom: 18, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: C.g50 },
+  verMaisCatalogoTexto: { fontSize: 14, fontWeight: '700', color: C.g700 },
 
   nivelCard: {
     backgroundColor: C.white,
