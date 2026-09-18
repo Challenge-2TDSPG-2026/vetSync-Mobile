@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Switch } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
@@ -8,66 +9,33 @@ import { useAuth } from '../../context/AuthContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { AppIcon } from '../../components/AppIcon';
 import { alertar, confirmar } from '../../utils/alert';
-import { statusExibicao } from '../../utils/eventoStatus';
-import { pedirPermissaoNotificacao } from '../../services/calendarService';
-import type { Pet } from '../../types';
-import { WalletStack } from '../../components/carteira/WalletStack';
-import { CarteiraModal } from '../../components/carteira/CarteiraModal';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
 
 const C = {
-  g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
-  g500: '#22a06b', g400: '#3db87e', g200: '#a8e6c7', g100: '#d4f2e4', g50: '#edfaf3',
-  cream: '#fafaf8', w50: '#f9f7f4', w100: '#f0ece5',
-  text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff',
-  danger: '#dc3545', warn: '#e67e22', info: '#2563eb',
+  g900: '#0a2218', g700: '#155c3f', g600: '#1a7a52',
+  g500: '#22a06b', g100: '#d4f2e4', g50: '#edfaf3',
+  cream: '#fafaf8', text: '#1a1512', muted: '#7a6a5e',
+  border: '#e8e2da', white: '#fff', danger: '#dc3545',
 };
+
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+function obterIniciais(nome: string | undefined): string {
+  const partes = nome?.trim().split(/\s+/).filter(Boolean) ?? [];
+  return partes.slice(0, 2).map(parte => parte[0]).join('').toUpperCase() || '?';
+}
 
 export default function PerfilScreen() {
   const router = useRouter();
-  const [petCarteira, setPetCarteira] = useState<Pet | null>(null);
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
-  const { logout } = useAuth();
-  const { modoSimples, alternarModoSimples } = useAccessibility();
-  const {
-    pets,
-    petAtivo,
-    petAtivoId,
-    selecionarPet,
-    removerPet,
-    eventos,
-    preferencias,
-    atualizarPreferencias,
-  } = usePet();
+  const { sessao, logout } = useAuth();
+  const { modoSimples } = useAccessibility();
+  const { pets, removerPet } = usePet();
 
-  async function handleAlternarNotificacoes(v: boolean) {
-    if (v) {
-      const concedida = await pedirPermissaoNotificacao();
-      if (!concedida) {
-        alertar(
-          'Permissão necessária',
-          'Ative as notificações para o VetSync nas configurações do sistema para receber os lembretes.'
-        );
-      }
-    }
-    atualizarPreferencias({ ...preferencias, ativas: v });
-  }
-
-  const eventosComStatus = useMemo(
-    () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
-    [eventos]
-  );
-  const total = eventosComStatus.length;
-  const concluidos = eventosComStatus.filter(e => e.statusExibicao === 'CONCLUIDO').length;
-  const pendentes = eventosComStatus.filter(e => e.statusExibicao === 'AGENDADO').length;
-  const atrasados = eventosComStatus.filter(e => e.statusExibicao === 'ATRASADO').length;
-  const especieInfo = ESPECIES.find(e => e.valor === petAtivo?.especie);
-  const mostrarListaPets = !modoSimples || pets.length > 1;
-
-  function abrirCarteira(pet: Pet) {
-    selecionarPet(pet.id);
-    setPetCarteira(pet);
-  }
+  const nome = sessao?.nome?.trim() || 'Conta VetSync';
+  const email = sessao?.email?.trim() || 'E-mail não disponível';
+  const perfil = sessao?.perfil === 'TUTOR' ? 'Tutor responsável' : sessao?.perfil || 'Perfil não informado';
+  const iniciais = obterIniciais(sessao?.nome);
 
   function handleSair() {
     setModalSairVisivel(true);
@@ -79,13 +47,13 @@ export default function PerfilScreen() {
     router.replace('/login');
   }
 
-  function handleRemoverPet(id: string, nome: string) {
+  function handleRemoverPet(id: string, nomePet: string) {
     if (pets.length <= 1) {
       alertar('Não é possível remover', 'Você precisa ter pelo menos 1 pet cadastrado.');
       return;
     }
     confirmar(
-      `Remover ${nome}?`,
+      `Remover ${nomePet}?`,
       'Os eventos de saúde desse pet também serão removidos.',
       [
         { texto: 'Cancelar', estilo: 'cancel' },
@@ -94,176 +62,120 @@ export default function PerfilScreen() {
     );
   }
 
-  const iniciais = petAtivo?.nome ? petAtivo.nome[0].toUpperCase() : '?';
-
   return (
     <>
-      <ScrollView style={s.container} contentContainerStyle={s.content}>
+      <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <LinearGradient colors={[C.g900, C.g700]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
+          <View style={s.heroGlowOne} />
+          <View style={s.heroGlowTwo} />
 
-        {/* Banner do usuário */}
-        <View style={s.banner}>
-          <View style={[s.avatar, modoSimples && sSimples.avatar]}>
-            <Text style={[s.avatarText, modoSimples && sSimples.avatarText]}>{iniciais}</Text>
+          <View style={s.heroTop}>
+            <View style={[s.avatar, modoSimples && sSimples.avatar]}>
+              <Text style={[s.avatarText, modoSimples && sSimples.avatarText]}>{iniciais}</Text>
+            </View>
+            <View style={s.heroInfo}>
+              <Text style={[s.overline, modoSimples && sSimples.overline]}>MINHA CONTA</Text>
+              <Text style={[s.heroNome, modoSimples && sSimples.heroNome]} numberOfLines={2}>{nome}</Text>
+              <Text style={[s.heroEmail, modoSimples && sSimples.heroEmail]} numberOfLines={1}>{email}</Text>
+            </View>
           </View>
-          <View style={s.bannerInfo}>
-            <Text style={[s.bannerNome, modoSimples && sSimples.bannerNome]}>{petAtivo?.nome ?? '–'}</Text>
-            <Text style={[s.bannerRole, modoSimples && sSimples.bannerRole]}>{especieInfo?.label ?? '–'}{petAtivo?.raca ? ` • ${petAtivo.raca}` : ''}</Text>
+
+          <View style={s.heroFooter}>
+            <View style={s.rolePill}>
+              <Ionicons name="shield-checkmark-outline" size={14} color={C.g100} />
+              <Text style={s.rolePillText}>{perfil}</Text>
+            </View>
+            <Text style={s.petCount}>{pets.length} {pets.length === 1 ? 'pet vinculado' : 'pets vinculados'}</Text>
           </View>
-          <View style={s.bannerStat}>
-            <Text style={[s.bannerStatVal, modoSimples && sSimples.bannerStatVal]}>{total}</Text>
-            <Text style={[s.bannerStatLbl, modoSimples && sSimples.bannerStatLbl]}>eventos</Text>
-          </View>
+        </LinearGradient>
+
+        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Dados da conta</Text>
+        <View style={s.card}>
+          <InfoRow icon="person-outline" label="Nome completo" value={nome} simples={modoSimples} />
+          <View style={s.divider} />
+          <InfoRow icon="mail-outline" label="E-mail" value={email} simples={modoSimples} />
+          <View style={s.divider} />
+          <InfoRow icon="shield-checkmark-outline" label="Tipo de conta" value={perfil} simples={modoSimples} />
         </View>
 
-        {/* Stats row — some no modo simples */}
-        {!modoSimples && (
-          <View style={s.statsRow}>
-            <StatCard valor={total} label="Total" accentColor={C.info} />
-            <StatCard valor={concluidos} label="Realizados" accentColor={C.g500} />
-            <StatCard valor={pendentes} label="Pendentes" accentColor={C.warn} />
-            <StatCard valor={atrasados} label="Atrasados" accentColor={C.danger} />
-          </View>
-        )}
-
-        {/* Acessibilidade */}
-        <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Acessibilidade</Text>
+        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Sua conta</Text>
         <View style={s.card}>
-          <PrefSwitch
-            label="Modo simples"
-            desc="Tela mais limpa, com textos e botões bem maiores"
-            valor={modoSimples}
-            onToggle={alternarModoSimples}
+          <AccountAction
+            icon="time-outline"
+            title="Histórico clínico"
+            description="Consulte os eventos de saúde registrados"
+            onPress={() => router.push('/(tutor)/historico')}
             simples={modoSimples}
           />
         </View>
 
-        <View style={s.secLabelRow}>
-          <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Carteiras de vacinação</Text>
-          {pets.length > 1 && <Text style={s.secLabelContagem}>{pets.length} carteiras</Text>}
-        </View>
-        <WalletStack
-          pets={pets}
-          petAtivoId={petAtivoId}
-          onSelecionar={abrirCarteira}
-          onTrocarPetAtivo={selecionarPet}
-        />
-
-        {/* Meus Pets */}
-        {mostrarListaPets && (
-          <>
-            <View style={s.secLabelRow}>
-              <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Meus Pets</Text>
-              <Text style={s.secLabelContagem}>{pets.length}</Text>
+        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Acessibilidade</Text>
+        <View style={s.card}>
+          <Pressable
+            style={[s.accessibilityAction, modoSimples && sSimples.accessibilityAction]}
+            onPress={() => router.push('/modo-simples')}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir configurações do modo simples"
+          >
+            <View style={[s.accessibilityIcon, modoSimples && sSimples.accessibilityIcon]}>
+              <Ionicons name="accessibility-outline" size={modoSimples ? 28 : 20} color={C.g600} />
             </View>
-            <View style={s.card}>
-              {pets.map((p, i) => {
-                const info = ESPECIES.find(e => e.valor === p.especie);
-                const ativo = p.id === petAtivoId;
-                return (
-                  <View key={p.id}>
-                    <Pressable style={[s.petRow, modoSimples && sSimples.petRow]} onPress={() => selecionarPet(p.id)}>
-                      <View style={[s.petRowAvatar, ativo && s.petRowAvatarAtivo, modoSimples && sSimples.petRowAvatar]}>
-                        <AppIcon
-                          name={info?.icon ?? 'paw'}
-                          set={info?.iconSet ?? 'MaterialCommunityIcons'}
-                          size={modoSimples ? 30 : 22}
-                          color={ativo ? C.white : C.muted}
-                        />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[s.petRowNome, modoSimples && sSimples.petRowNome]}>{p.nome}</Text>
-                        {!modoSimples && (
-                          <Text style={s.petRowDetalhe}>{info?.label}{p.raca ? ` • ${p.raca}` : ''}</Text>
-                        )}
-                      </View>
-                      {ativo && (
-                        <View style={s.petRowBadge}>
-                          <Text style={s.petRowBadgeText}>Ativo</Text>
-                        </View>
-                      )}
-                      <Pressable
-                        style={s.petRowRemover}
-                        onPress={() => handleRemoverPet(p.id, p.nome)}
-                        hitSlop={8}
-                      >
-                        <Ionicons name="trash-outline" size={modoSimples ? 26 : 20} color={C.danger} />
-                      </Pressable>
-                    </Pressable>
-                    {i < pets.length - 1 && <View style={s.divisor} />}
+            <View style={s.accessibilityCopy}>
+              <Text style={[s.accessibilityTitle, modoSimples && sSimples.accessibilityTitle]}>Modo simples</Text>
+              <Text style={[s.accessibilityDescription, modoSimples && sSimples.accessibilityDescription]}>
+                {modoSimples ? 'Ativado. Toque para revisar esta configuração.' : 'Textos e botões maiores para uma navegação mais confortável.'}
+              </Text>
+            </View>
+            <View style={[s.modeStatus, modoSimples && s.modeStatusActive]}>
+              <Text style={[s.modeStatusText, modoSimples && s.modeStatusTextActive]}>{modoSimples ? 'Ativo' : 'Ver'}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={modoSimples ? 27 : 20} color={C.muted} />
+          </Pressable>
+        </View>
+
+        <View style={s.sectionTitleRow}>
+          <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Pets vinculados</Text>
+          <View style={s.countBadge}><Text style={s.countBadgeText}>{pets.length}</Text></View>
+        </View>
+        <View style={s.card}>
+          {pets.map((pet, index) => {
+            const especie = ESPECIES.find(item => item.valor === pet.especie);
+            return (
+              <View key={pet.id}>
+                <View style={[s.petRow, modoSimples && sSimples.petRow]}>
+                  <View style={[s.petIcon, modoSimples && sSimples.petIcon]}>
+                    <AppIcon name={especie?.icon ?? 'paw'} set={especie?.iconSet ?? 'MaterialCommunityIcons'} size={modoSimples ? 28 : 21} color={C.g700} />
                   </View>
-                );
-              })}
-              <View style={s.divisor} />
-              <Pressable style={[s.btnAddPet, modoSimples && sSimples.btnAddPet]} onPress={() => router.push('/add-pet')}>
-                <Ionicons name="add-circle-outline" size={modoSimples ? 28 : 22} color={C.g600} />
-                <Text style={[s.btnAddPetText, modoSimples && sSimples.btnAddPetText]}>Adicionar novo pet</Text>
-              </Pressable>
-            </View>
-          </>
-        )}
-
-        {/* Dados do pet ativo */}
-        <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Dados do Pet</Text>
-        <View style={s.card}>
-          {(modoSimples
-            ? [['Nome', petAtivo?.nome ?? '–'], ['Espécie', especieInfo?.label ?? '–']]
-            : [
-              ['Nome', petAtivo?.nome ?? '–'],
-              ['Espécie', especieInfo?.label ?? '–'],
-              ['Raça', petAtivo?.raca ?? '–'],
-              ['Peso', petAtivo?.peso ? `${petAtivo.peso} kg` : '–'],
-            ]
-          ).map(([label, valor], i, arr) => (
-            <View key={label}>
-              <View style={[s.infoRow, modoSimples && sSimples.infoRow]}>
-                <Text style={[s.infoLabel, modoSimples && sSimples.infoLabel]}>{label}</Text>
-                <Text style={[s.infoValor, modoSimples && sSimples.infoValor]}>{valor}</Text>
+                  <View style={s.petCopy}>
+                    <Text style={[s.petName, modoSimples && sSimples.petName]}>{pet.nome}</Text>
+                    <Text style={[s.petDetail, modoSimples && sSimples.petDetail]}>{especie?.label ?? 'Espécie não informada'}{pet.raca ? ` • ${pet.raca}` : ''}</Text>
+                  </View>
+                  <Pressable
+                    style={s.removePet}
+                    onPress={() => handleRemoverPet(pet.id, pet.nome)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remover ${pet.nome}`}
+                  >
+                    <Ionicons name="trash-outline" size={modoSimples ? 25 : 19} color={C.danger} />
+                  </Pressable>
+                </View>
+                {index < pets.length - 1 && <View style={s.divider} />}
               </View>
-              {i < arr.length - 1 && <View style={s.divisor} />}
-            </View>
-          ))}
+            );
+          })}
+          {pets.length > 0 && <View style={s.divider} />}
+          <Pressable style={[s.addPet, modoSimples && sSimples.addPet]} onPress={() => router.push('/add-pet')} accessibilityRole="button">
+            <Ionicons name="add-circle-outline" size={modoSimples ? 27 : 21} color={C.g600} />
+            <Text style={[s.addPetText, modoSimples && sSimples.addPetText]}>Adicionar pet</Text>
+          </Pressable>
         </View>
 
-        {/* Notificações */}
-        <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Notificações</Text>
-        <View style={s.card}>
-          <PrefSwitch
-            label="Ativar notificações"
-            desc="Receba lembretes de eventos"
-            valor={preferencias.ativas ?? true}
-            onToggle={handleAlternarNotificacoes}
-            simples={modoSimples}
-          />
-          <View style={s.divisor} />
-          <PrefSwitch
-            label="Lembrete 7 dias antes"
-            desc="Aviso com antecedência"
-            valor={preferencias.lembrete7 ?? true}
-            onToggle={v => atualizarPreferencias({ ...preferencias, lembrete7: v })}
-            simples={modoSimples}
-          />
-          <View style={s.divisor} />
-          <PrefSwitch
-            label="Lembrete no dia anterior"
-            desc="Aviso na véspera"
-            valor={preferencias.lembreteAntes ?? true}
-            onToggle={v => atualizarPreferencias({ ...preferencias, lembreteAntes: v })}
-            simples={modoSimples}
-          />
-        </View>
-
-        {/* Sair */}
-        <Pressable style={[s.btnSair, modoSimples && sSimples.btnSair]} onPress={handleSair}>
+        <Pressable style={[s.logout, modoSimples && sSimples.logout]} onPress={handleSair} accessibilityRole="button">
           <Ionicons name="log-out-outline" size={modoSimples ? 26 : 20} color={C.g700} />
-          <Text style={[s.btnSairText, modoSimples && sSimples.btnSairText]}>Sair da conta</Text>
+          <Text style={[s.logoutText, modoSimples && sSimples.logoutText]}>Sair da conta</Text>
         </Pressable>
-
       </ScrollView>
-      <CarteiraModal
-        pet={petCarteira}
-        eventos={petCarteira ? eventos.filter(evento => evento.petId === petCarteira.id) : []}
-        onFechar={() => setPetCarteira(null)}
-      />
       <LogoutConfirmationModal
         visivel={modalSairVisivel}
         onFechar={() => setModalSairVisivel(false)}
@@ -273,168 +185,116 @@ export default function PerfilScreen() {
   );
 }
 
-function StatCard({ valor, label, accentColor }: { valor: number; label: string; accentColor: string }) {
+function InfoRow({ icon, label, value, simples }: { icon: IconName; label: string; value: string; simples: boolean }) {
   return (
-    <View style={[s.statCard, { borderBottomColor: accentColor }]}>
-      <Text style={s.statLabel}>{label}</Text>
-      <Text style={[s.statVal, { color: accentColor }]}>{valor}</Text>
+    <View style={[s.infoRow, simples && sSimples.infoRow]}>
+      <View style={[s.infoIcon, simples && sSimples.infoIcon]}><Ionicons name={icon} size={simples ? 24 : 18} color={C.g600} /></View>
+      <View style={s.infoCopy}>
+        <Text style={[s.infoLabel, simples && sSimples.infoLabel]}>{label}</Text>
+        <Text style={[s.infoValue, simples && sSimples.infoValue]} numberOfLines={2}>{value}</Text>
+      </View>
     </View>
   );
 }
 
-function PrefSwitch({ label, desc, valor, onToggle, simples }: { label: string; desc: string; valor: boolean; onToggle: (v: boolean) => void; simples?: boolean }) {
+function AccountAction({ icon, title, description, onPress, simples }: { icon: IconName; title: string; description: string; onPress: () => void; simples: boolean }) {
   return (
-    <View style={[s.prefRow, simples && sSimples.prefRow]}>
-      <View style={s.prefInfo}>
-        <Text style={[s.prefLabel, simples && sSimples.prefLabel]}>{label}</Text>
-        <Text style={[s.prefDesc, simples && sSimples.prefDesc]}>{desc}</Text>
+    <Pressable style={[s.accountAction, simples && sSimples.accountAction]} onPress={onPress} accessibilityRole="button">
+      <View style={[s.actionIcon, simples && sSimples.actionIcon]}><Ionicons name={icon} size={simples ? 28 : 20} color={C.g600} /></View>
+      <View style={s.actionCopy}>
+        <Text style={[s.actionTitle, simples && sSimples.actionTitle]}>{title}</Text>
+        <Text style={[s.actionDescription, simples && sSimples.actionDescription]}>{description}</Text>
       </View>
-      <Switch
-        value={valor}
-        onValueChange={onToggle}
-        trackColor={{ false: C.border, true: C.g500 }}
-        thumbColor={C.white}
-        style={[s.switch, simples && sSimples.switch]}
-      />
-    </View>
+      <Ionicons name="chevron-forward" size={simples ? 27 : 20} color={C.muted} />
+    </Pressable>
   );
 }
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
-  content: { padding: 16, paddingBottom: 40 },
+  content: { padding: 16, paddingBottom: 38 },
+  hero: { borderRadius: 24, padding: 20, marginBottom: 24, overflow: 'hidden' },
+  heroGlowOne: { position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(168,230,199,0.10)', right: -52, top: -70 },
+  heroGlowTwo: { position: 'absolute', width: 84, height: 84, borderRadius: 42, backgroundColor: 'rgba(242,200,121,0.10)', right: 30, bottom: -48 },
+  heroTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  avatar: { width: 62, height: 62, borderRadius: 22, backgroundColor: C.white, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: C.g700, fontSize: 21, fontWeight: '800', letterSpacing: -0.5 },
+  heroInfo: { flex: 1, minWidth: 0 },
+  overline: { color: 'rgba(255,255,255,0.62)', fontSize: 10, fontWeight: '800', letterSpacing: 1.1 },
+  heroNome: { color: C.white, fontSize: 22, fontWeight: '800', letterSpacing: -0.55, marginTop: 4 },
+  heroEmail: { color: 'rgba(255,255,255,0.77)', fontSize: 13, marginTop: 3 },
+  heroFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, gap: 10 },
+  rolePill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.12)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
+  rolePillText: { color: C.g100, fontSize: 11, fontWeight: '800' },
+  petCount: { color: 'rgba(255,255,255,0.70)', fontSize: 11, fontWeight: '700', textAlign: 'right' },
 
-  banner: {
-    backgroundColor: C.g900,
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    marginBottom: 18,
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: C.g700,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: { fontSize: 20, fontWeight: '700', color: C.white },
-  bannerInfo: { flex: 1 },
-  bannerNome: { fontSize: 19, fontWeight: '700', color: C.white },
-  bannerRole: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 3 },
-  bannerStat: { alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: 10 },
-  bannerStatVal: { fontSize: 26, fontWeight: '700', color: C.white },
-  bannerStatLbl: { fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: '600' },
+  sectionTitle: { color: C.muted, fontSize: 12, fontWeight: '800', letterSpacing: 0.85, textTransform: 'uppercase', marginBottom: 10, paddingLeft: 2 },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 2 },
+  countBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: C.g100, marginBottom: 10 },
+  countBadgeText: { color: C.g700, fontSize: 11, fontWeight: '800' },
+  card: { backgroundColor: C.white, borderRadius: 18, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 22 },
+  divider: { height: 1, backgroundColor: C.border },
 
-  statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
-  statCard: {
-    minWidth: '47%',
-    flexBasis: '47%',
-    flexGrow: 1,
-    backgroundColor: C.white,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
-    padding: 14,
-    borderBottomWidth: 3,
-  },
-  statLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: C.muted, marginBottom: 5 },
-  statVal: { fontSize: 28, fontWeight: '700', lineHeight: 30 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 14 },
+  infoIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: C.g50 },
+  infoCopy: { flex: 1, minWidth: 0 },
+  infoLabel: { color: C.muted, fontSize: 11, fontWeight: '700', marginBottom: 2 },
+  infoValue: { color: C.text, fontSize: 15, fontWeight: '700' },
 
-  secLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    color: C.muted,
-    marginBottom: 11,
-    marginTop: 5,
-    paddingLeft: 2,
-  },
-  secLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 2 },
-  secLabelContagem: { fontSize: 12, fontWeight: '700', color: C.g600, marginBottom: 11 },
+  accountAction: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
+  actionIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.g50 },
+  actionCopy: { flex: 1, minWidth: 0 },
+  actionTitle: { color: C.text, fontSize: 15, fontWeight: '800' },
+  actionDescription: { color: C.muted, fontSize: 12, marginTop: 3, lineHeight: 17 },
 
-  card: {
-    backgroundColor: C.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: C.border,
-    paddingHorizontal: 16,
-    marginBottom: 22,
-    overflow: 'hidden',
-  },
-  divisor: { height: 1, backgroundColor: C.border },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 17 },
-  infoLabel: { fontSize: 16, color: C.muted },
-  infoValor: { fontSize: 16, fontWeight: '600', color: C.text },
-  prefRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18, gap: 12 },
-  prefInfo: { flex: 1 },
-  prefLabel: { fontSize: 17, fontWeight: '600', color: C.text },
-  prefDesc: { fontSize: 14, color: C.muted, marginTop: 3 },
-  switch: { transform: [{ scale: 1.2 }] },
+  accessibilityAction: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
+  accessibilityIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.g50 },
+  accessibilityCopy: { flex: 1, minWidth: 0 },
+  accessibilityTitle: { color: C.text, fontSize: 15, fontWeight: '800' },
+  accessibilityDescription: { color: C.muted, fontSize: 12, marginTop: 3, lineHeight: 17 },
+  modeStatus: { borderRadius: 999, backgroundColor: '#f0ece5', paddingHorizontal: 8, paddingVertical: 4 },
+  modeStatusActive: { backgroundColor: C.g100 },
+  modeStatusText: { color: C.muted, fontSize: 10, fontWeight: '800' },
+  modeStatusTextActive: { color: C.g700 },
 
-  petRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 16, gap: 12 },
-  petRowAvatar: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: C.w50, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: C.border,
-  },
-  petRowAvatarAtivo: { backgroundColor: C.g600, borderColor: C.g600 },
-  petRowNome: { fontSize: 17, fontWeight: '700', color: C.text },
-  petRowDetalhe: { fontSize: 13, color: C.muted, marginTop: 2 },
-  petRowBadge: { backgroundColor: C.g100, borderRadius: 20, paddingHorizontal: 9, paddingVertical: 3, marginRight: 6 },
-  petRowBadgeText: { fontSize: 11, fontWeight: '700', color: C.g700 },
-  petRowRemover: { padding: 6 },
+  petRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 13 },
+  petIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.g50 },
+  petCopy: { flex: 1, minWidth: 0 },
+  petName: { color: C.text, fontSize: 15, fontWeight: '800' },
+  petDetail: { color: C.muted, fontSize: 12, marginTop: 3 },
+  removePet: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff5f5' },
+  addPet: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 15 },
+  addPetText: { color: C.g600, fontSize: 14, fontWeight: '800' },
 
-  btnAddPet: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    paddingVertical: 18,
-  },
-  btnAddPetText: { fontSize: 16, fontWeight: '700', color: C.g600 },
-
-  btnSair: {
-    backgroundColor: C.white,
-    borderWidth: 1.5,
-    borderColor: C.border,
-    paddingVertical: 18,
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 9,
-  },
-  btnSairText: { color: C.g700, fontSize: 16, fontWeight: '700' },
+  logout: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16, borderRadius: 16, borderWidth: 1, borderColor: C.border, backgroundColor: C.white },
+  logoutText: { color: C.g700, fontSize: 15, fontWeight: '800' },
 });
 
 const sSimples = StyleSheet.create({
-  avatar: { width: 76, height: 76, borderRadius: 38 },
+  avatar: { width: 76, height: 76, borderRadius: 26 },
   avatarText: { fontSize: 27 },
-  bannerNome: { fontSize: 26 },
-  bannerRole: { fontSize: 19 },
-  bannerStatVal: { fontSize: 35 },
-  bannerStatLbl: { fontSize: 14 },
-
-  secLabel: { fontSize: 19 },
-
-  infoRow: { paddingVertical: 23 },
-  infoLabel: { fontSize: 22 },
-  infoValor: { fontSize: 22 },
-
-  prefRow: { paddingVertical: 24 },
-  prefLabel: { fontSize: 23 },
-  prefDesc: { fontSize: 19 },
-  switch: { transform: [{ scale: 1.5 }] },
-
-  petRow: { paddingVertical: 22 },
-  petRowAvatar: { width: 60, height: 60, borderRadius: 30 },
-  petRowNome: { fontSize: 23 },
-
-  btnAddPet: { paddingVertical: 24 },
-  btnAddPetText: { fontSize: 22 },
-
-  btnSair: { paddingVertical: 24 },
-  btnSairText: { fontSize: 22 },
+  overline: { fontSize: 13 },
+  heroNome: { fontSize: 27, lineHeight: 32 },
+  heroEmail: { fontSize: 17 },
+  sectionTitle: { fontSize: 18 },
+  infoRow: { paddingVertical: 19, gap: 16 },
+  infoIcon: { width: 52, height: 52, borderRadius: 17 },
+  infoLabel: { fontSize: 16 },
+  infoValue: { fontSize: 20, lineHeight: 26 },
+  accountAction: { paddingVertical: 20, gap: 16 },
+  actionIcon: { width: 58, height: 58, borderRadius: 18 },
+  actionTitle: { fontSize: 22 },
+  actionDescription: { fontSize: 17, lineHeight: 23 },
+  accessibilityAction: { paddingVertical: 20, gap: 16 },
+  accessibilityIcon: { width: 58, height: 58, borderRadius: 18 },
+  accessibilityTitle: { fontSize: 22 },
+  accessibilityDescription: { fontSize: 17, lineHeight: 23 },
+  petRow: { paddingVertical: 19, gap: 16 },
+  petIcon: { width: 58, height: 58, borderRadius: 18 },
+  petName: { fontSize: 22 },
+  petDetail: { fontSize: 17 },
+  addPet: { paddingVertical: 21 },
+  addPetText: { fontSize: 21 },
+  logout: { paddingVertical: 22 },
+  logoutText: { fontSize: 22 },
 });
