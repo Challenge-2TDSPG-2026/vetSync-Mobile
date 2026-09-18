@@ -8,13 +8,12 @@ import { usePet } from '../context/PetContext';
 import { AppIcon } from '../components/AppIcon';
 import { ApiError } from '../services/api/httpClient';
 import { iaService } from '../services/iaService';
-import type { CategoriaSia } from '../services/iaService';
 import { alertar } from '../utils/alert';
 
 const C = { green900: '#0a2218', green800: '#0e3326', green700: '#155c3f', green600: '#1a7a52', green100: '#d4f2e4', cream: '#fafaf8', white: '#ffffff', text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', danger: '#991b1b', dangerBg: '#fee2e2' };
 const DURACAO_TRANSICAO_TECLADO = 250;
 
-type Mensagem = { id: number; autoria: 'usuario' | 'sia'; texto: string; categoria?: CategoriaSia; destaque?: string; erro?: boolean };
+type Mensagem = { id: number; autoria: 'usuario' | 'sia'; texto: string; erro?: boolean };
 
 const SUGESTOES_TUTOR = [
   { icon: 'calendar-outline' as const, texto: 'Quero agendar uma consulta para meu pet' },
@@ -103,10 +102,15 @@ export default function AssistenteScreen() {
     const texto = (textoDireto ?? entrada).trim();
     if (!texto || carregando) return;
     setEntrada('');
-    setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'usuario', texto }]);
+    const mensagemUsuario: Mensagem = { id: ++idRef.current, autoria: 'usuario', texto };
+    const historico = [...mensagens, mensagemUsuario].map(mensagem => ({
+      role: mensagem.autoria === 'usuario' ? 'user' as const : 'assistant' as const,
+      text: mensagem.texto,
+    }));
+    setMensagens(atuais => [...atuais, mensagemUsuario]);
     setCarregando(true);
     try {
-      const resposta = await iaService.perguntar(texto, petAtivo);
+      const resposta = await iaService.perguntar(texto, petAtivo, historico);
       setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'sia', ...resposta }]);
     } catch (erro) {
       const detalhe = erro instanceof ApiError || erro instanceof Error ? erro.message : 'Não foi possível obter uma resposta agora.';
@@ -150,8 +154,6 @@ export default function AssistenteScreen() {
         </> : mensagens.map(item => <View key={item.id} style={[s.messageRow, item.autoria === 'usuario' && s.messageRowUser]}>
           {item.autoria === 'sia' && <View style={[s.avatar, item.erro && s.avatarError]}><Ionicons name={item.erro ? 'alert-circle-outline' : 'sparkles'} size={15} color={item.erro ? C.danger : C.green700} /></View>}
           <View style={[s.bubble, item.autoria === 'usuario' ? s.bubbleUser : s.bubbleSia, item.erro && s.bubbleError]}>
-            {item.categoria && <Text style={s.category}>{item.categoria.replace(/_/g, ' ')}</Text>}
-            {item.destaque && <Text style={s.highlight}>{item.destaque.replace(/_/g, ' ')}</Text>}
             <Text style={[s.messageText, item.autoria === 'usuario' && s.messageTextUser, item.erro && s.messageTextError]}>{item.texto}</Text>
           </View>
         </View>)}
@@ -185,6 +187,6 @@ const s = StyleSheet.create({
   chat: { flex: 1 }, chatContent: { flexGrow: 1, paddingHorizontal: 18, paddingTop: 14, paddingBottom: 18 },
   welcome: { alignItems: 'center', paddingTop: 22, paddingHorizontal: 12, marginBottom: 'auto' }, siaMark: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', backgroundColor: C.green100, marginBottom: 15 }, welcomeTitle: { color: C.text, fontSize: 22, lineHeight: 28, fontWeight: '800', textAlign: 'center' }, welcomeText: { color: C.muted, fontSize: 14, lineHeight: 20, textAlign: 'center', marginTop: 7, maxWidth: 360 },
   suggestionsAnimated: { overflow: 'hidden' }, suggestions: { borderRadius: 18, backgroundColor: '#f3f6f4', overflow: 'hidden' }, suggestion: { minHeight: 62, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.white }, pressed: { opacity: 0.7 }, suggestionIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: C.white, marginRight: 11 }, suggestionText: { flex: 1, color: C.text, fontSize: 13, lineHeight: 18, fontWeight: '600', marginRight: 7 },
-  messageRow: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 12, maxWidth: '88%' }, messageRowUser: { alignSelf: 'flex-end', justifyContent: 'flex-end' }, avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.green100, marginRight: 7 }, avatarError: { backgroundColor: C.dangerBg }, bubble: { borderRadius: 17, paddingHorizontal: 13, paddingVertical: 10 }, bubbleSia: { backgroundColor: '#f0f5f2', borderBottomLeftRadius: 5 }, bubbleUser: { backgroundColor: C.green800, borderBottomRightRadius: 5 }, bubbleError: { backgroundColor: C.dangerBg }, category: { color: C.green600, fontSize: 9, fontWeight: '800', letterSpacing: 0.65, marginBottom: 4 }, highlight: { alignSelf: 'flex-start', color: C.danger, backgroundColor: C.white, borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3, fontSize: 9, fontWeight: '800', marginBottom: 6 }, messageText: { color: C.text, fontSize: 14, lineHeight: 20 }, messageTextUser: { color: C.white }, messageTextError: { color: C.danger }, thinking: { color: C.muted, fontSize: 13, fontStyle: 'italic' },
+  messageRow: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 12, maxWidth: '88%' }, messageRowUser: { alignSelf: 'flex-end', justifyContent: 'flex-end' }, avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.green100, marginRight: 7 }, avatarError: { backgroundColor: C.dangerBg }, bubble: { borderRadius: 17, paddingHorizontal: 13, paddingVertical: 10 }, bubbleSia: { backgroundColor: '#f0f5f2', borderBottomLeftRadius: 5 }, bubbleUser: { backgroundColor: C.green800, borderBottomRightRadius: 5 }, bubbleError: { backgroundColor: C.dangerBg }, messageText: { color: C.text, fontSize: 14, lineHeight: 20 }, messageTextUser: { color: C.white }, messageTextError: { color: C.danger }, thinking: { color: C.muted, fontSize: 13, fontStyle: 'italic' },
   safety: { color: C.muted, fontSize: 9, textAlign: 'center', paddingHorizontal: 14, paddingBottom: 5 }, composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 9, paddingHorizontal: 14, paddingTop: 7, paddingBottom: 8, backgroundColor: C.white }, composerField: { flex: 1, minHeight: 48, maxHeight: 108, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: C.border, borderRadius: 24, overflow: 'hidden' }, attach: { width: 44, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }, input: { flex: 1, minHeight: 46, maxHeight: 106, paddingLeft: 0, paddingRight: 14, paddingVertical: 12, color: C.text, fontSize: 16, textAlignVertical: 'top' }, send: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: C.green700 }, sendDisabled: { backgroundColor: '#b6c5bc' },
 });
