@@ -11,6 +11,8 @@ import { PetSwitcher } from '../../components/PetSwitcher';
 import { Calendario, dateKey } from '../../components/Calendario';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento, formatarDataEvento } from '../../utils/eventoStatus';
 import { alertar } from '../../utils/alert';
+import { cancelarLembretes } from '../../services/calendarService';
+import { obterERemoverLembretesEvento } from '../../storage/petStorage';
 import type { Evento } from '../../types';
 
 const C = {
@@ -99,6 +101,15 @@ export default function AgendaScreen() {
     setMotivoCancelamento('');
   }
 
+  async function cancelarLembretesLocais(eventoId: string) {
+    try {
+      const ids = await obterERemoverLembretesEvento(eventoId);
+      if (ids.length > 0) await cancelarLembretes(ids);
+    } catch {
+      // Falha ao cancelar lembretes locais não deve bloquear o fluxo do evento.
+    }
+  }
+
   async function confirmarCancelamento() {
     if (!eventoParaCancelar) return;
     if (!motivoCancelamento.trim()) {
@@ -107,6 +118,7 @@ export default function AgendaScreen() {
     }
     try {
       await cancelarMutation.mutateAsync({ id: eventoParaCancelar.id, motivo: motivoCancelamento.trim() });
+      await cancelarLembretesLocais(eventoParaCancelar.id);
       setEventoParaCancelar(null);
     } catch {
       alertar('Não foi possível cancelar', 'Tente novamente em instantes.');
@@ -116,6 +128,7 @@ export default function AgendaScreen() {
   async function handleRemover(evento: Evento) {
     try {
       await removerMutation.mutateAsync(evento.id);
+      await cancelarLembretesLocais(evento.id);
     } catch {
       alertar(
         'Não foi possível remover',
