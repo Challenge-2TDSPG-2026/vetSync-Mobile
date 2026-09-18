@@ -2,6 +2,7 @@ import * as Calendar from 'expo-calendar';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import type { Evento, Pet } from '../types';
+import { parseDataEvento } from '../utils/eventoStatus';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -55,7 +56,7 @@ export async function adicionarEventoAoCalendario(evento: Evento, pet?: Pet | nu
   if (!ok) return null;
 
   const calendarioId = await obterOuCriarCalendarioId();
-  const inicio = new Date(evento.data);
+  const inicio = parseDataEvento(evento.data);
   const fim = new Date(inicio.getTime() + 60 * 60 * 1000);
 
   return Calendar.createEventAsync(calendarioId, {
@@ -81,7 +82,7 @@ export async function agendarLembretes(
   const ok = await pedirPermissaoNotificacao();
   if (!ok) return [];
 
-  const dataEvento = new Date(evento.data);
+  const dataEvento = parseDataEvento(evento.data);
   const ids: string[] = [];
 
   for (const dias of diasAntes) {
