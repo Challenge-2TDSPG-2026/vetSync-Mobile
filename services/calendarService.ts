@@ -1,18 +1,34 @@
 import * as Calendar from 'expo-calendar';
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import type * as NotificationsModule from 'expo-notifications';
 import type { Evento, Pet } from '../types';
 import { parseDataEvento } from '../utils/eventoStatus';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+let notifications: typeof NotificationsModule | null | undefined;
+
+function obterNotificacoes(): typeof NotificationsModule | null {
+  if (notifications !== undefined) return notifications;
+
+  try {
+    // Expo Go no Android não inclui o suporte completo a push remoto. Carregar o
+    // módulo apenas quando ele for necessário evita que essa limitação interrompa
+    // a avaliação das rotas que usam calendário.
+    notifications = require('expo-notifications') as typeof NotificationsModule;
+    notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  } catch {
+    notifications = null;
+  }
+
+  return notifications;
+}
 
 const NOME_CALENDARIO = 'VetSync';
 
@@ -22,7 +38,10 @@ export async function pedirPermissaoCalendario(): Promise<boolean> {
 }
 
 export async function pedirPermissaoNotificacao(): Promise<boolean> {
-  const { status } = await Notifications.requestPermissionsAsync();
+  const notificacoes = obterNotificacoes();
+  if (!notificacoes) return false;
+
+  const { status } = await notificacoes.requestPermissionsAsync();
   return status === 'granted';
 }
 
@@ -79,6 +98,9 @@ export async function agendarLembretes(
   pet: Pet | null,
   diasAntes: number[] = [7, 1],
 ): Promise<string[]> {
+  const notificacoes = obterNotificacoes();
+  if (!notificacoes) return [];
+
   const ok = await pedirPermissaoNotificacao();
   if (!ok) return [];
 
@@ -91,13 +113,13 @@ export async function agendarLembretes(
     disparo.setHours(9, 0, 0, 0);
     if (disparo.getTime() <= Date.now()) continue;
 
-    const id = await Notifications.scheduleNotificationAsync({
+    const id = await notificacoes.scheduleNotificationAsync({
       content: {
         title: dias === 0 ? 'Evento hoje' : `Evento em ${dias} dia${dias > 1 ? 's' : ''}`,
         body: `${evento.nomeTipoEvento}${pet ? ` — ${pet.nome}` : ''}`,
         data: { eventoId: evento.id },
       },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: disparo },
+      trigger: { type: notificacoes.SchedulableTriggerInputTypes.DATE, date: disparo },
     });
     ids.push(id);
   }
@@ -105,5 +127,8 @@ export async function agendarLembretes(
 }
 
 export async function cancelarLembretes(ids: string[]): Promise<void> {
-  await Promise.all(ids.map(id => Notifications.cancelScheduledNotificationAsync(id)));
+  const notificacoes = obterNotificacoes();
+  if (!notificacoes) return;
+
+  await Promise.all(ids.map(id => notificacoes.cancelScheduledNotificationAsync(id)));
 }
