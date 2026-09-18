@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { usePet } from '../context/PetContext';
+import { AppIcon } from '../components/AppIcon';
 import { ApiError } from '../services/api/httpClient';
 import { iaService } from '../services/iaService';
 import type { CategoriaSia } from '../services/iaService';
@@ -122,6 +123,11 @@ export default function AssistenteScreen() {
     <Animated.View pointerEvents="none" style={[s.backdrop, { opacity: opacidadeFundo }]} />
     <Pressable style={StyleSheet.absoluteFill} onPress={fechar} accessibilityLabel="Fechar SIA" />
     <Animated.View style={[s.sheet, { paddingBottom: Math.max(insets.bottom, 8), transform: [{ translateY: deslocamento }] }]}>
+      <View pointerEvents="none" style={s.pawWatermarks}>
+        <AppIcon name="paw" set="MaterialCommunityIcons" size={188} color="rgba(26,122,82,0.045)" style={s.pawWatermarkLarge} />
+        <AppIcon name="paw" set="MaterialCommunityIcons" size={52} color="rgba(26,122,82,0.055)" style={s.pawWatermarkSmall} />
+        <AppIcon name="paw" set="MaterialCommunityIcons" size={82} color="rgba(26,122,82,0.04)" style={s.pawWatermarkBottom} />
+      </View>
       <View {...gestoAlca.panHandlers} style={s.handleArea} accessibilityLabel="Arraste para baixo para fechar a SIA">
         <View style={s.handle} />
       </View>
@@ -168,6 +174,10 @@ const s = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'transparent' },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(10,34,24,0.35)' },
   sheet: { width: '100%', maxWidth: 680, height: '86%', backgroundColor: C.white, borderTopLeftRadius: 28, borderTopRightRadius: 28, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 16, shadowOffset: { width: 0, height: -4 }, elevation: 16 },
+  pawWatermarks: { ...StyleSheet.absoluteFill, overflow: 'hidden' },
+  pawWatermarkLarge: { position: 'absolute', top: 112, right: -50, transform: [{ rotate: '-18deg' }] },
+  pawWatermarkSmall: { position: 'absolute', top: '43%', left: 17, transform: [{ rotate: '20deg' }] },
+  pawWatermarkBottom: { position: 'absolute', bottom: 56, right: 10, transform: [{ rotate: '14deg' }] },
   handleArea: { height: 28, alignItems: 'center', justifyContent: 'center' }, handle: { width: 42, height: 5, borderRadius: 3, backgroundColor: '#b7b3c2' },
   header: { minHeight: 76, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.border },
   headerButton: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f5f2' }, disabled: { opacity: 0.38 },
