@@ -3,7 +3,6 @@ export const STORAGE_KEYS = {
   PET_ATIVO: '@vetsync:pet_ativo',
   EVENTOS: '@vetsync:eventos',
   ONBOARDING_CONCLUIDO: '@vetsync:onboarding',
-  NOTIFICACOES: '@vetsync:notificacoes',
   SESSAO: '@vetsync:sessao',
   SESSAO_ENCERRADA: '@vetsync:sessao_encerrada',
   CONTAS_CONHECIDAS: '@vetsync:contas_conhecidas',

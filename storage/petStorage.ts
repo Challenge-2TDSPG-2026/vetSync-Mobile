@@ -18,21 +18,10 @@ export async function verificarOnboardingConcluido(): Promise<boolean> {
   return val === 'true';
 }
 
-export async function salvarPreferencias(prefs: Record<string, boolean>): Promise<void> {
-  await AsyncStorage.setItem(STORAGE_KEYS.NOTIFICACOES, JSON.stringify(prefs));
-}
-
-export async function carregarPreferencias(): Promise<Record<string, boolean>> {
-  const raw = await AsyncStorage.getItem(STORAGE_KEYS.NOTIFICACOES);
-  if (!raw) return { ativas: true, lembrete7: true, lembreteAntes: true };
-  return JSON.parse(raw);
-}
-
 export async function resetarPreferenciasLocais(): Promise<void> {
   await AsyncStorage.multiRemove([
     STORAGE_KEYS.PET_ATIVO,
     STORAGE_KEYS.ONBOARDING_CONCLUIDO,
-    STORAGE_KEYS.NOTIFICACOES,
     STORAGE_KEYS.LEMBRETES_EVENTO,
   ]);
 }

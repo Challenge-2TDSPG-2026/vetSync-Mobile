@@ -4,8 +4,6 @@ import { XP_POR_EVENTO, NIVEIS } from '../constants';
 import {
   salvarPetAtivoId,
   carregarPetAtivoId,
-  salvarPreferencias,
-  carregarPreferencias,
   resetarPreferenciasLocais,
 } from '../storage/petStorage';
 import { useAuth } from './AuthContext';
@@ -37,9 +35,6 @@ type PetContextValue = {
   erroPets: boolean;
   recarregarPets: () => void;
 
-  preferencias: Record<string, boolean>;
-  atualizarPreferencias: (prefs: Record<string, boolean>) => Promise<void>;
-
   onboardingConcluido: boolean;
   carregando: boolean;
   resetarPreferencias: () => Promise<void>;
@@ -53,21 +48,12 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
   const { autenticado, carregando: carregandoAuth } = useAuth();
 
   const [petAtivoId, setPetAtivoIdState] = useState<string | null>(null);
-  const [preferencias, setPreferencias] = useState<Record<string, boolean>>({
-    ativas: true,
-    lembrete7: true,
-    lembreteAntes: true,
-  });
   const [carregandoLocal, setCarregandoLocal] = useState(true);
 
   useEffect(() => {
     async function carregarLocal() {
-      const [ativoSalvo, prefsSalvas] = await Promise.all([
-        carregarPetAtivoId(),
-        carregarPreferencias(),
-      ]);
+      const ativoSalvo = await carregarPetAtivoId();
       setPetAtivoIdState(ativoSalvo);
-      setPreferencias(prefsSalvas);
       setCarregandoLocal(false);
     }
     carregarLocal();
@@ -115,15 +101,9 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
     [eventosTodos, petAtivoId]
   );
 
-  const atualizarPreferencias = useCallback(async (prefs: Record<string, boolean>) => {
-    await salvarPreferencias(prefs);
-    setPreferencias(prefs);
-  }, []);
-
   const resetarPreferencias = useCallback(async () => {
     await resetarPreferenciasLocais();
     setPetAtivoIdState(null);
-    setPreferencias({ ativas: true, lembrete7: true, lembreteAntes: true });
   }, []);
 
 
@@ -176,8 +156,6 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
         carregandoEventos,
         erroPets,
         recarregarPets: () => { recarregarPets(); },
-        preferencias,
-        atualizarPreferencias,
         onboardingConcluido,
         carregando,
         resetarPreferencias,
