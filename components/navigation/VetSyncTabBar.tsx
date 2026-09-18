@@ -43,8 +43,8 @@ function AssistantItem({ simples }: { simples?: boolean }) {
 export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarProps) {
   const insets = useSafeAreaInsets();
   const { modoSimples } = useAccessibility();
-  const routesVisiveis = state.routes.filter(route => route.name !== 'perfil');
-  // A IA ocupa o centro da barra; Histórico segue imediatamente à direita.
+  const routesVisiveis = state.routes.filter(route => route.name !== 'perfil' && route.name !== 'historico');
+  // A IA ocupa o centro da barra; Carteiras segue imediatamente à direita.
   const indiceDaIa = Math.min(2, routesVisiveis.length);
   const altura = (modoSimples ? 96 : 82) + Math.max(insets.bottom, 6);
   return <View style={[s.shell, { paddingBottom: Math.max(insets.bottom, 6), height: altura }]}>
