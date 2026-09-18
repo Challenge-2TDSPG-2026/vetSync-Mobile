@@ -49,7 +49,7 @@ function mensagemDeErro(e: unknown, fallback: string): string {
 
 export default function AddEventoScreen() {
   const router = useRouter();
-  const { petAtivo, preferencias } = usePet();
+  const { petAtivo } = usePet();
 
   const { data: tiposEvento = [], isLoading: carregandoTipos } = useTiposEvento(true);
   const { data: veterinarios = [], isLoading: carregandoVets } = useVeterinarios(true);
@@ -60,7 +60,16 @@ export default function AddEventoScreen() {
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
   const [observacao, setObservacao] = useState('');
+  const [lembretesSelecionados, setLembretesSelecionados] = useState<number[]>([7, 1]);
   const [erros, setErros] = useState<Record<string, string>>({});
+
+  function alternarLembrete(diasAntes: number) {
+    setLembretesSelecionados(atual => (
+      atual.includes(diasAntes)
+        ? atual.filter(dias => dias !== diasAntes)
+        : [...atual, diasAntes].sort((a, b) => a - b)
+    ));
+  }
 
   function validar(): boolean {
     const e: Record<string, string> = {};
@@ -84,18 +93,12 @@ export default function AddEventoScreen() {
         observacao: observacao.trim() || undefined,
       });
 
-      if (preferencias.ativas ?? true) {
-        const diasAntes = [
-          ...(preferencias.lembrete7 ?? true ? [7] : []),
-          ...(preferencias.lembreteAntes ?? true ? [1] : []),
-        ];
-        if (diasAntes.length > 0) {
-          try {
-            const idsLembretes = await agendarLembretes(evento, petAtivo, diasAntes);
-            await salvarLembretesEvento(evento.id, idsLembretes);
-          } catch {
-            // Falha ao agendar lembretes não deve bloquear a criação do evento.
-          }
+      if (lembretesSelecionados.length > 0) {
+        try {
+          const idsLembretes = await agendarLembretes(evento, petAtivo, lembretesSelecionados);
+          await salvarLembretesEvento(evento.id, idsLembretes);
+        } catch {
+          // Falha ao agendar lembretes não deve bloquear a criação do evento.
         }
       }
 
@@ -290,6 +293,39 @@ export default function AddEventoScreen() {
             </View>
           </View>
 
+          <View style={s.secao}>
+            <View style={s.secaoHeadRow}>
+              <AppIcon name="notifications-outline" set="Ionicons" size={16} color={C.g700} />
+              <Text style={s.secaoTitulo}>Lembretes</Text>
+            </View>
+            <Text style={s.lembreteAjuda}>Escolha quando deseja ser avisado sobre este evento.</Text>
+            <View style={s.lembreteOpcoes}>
+              {[
+                { dias: 0, label: 'No dia' },
+                { dias: 1, label: '1 dia antes' },
+                { dias: 7, label: '7 dias antes' },
+              ].map(opcao => {
+                const selecionado = lembretesSelecionados.includes(opcao.dias);
+                return (
+                  <Pressable
+                    key={opcao.dias}
+                    style={[s.lembreteOpcao, selecionado && s.lembreteOpcaoSelecionada]}
+                    onPress={() => alternarLembrete(opcao.dias)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: selecionado }}
+                    accessibilityLabel={`${opcao.label}${selecionado ? ', selecionado' : ''}`}
+                  >
+                    {selecionado && <AppIcon name="checkmark" set="Ionicons" size={13} color={C.white} />}
+                    <Text style={[s.lembreteOpcaoTexto, selecionado && s.lembreteOpcaoTextoSelecionado]}>{opcao.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            {lembretesSelecionados.length === 0 && (
+              <Text style={s.lembreteSemAviso}>Este evento será criado sem lembretes.</Text>
+            )}
+          </View>
+
           <Pressable
             style={({ pressed }) => [s.btnSalvar, { backgroundColor: corTema }, pressed && { opacity: 0.9 }, agendarMutation.isPending && { opacity: 0.6 }]}
             onPress={handleSalvar}
@@ -394,6 +430,14 @@ const s = StyleSheet.create({
   fiInput: { flex: 1, paddingVertical: 13, fontSize: 14, color: C.text },
   fiTextarea: { minHeight: 80, textAlignVertical: 'top', paddingVertical: 12 },
   textoErro: { color: C.danger, fontSize: 12, marginTop: 6, fontWeight: '600' },
+
+  lembreteAjuda: { color: C.muted, fontSize: 12, lineHeight: 17, marginTop: -4, marginBottom: 11 },
+  lembreteOpcoes: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  lembreteOpcao: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 999, backgroundColor: C.w50, borderWidth: 1, borderColor: C.border, paddingHorizontal: 12, paddingVertical: 9 },
+  lembreteOpcaoSelecionada: { backgroundColor: C.g600, borderColor: C.g600 },
+  lembreteOpcaoTexto: { color: C.text, fontSize: 12, fontWeight: '700' },
+  lembreteOpcaoTextoSelecionado: { color: C.white },
+  lembreteSemAviso: { color: C.muted, fontSize: 11, marginTop: 10 },
 
   tipoBtn: {
     alignItems: 'center',
