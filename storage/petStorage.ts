@@ -33,7 +33,32 @@ export async function resetarPreferenciasLocais(): Promise<void> {
     STORAGE_KEYS.PET_ATIVO,
     STORAGE_KEYS.ONBOARDING_CONCLUIDO,
     STORAGE_KEYS.NOTIFICACOES,
+    STORAGE_KEYS.LEMBRETES_EVENTO,
   ]);
+}
+
+async function carregarMapaLembretes(): Promise<Record<string, string[]>> {
+  const raw = await AsyncStorage.getItem(STORAGE_KEYS.LEMBRETES_EVENTO);
+  return raw ? JSON.parse(raw) : {};
+}
+
+async function salvarMapaLembretes(mapa: Record<string, string[]>): Promise<void> {
+  await AsyncStorage.setItem(STORAGE_KEYS.LEMBRETES_EVENTO, JSON.stringify(mapa));
+}
+
+export async function salvarLembretesEvento(eventoId: string, ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const mapa = await carregarMapaLembretes();
+  mapa[eventoId] = ids;
+  await salvarMapaLembretes(mapa);
+}
+
+export async function obterERemoverLembretesEvento(eventoId: string): Promise<string[]> {
+  const mapa = await carregarMapaLembretes();
+  const ids = mapa[eventoId] ?? [];
+  delete mapa[eventoId];
+  await salvarMapaLembretes(mapa);
+  return ids;
 }
 
 export async function salvarModoSimples(ativo: boolean): Promise<void> {
