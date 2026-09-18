@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useAuth } from '../../context/AuthContext';
@@ -91,18 +92,21 @@ export default function RecompensasScreen() {
 
       {/* Banner — some no modo simples */}
       {!modoSimples && (
-        <View style={s.banner}>
+        <LinearGradient colors={[C.g900, C.g700]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.banner}>
+          <AppIcon name="paw" set="MaterialCommunityIcons" size={176} color="rgba(255,255,255,0.06)" style={s.bannerPaw} />
           <View style={s.bannerIconWrap}>
             <AppIcon name="gift-outline" set="Ionicons" size={30} color={C.white} />
           </View>
+          <Text style={s.bannerKicker}>CUIDADO QUE RECOMPENSA</Text>
           <Text style={s.bannerTitulo}>Programa de Fidelidade</Text>
           <Text style={s.bannerSub}>
             Acumule pontos em cada atendimento e resgate benefícios exclusivos para {petAtivo?.nome ?? 'seu pet'}.
           </Text>
-        </View>
+        </LinearGradient>
       )}
 
       <View style={[s.nivelCard, modoSimples && sSimples.nivelCard]}>
+        <Text style={s.nivelKicker}>SEU NÍVEL ATUAL</Text>
         <View style={s.nivelHead}>
           <View style={[s.nivelBadge, modoSimples && sSimples.nivelBadge]}>
             <Text style={[s.nivelBadgeNumero, modoSimples && sSimples.nivelBadgeNumero]}>{nivelInfo.nivel}</Text>
@@ -157,7 +161,10 @@ export default function RecompensasScreen() {
 
       <View style={s.secLabelRow}>
         <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Benefícios do Catálogo</Text>
-        <Text style={s.secLabelContagem}>Saldo: {saldoPontos} pts</Text>
+        <View style={s.saldoPill}>
+          <AppIcon name="sparkles" set="Ionicons" size={12} color={C.ouro} />
+          <Text style={s.secLabelContagem}>{saldoPontos} pts</Text>
+        </View>
       </View>
 
       {carregandoCatalogo ? (
@@ -307,60 +314,60 @@ export default function RecompensasScreen() {
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
-  content: { padding: 16, paddingBottom: 42 },
+  content: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 42 },
 
   banner: {
-    backgroundColor: C.g800,
-    borderRadius: 16,
+    borderRadius: 28,
     padding: 22,
-    alignItems: 'center',
+    overflow: 'hidden',
     marginBottom: 18,
   },
+  bannerPaw: { position: 'absolute', right: -30, top: -31, transform: [{ rotate: '-19deg' }] },
   bannerIconWrap: {
-    width: 60, height: 60, borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    width: 52, height: 52, borderRadius: 16,
+    backgroundColor: C.g500,
     justifyContent: 'center', alignItems: 'center',
-    marginBottom: 11,
+    marginBottom: 17,
   },
-  bannerTitulo: { fontSize: 19, fontWeight: '700', color: C.white, marginBottom: 5 },
-  bannerSub: { fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center', paddingHorizontal: 12 },
+  bannerKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1.25, color: C.g200, marginBottom: 6 },
+  bannerTitulo: { fontSize: 25, lineHeight: 30, fontWeight: '800', color: C.white, letterSpacing: -0.45, marginBottom: 6 },
+  bannerSub: { maxWidth: 285, fontSize: 14, lineHeight: 20, color: 'rgba(212,242,228,0.86)' },
 
-  verMaisCatalogo: { minHeight: 48, marginTop: -2, marginBottom: 18, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: C.g50 },
+  verMaisCatalogo: { minHeight: 48, marginTop: -2, marginBottom: 18, borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: C.g50 },
   verMaisCatalogoTexto: { fontSize: 14, fontWeight: '700', color: C.g700 },
 
   nivelCard: {
-    backgroundColor: C.white,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: C.border,
-    padding: 20,
+    backgroundColor: C.roxoClaro,
+    borderRadius: 22,
+    padding: 18,
     marginBottom: 18,
   },
-  nivelHead: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 15 },
+  nivelKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: C.roxo, marginBottom: 11 },
+  nivelHead: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 16 },
   nivelBadge: {
-    width: 52, height: 52, borderRadius: 26,
+    width: 54, height: 54, borderRadius: 18,
     backgroundColor: C.roxo,
     justifyContent: 'center', alignItems: 'center',
+    shadowColor: C.roxo, shadowOpacity: 0.22, shadowRadius: 9, shadowOffset: { width: 0, height: 4 }, elevation: 3,
   },
-  nivelBadgeNumero: { fontSize: 20, fontWeight: '700', color: C.white },
-  nivelTitulo: { fontSize: 17, fontWeight: '700', color: C.text },
+  nivelBadgeNumero: { fontSize: 21, fontWeight: '800', color: C.white },
+  nivelTitulo: { fontSize: 18, fontWeight: '800', color: C.text },
   nivelSub: { fontSize: 14, color: C.muted, marginTop: 3 },
-  barraTrackRoxo: { height: 10, backgroundColor: C.roxoClaro, borderRadius: 5, overflow: 'hidden', marginBottom: 9 },
+  barraTrackRoxo: { height: 10, backgroundColor: 'rgba(109,74,168,0.16)', borderRadius: 5, overflow: 'hidden', marginBottom: 9 },
   barraFillRoxo: { height: '100%', backgroundColor: C.roxo, borderRadius: 5 },
-  nivelHint: { fontSize: 14, color: C.text, fontWeight: '600', marginBottom: 2 },
+  nivelHint: { fontSize: 13, color: C.text, fontWeight: '700', marginBottom: 3 },
   nivelDica: { fontSize: 12, color: C.muted },
 
   progressoCard: {
     backgroundColor: C.white,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: C.border,
-    padding: 20,
+    borderRadius: 22,
+    padding: 18,
     marginBottom: 22,
+    shadowColor: '#281d15', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   progressoHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 11 },
   progressoLbl: { fontSize: 13, fontWeight: '700', color: C.muted, textTransform: 'uppercase', letterSpacing: 0.4 },
-  progressoContagem: { fontSize: 20, fontWeight: '700', color: C.g700 },
+  progressoContagem: { fontSize: 20, fontWeight: '800', color: C.g700 },
   barraTrack: { height: 11, backgroundColor: C.w100, borderRadius: 6, overflow: 'hidden', marginBottom: 11 },
   barraFill: { height: '100%', backgroundColor: C.g500, borderRadius: 6 },
   progressoHint: { fontSize: 13, color: C.muted, marginBottom: 15 },
@@ -381,10 +388,11 @@ const s = StyleSheet.create({
   secLabelRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 2,
   },
-  secLabelContagem: { fontSize: 12, fontWeight: '700', color: C.g600, marginBottom: 11 },
+  saldoPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: C.ouroClaro, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, marginBottom: 11 },
+  secLabelContagem: { fontSize: 12, fontWeight: '800', color: C.ouro },
 
   emptyCard: {
-    backgroundColor: C.white, borderRadius: 12, borderWidth: 1, borderColor: C.border,
+    backgroundColor: C.white, borderRadius: 22, borderWidth: 1, borderColor: C.border, borderStyle: 'dashed',
     padding: 26, alignItems: 'center', marginBottom: 22,
   },
   emptyTitle: { fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 4 },
@@ -392,20 +400,19 @@ const s = StyleSheet.create({
 
   cupomCard: {
     flexDirection: 'row', alignItems: 'center', gap: 13,
-    backgroundColor: C.ouroClaro, borderRadius: 12,
-    borderWidth: 1.5, borderColor: C.ouro,
-    padding: 16, marginBottom: 11,
+    backgroundColor: C.white, borderRadius: 20,
+    padding: 15, marginBottom: 11,
+    shadowColor: '#281d15', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   cupomIconWrap: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: C.white, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: C.ouro,
+    width: 48, height: 48, borderRadius: 16,
+    backgroundColor: C.ouroClaro, justifyContent: 'center', alignItems: 'center',
   },
   cupomInfo: { flex: 1 },
-  cupomTitulo: { fontSize: 16, fontWeight: '700', color: C.text },
+  cupomTitulo: { fontSize: 16, fontWeight: '800', color: C.text },
   cupomSub: { fontSize: 13, color: C.muted, marginTop: 3 },
   btnResgatar: {
-    backgroundColor: C.ouro, paddingHorizontal: 16, paddingVertical: 11, borderRadius: 8,
+    backgroundColor: C.ouro, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999,
   },
   btnResgatarText: { color: C.white, fontSize: 14, fontWeight: '700' },
 
@@ -415,13 +422,12 @@ const s = StyleSheet.create({
   conquistaCard: {
     width: '31%',
     backgroundColor: C.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: C.g200,
+    borderRadius: 18,
     padding: 11,
     alignItems: 'center',
+    shadowColor: '#281d15', shadowOpacity: 0.05, shadowRadius: 9, shadowOffset: { width: 0, height: 3 }, elevation: 1,
   },
-  conquistaCardBloqueada: { borderColor: C.border, opacity: 0.55 },
+  conquistaCardBloqueada: { opacity: 0.55 },
   conquistaIconWrap: {
     width: 38, height: 38, borderRadius: 19,
     backgroundColor: C.w100,
@@ -434,8 +440,8 @@ const s = StyleSheet.create({
   conquistaDescricao: { fontSize: 9, color: C.muted, textAlign: 'center', lineHeight: 12 },
 
   statsCard: {
-    flexDirection: 'row', backgroundColor: C.white, borderRadius: 12,
-    borderWidth: 1, borderColor: C.border, marginBottom: 22, overflow: 'hidden',
+    flexDirection: 'row', backgroundColor: C.white, borderRadius: 22,
+    marginBottom: 22, overflow: 'hidden', shadowColor: '#281d15', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   statItem: { flex: 1, alignItems: 'center', paddingVertical: 17 },
   statValor: { fontSize: 23, fontWeight: '700', color: C.g700 },
@@ -443,7 +449,7 @@ const s = StyleSheet.create({
   statDivisor: { width: 1, backgroundColor: C.border },
 
   historicoCard: {
-    backgroundColor: C.white, borderRadius: 12, borderWidth: 1, borderColor: C.border, overflow: 'hidden',
+    backgroundColor: C.white, borderRadius: 22, overflow: 'hidden', shadowColor: '#281d15', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   historicoRow: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 16 },
   historicoRowBorder: { borderBottomWidth: 1, borderBottomColor: C.border },
