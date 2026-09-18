@@ -3,7 +3,8 @@ import {
   View, Text, TextInput, ScrollView, Pressable,
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
-import { useRouter, Stack } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { usePet } from '../context/PetContext';
 import { useTiposEvento, useVeterinarios, useAgendarEvento } from '../hooks/useEventos';
 import { obterVisualTipoEvento } from '../constants';
@@ -15,8 +16,10 @@ import { salvarLembretesEvento } from '../storage/petStorage';
 import type { TipoEvento, Veterinario } from '../types';
 
 const C = {
+  night: '#0a2218', forest: '#123d29',
   g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
   g500: '#22a06b', g400: '#3db87e', g200: '#a8e6c7', g100: '#d4f2e4', g50: '#edfaf3',
+  glow: '#f2c879',
   cream: '#f6f4ef', w50: '#f9f7f4', w100: '#f0ece5',
   text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff',
   danger: '#dc3545', dangerLight: '#fff2f2', warn: '#e67e22',
@@ -107,33 +110,53 @@ export default function AddEventoScreen() {
   const corTema = visualTipo?.cor ?? C.g600;
 
   return (
-    <>
-      <Stack.Screen options={{
-        title: 'Agendar Evento de Saúde',
-        headerStyle: { backgroundColor: C.g900 },
-        headerTintColor: C.white,
-        headerTitleStyle: { fontWeight: '700' },
-      }} />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView style={s.container} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.night }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={s.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
 
-          <View style={[s.hero, { backgroundColor: corTema }]}>
-            <View style={s.heroIconWrap}>
+        <LinearGradient colors={[C.night, corTema]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
+          <AppIcon name="paw" set="MaterialCommunityIcons" size={190} color="rgba(255,255,255,0.05)" style={s.pawMarca} />
+
+          <Pressable
+            onPress={() => router.replace('/(tutor)')}
+            style={s.btnFechar}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar"
+          >
+            <AppIcon name="close" set="Ionicons" size={20} color="#fff" />
+          </Pressable>
+
+          <View style={s.seloWrap}>
+            <View style={s.seloGlowOut} />
+            <View style={s.seloGlowIn} />
+            <View style={[s.selo, { backgroundColor: corTema }]}>
               <AppIcon
                 name={visualTipo?.icon ?? 'document-text-outline'}
                 set={visualTipo?.iconSet ?? 'Ionicons'}
-                size={30}
-                color={C.white}
+                size={26}
+                color="#fff"
               />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={s.heroTitulo} numberOfLines={1}>{tipoSelecionado?.nome ?? 'Novo evento de saúde'}</Text>
-              <Text style={s.heroSub} numberOfLines={1}>
-                {vetSelecionado ? vetSelecionado.nome : 'Escolha o veterinário'} • {data || 'Data'}{hora ? ` às ${hora}` : ''}
-              </Text>
-              {petAtivo ? <Text style={s.heroPet}>Para {petAtivo.nome}</Text> : null}
-            </View>
           </View>
+
+          <Text style={s.heroTitulo} numberOfLines={2}>{tipoSelecionado?.nome ?? 'Novo evento de saúde'}</Text>
+          <Text style={s.heroSub} numberOfLines={1}>
+            {vetSelecionado ? vetSelecionado.nome : 'Escolha o veterinário'} • {data || 'Data'}{hora ? ` às ${hora}` : ''}
+          </Text>
+          {petAtivo ? (
+            <View style={s.petPill}>
+              <AppIcon name="paw" set="MaterialCommunityIcons" size={12} color="#fff" />
+              <Text style={s.petPillTexto}>Para {petAtivo.nome}</Text>
+            </View>
+          ) : null}
+        </LinearGradient>
+
+        <View style={s.sheet}>
 
           {carregandoCatalogo ? (
             <View style={s.loadingBox}>
@@ -154,7 +177,7 @@ export default function AddEventoScreen() {
                       return (
                         <Pressable
                           key={t.id}
-                          style={[s.tipoBtn, ativo && { backgroundColor: v.cor, borderColor: v.cor }]}
+                          style={[s.tipoBtn, ativo && { backgroundColor: v.cor }]}
                           onPress={() => setTipoSelecionado(t)}
                         >
                           {ativo && (
@@ -217,27 +240,33 @@ export default function AddEventoScreen() {
             </View>
             <View style={s.fr}>
               <View style={{ flex: 1 }}>
-                <TextInput
-                  style={[s.fiInput, erros.data && s.fiInputErro]}
-                  value={data}
-                  onChangeText={v => setData(formatarData(v))}
-                  placeholder="DD/MM/AAAA"
-                  placeholderTextColor={C.muted}
-                  keyboardType="numeric"
-                  maxLength={10}
-                />
+                <View style={[s.inputWrap, erros.data && s.inputWrapErro]}>
+                  <AppIcon name="calendar-outline" set="Ionicons" size={16} color={C.muted} style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={s.fiInput}
+                    value={data}
+                    onChangeText={v => setData(formatarData(v))}
+                    placeholder="DD/MM/AAAA"
+                    placeholderTextColor={C.muted}
+                    keyboardType="numeric"
+                    maxLength={10}
+                  />
+                </View>
                 {erros.data ? <Text style={s.textoErro}>{erros.data}</Text> : null}
               </View>
-              <View style={{ width: 100 }}>
-                <TextInput
-                  style={[s.fiInput, erros.hora && s.fiInputErro]}
-                  value={hora}
-                  onChangeText={v => setHora(formatarHora(v))}
-                  placeholder="HH:MM"
-                  placeholderTextColor={C.muted}
-                  keyboardType="numeric"
-                  maxLength={5}
-                />
+              <View style={{ width: 118 }}>
+                <View style={[s.inputWrap, erros.hora && s.inputWrapErro]}>
+                  <AppIcon name="time-outline" set="Ionicons" size={16} color={C.muted} style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={s.fiInput}
+                    value={hora}
+                    onChangeText={v => setHora(formatarHora(v))}
+                    placeholder="HH:MM"
+                    placeholderTextColor={C.muted}
+                    keyboardType="numeric"
+                    maxLength={5}
+                  />
+                </View>
                 {erros.hora ? <Text style={s.textoErro}>{erros.hora}</Text> : null}
               </View>
             </View>
@@ -248,97 +277,122 @@ export default function AddEventoScreen() {
               <AppIcon name="create-outline" set="Ionicons" size={16} color={C.g700} />
               <Text style={s.secaoTitulo}>Observação</Text>
             </View>
-            <TextInput
-              style={[s.fiInput, s.fiTextarea]}
-              value={observacao}
-              onChangeText={setObservacao}
-              placeholder="Sintomas, contexto, pedidos específicos..."
-              placeholderTextColor={C.muted}
-              multiline
-              numberOfLines={3}
-            />
+            <View style={[s.inputWrap, s.inputWrapTextarea]}>
+              <TextInput
+                style={[s.fiInput, s.fiTextarea]}
+                value={observacao}
+                onChangeText={setObservacao}
+                placeholder="Sintomas, contexto, pedidos específicos..."
+                placeholderTextColor={C.muted}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
           </View>
 
-          <View style={s.modalFoot}>
-            <Pressable style={s.btnCancelar} onPress={() => router.replace('/(tutor)')}>
-              <Text style={s.btnCancelarText}>Cancelar</Text>
-            </Pressable>
-            <Pressable
-              style={[s.btnSalvar, { backgroundColor: corTema }, agendarMutation.isPending && { opacity: 0.6 }]}
-              onPress={handleSalvar}
-              disabled={agendarMutation.isPending}
-            >
-              {agendarMutation.isPending ? (
-                <Text style={s.btnSalvarText}>Agendando...</Text>
-              ) : (
-                <>
-                  <AppIcon name={visualTipo?.icon ?? 'document-text-outline'} set={visualTipo?.iconSet ?? 'Ionicons'} size={16} color={C.white} style={{ marginRight: 6 }} />
-                  <Text style={s.btnSalvarText}>Agendar evento</Text>
-                </>
-              )}
-            </Pressable>
-          </View>
+          <Pressable
+            style={({ pressed }) => [s.btnSalvar, { backgroundColor: corTema }, pressed && { opacity: 0.9 }, agendarMutation.isPending && { opacity: 0.6 }]}
+            onPress={handleSalvar}
+            disabled={agendarMutation.isPending}
+          >
+            {agendarMutation.isPending ? (
+              <Text style={s.btnSalvarText}>Agendando...</Text>
+            ) : (
+              <>
+                <Text style={s.btnSalvarText}>Agendar evento</Text>
+                <AppIcon name="arrow-forward" set="Ionicons" size={18} color="#fff" />
+              </>
+            )}
+          </Pressable>
 
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </>
+          <Pressable style={s.btnCancelar} onPress={() => router.replace('/(tutor)')}>
+            <Text style={s.btnCancelarText}>Cancelar</Text>
+          </Pressable>
+
+        </View>
+
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.cream },
-  content: { padding: 18, paddingBottom: 40 },
+  scroll: { flexGrow: 1 },
 
   hero: {
-    borderRadius: 20,
-    padding: 20,
-    flexDirection: 'row',
+    paddingTop: 56,
+    paddingHorizontal: 28,
+    paddingBottom: 46,
+    overflow: 'hidden',
+  },
+  pawMarca: { position: 'absolute', top: -18, right: -26, transform: [{ rotate: '-16deg' }] },
+  btnFechar: {
+    position: 'absolute',
+    top: 16,
+    right: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.14)',
     alignItems: 'center',
-    gap: 14,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 14,
-    elevation: 5,
+    justifyContent: 'center',
   },
-  heroIconWrap: {
-    width: 58, height: 58, borderRadius: 29,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center', alignItems: 'center',
+
+  seloWrap: { width: 60, height: 60, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  seloGlowOut: { position: 'absolute', width: 86, height: 86, borderRadius: 43, backgroundColor: 'rgba(242,200,121,0.12)' },
+  seloGlowIn: { position: 'absolute', width: 66, height: 66, borderRadius: 33, backgroundColor: 'rgba(242,200,121,0.16)' },
+  selo: {
+    width: 48, height: 48, borderRadius: 15,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 }, elevation: 6,
   },
-  heroTitulo: { fontSize: 17, fontWeight: '700', color: C.white, letterSpacing: -0.2 },
-  heroSub: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
-  heroPet: { fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 3, fontWeight: '600' },
+
+  heroTitulo: { fontSize: 24, fontWeight: '800', color: C.white, letterSpacing: -0.5, lineHeight: 29, marginBottom: 8, maxWidth: 300 },
+  heroSub: { fontSize: 13, fontWeight: '500', color: 'rgba(255,255,255,0.8)', lineHeight: 18 },
+  petPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 999,
+    marginTop: 12,
+  },
+  petPillTexto: { fontSize: 11, fontWeight: '700', color: '#fff' },
+
+  sheet: {
+    flexGrow: 1,
+    backgroundColor: C.cream,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    marginTop: -24,
+    paddingTop: 30,
+    paddingHorizontal: 22,
+    paddingBottom: 40,
+  },
 
   loadingBox: { paddingVertical: 32, alignItems: 'center' },
 
-  secao: {
-    backgroundColor: C.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
+  secao: { marginBottom: 24 },
   secaoHeadRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 },
-  secaoTitulo: { fontSize: 12, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: C.text },
+  secaoTitulo: { fontSize: 14, fontWeight: '700', color: C.text },
 
   fr: { flexDirection: 'row', gap: 10 },
 
-  fiInput: {
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
     width: '100%',
     backgroundColor: C.w50,
     borderWidth: 1.5,
-    borderColor: C.border,
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: C.text,
+    borderColor: 'transparent',
+    borderRadius: 14,
+    paddingHorizontal: 14,
   },
-  fiInputErro: { borderColor: C.danger, backgroundColor: C.dangerLight },
-  fiTextarea: { minHeight: 84, textAlignVertical: 'top' },
+  inputWrapErro: { borderColor: C.danger, backgroundColor: C.dangerLight },
+  inputWrapTextarea: { alignItems: 'flex-start', paddingVertical: 4 },
+  fiInput: { flex: 1, paddingVertical: 13, fontSize: 14, color: C.text },
+  fiTextarea: { minHeight: 80, textAlignVertical: 'top', paddingVertical: 12 },
   textoErro: { color: C.danger, fontSize: 12, marginTop: 6, fontWeight: '600' },
 
   tipoBtn: {
@@ -347,8 +401,6 @@ const s = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 16,
     backgroundColor: C.w50,
-    borderWidth: 1.5,
-    borderColor: C.border,
     minWidth: 118,
     position: 'relative',
   },
@@ -374,11 +426,9 @@ const s = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 14,
     backgroundColor: C.w50,
-    borderWidth: 1.5,
-    borderColor: C.border,
     minWidth: 180,
   },
-  vetBtnAtivo: { backgroundColor: C.g600, borderColor: C.g600 },
+  vetBtnAtivo: { backgroundColor: C.g600 },
   vetAvatar: {
     width: 32, height: 32, borderRadius: 16,
     backgroundColor: C.g50,
@@ -387,32 +437,22 @@ const s = StyleSheet.create({
   vetNome: { fontSize: 12, fontWeight: '700', color: C.text },
   vetClinica: { fontSize: 10, color: C.muted, marginTop: 1 },
 
-  modalFoot: {
-    flexDirection: 'row',
-    gap: 10,
-    justifyContent: 'flex-end',
-    paddingTop: 4,
-    marginTop: 4,
-  },
-  btnCancelar: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 14,
-    justifyContent: 'center',
-  },
-  btnCancelarText: { fontSize: 14, fontWeight: '700', color: C.muted },
   btnSalvar: {
-    flex: 1,
     flexDirection: 'row',
-    paddingVertical: 14,
-    borderRadius: 14,
+    gap: 8,
+    marginTop: 6,
+    paddingVertical: 16,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  btnSalvarText: { color: C.white, fontSize: 14, fontWeight: '700' },
+  btnSalvarText: { color: C.white, fontSize: 15, fontWeight: '700' },
+
+  btnCancelar: { marginTop: 12, paddingVertical: 10, alignItems: 'center' },
+  btnCancelarText: { fontSize: 13, fontWeight: '600', color: C.muted },
 });
