@@ -9,6 +9,7 @@ import { useAccessibility } from '../../context/AccessibilityContext';
 import { AppIcon } from '../../components/AppIcon';
 import { alertar, confirmar } from '../../utils/alert';
 import { statusExibicao } from '../../utils/eventoStatus';
+import { pedirPermissaoNotificacao } from '../../services/calendarService';
 import type { Pet } from '../../types';
 import { WalletStack } from '../../components/carteira/WalletStack';
 import { CarteiraModal } from '../../components/carteira/CarteiraModal';
@@ -38,6 +39,19 @@ export default function PerfilScreen() {
     preferencias,
     atualizarPreferencias,
   } = usePet();
+
+  async function handleAlternarNotificacoes(v: boolean) {
+    if (v) {
+      const concedida = await pedirPermissaoNotificacao();
+      if (!concedida) {
+        alertar(
+          'Permissão necessária',
+          'Ative as notificações para o VetSync nas configurações do sistema para receber os lembretes.'
+        );
+      }
+    }
+    atualizarPreferencias({ ...preferencias, ativas: v });
+  }
 
   const eventosComStatus = useMemo(
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
@@ -217,7 +231,7 @@ export default function PerfilScreen() {
             label="Ativar notificações"
             desc="Receba lembretes de eventos"
             valor={preferencias.ativas ?? true}
-            onToggle={v => atualizarPreferencias({ ...preferencias, ativas: v })}
+            onToggle={handleAlternarNotificacoes}
             simples={modoSimples}
           />
           <View style={s.divisor} />
