@@ -10,6 +10,8 @@ import { obterVisualTipoEvento } from '../constants';
 import { AppIcon } from '../components/AppIcon';
 import { ApiError } from '../services/api/httpClient';
 import { alertar } from '../utils/alert';
+import { agendarLembretes } from '../services/calendarService';
+import { salvarLembretesEvento } from '../storage/petStorage';
 import type { TipoEvento, Veterinario } from '../types';
 
 const C = {
@@ -44,7 +46,7 @@ function mensagemDeErro(e: unknown, fallback: string): string {
 
 export default function AddEventoScreen() {
   const router = useRouter();
-  const { petAtivo } = usePet();
+  const { petAtivo, preferencias } = usePet();
 
   const { data: tiposEvento = [], isLoading: carregandoTipos } = useTiposEvento(true);
   const { data: veterinarios = [], isLoading: carregandoVets } = useVeterinarios(true);
@@ -70,7 +72,7 @@ export default function AddEventoScreen() {
   async function handleSalvar() {
     if (!validar() || !petAtivo || !tipoSelecionado || !vetSelecionado) return;
     try {
-      await agendarMutation.mutateAsync({
+      const evento = await agendarMutation.mutateAsync({
         idPet: petAtivo.id,
         idTipoEvento: tipoSelecionado.id,
         idVeterinario: vetSelecionado.id,
@@ -78,6 +80,22 @@ export default function AddEventoScreen() {
         hora,
         observacao: observacao.trim() || undefined,
       });
+
+      if (preferencias.ativas ?? true) {
+        const diasAntes = [
+          ...(preferencias.lembrete7 ?? true ? [7] : []),
+          ...(preferencias.lembreteAntes ?? true ? [1] : []),
+        ];
+        if (diasAntes.length > 0) {
+          try {
+            const idsLembretes = await agendarLembretes(evento, petAtivo, diasAntes);
+            await salvarLembretesEvento(evento.id, idsLembretes);
+          } catch {
+            // Falha ao agendar lembretes não deve bloquear a criação do evento.
+          }
+        }
+      }
+
       router.replace('/(tutor)');
     } catch (e) {
       alertar('Não foi possível agendar o evento', mensagemDeErro(e, 'Tente novamente em instantes.'));
