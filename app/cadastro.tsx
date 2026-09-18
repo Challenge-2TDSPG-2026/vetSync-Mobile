@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, ScrollView, Pressable, Image,
   StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
@@ -10,9 +11,16 @@ import { alertar } from '../utils/alert';
 import { AppIcon } from '../components/AppIcon';
 
 const C = {
-  g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
-  g500: '#22a06b', g200: '#a8e6c7',
-  white: '#fff', text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da',
+  night: '#0a2218',
+  forest: '#123d29',
+  mint: '#22a06b',
+  mintDeep: '#1a7a52',
+  mintPale: '#bfe9d5',
+  glow: '#f2c879',
+  cream: '#faf8f3',
+  fill: '#f1ece1',
+  ink: '#1a1512',
+  muted: '#7a6a5e',
   danger: '#dc3545',
 };
 
@@ -101,115 +109,138 @@ export default function CadastroScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: C.g900 }}
+      style={{ flex: 1, backgroundColor: C.night }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        style={s.container}
-        contentContainerStyle={s.content}
+        style={{ flex: 1 }}
+        contentContainerStyle={s.scroll}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <View style={s.authCard}>
 
-          <View style={s.authHdr}>
-            <View style={s.authLogo}>
-              <Image source={require('../assets/logo.png')} style={s.authLogoImg} resizeMode="contain" />
+        <LinearGradient
+          colors={[C.night, C.forest]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={s.hero}
+        >
+          <AppIcon
+            name="paw" set="MaterialCommunityIcons" size={190}
+            color="rgba(255,255,255,0.05)" style={s.pawMarca}
+          />
+          <AppIcon name="paw" set="MaterialCommunityIcons" size={11} color="rgba(191,233,213,0.3)" style={s.pegada1} />
+          <AppIcon name="paw" set="MaterialCommunityIcons" size={15} color="rgba(191,233,213,0.45)" style={s.pegada2} />
+          <AppIcon name="paw" set="MaterialCommunityIcons" size={19} color="rgba(191,233,213,0.6)" style={s.pegada3} />
+
+          <View style={s.marca}>
+            <View style={s.seloWrap}>
+              <View style={s.seloGlowOut} />
+              <View style={s.seloGlowIn} />
+              <View style={s.selo}>
+                <Image source={require('../assets/logo.png')} style={s.seloImg} resizeMode="contain" />
+              </View>
             </View>
-            <Text style={s.authName}>VetSync</Text>
-            <Text style={s.authSub}>Criar Conta de Tutor</Text>
+            <Text style={s.marcaTexto}>VetSync</Text>
           </View>
 
-          <View style={s.authForm}>
+          <Text style={s.heroTitulo}>Crie sua conta.</Text>
+          <Text style={s.heroSub}>
+            Acompanhe vacinas, consultas e o bem-estar do seu pet em um só lugar.
+          </Text>
+        </LinearGradient>
 
-            <View style={s.introBox}>
-              <AppIcon name="person-add-outline" set="Ionicons" size={22} color={C.g600} />
-              <Text style={s.introText}>
-                Cadastre-se para acompanhar o histórico de saúde, vacinas e consultas do seu pet.
-              </Text>
+        <View style={s.sheet}>
+
+          <Campo
+            label="Nome completo"
+            icon="person-outline"
+            value={nome}
+            onChangeText={setNome}
+            placeholder="Ex: Maria da Silva"
+            autoCapitalize="words"
+            erro={erros.nome}
+          />
+
+          <Campo
+            label="E-mail"
+            icon="mail-outline"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="voce@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            erro={erros.email}
+          />
+
+          <View style={s.linha}>
+            <View style={{ flex: 1.1 }}>
+              <Campo
+                label="CPF"
+                icon="card-outline"
+                value={cpf}
+                onChangeText={(t: string) => setCpf(formatarCpf(t))}
+                placeholder="000.000.000-00"
+                keyboardType="numeric"
+                maxLength={14}
+                erro={erros.cpf}
+              />
             </View>
+            <View style={{ flex: 1 }}>
+              <Campo
+                label="Telefone"
+                icon="call-outline"
+                value={telefone}
+                onChangeText={(t: string) => setTelefone(formatarTelefone(t))}
+                placeholder="(11) 99999-9999"
+                keyboardType="phone-pad"
+                maxLength={15}
+                erro={erros.telefone}
+              />
+            </View>
+          </View>
 
-            <Campo
-              label="Nome Completo *"
-              value={nome}
-              onChangeText={setNome}
-              placeholder="Ex: Maria da Silva"
-              erro={erros.nome}
-            />
+          <Campo
+            label="Senha"
+            icon="lock-closed-outline"
+            value={senha}
+            onChangeText={setSenha}
+            placeholder="Mínimo de 6 caracteres"
+            isPassword
+            showPassword={mostrarSenha}
+            onTogglePassword={() => setMostrarSenha(v => !v)}
+            erro={erros.senha}
+          />
 
-            <Campo
-              label="E-mail *"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="voce@email.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              erro={erros.email}
-            />
+          <Campo
+            label="Confirmar senha"
+            icon="lock-closed-outline"
+            value={confirmarSenha}
+            onChangeText={setConfirmarSenha}
+            placeholder="Repita a senha"
+            isPassword
+            showPassword={mostrarConfirmarSenha}
+            onTogglePassword={() => setMostrarConfirmarSenha(v => !v)}
+            erro={erros.confirmarSenha}
+          />
 
-            <Campo
-              label="CPF *"
-              value={cpf}
-              onChangeText={(t: string) => setCpf(formatarCpf(t))}
-              placeholder="000.000.000-00"
-              keyboardType="numeric"
-              maxLength={14}
-              erro={erros.cpf}
-            />
+          <Pressable
+            style={({ pressed }) => [s.btnAuth, pressed && s.btnAuthPressed, cadastrando && { opacity: 0.65 }]}
+            onPress={handleCadastrar}
+            disabled={cadastrando}
+          >
+            <Text style={s.btnAuthText}>{cadastrando ? 'Cadastrando...' : 'Criar conta'}</Text>
+            {!cadastrando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color="#fff" />}
+          </Pressable>
 
-            <Campo
-              label="Telefone (opcional)"
-              value={telefone}
-              onChangeText={(t: string) => setTelefone(formatarTelefone(t))}
-              placeholder="(11) 99999-9999"
-              keyboardType="phone-pad"
-              maxLength={15}
-              erro={erros.telefone}
-            />
-
-            <Campo
-              label="Senha *"
-              value={senha}
-              onChangeText={setSenha}
-              placeholder="Mínimo de 6 caracteres"
-              isPassword
-              showPassword={mostrarSenha}
-              onTogglePassword={() => setMostrarSenha(v => !v)}
-              erro={erros.senha}
-            />
-
-            <Campo
-              label="Confirmar Senha *"
-              value={confirmarSenha}
-              onChangeText={setConfirmarSenha}
-              placeholder="Repita a senha"
-              isPassword
-              showPassword={mostrarConfirmarSenha}
-              onTogglePassword={() => setMostrarConfirmarSenha(v => !v)}
-              erro={erros.confirmarSenha}
-            />
-
-            <Pressable
-              style={[s.btnAuth, cadastrando && { opacity: 0.6 }]}
-              onPress={handleCadastrar}
-              disabled={cadastrando}
-            >
-              <Text style={s.btnAuthText}>
-                {cadastrando ? 'Cadastrando...' : 'Cadastrar e Continuar →'}
+          <Link href="/login" asChild>
+            <Pressable style={s.linkSecundario} disabled={cadastrando}>
+              <Text style={s.linkSecundarioTexto}>
+                Já tem uma conta? <Text style={s.linkSecundarioDestaque}>Entrar</Text>
               </Text>
             </Pressable>
+          </Link>
 
-            <Link href="/login" asChild>
-              <Pressable
-                style={s.btnVoltar}
-                disabled={cadastrando}
-              >
-                <Text style={s.btnVoltarText}>
-                  Já tem uma conta? <Text style={s.btnVoltarDestaque}>Entrar</Text>
-                </Text>
-              </Pressable>
-            </Link>
-
-          </View>
         </View>
 
       </ScrollView>
@@ -219,12 +250,14 @@ export default function CadastroScreen() {
 
 function Campo({
   label, value, onChangeText, placeholder, keyboardType, maxLength,
-  erro, secureTextEntry, autoCapitalize, isPassword, showPassword, onTogglePassword,
+  erro, autoCapitalize, isPassword, showPassword, onTogglePassword, icon,
 }: any) {
+  const [focado, setFocado] = useState(false);
   return (
     <View style={s.campo}>
       <Text style={s.fl}>{label}</Text>
-      <View style={[s.inputWrap, erro && s.fiErro]}>
+      <View style={[s.inputWrap, focado && s.inputWrapFocado, erro && s.fiErro]}>
+        <AppIcon name={icon} set="Ionicons" size={18} color={focado ? C.mintDeep : C.muted} style={{ marginRight: 10 }} />
         <TextInput
           style={s.fi}
           value={value}
@@ -233,8 +266,10 @@ function Campo({
           placeholderTextColor={C.muted}
           keyboardType={keyboardType}
           maxLength={maxLength}
-          secureTextEntry={isPassword ? !showPassword : secureTextEntry}
-          autoCapitalize={autoCapitalize ?? (isPassword || secureTextEntry ? 'none' : 'words')}
+          secureTextEntry={isPassword ? !showPassword : undefined}
+          autoCapitalize={autoCapitalize ?? (isPassword ? 'none' : undefined)}
+          onFocus={() => setFocado(true)}
+          onBlur={() => setFocado(false)}
         />
         {isPassword && (
           <Pressable
@@ -247,7 +282,7 @@ function Campo({
             <AppIcon
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               set="Ionicons"
-              size={20}
+              size={19}
               color={C.muted}
             />
           </Pressable>
@@ -259,103 +294,99 @@ function Campo({
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1 },
-  content: { flexGrow: 1, justifyContent: 'center', padding: 24, paddingVertical: 40 },
+  scroll: { flexGrow: 1 },
 
-  authCard: {
-    backgroundColor: C.white,
-    borderRadius: 24,
+  hero: {
+    paddingTop: 56,
+    paddingHorizontal: 30,
+    paddingBottom: 46,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 12,
+  },
+  pawMarca: {
+    position: 'absolute',
+    top: -20,
+    right: -28,
+    transform: [{ rotate: '-18deg' }],
+  },
+  pegada1: { position: 'absolute', top: 4, left: 2, transform: [{ rotate: '18deg' }] },
+  pegada2: { position: 'absolute', top: 18, left: 20, transform: [{ rotate: '-10deg' }] },
+  pegada3: { position: 'absolute', top: 34, left: 42, transform: [{ rotate: '20deg' }] },
+
+  marca: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 24 },
+  seloWrap: { width: 60, height: 60, alignItems: 'center', justifyContent: 'center' },
+  seloGlowOut: {
+    position: 'absolute', width: 86, height: 86, borderRadius: 43,
+    backgroundColor: 'rgba(242,200,121,0.12)',
+  },
+  seloGlowIn: {
+    position: 'absolute', width: 66, height: 66, borderRadius: 33,
+    backgroundColor: 'rgba(242,200,121,0.16)',
+  },
+  selo: {
+    width: 48, height: 48, borderRadius: 15,
+    backgroundColor: C.mint,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 }, elevation: 6,
+  },
+  seloImg: { width: 28, height: 28 },
+  marcaTexto: { fontSize: 19, fontWeight: '700', color: '#fff', letterSpacing: -0.3 },
+
+  heroTitulo: {
+    fontSize: 28, fontWeight: '800', color: '#fff',
+    letterSpacing: -0.6, lineHeight: 33, marginBottom: 9, maxWidth: 300,
+  },
+  heroSub: { fontSize: 14, fontWeight: '500', color: C.mintPale, lineHeight: 21, maxWidth: 280 },
+
+  sheet: {
+    flexGrow: 1,
+    backgroundColor: C.cream,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    marginTop: -24,
+    paddingTop: 32,
+    paddingHorizontal: 28,
+    paddingBottom: 40,
   },
 
-  authHdr: {
-    backgroundColor: C.g800,
-    paddingVertical: 24,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-  },
-  authLogo: {
-    width: 48,
-    height: 48,
-    backgroundColor: C.g500,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  authLogoImg: { width: 30, height: 30 },
-  authName: { fontSize: 24, fontWeight: '700', color: C.white, letterSpacing: -0.5, marginBottom: 2 },
-  authSub: { fontSize: 13, color: C.g200 },
+  linha: { flexDirection: 'row', gap: 12 },
 
-  authForm: { padding: 24 },
-
-  introBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#f9f7f4',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  introText: { flex: 1, fontSize: 12, color: C.muted, lineHeight: 18 },
-
-  campo: { marginBottom: 14 },
-  fl: {
-    fontSize: 11, fontWeight: '700', letterSpacing: 0.6,
-    textTransform: 'uppercase', color: C.muted, marginBottom: 6,
-  },
+  campo: { marginBottom: 16 },
+  fl: { fontSize: 13, fontWeight: '600', color: C.ink, marginBottom: 8 },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: C.white,
+    backgroundColor: C.fill,
     borderWidth: 1.5,
-    borderColor: C.border,
-    borderRadius: 10,
-    paddingHorizontal: 13,
+    borderColor: 'transparent',
+    borderRadius: 14,
+    paddingHorizontal: 15,
   },
-  fi: {
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: C.text,
-  },
-  btnOlho: {
-    paddingLeft: 8,
-    paddingVertical: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  inputWrapFocado: { borderColor: C.mint, backgroundColor: '#fff' },
+  fi: { flex: 1, paddingVertical: 13, fontSize: 15, color: C.ink },
+  btnOlho: { paddingLeft: 6, paddingVertical: 6, justifyContent: 'center', alignItems: 'center' },
   fiErro: { borderColor: C.danger },
-  textoErro: { color: C.danger, fontSize: 12, marginTop: 4 },
+  textoErro: { color: C.danger, fontSize: 12, marginTop: 6 },
 
   btnAuth: {
-    backgroundColor: C.g600,
-    paddingVertical: 13,
-    borderRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+    backgroundColor: C.mint,
+    paddingVertical: 16,
+    borderRadius: 999,
     alignItems: 'center',
-    marginTop: 8,
+    justifyContent: 'center',
+    marginTop: 6,
+    shadowColor: C.mint,
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
   },
-  btnAuthText: { color: C.white, fontSize: 14, fontWeight: '700' },
+  btnAuthPressed: { backgroundColor: C.mintDeep },
+  btnAuthText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 
-  btnVoltar: {
-    marginTop: 18,
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  btnVoltarText: {
-    fontSize: 13,
-    color: C.muted,
-  },
-  btnVoltarDestaque: {
-    color: C.g600,
-    fontWeight: '700',
-  },
+  linkSecundario: { marginTop: 22, alignItems: 'center', paddingVertical: 4 },
+  linkSecundarioTexto: { fontSize: 13, color: C.muted },
+  linkSecundarioDestaque: { color: C.mintDeep, fontWeight: '700' },
 });
