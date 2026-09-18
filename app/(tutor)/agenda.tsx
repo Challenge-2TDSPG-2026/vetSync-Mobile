@@ -178,10 +178,13 @@ export default function AgendaScreen() {
         />
 
         <View style={s.diaHeader}>
-          <Text style={[s.diaHeaderTexto, modoSimples && sSimples.diaHeaderTexto]}>{formatarDataLonga(selecionado)}</Text>
+          <View style={s.diaHeaderInfo}>
+            <Text style={s.diaHeaderKicker}>DATA SELECIONADA</Text>
+            <Text style={[s.diaHeaderTexto, modoSimples && sSimples.diaHeaderTexto]}>{formatarDataLonga(selecionado)}</Text>
+          </View>
           {eventosDoDia.length > 0 && (
             <View style={s.diaHeaderBadge}>
-              <Text style={s.diaHeaderBadgeText}>{eventosDoDia.length}</Text>
+              <Text style={s.diaHeaderBadgeText}>{eventosDoDia.length} {eventosDoDia.length === 1 ? 'evento' : 'eventos'}</Text>
             </View>
           )}
         </View>
@@ -191,8 +194,10 @@ export default function AgendaScreen() {
             <ActivityIndicator color={C.g600} />
           </View>
         ) : eventosDoDia.length === 0 ? (
-          <View style={s.empty}>
-            <AppIcon name="calendar-outline" set="Ionicons" size={40} color={C.muted} style={s.emptyIcon} />
+          <View style={[s.empty, modoSimples && sSimples.empty]}>
+            <View style={s.emptyOrb}>
+              <AppIcon name="calendar-outline" set="Ionicons" size={29} color={C.g600} />
+            </View>
             <Text style={s.emptyTitle}>Nenhum evento nesse dia</Text>
             <Text style={s.emptySub}>Toque em outra data ou adicione um novo evento</Text>
           </View>
@@ -324,54 +329,61 @@ export default function AgendaScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
 
-  filtroBar: { flexGrow: 0, flexShrink: 0, minHeight: 72, backgroundColor: C.white, borderBottomWidth: 1, borderBottomColor: C.border },
-  filtroContent: { alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
+  filtroBar: { flexGrow: 0, flexShrink: 0, minHeight: 68, backgroundColor: C.cream },
+  filtroContent: { alignItems: 'center', paddingHorizontal: 18, paddingVertical: 10, gap: 8 },
   filtroBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: C.w50,
-    borderWidth: 1.5,
-    borderColor: C.border,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: C.white,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    shadowColor: '#281d15',
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
   filtroBtnAtivo: { backgroundColor: C.g800, borderColor: C.g800 },
-  filtroText: { fontSize: 14, fontWeight: '600', color: C.text },
+  filtroText: { fontSize: 13, fontWeight: '700', color: C.text },
   filtroTextAtivo: { color: C.white },
 
-  scrollContent: { padding: 16, paddingBottom: 100 },
+  scrollContent: { paddingHorizontal: 18, paddingTop: 6, paddingBottom: 108 },
 
   diaHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginBottom: 13, paddingHorizontal: 2,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+    marginBottom: 12, paddingHorizontal: 4,
   },
-  diaHeaderTexto: { fontSize: 16, fontWeight: '700', color: C.text, textTransform: 'capitalize', flex: 1 },
+  diaHeaderInfo: { flex: 1, minWidth: 0 },
+  diaHeaderKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: C.g600, marginBottom: 3 },
+  diaHeaderTexto: { fontSize: 17, fontWeight: '800', color: C.text, textTransform: 'capitalize' },
   diaHeaderBadge: {
-    backgroundColor: C.g100, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2,
-    borderWidth: 1, borderColor: C.g200,
+    backgroundColor: C.g50, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6,
   },
-  diaHeaderBadgeText: { fontSize: 11, fontWeight: '700', color: C.g700 },
+  diaHeaderBadgeText: { fontSize: 11, fontWeight: '800', color: C.g700 },
 
   card: {
     backgroundColor: C.white,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
+    borderRadius: 22,
     overflow: 'hidden',
-    marginBottom: 11,
+    marginBottom: 12,
+    shadowColor: '#281d15',
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
   },
   cardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    gap: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
+    padding: 17,
+    gap: 13,
   },
-  eventoIcone: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
-  eventoInfo: { flex: 1 },
-  eventoTitulo: { fontSize: 17, fontWeight: '600', color: C.text },
+  eventoIcone: { width: 50, height: 50, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
+  eventoInfo: { flex: 1, minWidth: 0 },
+  eventoTitulo: { fontSize: 16, fontWeight: '800', color: C.text },
   eventoMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   eventoMeta: { fontSize: 13, color: C.muted },
   eventoMetaDot: { fontSize: 13, color: C.muted, marginHorizontal: 2 },
@@ -382,9 +394,11 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 17,
     paddingVertical: 12,
-    backgroundColor: C.w50,
+    backgroundColor: '#fcfbf8',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: C.border,
   },
   badges: { flexDirection: 'row', gap: 6 },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
@@ -396,36 +410,34 @@ const s = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 999,
     backgroundColor: C.g50,
-    borderWidth: 1,
-    borderColor: C.g200,
     minWidth: 40,
     justifyContent: 'center',
   },
   btnAcaoDanger: { backgroundColor: '#fff5f5', borderColor: '#fecaca' },
   btnAcaoText: { fontSize: 14, fontWeight: '600' },
 
-  empty: { alignItems: 'center', paddingVertical: 48 },
-  emptyIcon: { marginBottom: 12 },
-  emptyTitle: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 4 },
-  emptySub: { fontSize: 13, color: C.muted, textAlign: 'center' },
+  empty: { alignItems: 'center', backgroundColor: C.white, borderRadius: 22, borderWidth: 1, borderColor: C.border, borderStyle: 'dashed', paddingHorizontal: 24, paddingVertical: 36 },
+  emptyOrb: { width: 58, height: 58, borderRadius: 29, backgroundColor: C.g100, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  emptyTitle: { fontSize: 15, fontWeight: '800', color: C.text, marginBottom: 5 },
+  emptySub: { fontSize: 13, color: C.muted, textAlign: 'center', lineHeight: 18 },
 
   fab: {
     position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    bottom: 22,
+    right: 22,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: C.g600,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
+    shadowColor: C.g600,
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 7 },
   },
 
   modalOverlay: {
@@ -471,6 +483,7 @@ const sSimples = StyleSheet.create({
   eventoIcone: { width: 68, height: 68, borderRadius: 34 },
   eventoTitulo: { fontSize: 23 },
   eventoMeta: { fontSize: 18, marginTop: 4 },
+  empty: { paddingVertical: 48 },
 
   cardFooter: { paddingVertical: 16 },
   btnAcao: { paddingHorizontal: 16, paddingVertical: 11 },
