@@ -50,6 +50,3 @@ logs/
 # Build outputs
 android/
 ios/
-
-# Json
-package-lock.json
