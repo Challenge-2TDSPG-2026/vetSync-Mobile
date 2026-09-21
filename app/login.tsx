@@ -113,6 +113,8 @@ export default function LoginScreen() {
             placeholder="voce@email.com"
             keyboardType="email-address"
             autoCapitalize="none"
+            textContentType="username"
+            autoComplete="username"
             erro={errosConta.email}
           />
 
@@ -125,6 +127,8 @@ export default function LoginScreen() {
             isPassword
             showPassword={mostrarSenha}
             onTogglePassword={() => setMostrarSenha(v => !v)}
+            textContentType="password"
+            autoComplete="password"
             erro={errosConta.senha}
           />
 
@@ -154,7 +158,8 @@ export default function LoginScreen() {
 
 function Campo({
   label, value, onChangeText, placeholder, keyboardType, maxLength,
-  erro, autoCapitalize, isPassword, showPassword, onTogglePassword, icon,
+  erro, autoCapitalize, textContentType, autoComplete,
+  isPassword, showPassword, onTogglePassword, icon,
 }: any) {
   const [focado, setFocado] = useState(false);
   return (
@@ -172,6 +177,8 @@ function Campo({
           maxLength={maxLength}
           secureTextEntry={isPassword ? !showPassword : undefined}
           autoCapitalize={autoCapitalize ?? (isPassword ? 'none' : undefined)}
+          textContentType={textContentType}
+          autoComplete={autoComplete}
           onFocus={() => setFocado(true)}
           onBlur={() => setFocado(false)}
         />
