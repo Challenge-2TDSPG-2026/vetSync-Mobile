@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "VetSync",
+    "name": "VetSync Tutor",
     "slug": "vetsync",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
@@ -21,6 +21,7 @@
       }
     },
     "android": {
+      "versionCode": 1,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
@@ -31,7 +32,9 @@
         "READ_CALENDAR",
         "WRITE_CALENDAR",
         "SCHEDULE_EXACT_ALARM",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
       ]
     },
     "web": {
@@ -54,6 +57,12 @@
           "color": "#22a06b"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "214b44b5-9a00-4d9f-8928-7928046899aa"
+      }
+    }
   }
 }
