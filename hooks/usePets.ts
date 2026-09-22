@@ -45,6 +45,12 @@ export function useCriarPet() {
   });
 }
 
+export function useDefinirPetAtivo() {
+  return useMutation({
+    mutationFn: (id: string) => petService.setPetAtivoId(id),
+  });
+}
+
 export function useAtualizarPet() {
   const queryClient = useQueryClient();
   return useMutation({
