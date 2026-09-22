@@ -50,5 +50,8 @@
       "/dist/"
     ]
   },
+  "overrides": {
+    "uuid": "11.1.1"
+  },
   "private": true
 }
