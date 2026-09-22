@@ -128,8 +128,8 @@ storage/          # petStorage.ts — únicas chaves ainda locais (pet ativo, on
 ### Passo a passo
 
 ```bash
-git clone https://github.com/thubrito/Mobile-Application-Development.git
-cd Mobile-Application-Development
+git clone https://github.com/Challenge-2TDSPG-2026/vetSync-Mobile.git
+cd vetSync-Mobile
 npm install
 npx expo start
 ```
