@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../../constants/api';
 import { STORAGE_KEYS } from '../../constants';
+import { notificarExpiracaoSessao } from './sessionEvents';
 
 export class ApiError extends Error {
   status: number;
@@ -103,8 +104,8 @@ export async function apiRequest<T = unknown>({
   }
 
   if (resposta.status === 401) {
-    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
-    throw new ApiError(401, 'Sua sess„o expirou. Entre novamente.');
+    notificarExpiracaoSessao();
+    throw new ApiError(401, 'Sua sess√£o expirou. Entre novamente.');
   }
 
   if (!resposta.ok) {

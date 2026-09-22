@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { STORAGE_KEYS } from '../constants';
 import { ApiError } from '../services/api/httpClient';
 import { authService } from '../services/authService';
+import { assinarExpiracaoSessao } from '../services/api/sessionEvents';
 
 export type Perfil = 'TUTOR' | 'VETERINARIO' | 'ADMIN';
 
@@ -65,6 +66,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     restaurarSessao();
   }, []);
 
+  const encerrarSessaoLocal = useCallback(async () => {
+    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+    setSessao(null);
+    queryClient.clear();
+  }, [queryClient]);
+
+  useEffect(() => {
+    return assinarExpiracaoSessao(() => {
+      void encerrarSessaoLocal();
+    });
+  }, [encerrarSessaoLocal]);
+
   const login = useCallback(async (email: string, senha: string) => {
     setErro(null);
     try {
@@ -92,14 +105,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    // 1. Limpa sessão local e notifica o app imediatamente
-    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
-    setSessao(null);
-    // 2. Limpa cache do React Query
-    queryClient.clear();
-    // 3. Notifica backend em segundo plano (não trava a saída do usuário)
+    await encerrarSessaoLocal();
     authService.logout().catch(() => {});
-  }, [queryClient]);
+  }, [encerrarSessaoLocal]);
 
   const limparErro = useCallback(() => setErro(null), []);
 
