@@ -2,12 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   LayoutAnimation,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
-  UIManager,
   View,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -33,11 +31,6 @@ const C = {
   muted: '#7a6a5e', border: '#e8e2da', danger: '#dc3545',
 };
 const ESPECIES_PRINCIPAIS: Especie[] = ['cachorro', 'gato', 'coelho'];
-
-if (Platform.OS === 'android') {
-  (UIManager as unknown as { setLayoutAnimationEnabledExperimentalAndroid?: (v: boolean) => void })
-    .setLayoutAnimationEnabledExperimentalAndroid?.(true);
-}
 
 function mascaraData(texto: string): string {
   const numeros = texto.replace(/\D/g, '').slice(0, 8);
