@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, StatusBar } from 'react-native';
 import { Stack, useRouter, useSegments, usePathname } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../context/AuthContext';
@@ -123,16 +123,19 @@ const s = StyleSheet.create({
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AccessibilityProvider>
-        <AuthProvider>
-          <PetProvider>
-            <VetProvider>
-              <RootNavigator />
-            </VetProvider>
-          </PetProvider>
-        </AuthProvider>
-      </AccessibilityProvider>
-    </QueryClientProvider>
+    <>
+      <StatusBar barStyle="light-content" />
+      <QueryClientProvider client={queryClient}>
+        <AccessibilityProvider>
+          <AuthProvider>
+            <PetProvider>
+              <VetProvider>
+                <RootNavigator />
+              </VetProvider>
+            </PetProvider>
+          </AuthProvider>
+        </AccessibilityProvider>
+      </QueryClientProvider>
+    </>
   );
 }
