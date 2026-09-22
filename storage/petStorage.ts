@@ -9,6 +9,10 @@ export async function carregarPetAtivoId(): Promise<string | null> {
   return AsyncStorage.getItem(STORAGE_KEYS.PET_ATIVO);
 }
 
+export async function limparPetAtivoId(): Promise<void> {
+  await AsyncStorage.removeItem(STORAGE_KEYS.PET_ATIVO);
+}
+
 export async function marcarOnboardingConcluido(): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_CONCLUIDO, 'true');
 }

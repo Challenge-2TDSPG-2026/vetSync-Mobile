@@ -6,7 +6,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ESPECIES } from '../constants';
 import { PetForm } from '../components/pet-form/PetForm';
-import { useAtualizarPet, useCriarPet, useDefinirPetAtivo, usePetPorId } from '../hooks/usePets';
+import { useAtualizarPet, usePetPorId } from '../hooks/usePets';
+import { usePet } from '../context/PetContext';
 import type { Pet } from '../types';
 
 const C = {
@@ -27,17 +28,15 @@ export default function AddPetScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const editando = !!id;
   const { data: petInicial, isLoading: carregandoPet } = usePetPorId(editando ? String(id) : null, editando);
-  const criarPet = useCriarPet();
   const atualizarPet = useAtualizarPet();
-  const definirPetAtivo = useDefinirPetAtivo();
+  const { adicionarPet, salvandoPet } = usePet();
   const [especieSelo, setEspecieSelo] = useState<Pet['especie'] | null>(null);
   const itemEspecie = ESPECIES.find(item => item.valor === (especieSelo ?? petInicial?.especie));
   const iconeSelo = itemEspecie
     ? { nome: itemEspecie.icon, conjunto: itemEspecie.iconSet as 'Ionicons' | 'MaterialCommunityIcons' }
     : { nome: 'paw', conjunto: 'MaterialCommunityIcons' as const };
 
-  async function aoSalvarComSucesso(pet: Pet) {
-    if (!editando) await definirPetAtivo.mutateAsync(pet.id);
+  function aoSalvarComSucesso() {
     router.back();
   }
 
@@ -50,7 +49,7 @@ export default function AddPetScreen() {
       atualizarPet.mutate(pet, { onSuccess: aoSalvarComSucesso, onError: exibirErro });
       return;
     }
-    criarPet.mutate(pet, { onSuccess: aoSalvarComSucesso, onError: exibirErro });
+    adicionarPet(pet).then(aoSalvarComSucesso).catch(exibirErro);
   }
 
   if (editando && carregandoPet) {
@@ -72,7 +71,7 @@ export default function AddPetScreen() {
         <PetForm
           petInicial={petInicial}
           editando={editando}
-          salvando={criarPet.isPending || atualizarPet.isPending || definirPetAtivo.isPending}
+          salvando={salvandoPet || atualizarPet.isPending}
           onSalvar={salvar}
           onCancelar={() => router.back()}
           onEspecieChange={setEspecieSelo}

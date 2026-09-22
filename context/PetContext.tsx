@@ -4,11 +4,13 @@ import { XP_POR_EVENTO, NIVEIS } from '../constants';
 import {
   salvarPetAtivoId,
   carregarPetAtivoId,
+  limparPetAtivoId,
   resetarPreferenciasLocais,
 } from '../storage/petStorage';
 import { useAuth } from './AuthContext';
 import { usePets, useCriarPet, useRemoverPet } from '../hooks/usePets';
 import { useEventos } from '../hooks/useEventos';
+import { resolverPetAtivoId } from '../utils/petAtivo';
 
 export interface NivelInfo {
   nivel: number;
@@ -69,13 +71,13 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (carregandoPets) return;
-    const aindaExiste = petAtivoId !== null && pets.some(p => p.id === petAtivoId);
-    if (aindaExiste) return;
-
-    const novoAtivo = pets[0]?.id ?? null;
+    const novoAtivo = resolverPetAtivoId(pets, petAtivoId);
+    if (novoAtivo === petAtivoId) return;
     setPetAtivoIdState(novoAtivo);
     if (novoAtivo) {
-      salvarPetAtivoId(novoAtivo);
+      void salvarPetAtivoId(novoAtivo);
+    } else {
+      void limparPetAtivoId();
     }
   }, [pets, carregandoPets, petAtivoId]);
 
