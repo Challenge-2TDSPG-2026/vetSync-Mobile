@@ -10,7 +10,7 @@ import { useTiposEvento, useVeterinarios, useAgendarEvento } from '../hooks/useE
 import { obterVisualTipoEvento } from '../constants';
 import { AppIcon } from '../components/AppIcon';
 import { ApiError } from '../services/api/httpClient';
-import { alertar } from '../utils/alert';
+import { mostrarToast } from '../components/ui/Toast';
 import { agendarLembretes } from '../services/calendarService';
 import { salvarLembretesEvento } from '../storage/petStorage';
 import type { TipoEvento, Veterinario } from '../types';
@@ -104,7 +104,7 @@ export default function AddEventoScreen() {
 
       router.replace('/(tutor)');
     } catch (e) {
-      alertar('Não foi possível agendar o evento', mensagemDeErro(e, 'Tente novamente em instantes.'));
+      mostrarToast('erro', 'Não foi possível agendar o evento', mensagemDeErro(e, 'Tente novamente em instantes.'));
     }
   }
 
