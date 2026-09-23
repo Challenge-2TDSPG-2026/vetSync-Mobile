@@ -1,9 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
+import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonList } from '../../components/ui/Skeleton';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 
 const C = {
@@ -15,20 +18,25 @@ const C = {
 export default function ConsultasScreen() {
   const router = useRouter();
   const { eventosAgendados, carregando } = useVet();
+  const { atualizando, aoAtualizar } = useRecarregarDados();
 
   const listaOrdenada = [...eventosAgendados].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
 
   return (
     <View style={s.container}>
-      <ScrollView contentContainerStyle={s.content}>
+      <ScrollView
+        contentContainerStyle={s.content}
+        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+      >
         {carregando ? (
-          <View style={s.empty}><ActivityIndicator color={C.g600} /></View>
+          <SkeletonList linhas={4} />
         ) : listaOrdenada.length === 0 ? (
-          <View style={s.empty}>
-            <AppIcon name="checkmark-done-outline" set="Ionicons" size={40} color={C.muted} style={{ marginBottom: 12 }} />
-            <Text style={s.emptyTitle}>Nada por aqui</Text>
-            <Text style={s.emptySub}>Nenhuma consulta agendada no momento.</Text>
-          </View>
+          <EmptyState
+            icon="checkmark-done-outline"
+            title="Nada por aqui"
+            subtitle="Nenhuma consulta agendada no momento."
+            accentColor={C.g600}
+          />
         ) : (
           listaOrdenada.map(item => {
             const visual = obterVisualTipoEvento(item.nomeTipoEvento);
