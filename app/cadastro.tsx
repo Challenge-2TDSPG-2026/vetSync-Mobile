@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
-import { alertar } from '../utils/alert';
+import { mostrarToast } from '../components/ui/Toast';
 import { AppIcon } from '../components/AppIcon';
 
 const C = {
@@ -101,7 +101,7 @@ export default function CadastroScreen() {
       // Usuário autenticado como TUTOR com 0 pets. Redireciona para cadastrar o primeiro pet.
       router.replace('/add-pet');
     } catch (e) {
-      alertar('Não foi possível realizar o cadastro', mensagemDeErro(e, 'Verifique os dados e tente novamente.'));
+      mostrarToast('erro', 'Não foi possível realizar o cadastro', mensagemDeErro(e, 'Verifique os dados e tente novamente.'));
     } finally {
       setCadastrando(false);
     }
