@@ -108,6 +108,14 @@ export default function PerfilScreen() {
             onPress={() => router.push('/(tutor)/historico')}
             simples={modoSimples}
           />
+          <View style={s.divider} />
+          <AccountAction
+            icon="people-outline"
+            title="Gerenciar acessos"
+            description="Convide cuidadores e controle quem acompanha seus pets"
+            onPress={() => router.push('/gerenciar-acessos')}
+            simples={modoSimples}
+          />
         </View>
 
         <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Acessibilidade</Text>
