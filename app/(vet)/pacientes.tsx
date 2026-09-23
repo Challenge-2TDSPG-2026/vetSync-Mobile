@@ -1,9 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, TextInput, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
+import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { ESPECIES } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonList } from '../../components/ui/Skeleton';
 
 const C = {
   g800: '#0e3326', g600: '#1a7a52', g100: '#d4f2e4',
@@ -15,6 +18,7 @@ export default function PacientesScreen() {
   const router = useRouter();
   const { pacientes, carregando } = useVet();
   const [busca, setBusca] = useState('');
+  const { atualizando, aoAtualizar } = useRecarregarDados();
 
   const pacientesFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -35,17 +39,20 @@ export default function PacientesScreen() {
         />
       </View>
 
-      <ScrollView contentContainerStyle={s.content}>
+      <ScrollView
+        contentContainerStyle={s.content}
+        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+      >
         {carregando ? (
-          <View style={s.empty}><ActivityIndicator color={C.g600} /></View>
+          <SkeletonList linhas={4} />
         ) : pacientesFiltrados.length === 0 ? (
-          <View style={s.empty}>
-            <AppIcon name="paw" set="MaterialCommunityIcons" size={40} color={C.muted} style={{ marginBottom: 12 }} />
-            <Text style={s.emptyTitle}>Nenhum paciente encontrado</Text>
-            <Text style={s.emptySub}>
-              {busca ? 'Tente outro termo de busca.' : 'Pacientes aparecem aqui assim que um tutor solicita um evento com você.'}
-            </Text>
-          </View>
+          <EmptyState
+            icon="paw"
+            iconSet="MaterialCommunityIcons"
+            title="Nenhum paciente encontrado"
+            subtitle={busca ? 'Tente outro termo de busca.' : 'Pacientes aparecem aqui assim que um tutor solicita um evento com você.'}
+            accentColor={C.g600}
+          />
         ) : (
           pacientesFiltrados.map(({ pet, eventos }) => {
             const especieInfo = ESPECIES.find(e => e.valor === pet.especie);
