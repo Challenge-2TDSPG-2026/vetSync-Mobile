@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
 import { useVet } from '../../context/VetContext';
 import { AppIcon } from '../../components/AppIcon';
-import { alertar, confirmar } from '../../utils/alert';
+import { confirmar } from '../../utils/alert';
+import { mostrarToast } from '../../components/ui/Toast';
 
 const C = {
   g800: '#0e3326', g600: '#1a7a52', g100: '#d4f2e4',
@@ -52,11 +53,11 @@ export default function DisponibilidadeScreen() {
 
   async function handleAdicionarFaixa() {
     if (horaInicio.length !== 5 || horaFim.length !== 5) {
-      alertar('Horário inválido', 'Informe início e fim no formato HH:mm.');
+      mostrarToast('erro', 'Horário inválido', 'Informe início e fim no formato HH:mm.');
       return;
     }
     if (horaInicio >= horaFim) {
-      alertar('Horário inválido', 'O horário de início deve ser antes do horário de fim.');
+      mostrarToast('erro', 'Horário inválido', 'O horário de início deve ser antes do horário de fim.');
       return;
     }
     setSalvandoFaixa(true);
@@ -64,8 +65,9 @@ export default function DisponibilidadeScreen() {
       await adicionarFaixaDisponibilidade({ diaSemana: diaSelecionado, horaInicio, horaFim });
       setHoraInicio('');
       setHoraFim('');
+      mostrarToast('sucesso', 'Horário adicionado');
     } catch {
-      alertar('Não foi possível adicionar', 'Tente novamente em instantes.');
+      mostrarToast('erro', 'Não foi possível adicionar', 'Tente novamente em instantes.');
     } finally {
       setSalvandoFaixa(false);
     }
@@ -80,7 +82,7 @@ export default function DisponibilidadeScreen() {
 
   async function handleAdicionarBloqueio() {
     if (dataInicioBloqueio.length < 10 || dataFimBloqueio.length < 10) {
-      alertar('Data inválida', 'Informe início e fim no formato DD/MM/AAAA.');
+      mostrarToast('erro', 'Data inválida', 'Informe início e fim no formato DD/MM/AAAA.');
       return;
     }
     setSalvandoBloqueio(true);
@@ -93,8 +95,9 @@ export default function DisponibilidadeScreen() {
       setDataInicioBloqueio('');
       setDataFimBloqueio('');
       setMotivoBloqueio('');
+      mostrarToast('sucesso', 'Bloqueio adicionado');
     } catch {
-      alertar('Não foi possível adicionar', 'Verifique se a data de fim é igual ou posterior à de início.');
+      mostrarToast('erro', 'Não foi possível adicionar', 'Verifique se a data de fim é igual ou posterior à de início.');
     } finally {
       setSalvandoBloqueio(false);
     }
