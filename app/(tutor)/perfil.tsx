@@ -8,7 +8,8 @@ import { ESPECIES } from '../../constants';
 import { useAuth } from '../../context/AuthContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { AppIcon } from '../../components/AppIcon';
-import { alertar, confirmar } from '../../utils/alert';
+import { confirmar } from '../../utils/alert';
+import { mostrarToast } from '../../components/ui/Toast';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
 
 const C = {
@@ -49,7 +50,7 @@ export default function PerfilScreen() {
 
   function handleRemoverPet(id: string, nomePet: string) {
     if (pets.length <= 1) {
-      alertar('Não é possível remover', 'Você precisa ter pelo menos 1 pet cadastrado.');
+      mostrarToast('erro', 'Não é possível remover', 'Você precisa ter pelo menos 1 pet cadastrado.');
       return;
     }
     confirmar(
