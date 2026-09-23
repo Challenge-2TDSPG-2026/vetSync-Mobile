@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { AppIcon } from '../../components/AppIcon';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonBlock, SkeletonList } from '../../components/ui/Skeleton';
+import { mostrarToast } from '../../components/ui/Toast';
 import { useMeusResgates, useValidarResgate } from '../../hooks/useRecompensas';
-import { confirmar, alertar } from '../../utils/alert';
+import { confirmar } from '../../utils/alert';
 
 const C = {
   g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52', g500: '#22a06b',
@@ -37,8 +40,10 @@ export default function ResgatesPendentesScreen() {
             validar.mutate(
               { idResgate, aprovado },
               {
+                onSuccess: () =>
+                  mostrarToast('sucesso', aprovado ? 'Resgate aprovado' : 'Resgate negado'),
                 onError: () =>
-                  alertar('Não foi possível validar', 'Tente novamente em instantes.'),
+                  mostrarToast('erro', 'Não foi possível validar', 'Tente novamente em instantes.'),
               }
             );
           },
@@ -49,9 +54,10 @@ export default function ResgatesPendentesScreen() {
 
   if (isLoading) {
     return (
-      <View style={s.loadingContainer}>
-        <ActivityIndicator color={C.g600} size="large" />
-      </View>
+      <ScrollView style={s.container} contentContainerStyle={s.content}>
+        <SkeletonBlock height={84} borderRadius={16} style={{ marginBottom: 14 }} />
+        <SkeletonList linhas={3} comIcone={false} />
+      </ScrollView>
     );
   }
 
@@ -59,7 +65,7 @@ export default function ResgatesPendentesScreen() {
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
-      refreshControl={undefined}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={C.g600} colors={[C.g600]} />}
     >
       <View style={s.banner}>
         <View style={s.bannerIconWrap}>
@@ -73,17 +79,13 @@ export default function ResgatesPendentesScreen() {
         </View>
       </View>
 
-      <Pressable style={s.btnAtualizar} onPress={() => refetch()} disabled={isRefetching}>
-        <AppIcon name="refresh-outline" set="Ionicons" size={14} color={C.g600} />
-        <Text style={s.btnAtualizarText}>{isRefetching ? 'Atualizando...' : 'Atualizar lista'}</Text>
-      </Pressable>
-
       {pendentes.length === 0 ? (
-        <View style={s.empty}>
-          <AppIcon name="checkmark-done-outline" set="Ionicons" size={36} color={C.muted} style={{ marginBottom: 10 }} />
-          <Text style={s.emptyTitle}>Nenhum resgate pendente</Text>
-          <Text style={s.emptySub}>Quando um tutor resgatar uma recompensa, ela aparece aqui para validação.</Text>
-        </View>
+        <EmptyState
+          icon="checkmark-done-outline"
+          title="Nenhum resgate pendente"
+          subtitle="Quando um tutor resgatar uma recompensa, ela aparece aqui para validação."
+          accentColor={C.g600}
+        />
       ) : (
         pendentes.map(r => (
           <View key={r.id} style={s.card}>
