@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
-import { alertar } from '../utils/alert';
+import { mostrarToast } from '../components/ui/Toast';
 import { AppIcon } from '../components/AppIcon';
 
 const C = {
@@ -54,7 +54,7 @@ export default function LoginScreen() {
       // Navegação (para (tutor) ou (vet), conforme sessao.perfil) é reativa,
       // controlada pelo RootNavigator em app/_layout.tsx.
     } catch (e) {
-      alertar('Não foi possível entrar', mensagemDeErro(e, 'Verifique seu e-mail e senha.'));
+      mostrarToast('erro', 'Não foi possível entrar', mensagemDeErro(e, 'Verifique seu e-mail e senha.'));
     } finally {
       setAutenticando(false);
     }
