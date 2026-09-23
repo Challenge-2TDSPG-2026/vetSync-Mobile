@@ -1,11 +1,14 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
 import { useMeusResgates } from '../../hooks/useRecompensas';
+import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonList, SkeletonCard } from '../../components/ui/Skeleton';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 
 const C = {
@@ -22,17 +25,27 @@ export default function VetDashboardScreen() {
   const { veterinarioAtivo, eventosAgendados, eventosDeHoje, carregando } = useVet();
   const { data: resgates = [] } = useMeusResgates(true);
   const resgatesPendentes = resgates.filter(r => r.status === 'PENDENTE');
+  const { atualizando, aoAtualizar } = useRecarregarDados();
 
   if (carregando) {
     return (
-      <View style={s.loadingContainer}>
-        <ActivityIndicator color={C.g600} size="large" />
-      </View>
+      <ScrollView style={s.container} contentContainerStyle={s.content}>
+        <SkeletonCard height={84} borderRadius={16} style={{ marginBottom: 20 }} />
+        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
+          <SkeletonCard height={72} borderRadius={12} style={{ flex: 1 }} />
+          <SkeletonCard height={72} borderRadius={12} style={{ flex: 1 }} />
+        </View>
+        <SkeletonList linhas={3} />
+      </ScrollView>
     );
   }
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
+    <ScrollView
+      style={s.container}
+      contentContainerStyle={s.content}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+    >
 
       <View style={s.welcome}>
         <View style={s.welcomeIconWrap}>
@@ -70,10 +83,12 @@ export default function VetDashboardScreen() {
         </View>
 
         {eventosAgendados.length === 0 ? (
-          <View style={s.empty}>
-            <AppIcon name="checkmark-done-outline" set="Ionicons" size={32} color={C.muted} style={{ marginBottom: 8 }} />
-            <Text style={s.emptyTitle}>Nenhum atendimento agendado</Text>
-          </View>
+          <EmptyState
+            icon="checkmark-done-outline"
+            title="Nenhum atendimento agendado"
+            accentColor={C.g600}
+            variant="plain"
+          />
         ) : (
           [...eventosAgendados]
             .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
@@ -109,10 +124,12 @@ export default function VetDashboardScreen() {
         </View>
 
         {eventosDeHoje.length === 0 ? (
-          <View style={s.empty}>
-            <AppIcon name="calendar-outline" set="Ionicons" size={32} color={C.muted} style={{ marginBottom: 8 }} />
-            <Text style={s.emptyTitle}>Nada agendado para hoje</Text>
-          </View>
+          <EmptyState
+            icon="calendar-outline"
+            title="Nada agendado para hoje"
+            accentColor={C.info}
+            variant="plain"
+          />
         ) : (
           eventosDeHoje.map((e, idx, arr) => {
             const visual = obterVisualTipoEvento(e.nomeTipoEvento);
