@@ -1,13 +1,16 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonList } from '../../components/ui/Skeleton';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, formatarDataEvento } from '../../utils/eventoStatus';
 
 const C = {
@@ -32,6 +35,7 @@ export default function DashboardScreen() {
   const router = useRouter();
   const { modoSimples } = useAccessibility();
   const { pets, petAtivo, eventos, carregandoEventos, carregando } = usePet();
+  const { atualizando, aoAtualizar } = useRecarregarDados();
 
   const eventosComStatus = useMemo(
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
@@ -76,6 +80,7 @@ export default function DashboardScreen() {
       style={s.container}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
     >
 
       <PetSwitcher />
@@ -220,17 +225,17 @@ export default function DashboardScreen() {
         </View>
 
         {carregandoEventos ? (
-          <View style={s.empty}>
-            <ActivityIndicator color={C.g600} />
+          <View style={{ paddingHorizontal: 4 }}>
+            <SkeletonList linhas={3} />
           </View>
         ) : proximos.length === 0 ? (
-          <View style={[s.empty, s.emptyEventos, modoSimples && sSimples.emptyEventos]}>
-            <View style={s.emptyOrb}>
-              <AppIcon name="calendar-outline" set="Ionicons" size={27} color={C.g600} />
-            </View>
-            <Text style={s.emptyTitle}>Nenhum evento pendente</Text>
-            <Text style={s.emptySub}>Adicione eventos de saúde para o seu pet</Text>
-          </View>
+          <EmptyState
+            icon="calendar-outline"
+            title="Nenhum evento pendente"
+            subtitle="Adicione eventos de saúde para o seu pet"
+            accentColor={C.g600}
+            style={[s.emptyEventos, modoSimples && sSimples.emptyEventos]}
+          />
         ) : (
           proximos.map((e, idx) => {
             const visual = obterVisualTipoEvento(e.nomeTipoEvento);
