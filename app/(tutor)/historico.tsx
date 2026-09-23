@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonList } from '../../components/ui/Skeleton';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento } from '../../utils/eventoStatus';
 
 const C = {
@@ -26,6 +29,7 @@ function formatarDataCurta(iso: string): string {
 export default function HistoricoScreen() {
   const { eventos, carregandoEventos } = usePet();
   const { modoSimples } = useAccessibility();
+  const { atualizando, aoAtualizar } = useRecarregarDados();
 
   const eventosComStatus = useMemo(
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
@@ -53,7 +57,11 @@ export default function HistoricoScreen() {
   const pct = Math.round(progresso * 100);
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
+    <ScrollView
+      style={s.container}
+      contentContainerStyle={s.content}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+    >
 
       <PetSwitcher />
 
@@ -87,15 +95,15 @@ export default function HistoricoScreen() {
       )}
 
       {carregandoEventos ? (
-        <View style={s.empty}>
-          <ActivityIndicator color={C.g600} />
-        </View>
+        <SkeletonList linhas={4} comIcone={false} />
       ) : Object.keys(agrupados).length === 0 ? (
-        <View style={s.empty}>
-          <AppIcon name="document-text-outline" set="Ionicons" size={40} color={C.muted} style={s.emptyIcon} />
-          <Text style={s.emptyTitle}>Nenhum evento registrado ainda</Text>
-          <Text style={s.emptySub}>Adicione eventos para ver o histórico clínico</Text>
-        </View>
+        <EmptyState
+          icon="document-text-outline"
+          title="Nenhum evento registrado ainda"
+          subtitle="Adicione eventos para ver o histórico clínico"
+          accentColor={C.info}
+          variant="plain"
+        />
       ) : (
         Object.entries(agrupados).map(([mes, evts]) => (
           <View key={mes} style={s.grupo}>
