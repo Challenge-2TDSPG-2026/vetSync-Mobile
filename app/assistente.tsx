@@ -8,7 +8,7 @@ import { usePet } from '../context/PetContext';
 import { AppIcon } from '../components/AppIcon';
 import { ApiError } from '../services/api/httpClient';
 import { iaService } from '../services/iaService';
-import { alertar } from '../utils/alert';
+import { mostrarToast } from '../components/ui/Toast';
 
 const C = { green900: '#0a2218', green800: '#0e3326', green700: '#155c3f', green600: '#1a7a52', green100: '#d4f2e4', cream: '#fafaf8', white: '#ffffff', text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', danger: '#991b1b', dangerBg: '#fee2e2' };
 const DURACAO_TRANSICAO_TECLADO = 250;
@@ -163,7 +163,7 @@ export default function AssistenteScreen() {
       <Text style={s.safety}>A SIA não substitui uma avaliação veterinária.</Text>
       <View style={s.composer}>
         <View style={s.composerField}>
-          <Pressable onPress={() => alertar('Anexos', 'O envio de arquivos será habilitado após a definição de privacidade da integração com a IA.')} hitSlop={7} style={s.attach} accessibilityLabel="Anexar arquivo"><Ionicons name="add" size={25} color={C.green700} /></Pressable>
+          <Pressable onPress={() => mostrarToast('info', 'Anexos', 'O envio de arquivos será habilitado após a definição de privacidade da integração com a IA.')} hitSlop={7} style={s.attach} accessibilityLabel="Anexar arquivo"><Ionicons name="add" size={25} color={C.green700} /></Pressable>
           <TextInput value={entrada} onChangeText={setEntrada} onFocus={() => setTecladoVisivel(true)} onBlur={() => setTecladoVisivel(false)} placeholder="Pergunte algo à SIA" placeholderTextColor={C.muted} style={s.input} multiline maxLength={1000} editable={!carregando} onSubmitEditing={() => enviar()} blurOnSubmit={false} />
         </View>
         <Pressable onPress={() => enviar()} disabled={!entrada.trim() || carregando} style={[s.send, (!entrada.trim() || carregando) && s.sendDisabled]} accessibilityLabel="Enviar pergunta"><Ionicons name="arrow-up" size={20} color={C.white} /></Pressable>
