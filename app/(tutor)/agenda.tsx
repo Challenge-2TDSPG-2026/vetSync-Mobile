@@ -1,16 +1,19 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Modal, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useCancelarEvento, useRemoverEvento } from '../../hooks/useEventos';
+import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
 import { Calendario, dateKey } from '../../components/Calendario';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonList } from '../../components/ui/Skeleton';
+import { mostrarToast } from '../../components/ui/Toast';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento, formatarDataEvento } from '../../utils/eventoStatus';
-import { alertar } from '../../utils/alert';
 import { cancelarLembretes } from '../../services/calendarService';
 import { obterERemoverLembretesEvento } from '../../storage/petStorage';
 import type { Evento } from '../../types';
@@ -45,6 +48,7 @@ export default function AgendaScreen() {
   const router = useRouter();
   const { petAtivo, eventos, carregandoEventos } = usePet();
   const { modoSimples } = useAccessibility();
+  const { atualizando, aoAtualizar } = useRecarregarDados();
   const cancelarMutation = useCancelarEvento();
   const removerMutation = useRemoverEvento();
 
@@ -113,15 +117,16 @@ export default function AgendaScreen() {
   async function confirmarCancelamento() {
     if (!eventoParaCancelar) return;
     if (!motivoCancelamento.trim()) {
-      alertar('Informe o motivo', 'É preciso descrever o motivo do cancelamento.');
+      mostrarToast('erro', 'Informe o motivo', 'É preciso descrever o motivo do cancelamento.');
       return;
     }
     try {
       await cancelarMutation.mutateAsync({ id: eventoParaCancelar.id, motivo: motivoCancelamento.trim() });
       await cancelarLembretesLocais(eventoParaCancelar.id);
       setEventoParaCancelar(null);
+      mostrarToast('sucesso', 'Evento cancelado');
     } catch {
-      alertar('Não foi possível cancelar', 'Tente novamente em instantes.');
+      mostrarToast('erro', 'Não foi possível cancelar', 'Tente novamente em instantes.');
     }
   }
 
@@ -129,8 +134,10 @@ export default function AgendaScreen() {
     try {
       await removerMutation.mutateAsync(evento.id);
       await cancelarLembretesLocais(evento.id);
+      mostrarToast('sucesso', 'Evento removido');
     } catch {
-      alertar(
+      mostrarToast(
+        'erro',
         'Não foi possível remover',
         'Só é possível remover eventos que ainda estão agendados.'
       );
@@ -164,7 +171,10 @@ export default function AgendaScreen() {
         ))}
       </ScrollView>
 
-      <ScrollView contentContainerStyle={s.scrollContent}>
+      <ScrollView
+        contentContainerStyle={s.scrollContent}
+        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+      >
 
         <PetSwitcher />
 
@@ -190,17 +200,15 @@ export default function AgendaScreen() {
         </View>
 
         {carregandoEventos ? (
-          <View style={s.empty}>
-            <ActivityIndicator color={C.g600} />
-          </View>
+          <SkeletonList linhas={2} />
         ) : eventosDoDia.length === 0 ? (
-          <View style={[s.empty, modoSimples && sSimples.empty]}>
-            <View style={s.emptyOrb}>
-              <AppIcon name="calendar-outline" set="Ionicons" size={29} color={C.g600} />
-            </View>
-            <Text style={s.emptyTitle}>Nenhum evento nesse dia</Text>
-            <Text style={s.emptySub}>Toque em outra data ou adicione um novo evento</Text>
-          </View>
+          <EmptyState
+            icon="calendar-outline"
+            title="Nenhum evento nesse dia"
+            subtitle="Toque em outra data ou adicione um novo evento"
+            accentColor={C.g600}
+            style={modoSimples ? sSimples.empty : undefined}
+          />
         ) : (
           eventosDoDia.map(item => {
             const visual = obterVisualTipoEvento(item.nomeTipoEvento);
