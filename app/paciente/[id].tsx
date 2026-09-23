@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
-import { alertar } from '../../utils/alert';
+import { mostrarToast } from '../../components/ui/Toast';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 
 const C = {
@@ -66,8 +66,9 @@ export default function FichaPacienteScreen() {
     try {
       await concluirEvento(eventoSelecionadoId, textoModal.trim() || undefined);
       fecharModal();
+      mostrarToast('sucesso', 'Consulta concluída');
     } catch {
-      alertar('Não foi possível concluir a consulta', 'Tente novamente em instantes.');
+      mostrarToast('erro', 'Não foi possível concluir a consulta', 'Tente novamente em instantes.');
     } finally {
       setEnviando(false);
     }
