@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useAuth } from '../../context/AuthContext';
+import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import {
   useCatalogoRecompensas,
   useSaldoRecompensas,
@@ -13,7 +14,10 @@ import {
 import { useConquistas } from '../../hooks/useConquistas';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
-import { alertar, confirmar } from '../../utils/alert';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonList } from '../../components/ui/Skeleton';
+import { mostrarToast } from '../../components/ui/Toast';
+import { confirmar } from '../../utils/alert';
 import { META_CONSULTAS_RECOMPENSA } from '../../constants/gamification';
 import type { Recompensa } from '../../types';
 
@@ -35,6 +39,7 @@ export default function RecompensasScreen() {
   const { petAtivo, eventos, nivelInfo } = usePet();
   const { modoSimples } = useAccessibility();
   const { autenticado } = useAuth();
+  const { atualizando, aoAtualizar } = useRecarregarDados();
   const [mostrarCatalogoCompleto, setMostrarCatalogoCompleto] = useState(false);
 
   const { data: catalogo = [], isLoading: carregandoCatalogo } = useCatalogoRecompensas(autenticado);
@@ -62,7 +67,7 @@ export default function RecompensasScreen() {
 
   function handleResgatar(r: Recompensa) {
     if (saldoPontos < r.custoPontos) {
-      alertar('Pontos insuficientes', `Essa recompensa custa ${r.custoPontos} pontos. Seu saldo é de ${saldoPontos} pontos.`);
+      mostrarToast('erro', 'Pontos insuficientes', `Essa recompensa custa ${r.custoPontos} pontos. Seu saldo é de ${saldoPontos} pontos.`);
       return;
     }
     confirmar(
@@ -75,9 +80,9 @@ export default function RecompensasScreen() {
           aoConfirmar: async () => {
             try {
               await resgatarMutation.mutateAsync(r.id);
-              alertar('Resgate efetuado!', 'Apresente o comprovante de resgate na clínica veterinária.');
+              mostrarToast('sucesso', 'Resgate efetuado!', 'Apresente o comprovante de resgate na clínica veterinária.');
             } catch {
-              alertar('Erro ao resgatar', 'Não foi possível concluir o resgate. Tente novamente.');
+              mostrarToast('erro', 'Erro ao resgatar', 'Não foi possível concluir o resgate. Tente novamente.');
             }
           },
         },
@@ -86,7 +91,11 @@ export default function RecompensasScreen() {
   }
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
+    <ScrollView
+      style={s.container}
+      contentContainerStyle={s.content}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+    >
 
       <PetSwitcher />
 
@@ -168,15 +177,14 @@ export default function RecompensasScreen() {
       </View>
 
       {carregandoCatalogo ? (
-        <View style={s.emptyCard}>
-          <ActivityIndicator color={C.g600} />
-        </View>
+        <SkeletonList linhas={2} />
       ) : catalogo.length === 0 ? (
-        <View style={s.emptyCard}>
-          <AppIcon name="ribbon-outline" set="Ionicons" size={32} color={C.muted} style={{ marginBottom: 8 }} />
-          <Text style={s.emptyTitle}>Nenhum benefício disponível no momento</Text>
-          <Text style={s.emptySub}>Novas recompensas aparecerão aqui em breve.</Text>
-        </View>
+        <EmptyState
+          icon="ribbon-outline"
+          title="Nenhum benefício disponível no momento"
+          subtitle="Novas recompensas aparecerão aqui em breve."
+          accentColor={C.ouro}
+        />
       ) : (
         <>
           {recompensasVisiveis.map(r => {
@@ -277,9 +285,7 @@ export default function RecompensasScreen() {
       )}
 
       {carregandoResgates ? (
-        <View style={s.emptyCard}>
-          <ActivityIndicator color={C.g600} />
-        </View>
+        <SkeletonList linhas={2} comIcone={false} />
       ) : historico.length > 0 && (
         <>
           <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>
