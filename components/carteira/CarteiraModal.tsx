@@ -8,7 +8,8 @@ import { formatarDataEvento, statusExibicao } from '../../utils/eventoStatus';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { ApiError } from '../../services/api/httpClient';
 import { carteiraCompartilhadaService, type CarteiraCompartilhadaAtiva } from '../../services/carteiraCompartilhadaService';
-import { alertar, confirmar } from '../../utils/alert';
+import { confirmar } from '../../utils/alert';
+import { mostrarToast } from '../ui/Toast';
 
 const C = { green900: '#0a2218', green800: '#0e3326', green700: '#155c3f', green600: '#1a7a52', green100: '#d4f2e4', cream: '#fafaf8', white: '#ffffff', text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', blue: '#1e40af', blueBg: '#dbeafe', red: '#991b1b', redBg: '#fee2e2', ok: '#166534', okBg: '#dcfce7' };
 type Props = { pet: Pet | null; eventos: Evento[]; onFechar: () => void };
@@ -56,7 +57,7 @@ export function CarteiraModal({ pet, eventos, onFechar }: Props) {
       } catch (erro) {
         // 404 é o estado esperado quando o tutor ainda não criou um QR para o pet.
         if (ativo && (!(erro instanceof ApiError) || erro.status !== 404)) {
-          alertar('Não foi possível consultar o QR Code', erro instanceof Error ? erro.message : undefined);
+          mostrarToast('erro', 'Não foi possível consultar o QR Code', erro instanceof Error ? erro.message : undefined);
         }
       } finally {
         if (ativo) setCarregandoCompartilhamento(false);
@@ -78,7 +79,7 @@ export function CarteiraModal({ pet, eventos, onFechar }: Props) {
       });
       setUrlPublica(criada.urlPublica);
     } catch (erro) {
-      alertar('Não foi possível gerar o QR Code', erro instanceof Error ? erro.message : undefined);
+      mostrarToast('erro', 'Não foi possível gerar o QR Code', erro instanceof Error ? erro.message : undefined);
     } finally {
       setGerandoQr(false);
     }
@@ -91,9 +92,9 @@ export function CarteiraModal({ pet, eventos, onFechar }: Props) {
       await carteiraCompartilhadaService.revogar(pet.id, carteiraCompartilhada.id);
       setCarteiraCompartilhada(null);
       setUrlPublica(null);
-      alertar('QR Code revogado', 'A página pública deixou de estar disponível imediatamente.');
+      mostrarToast('sucesso', 'QR Code revogado', 'A página pública deixou de estar disponível imediatamente.');
     } catch (erro) {
-      alertar('Não foi possível revogar o QR Code', erro instanceof Error ? erro.message : undefined);
+      mostrarToast('erro', 'Não foi possível revogar o QR Code', erro instanceof Error ? erro.message : undefined);
     } finally {
       setRevogandoQr(false);
     }
@@ -115,7 +116,7 @@ export function CarteiraModal({ pet, eventos, onFechar }: Props) {
     try {
       await Linking.openURL(urlPublica);
     } catch {
-      alertar('Não foi possível abrir a página pública');
+      mostrarToast('erro', 'Não foi possível abrir a página pública');
     }
   }
   if (!pet) return null;
