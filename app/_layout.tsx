@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PetProvider, usePet } from '../context/PetContext';
 import { VetProvider } from '../context/VetContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
+import { ToastHost } from '../components/ui/Toast';
 import { lockFontScaling } from '../utils/lockFontScaling';
 
 lockFontScaling();
@@ -131,6 +132,7 @@ export default function RootLayout() {
             <PetProvider>
               <VetProvider>
                 <RootNavigator />
+                <ToastHost />
               </VetProvider>
             </PetProvider>
           </AuthProvider>
