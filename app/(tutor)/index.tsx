@@ -6,11 +6,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, formatarDataEvento } from '../../utils/eventoStatus';
 
 const C = {
@@ -36,6 +38,7 @@ export default function DashboardScreen() {
   const { modoSimples } = useAccessibility();
   const { pets, petAtivo, eventos, carregandoEventos, carregando } = usePet();
   const { atualizando, aoAtualizar } = useRecarregarDados();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-dashboard');
 
   const eventosComStatus = useMemo(
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
@@ -84,6 +87,16 @@ export default function DashboardScreen() {
     >
 
       <PetSwitcher />
+
+      {dicaVisivel && (
+        <DicaTela
+          titulo="Sua central de cuidados"
+          texto="Aqui você acompanha os próximos eventos de saúde do seu pet. Troque de pet no seletor acima e toque em qualquer evento pra ver os detalhes."
+          accentColor={C.g600}
+          onFechar={fecharDica}
+          simples={modoSimples}
+        />
+      )}
 
       {/* Hero inspirado nos fluxos de cadastro: gradiente, selo e patinhas decorativas. */}
       <LinearGradient
