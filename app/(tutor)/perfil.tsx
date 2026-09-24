@@ -7,9 +7,11 @@ import { usePet } from '../../context/PetContext';
 import { ESPECIES } from '../../constants';
 import { useAuth } from '../../context/AuthContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { AppIcon } from '../../components/AppIcon';
 import { confirmar } from '../../utils/alert';
 import { mostrarToast } from '../../components/ui/Toast';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
 
 const C = {
@@ -32,6 +34,7 @@ export default function PerfilScreen() {
   const { sessao, logout } = useAuth();
   const { modoSimples } = useAccessibility();
   const { pets, removerPet } = usePet();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-perfil');
 
   const nome = sessao?.nome?.trim() || 'Conta VetSync';
   const email = sessao?.email?.trim() || 'E-mail não disponível';
@@ -90,6 +93,16 @@ export default function PerfilScreen() {
           </View>
         </LinearGradient>
 
+        {dicaVisivel && (
+          <DicaTela
+            titulo="Sua conta"
+            texto="Aqui você vê seus dados, gerencia seus pets cadastrados e ativa o modo simples, com textos e botões maiores."
+            accentColor={C.g600}
+            onFechar={fecharDica}
+            simples={modoSimples}
+          />
+        )}
+
         <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Dados da conta</Text>
         <View style={s.card}>
           <InfoRow icon="person-outline" label="Nome completo" value={nome} simples={modoSimples} />
@@ -106,14 +119,6 @@ export default function PerfilScreen() {
             title="Histórico clínico"
             description="Consulte os eventos de saúde registrados"
             onPress={() => router.push('/(tutor)/historico')}
-            simples={modoSimples}
-          />
-          <View style={s.divider} />
-          <AccountAction
-            icon="people-outline"
-            title="Gerenciar acessos"
-            description="Convide cuidadores e controle quem acompanha seus pets"
-            onPress={() => router.push('/gerenciar-acessos')}
             simples={modoSimples}
           />
         </View>
