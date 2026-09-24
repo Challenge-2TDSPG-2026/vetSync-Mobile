@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
 import { AppIcon } from '../../components/AppIcon';
+import { DicaTela } from '../../components/ui/DicaTela';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
 
 const C = {
@@ -18,6 +20,7 @@ export default function VetPerfilScreen() {
   const { veterinarioAtivo, pacientes, eventosAgendados } = useVet();
   const { sessao, logout } = useAuth();
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-perfil');
 
   function handleSair() {
     setModalSairVisivel(true);
@@ -44,6 +47,15 @@ export default function VetPerfilScreen() {
             <Text style={s.bannerRole}>{sessao?.email}</Text>
           </View>
         </View>
+
+        {dicaVisivel && (
+          <DicaTela
+            titulo="Seu perfil"
+            texto="Aqui você vê seus dados profissionais e um resumo dos seus pacientes e agendamentos."
+            accentColor={C.g600}
+            onFechar={fecharDica}
+          />
+        )}
 
         <View style={s.statsRow}>
           <StatCard valor={pacientes.length} label="Pacientes" />
