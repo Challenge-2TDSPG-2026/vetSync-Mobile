@@ -25,6 +25,7 @@ export const STORAGE_KEYS = {
   LEMBRETES_EVENTO: '@vetsync:lembretes_evento',
   SESSAO: '@vetsync:sessao',
   MODO_SIMPLES: '@vetsync:modo_simples',
+  DICAS_VISTAS: '@vetsync:dicas_vistas',
 };
 
 export const XP_POR_EVENTO = 10;
