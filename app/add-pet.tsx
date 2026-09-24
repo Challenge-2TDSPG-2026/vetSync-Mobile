@@ -8,6 +8,8 @@ import { ESPECIES } from '../constants';
 import { PetForm } from '../components/pet-form/PetForm';
 import { useAtualizarPet, usePetPorId } from '../hooks/usePets';
 import { usePet } from '../context/PetContext';
+import { useDicaPrimeiraVisita } from '../hooks/useDicaPrimeiraVisita';
+import { DicaTela } from '../components/ui/DicaTela';
 import type { Pet } from '../types';
 
 const C = {
@@ -27,6 +29,7 @@ export default function AddPetScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const editando = !!id;
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('add-pet');
   const { data: petInicial, isLoading: carregandoPet } = usePetPorId(editando ? String(id) : null, editando);
   const atualizarPet = useAtualizarPet();
   const { adicionarPet, salvandoPet } = usePet();
@@ -68,6 +71,15 @@ export default function AddPetScreen() {
           <Text style={estilos.heroTitulo}>{editando ? 'Editar pet' : 'Vamos conhecer seu pet.'}</Text>
           <Text style={estilos.heroSub}>{editando ? 'Atualize as informações sempre que algo mudar.' : 'Só o essencial pra começar a cuidar da saúde dele por aqui.'}</Text>
         </LinearGradient>
+        {dicaVisivel && (
+          <DicaTela
+            titulo="Cadastro do pet"
+            texto="Preencha as informações básicas do seu pet. Você pode editar qualquer dado depois, sempre que precisar."
+            accentColor={C.mint}
+            onFechar={fecharDica}
+            style={{ marginHorizontal: 24, marginBottom: 40 }}
+          />
+        )}
         <PetForm
           petInicial={petInicial}
           editando={editando}
