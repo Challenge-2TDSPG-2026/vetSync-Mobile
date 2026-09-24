@@ -3,10 +3,12 @@ import { View, Text, ScrollView, Pressable, StyleSheet, TextInput, RefreshContro
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { ESPECIES } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
+import { DicaTela } from '../../components/ui/DicaTela';
 
 const C = {
   g800: '#0e3326', g600: '#1a7a52', g100: '#d4f2e4',
@@ -19,6 +21,7 @@ export default function PacientesScreen() {
   const { pacientes, carregando } = useVet();
   const [busca, setBusca] = useState('');
   const { atualizando, aoAtualizar } = useRecarregarDados();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-pacientes');
 
   const pacientesFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -43,6 +46,15 @@ export default function PacientesScreen() {
         contentContainerStyle={s.content}
         refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
       >
+        {dicaVisivel && (
+          <DicaTela
+            titulo="Seus pacientes"
+            texto="Aqui ficam os pets que já passaram ou estão agendados com você. Toque num paciente pra ver o histórico completo e concluir atendimentos."
+            accentColor={C.g600}
+            onFechar={fecharDica}
+          />
+        )}
+
         {carregando ? (
           <SkeletonList linhas={4} />
         ) : pacientesFiltrados.length === 0 ? (
