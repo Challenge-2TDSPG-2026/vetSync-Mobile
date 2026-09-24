@@ -6,6 +6,7 @@ import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useCancelarEvento, useRemoverEvento } from '../../hooks/useEventos';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
@@ -13,6 +14,7 @@ import { Calendario, dateKey } from '../../components/Calendario';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { mostrarToast } from '../../components/ui/Toast';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento, formatarDataEvento } from '../../utils/eventoStatus';
 import { cancelarLembretes } from '../../services/calendarService';
 import { obterERemoverLembretesEvento } from '../../storage/petStorage';
@@ -49,6 +51,7 @@ export default function AgendaScreen() {
   const { petAtivo, eventos, carregandoEventos } = usePet();
   const { modoSimples } = useAccessibility();
   const { atualizando, aoAtualizar } = useRecarregarDados();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-agenda');
   const cancelarMutation = useCancelarEvento();
   const removerMutation = useRemoverEvento();
 
@@ -177,6 +180,16 @@ export default function AgendaScreen() {
       >
 
         <PetSwitcher />
+
+        {dicaVisivel && (
+          <DicaTela
+            titulo="Como funciona a agenda"
+            texto="Toque numa data no calendário pra ver os eventos daquele dia. Use os filtros acima pra ver só o que interessa, e toque em ‘Novo evento’ pra agendar."
+            accentColor={C.g600}
+            onFechar={fecharDica}
+            simples={modoSimples}
+          />
+        )}
 
         <Calendario
           mesRef={mesRef}
