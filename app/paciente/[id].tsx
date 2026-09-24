@@ -5,6 +5,8 @@ import { useVet } from '../../context/VetContext';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { mostrarToast } from '../../components/ui/Toast';
+import { DicaTela } from '../../components/ui/DicaTela';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 
 const C = {
@@ -35,6 +37,7 @@ export default function FichaPacienteScreen() {
   const [eventoSelecionadoId, setEventoSelecionadoId] = useState<string | null>(null);
   const [textoModal, setTextoModal] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-paciente-detalhe');
 
   const paciente = useMemo(() => pacientes.find(p => p.pet.id === id) ?? null, [pacientes, id]);
   const pet = paciente?.pet ?? null;
@@ -92,6 +95,15 @@ export default function FichaPacienteScreen() {
       <Stack.Screen options={{ title: pet.nome }} />
 
       <ScrollView contentContainerStyle={s.content}>
+
+        {dicaVisivel && (
+          <DicaTela
+            titulo="Ficha do paciente"
+            texto="Veja o histórico completo de eventos do pet abaixo. Toque num evento agendado pra concluir o atendimento."
+            accentColor={C.g600}
+            onFechar={fecharDica}
+          />
+        )}
 
         <View style={s.petCard}>
           <View style={s.petAvatar}>
