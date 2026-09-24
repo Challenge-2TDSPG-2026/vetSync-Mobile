@@ -4,6 +4,8 @@ import { useVet } from '../../context/VetContext';
 import { AppIcon } from '../../components/AppIcon';
 import { confirmar } from '../../utils/alert';
 import { mostrarToast } from '../../components/ui/Toast';
+import { DicaTela } from '../../components/ui/DicaTela';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 
 const C = {
   g800: '#0e3326', g600: '#1a7a52', g100: '#d4f2e4',
@@ -40,6 +42,7 @@ export default function DisponibilidadeScreen() {
     disponibilidade, adicionarFaixaDisponibilidade, removerFaixaDisponibilidade,
     bloqueios, adicionarBloqueio, removerBloqueio, carregando,
   } = useVet();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-disponibilidade');
 
   const [diaSelecionado, setDiaSelecionado] = useState(1);
   const [horaInicio, setHoraInicio] = useState('');
@@ -112,6 +115,15 @@ export default function DisponibilidadeScreen() {
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
+
+      {dicaVisivel && (
+        <DicaTela
+          titulo="Sua disponibilidade"
+          texto="Defina abaixo os horários fixos que você atende em cada dia da semana, e use a seção de bloqueios pra marcar férias ou folgas."
+          accentColor={C.g600}
+          onFechar={fecharDica}
+        />
+      )}
 
       <Text style={s.secLabel}>Horários fixos de atendimento</Text>
       <View style={s.card}>
