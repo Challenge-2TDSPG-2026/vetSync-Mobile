@@ -4,9 +4,11 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { WalletStack } from '../../components/carteira/WalletStack';
 import { CarteiraModal } from '../../components/carteira/CarteiraModal';
 import { AppIcon } from '../../components/AppIcon';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { formatarDataEvento, parseDataEvento, statusExibicao } from '../../utils/eventoStatus';
 import type { Pet } from '../../types';
 
@@ -28,6 +30,7 @@ const C = {
 export default function CarteirinhasScreen() {
   const router = useRouter();
   const { modoSimples } = useAccessibility();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-carteirinhas');
   const { pets, petAtivo, petAtivoId, selecionarPet, eventos, carregandoEventos } = usePet();
   const [petCarteira, setPetCarteira] = useState<Pet | null>(null);
 
@@ -55,6 +58,16 @@ export default function CarteirinhasScreen() {
             Acesse os registros de vacina e compartilhe a carteira do seu pet quando precisar.
           </Text>
         </View>
+
+        {dicaVisivel && (
+          <DicaTela
+            titulo="Carteira de vacinação"
+            texto="Toque num pet na pilha acima pra abrir a carteira dele. Lá dá pra gerar um QR Code e compartilhar o histórico de vacinas com a clínica."
+            accentColor={C.green600}
+            onFechar={fecharDica}
+            simples={modoSimples}
+          />
+        )}
 
         <WalletStack
           pets={pets}
