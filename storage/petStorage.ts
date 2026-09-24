@@ -62,3 +62,19 @@ export async function carregarModoSimples(): Promise<boolean> {
   const val = await AsyncStorage.getItem(STORAGE_KEYS.MODO_SIMPLES);
   return val === 'true';
 }
+
+async function carregarDicasVistas(): Promise<string[]> {
+  const raw = await AsyncStorage.getItem(STORAGE_KEYS.DICAS_VISTAS);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export async function verificarDicaVista(idTela: string): Promise<boolean> {
+  const vistas = await carregarDicasVistas();
+  return vistas.includes(idTela);
+}
+
+export async function marcarDicaVista(idTela: string): Promise<void> {
+  const vistas = await carregarDicasVistas();
+  if (vistas.includes(idTela)) return;
+  await AsyncStorage.setItem(STORAGE_KEYS.DICAS_VISTAS, JSON.stringify([...vistas, idTela]));
+}
