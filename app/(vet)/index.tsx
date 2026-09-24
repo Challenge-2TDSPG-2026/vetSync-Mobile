@@ -5,10 +5,12 @@ import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
 import { useMeusResgates } from '../../hooks/useRecompensas';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList, SkeletonCard } from '../../components/ui/Skeleton';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 
 const C = {
@@ -26,6 +28,7 @@ export default function VetDashboardScreen() {
   const { data: resgates = [] } = useMeusResgates(true);
   const resgatesPendentes = resgates.filter(r => r.status === 'PENDENTE');
   const { atualizando, aoAtualizar } = useRecarregarDados();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-painel');
 
   if (carregando) {
     return (
@@ -58,6 +61,15 @@ export default function VetDashboardScreen() {
           </Text>
         </View>
       </View>
+
+      {dicaVisivel && (
+        <DicaTela
+          titulo="Seu painel"
+          texto="Aqui você acompanha os atendimentos do dia e os próximos agendamentos. Use o menu abaixo pra ver consultas, pacientes e resgates."
+          accentColor={C.g600}
+          onFechar={fecharDica}
+        />
+      )}
 
       <View style={s.statsRow}>
         <StatCard valor={eventosAgendados.length} label="Agendados" accentColor={C.info} />
