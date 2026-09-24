@@ -5,6 +5,7 @@ import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useAuth } from '../../context/AuthContext';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import {
   useCatalogoRecompensas,
   useSaldoRecompensas,
@@ -17,6 +18,7 @@ import { PetSwitcher } from '../../components/PetSwitcher';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { mostrarToast } from '../../components/ui/Toast';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { confirmar } from '../../utils/alert';
 import { META_CONSULTAS_RECOMPENSA } from '../../constants/gamification';
 import type { Recompensa } from '../../types';
@@ -40,6 +42,7 @@ export default function RecompensasScreen() {
   const { modoSimples } = useAccessibility();
   const { autenticado } = useAuth();
   const { atualizando, aoAtualizar } = useRecarregarDados();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-recompensas');
   const [mostrarCatalogoCompleto, setMostrarCatalogoCompleto] = useState(false);
 
   const { data: catalogo = [], isLoading: carregandoCatalogo } = useCatalogoRecompensas(autenticado);
@@ -98,6 +101,16 @@ export default function RecompensasScreen() {
     >
 
       <PetSwitcher />
+
+      {dicaVisivel && (
+        <DicaTela
+          titulo="Como funcionam os pontos"
+          texto="Complete eventos de saúde do seu pet pra ganhar pontos, e troque por benefícios na clínica na aba de recompensas abaixo."
+          accentColor={C.g600}
+          onFechar={fecharDica}
+          simples={modoSimples}
+        />
+      )}
 
       {/* Banner — some no modo simples */}
       {!modoSimples && (
