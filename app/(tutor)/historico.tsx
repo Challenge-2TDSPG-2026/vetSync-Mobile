@@ -1,13 +1,15 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento } from '../../utils/eventoStatus';
 
 const C = {
@@ -30,6 +32,7 @@ export default function HistoricoScreen() {
   const { eventos, carregandoEventos } = usePet();
   const { modoSimples } = useAccessibility();
   const { atualizando, aoAtualizar } = useRecarregarDados();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-historico');
 
   const eventosComStatus = useMemo(
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
@@ -64,6 +67,16 @@ export default function HistoricoScreen() {
     >
 
       <PetSwitcher />
+
+      {dicaVisivel && (
+        <DicaTela
+          titulo="Histórico completo"
+          texto="Aqui ficam todos os eventos já concluídos ou cancelados, agrupados por mês. Use pra acompanhar tudo que já foi feito pelo seu pet."
+          accentColor={C.info}
+          onFechar={fecharDica}
+          simples={modoSimples}
+        />
+      )}
 
       {/* Stats — no modo simples, só Total */}
       <View style={[s.statsRow, modoSimples && sSimples.statsRow]}>
