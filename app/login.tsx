@@ -166,7 +166,7 @@ function Campo({
     <View style={s.campo}>
       <Text style={s.fl}>{label}</Text>
       <View style={[s.inputWrap, focado && s.inputWrapFocado, erro && s.fiErro]}>
-        <AppIcon name={icon} set="Ionicons" size={18} color={focado ? C.mintDeep : C.muted} style={{ marginRight: 10 }} />
+        <AppIcon name={icon} set="Ionicons" size={21} color={focado ? C.mintDeep : C.muted} style={{ marginRight: 12 }} />
         <TextInput
           style={s.fi}
           value={value}
@@ -193,7 +193,7 @@ function Campo({
             <AppIcon
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               set="Ionicons"
-              size={19}
+              size={22}
               color={C.muted}
             />
           </Pressable>
@@ -257,22 +257,29 @@ const s = StyleSheet.create({
     marginTop: -28,
     paddingTop: 36,
     paddingHorizontal: 28,
-    paddingBottom: 40,
+    paddingBottom: 32,
   },
 
-  campo: { marginBottom: 16 },
-  fl: { fontSize: 13, fontWeight: '600', color: C.ink, marginBottom: 8 },
+  campo: { marginBottom: 22 },
+  fl: { fontSize: 14, fontWeight: '600', color: C.ink, marginBottom: 10 },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: C.fill,
     borderWidth: 1.5,
     borderColor: 'transparent',
-    borderRadius: 14,
-    paddingHorizontal: 15,
+    borderRadius: 16,
+    paddingHorizontal: 18,
   },
   inputWrapFocado: { borderColor: C.mint, backgroundColor: '#fff' },
-  fi: { flex: 1, paddingVertical: 13, fontSize: 15, color: C.ink },
+  fi: {
+    flex: 1,
+    paddingVertical: 19,
+    fontSize: 16,
+    color: C.ink,
+    backgroundColor: 'transparent',
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null),
+  },
   btnOlho: { paddingLeft: 6, paddingVertical: 6, justifyContent: 'center', alignItems: 'center' },
   fiErro: { borderColor: C.danger },
   textoErro: { color: C.danger, fontSize: 12, marginTop: 6 },
@@ -281,11 +288,11 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     backgroundColor: C.mint,
-    paddingVertical: 16,
+    paddingVertical: 19,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 6,
+    marginTop: 10,
     shadowColor: C.mint,
     shadowOpacity: 0.35,
     shadowRadius: 14,
@@ -293,9 +300,9 @@ const s = StyleSheet.create({
     elevation: 6,
   },
   btnAuthPressed: { backgroundColor: C.mintDeep },
-  btnAuthText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  btnAuthText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 
-  linkSecundario: { marginTop: 22, alignItems: 'center', paddingVertical: 4 },
+  linkSecundario: { marginTop: 'auto', paddingTop: 22, alignItems: 'center', paddingBottom: 4 },
   linkSecundarioTexto: { fontSize: 13, color: C.muted },
   linkSecundarioDestaque: { color: C.mintDeep, fontWeight: '700' },
 });
