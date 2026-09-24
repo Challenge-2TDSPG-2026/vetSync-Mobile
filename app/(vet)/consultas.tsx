@@ -3,10 +3,12 @@ import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'r
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 
 const C = {
@@ -19,6 +21,7 @@ export default function ConsultasScreen() {
   const router = useRouter();
   const { eventosAgendados, carregando } = useVet();
   const { atualizando, aoAtualizar } = useRecarregarDados();
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-consultas');
 
   const listaOrdenada = [...eventosAgendados].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
 
@@ -28,6 +31,15 @@ export default function ConsultasScreen() {
         contentContainerStyle={s.content}
         refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
       >
+        {dicaVisivel && (
+          <DicaTela
+            titulo="Suas consultas"
+            texto="Veja aqui todas as consultas agendadas com você, ordenadas por data. Toque numa consulta pra ver os detalhes do paciente."
+            accentColor={C.g600}
+            onFechar={fecharDica}
+          />
+        )}
+
         {carregando ? (
           <SkeletonList linhas={4} />
         ) : listaOrdenada.length === 0 ? (
