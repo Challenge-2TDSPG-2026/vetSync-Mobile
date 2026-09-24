@@ -11,6 +11,8 @@ import { obterVisualTipoEvento } from '../constants';
 import { AppIcon } from '../components/AppIcon';
 import { ApiError } from '../services/api/httpClient';
 import { mostrarToast } from '../components/ui/Toast';
+import { DicaTela } from '../components/ui/DicaTela';
+import { useDicaPrimeiraVisita } from '../hooks/useDicaPrimeiraVisita';
 import { agendarLembretes } from '../services/calendarService';
 import { salvarLembretesEvento } from '../storage/petStorage';
 import type { TipoEvento, Veterinario } from '../types';
@@ -62,6 +64,7 @@ export default function AddEventoScreen() {
   const [observacao, setObservacao] = useState('');
   const [lembretesSelecionados, setLembretesSelecionados] = useState<number[]>([7, 1]);
   const [erros, setErros] = useState<Record<string, string>>({});
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('add-evento');
 
   function alternarLembrete(diasAntes: number) {
     setLembretesSelecionados(atual => (
@@ -160,6 +163,15 @@ export default function AddEventoScreen() {
         </LinearGradient>
 
         <View style={s.sheet}>
+
+          {dicaVisivel && (
+            <DicaTela
+              titulo="Como agendar"
+              texto="Escolha o tipo de evento, o veterinário, a data e o horário abaixo. Você também pode ativar lembretes pra não esquecer."
+              accentColor={C.g600}
+              onFechar={fecharDica}
+            />
+          )}
 
           {carregandoCatalogo ? (
             <View style={s.loadingBox}>
