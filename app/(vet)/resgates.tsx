@@ -4,7 +4,9 @@ import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonBlock, SkeletonList } from '../../components/ui/Skeleton';
 import { mostrarToast } from '../../components/ui/Toast';
+import { DicaTela } from '../../components/ui/DicaTela';
 import { useMeusResgates, useValidarResgate } from '../../hooks/useRecompensas';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { confirmar } from '../../utils/alert';
 
 const C = {
@@ -21,6 +23,7 @@ function formatarData(iso: string): string {
 
 export default function ResgatesPendentesScreen() {
   const { data: resgates = [], isLoading, refetch, isRefetching } = useMeusResgates(true);
+  const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-resgates');
   const validar = useValidarResgate();
 
   const pendentes = resgates.filter(r => r.status === 'PENDENTE');
@@ -78,6 +81,15 @@ export default function ResgatesPendentesScreen() {
           </Text>
         </View>
       </View>
+
+      {dicaVisivel && (
+        <DicaTela
+          titulo="Como validar um resgate"
+          texto="Confira a entrega com o tutor pessoalmente e toque em aprovar ou negar em cada card abaixo. Aprovar debita os pontos definitivamente."
+          accentColor={C.ouro}
+          onFechar={fecharDica}
+        />
+      )}
 
       {pendentes.length === 0 ? (
         <EmptyState
