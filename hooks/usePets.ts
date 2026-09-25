@@ -90,15 +90,13 @@ export function useRemoverFotoPet() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (idPet: string) => petService.removerFoto(idPet),
-    onSuccess: (_, idPet) => {
+    onSuccess: (petAtualizado) => {
       queryClient.setQueryData<Pet[]>(petKeys.all, (antigos = []) =>
-        antigos.map(pet => (pet.id === idPet ? { ...pet, fotoUrl: null } : pet))
+        antigos.map(pet => (pet.id === petAtualizado.id ? petAtualizado : pet))
       );
-      queryClient.setQueryData<Pet | undefined>(petKeys.detalhe(idPet), pet =>
-        pet ? { ...pet, fotoUrl: null } : pet
-      );
+      queryClient.setQueryData<Pet>(petKeys.detalhe(petAtualizado.id), petAtualizado);
       queryClient.invalidateQueries({ queryKey: petKeys.all });
-      queryClient.invalidateQueries({ queryKey: petKeys.detalhe(idPet) });
+      queryClient.invalidateQueries({ queryKey: petKeys.detalhe(petAtualizado.id) });
     },
   });
 }

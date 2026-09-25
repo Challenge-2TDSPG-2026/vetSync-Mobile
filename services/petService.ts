@@ -35,7 +35,8 @@ export const petService = {
     return paraPetApp(dto);
   },
 
-  async removerFoto(idPet: string): Promise<void> {
-    await api.delete(`/pets/${idPet}/foto`);
+  async removerFoto(idPet: string): Promise<Pet> {
+    const dto = await api.delete<PetResponseApi>(`/pets/${idPet}/foto`);
+    return paraPetApp(dto);
   },
 };

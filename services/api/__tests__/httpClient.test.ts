@@ -4,7 +4,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiRequest } from '../httpClient';
+import { api, apiRequest } from '../httpClient';
 import { assinarExpiracaoSessao } from '../sessionEvents';
 
 describe('apiRequest', () => {
@@ -32,5 +32,28 @@ describe('apiRequest', () => {
       headers: expect.objectContaining({ Authorization: 'Bearer token-valido' }),
     }));
     cancelarAssinatura();
+  });
+
+  it('envia a foto no campo multipart esperado pelo Java', async () => {
+    const append = jest.fn();
+    globalThis.FormData = jest.fn(() => ({ append })) as unknown as typeof FormData;
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      ok: true,
+      text: jest.fn().mockResolvedValue(JSON.stringify({ idPet: 12 })),
+      blob: jest.fn().mockResolvedValue({}),
+    } as Partial<Response>) as typeof fetch;
+
+    await api.uploadMultipart('/pets/12/foto', {
+      uri: 'file:///foto.jpg',
+      nome: 'foto-pet.jpg',
+      tipoMime: 'image/jpeg',
+    });
+
+    expect(append.mock.calls[0][0]).toBe('foto');
+    expect(globalThis.fetch).toHaveBeenLastCalledWith(
+      'https://vetsync-java.onrender.com/pets/12/foto',
+      expect.objectContaining({ method: 'PUT', headers: { Authorization: 'Bearer token-valido' } })
+    );
   });
 });

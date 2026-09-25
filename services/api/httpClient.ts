@@ -135,9 +135,9 @@ async function uploadMultipart<T>(path: string, arquivo: ArquivoUpload, autentic
     if (typeof window !== 'undefined') {
       const arquivoResposta = await fetch(arquivo.uri);
       const blob = await arquivoResposta.blob();
-      formData.append('arquivo', blob, arquivo.nome);
+      formData.append('foto', blob, arquivo.nome);
     } else {
-      formData.append('arquivo', {
+      formData.append('foto', {
         uri: arquivo.uri,
         name: arquivo.nome,
         type: arquivo.tipoMime,
