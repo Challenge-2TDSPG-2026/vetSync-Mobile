@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, StatusBar } from 'react-native';
-import { Stack, useRouter, useSegments, usePathname } from 'expo-router';
+import { Stack, ThemeProvider as NavigationThemeProvider, useRouter, useSegments, usePathname } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PetProvider, usePet } from '../context/PetContext';
 import { VetProvider } from '../context/VetContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ToastHost } from '../components/ui/Toast';
+import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
 
 lockFontScaling();
@@ -101,6 +103,7 @@ function RootNavigator() {
 }
 
 const s = StyleSheet.create({
+  themeBootstrap: { flex: 1 },
   erroOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0,
@@ -123,10 +126,22 @@ const s = StyleSheet.create({
   erroBtnText: { color: '#fff', fontSize: 12, fontWeight: '700' },
 });
 
-export default function RootLayout() {
+function ThemedRootLayout() {
+  const { theme, isDark, carregando } = useTheme();
+
+  // A árvore de rotas só é liberada após restaurar a preferência persistida.
+  // Assim evitamos renderizar telas no tema errado antes do AsyncStorage responder.
+  if (carregando) {
+    return (
+      <View style={[s.themeBootstrap, { backgroundColor: theme.colors.background }]}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.colors.background} />
+      </View>
+    );
+  }
+
   return (
-    <>
-      <StatusBar barStyle="light-content" />
+    <NavigationThemeProvider value={createNavigationTheme(theme)}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.colors.background} />
       <QueryClientProvider client={queryClient}>
         <AccessibilityProvider>
           <AuthProvider>
@@ -139,6 +154,14 @@ export default function RootLayout() {
           </AuthProvider>
         </AccessibilityProvider>
       </QueryClientProvider>
-    </>
+    </NavigationThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <ThemedRootLayout />
+    </ThemeProvider>
   );
 }

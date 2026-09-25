@@ -1,22 +1,4 @@
-﻿export const CORES = {
-  primaria: '#0e3326',
-  secundaria: '#22a06b',
-  destaque: '#3db87e',
-  alerta: '#dc3545',
-  aviso: '#e67e22',
-  info: '#2563eb',
-  fundo: '#fafaf8',
-  fundoCard: '#FFFFFF',
-  fundoSutil: '#f0ece5',
-  texto: '#1a1512',
-  textoSecundario: '#7a6a5e',
-  borda: '#e8e2da',
-  success: '#166534',
-  successBg: '#dcfce7',
-  alertaBg: '#fee2e2',
-  avisoBg: '#fef3c7',
-  infoBg: '#dbeafe',
-};
+export { CORES } from './theme';
 
 export const STORAGE_KEYS = {
 
@@ -25,6 +7,7 @@ export const STORAGE_KEYS = {
   LEMBRETES_EVENTO: '@vetsync:lembretes_evento',
   SESSAO: '@vetsync:sessao',
   MODO_SIMPLES: '@vetsync:modo_simples',
+  THEME_PREFERENCE: '@vetsync:theme-preference',
   DICAS_VISTAS: '@vetsync:dicas_vistas',
 };
 
