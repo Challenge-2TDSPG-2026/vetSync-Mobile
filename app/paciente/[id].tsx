@@ -123,6 +123,21 @@ export default function FichaPacienteScreen() {
           </View>
         </View>
 
+        <View style={s.tutorCard}>
+          <View style={s.tutorIcon}>
+            <AppIcon name="person-outline" set="Ionicons" size={18} color={C.g600} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.tutorLabel}>Tutor responsável</Text>
+            <Text style={s.tutorNome}>{pet.tutor?.nome ?? `Tutor vinculado #${pet.tutor?.id ?? 'não informado'}`}</Text>
+            {pet.tutor?.telefone || pet.tutor?.email ? (
+              <Text style={s.tutorContato}>{pet.tutor.telefone ?? pet.tutor.email}</Text>
+            ) : (
+              <Text style={s.tutorContato}>Contato não informado no cadastro</Text>
+            )}
+          </View>
+        </View>
+
         <View style={s.statsRow}>
           <StatCard valor={total} label="Total" accentColor={C.info} />
           <StatCard valor={pendentes} label="Pendentes" accentColor={C.g600} />
@@ -247,6 +262,14 @@ const s = StyleSheet.create({
   petAvatar: { width: 54, height: 54, borderRadius: 27, backgroundColor: C.g100, justifyContent: 'center', alignItems: 'center' },
   petNome: { fontSize: 16, fontWeight: '700', color: C.text },
   petDetalhe: { fontSize: 12, color: C.muted, marginTop: 2 },
+  tutorCard: {
+    backgroundColor: C.g50, borderRadius: 12, borderWidth: 1, borderColor: C.g200,
+    padding: 13, flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16,
+  },
+  tutorIcon: { width: 34, height: 34, borderRadius: 17, backgroundColor: C.white, justifyContent: 'center', alignItems: 'center' },
+  tutorLabel: { fontSize: 10, fontWeight: '700', color: C.g700, textTransform: 'uppercase', letterSpacing: 0.5 },
+  tutorNome: { fontSize: 13, fontWeight: '700', color: C.text, marginTop: 2 },
+  tutorContato: { fontSize: 11, color: C.muted, marginTop: 2 },
 
   statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   statCard: { flex: 1, backgroundColor: C.white, borderWidth: 1, borderColor: C.border, borderRadius: 10, padding: 10, borderBottomWidth: 3 },
