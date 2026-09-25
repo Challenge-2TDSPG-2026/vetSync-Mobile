@@ -104,8 +104,11 @@ export async function apiRequest<T = unknown>({
   }
 
   if (resposta.status === 401) {
-    notificarExpiracaoSessao();
-    throw new ApiError(401, 'Sua sessão expirou. Entre novamente.');
+    if (autenticado) {
+      notificarExpiracaoSessao();
+      throw new ApiError(401, 'Sua sessão expirou. Entre novamente.');
+    }
+    throw extrairErro(resposta.status, corpo);
   }
 
   if (!resposta.ok) {
