@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import type { Evento, FaixaDisponibilidade, BloqueioAgenda } from '../types';
+import type { Evento, FaixaDisponibilidade, BloqueioAgenda, Pet } from '../types';
 import { useAuth } from './AuthContext';
 import { useEventos, useConcluirEvento } from '../hooks/useEventos';
 import { usePetsPorIds } from '../hooks/usePets';
@@ -15,7 +15,7 @@ import {
 import { parseDataEvento } from '../utils/eventoStatus';
 
 export interface PacienteComHistorico {
-  pet: { id: string; nome: string; especie: string; raca: string; dataNascimento: string; peso: string };
+  pet: Pet;
   eventos: Evento[];
 }
 
