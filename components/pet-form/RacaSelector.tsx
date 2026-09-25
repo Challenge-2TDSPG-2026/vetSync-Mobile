@@ -45,14 +45,18 @@ export function RacaSelector({ especie, raca, onChange }: Props) {
           placeholderTextColor={theme.colors.placeholder}
           autoCapitalize="words"
           autoCorrect={false}
+          accessibilityLabel="Raça do pet"
+          accessibilityHint={especie ? 'Digite para ver sugestões de raça' : 'Escolha a espécie do pet primeiro'}
         />
       </View>
-      {focada && isFetching && <Text style={estilos.ajuda}>Buscando raças…</Text>}
+      {focada && isFetching && (
+        <Text style={estilos.ajuda} accessibilityRole="text" accessibilityLiveRegion="polite">Buscando raças…</Text>
+      )}
       {focada && !isFetching && !!error && (
-        <Text style={estilos.erro}>Não deu para buscar sugestões agora. Confira sua conexão.</Text>
+        <Text style={estilos.erro} accessibilityRole="alert">Não deu para buscar sugestões agora. Confira sua conexão.</Text>
       )}
       {sugestoesVisiveis.length > 0 && (
-        <View style={estilos.listaSugestoes}>
+        <View style={estilos.listaSugestoes} accessibilityRole="list">
           {sugestoesVisiveis.map(sugestao => (
             <Pressable
               key={sugestao}
@@ -61,6 +65,8 @@ export function RacaSelector({ especie, raca, onChange }: Props) {
                 onChange(sugestao);
                 setFocada(false);
               }}
+              accessibilityRole="button"
+              accessibilityLabel={`Usar raça sugerida: ${sugestao}`}
             >
               <Ionicons name="paw-outline" size={15} color={theme.colors.textSecondary} />
               <Text style={estilos.textoSugestao}>{sugestao}</Text>
