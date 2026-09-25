@@ -157,6 +157,9 @@ export default function AgendaScreen() {
             key={f.valor}
             style={[s.filtroBtn, modoSimples && sSimples.filtroBtn, filtro === f.valor && s.filtroBtnAtivo]}
             onPress={() => setFiltro(f.valor)}
+            accessibilityRole="button"
+            accessibilityLabel={`Filtrar por ${f.label}`}
+            accessibilityState={{ selected: filtro === f.valor }}
           >
             <AppIcon
               name={f.icon}
@@ -199,7 +202,7 @@ export default function AgendaScreen() {
         <View style={s.diaHeader}>
           <View style={s.diaHeaderInfo}>
             <Text style={s.diaHeaderKicker}>DATA SELECIONADA</Text>
-            <Text style={[s.diaHeaderTexto, modoSimples && sSimples.diaHeaderTexto]}>{formatarDataLonga(selecionado)}</Text>
+            <Text style={[s.diaHeaderTexto, modoSimples && sSimples.diaHeaderTexto]} accessibilityRole="header">{formatarDataLonga(selecionado)}</Text>
           </View>
           {eventosDoDia.length > 0 && (
             <View style={s.diaHeaderBadge}>
@@ -265,6 +268,9 @@ export default function AgendaScreen() {
                         style={[s.btnAcao, s.btnAcaoDanger, modoSimples && sSimples.btnAcao]}
                         onPress={() => abrirCancelamento(item)}
                         disabled={cancelandoEste}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Cancelar evento ${item.nomeTipoEvento}`}
+                        accessibilityState={{ disabled: cancelandoEste, busy: cancelandoEste }}
                       >
                         {cancelandoEste ? (
                           <ActivityIndicator size="small" color={theme.colors.danger} />
@@ -281,6 +287,9 @@ export default function AgendaScreen() {
                         style={[s.btnAcao, modoSimples && sSimples.btnAcao]}
                         onPress={() => handleRemover(item)}
                         disabled={removendoEste}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Remover evento ${item.nomeTipoEvento}`}
+                        accessibilityState={{ disabled: removendoEste, busy: removendoEste }}
                       >
                         {removendoEste ? (
                           <ActivityIndicator size="small" color={theme.colors.textMuted} />
@@ -300,14 +309,20 @@ export default function AgendaScreen() {
         )}
       </ScrollView>
 
-      <Pressable style={[s.fab, modoSimples && sSimples.fab]} onPress={() => router.push('/add-evento')}>
+      <Pressable
+        style={[s.fab, modoSimples && sSimples.fab]}
+        onPress={() => router.push('/add-evento')}
+        accessibilityRole="button"
+        accessibilityLabel="Novo evento"
+        accessibilityHint="Abre o formulário de agendamento"
+      >
         <Ionicons name="add" size={modoSimples ? 38 : 30} color={theme.colors.onPrimary} />
       </Pressable>
 
       <Modal visible={eventoParaCancelar !== null} transparent animationType="fade" onRequestClose={() => setEventoParaCancelar(null)}>
         <View style={s.modalOverlay}>
-          <View style={s.modalCard}>
-            <Text style={[s.modalTitulo, modoSimples && sSimples.modalTitulo]}>Cancelar evento</Text>
+          <View style={s.modalCard} accessibilityViewIsModal accessibilityRole="none">
+            <Text style={[s.modalTitulo, modoSimples && sSimples.modalTitulo]} accessibilityRole="header">Cancelar evento</Text>
             <Text style={[s.modalSub, modoSimples && sSimples.modalSub]}>
               {eventoParaCancelar?.nomeTipoEvento} — {eventoParaCancelar ? formatarDataEvento(eventoParaCancelar.data) : ''}
             </Text>
@@ -320,15 +335,26 @@ export default function AgendaScreen() {
               multiline
               numberOfLines={3}
               autoFocus
+              accessibilityLabel="Motivo do cancelamento"
+              accessibilityHint="Descreva por que o evento está sendo cancelado"
             />
             <View style={s.modalAcoes}>
-              <Pressable style={[s.modalBtnCancelar, modoSimples && sSimples.modalBtnCancelar]} onPress={() => setEventoParaCancelar(null)}>
+              <Pressable
+                style={[s.modalBtnCancelar, modoSimples && sSimples.modalBtnCancelar]}
+                onPress={() => setEventoParaCancelar(null)}
+                accessibilityRole="button"
+                accessibilityLabel="Voltar"
+                accessibilityHint="Fecha sem cancelar o evento"
+              >
                 <Text style={[s.modalBtnCancelarText, modoSimples && sSimples.modalBtnCancelarText]}>Voltar</Text>
               </Pressable>
               <Pressable
                 style={[s.modalBtnConfirmar, modoSimples && sSimples.modalBtnCancelar, cancelarMutation.isPending && { opacity: 0.6 }]}
                 onPress={confirmarCancelamento}
                 disabled={cancelarMutation.isPending}
+                accessibilityRole="button"
+                accessibilityLabel={cancelarMutation.isPending ? 'Cancelando evento' : 'Confirmar cancelamento'}
+                accessibilityState={{ disabled: cancelarMutation.isPending, busy: cancelarMutation.isPending }}
               >
                 <Text style={[s.modalBtnConfirmarText, modoSimples && sSimples.modalBtnCancelarText]}>
                   {cancelarMutation.isPending ? 'Cancelando...' : 'Confirmar cancelamento'}
