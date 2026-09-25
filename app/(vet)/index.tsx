@@ -20,9 +20,12 @@ export default function VetDashboardScreen() {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const { sessao } = useAuth();
-  const { veterinarioAtivo, eventosAgendados, eventosDeHoje, carregando } = useVet();
+  const { veterinarioAtivo, eventos, eventosAgendados, eventosDeHoje, pacientes, carregando } = useVet();
   const { data: resgates = [] } = useMeusResgates(true);
   const resgatesPendentes = resgates.filter(r => r.status === 'PENDENTE');
+  const eventosConcluidos = eventos.filter(e => e.status === 'CONCLUIDO');
+  const faturamento = eventosConcluidos.reduce((total, evento) => total + evento.custo, 0);
+  const pacientesComPendencia = pacientes.filter(p => p.eventos.some(e => e.status === 'AGENDADO')).length;
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-painel');
 
@@ -70,6 +73,53 @@ export default function VetDashboardScreen() {
       <View style={s.statsRow}>
         <StatCard styles={s} valor={eventosAgendados.length} label="Agendados" accentColor={theme.colors.info} />
         <StatCard styles={s} valor={eventosDeHoje.length} label="Hoje" accentColor={theme.colors.success} />
+      </View>
+
+      <View style={s.statsRow}>
+        <StatCard styles={s} valor={pacientes.length} label="Pacientes" accentColor={theme.colors.primary} />
+        <StatCard styles={s} valor={eventosConcluidos.length} label="Concluídos" accentColor={theme.domain.event.vaccine} />
+      </View>
+
+      <View style={s.resumoCard}>
+        <View style={s.resumoHeader}>
+          <View>
+            <Text style={s.resumoEyebrow}>Resumo do atendimento</Text>
+            <Text style={s.resumoTitle}>Sua operação em um olhar</Text>
+          </View>
+          <AppIcon name="pulse-outline" set="Ionicons" size={24} color={theme.colors.primary} />
+        </View>
+        <View style={s.resumoMetrics}>
+          <View style={s.resumoMetric}>
+            <Text style={s.resumoValue}>{pacientesComPendencia}</Text>
+            <Text style={s.resumoLabel}>com retorno pendente</Text>
+          </View>
+          <View style={s.resumoDivider} />
+          <View style={s.resumoMetric}>
+            <Text style={s.resumoValue}>R$ {faturamento.toFixed(2).replace('.', ',')}</Text>
+            <Text style={s.resumoLabel}>em consultas concluídas</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={s.quickActions}>
+        <Pressable style={s.quickAction} onPress={() => router.push('/(vet)/pacientes')}>
+          <View style={[s.quickIcon, { backgroundColor: theme.colors.infoBackground }]}>
+            <AppIcon name="paw" set="Ionicons" size={18} color={theme.colors.info} />
+          </View>
+          <Text style={s.quickLabel}>Ver pacientes</Text>
+        </Pressable>
+        <Pressable style={s.quickAction} onPress={() => router.push('/(vet)/disponibilidade')}>
+          <View style={[s.quickIcon, { backgroundColor: theme.colors.successBackground }]}>
+            <AppIcon name="time-outline" set="Ionicons" size={18} color={theme.colors.success} />
+          </View>
+          <Text style={s.quickLabel}>Ajustar agenda</Text>
+        </Pressable>
+        <Pressable style={s.quickAction} onPress={() => router.push('/(vet)/resgates')}>
+          <View style={[s.quickIcon, { backgroundColor: theme.colors.warningBackground }]}>
+            <AppIcon name="gift-outline" set="Ionicons" size={18} color={theme.colors.warning} />
+          </View>
+          <Text style={s.quickLabel}>Resgates</Text>
+        </Pressable>
       </View>
 
       {resgatesPendentes.length > 0 && (
@@ -164,6 +214,38 @@ export default function VetDashboardScreen() {
         )}
       </View>
 
+      <View style={s.card}>
+        <View style={s.cardHead}>
+          <Text style={s.cardTitle}>Pacientes recentes</Text>
+          <Pressable onPress={() => router.push('/(vet)/pacientes')}>
+            <Text style={s.linkVer}>Ver todos</Text>
+          </Pressable>
+        </View>
+        {pacientes.length === 0 ? (
+          <EmptyState icon="paw-outline" title="Nenhum paciente ainda" accentColor={theme.colors.primary} variant="plain" />
+        ) : (
+          pacientes.slice(0, 3).map(({ pet, eventos: eventosPet }, idx) => (
+            <Pressable
+              key={pet.id}
+              style={[s.pacienteRow, idx < Math.min(pacientes.length, 3) - 1 && s.eventoRowBorder]}
+              onPress={() => router.push(`/paciente/${pet.id}`)}
+            >
+              <View style={s.pacienteAvatar}>
+                <AppIcon name="paw" set="Ionicons" size={16} color={theme.colors.primary} />
+              </View>
+              <View style={s.eventoInfo}>
+                <Text style={s.eventoTitulo}>{pet.nome}</Text>
+                <Text style={s.eventoData}>
+                  {pet.tutor?.nome ?? `Tutor vinculado #${pet.tutor?.id ?? 'não informado'}`}
+                </Text>
+              </View>
+              <Text style={s.pacienteEventos}>{eventosPet.length} {eventosPet.length === 1 ? 'evento' : 'eventos'}</Text>
+              <AppIcon name="chevron-forward" set="Ionicons" size={16} color={theme.colors.textSecondary} />
+            </Pressable>
+          ))
+        )}
+      </View>
+
     </ScrollView>
   );
 }
@@ -207,6 +289,19 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   },
   statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 6 },
   statVal: { fontSize: 26, fontWeight: '700', lineHeight: 28 },
+  resumoCard: { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 16, padding: 16, marginBottom: 16 },
+  resumoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  resumoEyebrow: { fontSize: 10, color: theme.colors.primary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
+  resumoTitle: { fontSize: 15, color: theme.colors.text, fontWeight: '700', marginTop: 3 },
+  resumoMetrics: { flexDirection: 'row', alignItems: 'center' },
+  resumoMetric: { flex: 1 },
+  resumoValue: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
+  resumoLabel: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 3 },
+  resumoDivider: { width: 1, height: 34, backgroundColor: theme.colors.border, marginHorizontal: 14 },
+  quickActions: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  quickAction: { flex: 1, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, padding: 11, alignItems: 'center', gap: 7 },
+  quickIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
+  quickLabel: { fontSize: 10, color: theme.colors.text, fontWeight: '700', textAlign: 'center' },
 
   alertaResgates: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -231,6 +326,9 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   eventoData: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 2 },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 11, fontWeight: '700' },
+  pacienteRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
+  pacienteAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: theme.colors.successBackground, justifyContent: 'center', alignItems: 'center' },
+  pacienteEventos: { fontSize: 10, color: theme.colors.textSecondary, marginRight: 2 },
 
   empty: { alignItems: 'center', paddingVertical: 28 },
   emptyTitle: { fontSize: 13, fontWeight: '700', color: theme.colors.text },
