@@ -1,4 +1,5 @@
 import type { Pet, Tutor } from '../types';
+import { API_BASE_URL } from '../constants/api';
 
 export const ESPECIE_APP_PARA_API: Record<Pet['especie'], string> = {
   cachorro: 'CAO', gato: 'GATO', equino: 'EQUINO', bovino: 'BOVINO', suino: 'SUINO',
@@ -10,6 +11,7 @@ const SEXO_APP_PARA_API: Record<Pet['sexo'], string> = { macho: 'M', femea: 'F' 
 
 export interface PetResponseApi {
   idPet: number;
+  numero?: string | null;
   nmPet: string;
   especie: string | null;
   sexo: string | null;
@@ -22,6 +24,12 @@ export interface PetResponseApi {
   emailTutor?: string | null;
   telefoneTutor?: string | null;
   fotoUrl?: string | null;
+}
+
+export function normalizarFotoUrl(fotoUrl: string | null | undefined): string | null {
+  if (!fotoUrl) return null;
+  if (/^https?:\/\//i.test(fotoUrl)) return fotoUrl;
+  return `${API_BASE_URL}${fotoUrl.startsWith('/') ? '' : '/'}${fotoUrl}`;
 }
 
 function semAcento(valor: string): string {
@@ -55,7 +63,8 @@ export function paraPetApp(dto: PetResponseApi): Pet {
     id: String(dto.idPet), nome: dto.nmPet, especie: especieApiParaApp(dto.especie),
     sexo: sexoApiParaApp(dto.sexo), raca: dto.raca ?? '', dataNascimento: dto.dtNascimento,
     peso: dto.peso != null ? String(dto.peso) : '',
-    fotoUrl: dto.fotoUrl ?? null,
+    numero: dto.numero ?? null,
+    fotoUrl: normalizarFotoUrl(dto.fotoUrl),
     ...(tutor ? { tutor } : {}),
   };
 }

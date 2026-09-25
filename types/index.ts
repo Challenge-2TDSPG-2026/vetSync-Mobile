@@ -6,6 +6,7 @@ export interface Pet {
   raca: string;
   dataNascimento: string;
   peso: string;
+  numero?: string | null;
   tutor?: Tutor;
   fotoUrl?: string | null;
 }

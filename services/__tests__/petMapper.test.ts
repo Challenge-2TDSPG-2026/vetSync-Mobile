@@ -1,9 +1,10 @@
-import { paraPetApp, paraRequestApi, type PetResponseApi } from '../petMapper';
+import { normalizarFotoUrl, paraPetApp, paraRequestApi, type PetResponseApi } from '../petMapper';
 
 describe('petMapper', () => {
   it('converte o contrato da API para o modelo do app, inclusive acentos', () => {
     const dto: PetResponseApi = {
       idPet: 12,
+      numero: '0012',
       nmPet: 'Luna',
       especie: ' CÃO ',
       sexo: 'F',
@@ -17,6 +18,7 @@ describe('petMapper', () => {
 
     expect(paraPetApp(dto)).toEqual({
       id: '12',
+      numero: '0012',
       nome: 'Luna',
       especie: 'cachorro',
       sexo: 'femea',
@@ -25,6 +27,11 @@ describe('petMapper', () => {
       peso: '12.5',
       fotoUrl: 'https://cdn.vetsync.com/pets/12/foto.jpg',
     });
+  });
+
+  it('normaliza o caminho relativo da foto devolvido pelo Java', () => {
+    expect(normalizarFotoUrl('/pets/12/foto')).toBe('https://vetsync-java.onrender.com/pets/12/foto');
+    expect(normalizarFotoUrl(null)).toBeNull();
   });
 
   it('converte peso decimal e data para o payload do backend', () => {
