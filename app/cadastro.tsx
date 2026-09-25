@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  View, Text, TextInput, ScrollView, Pressable, Image,
+  View, Text, ScrollView, Pressable, Image,
   StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,20 +9,9 @@ import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
 import { mostrarToast } from '../components/ui/Toast';
 import { AppIcon } from '../components/AppIcon';
-
-const C = {
-  night: '#0a2218',
-  forest: '#123d29',
-  mint: '#22a06b',
-  mintDeep: '#1a7a52',
-  mintPale: '#bfe9d5',
-  glow: '#f2c879',
-  cream: '#faf8f3',
-  fill: '#f1ece1',
-  ink: '#1a1512',
-  muted: '#7a6a5e',
-  danger: '#dc3545',
-};
+import { AuthField } from '../components/ui/AuthField';
+import { useTheme } from '../context/ThemeContext';
+import type { AppTheme } from '../constants/theme';
 
 function formatarCpf(text: string): string {
   const n = text.replace(/\D/g, '').slice(0, 11);
@@ -47,6 +36,8 @@ function mensagemDeErro(e: unknown, fallback: string): string {
 export default function CadastroScreen() {
   const router = useRouter();
   const { registrar } = useAuth();
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
 
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -109,7 +100,7 @@ export default function CadastroScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: C.night }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
@@ -120,7 +111,7 @@ export default function CadastroScreen() {
       >
 
         <LinearGradient
-          colors={[C.night, C.forest]}
+          colors={[theme.colors.navigation, theme.colors.navigationAccent]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={s.hero}
@@ -152,17 +143,17 @@ export default function CadastroScreen() {
 
         <View style={s.sheet}>
 
-          <Campo
+          <AuthField
             label="Nome completo"
             icon="person-outline"
             value={nome}
             onChangeText={setNome}
             placeholder="Ex: Maria da Silva"
             autoCapitalize="words"
-            erro={erros.nome}
+            error={erros.nome}
           />
 
-          <Campo
+          <AuthField
             label="E-mail"
             icon="mail-outline"
             value={email}
@@ -170,10 +161,10 @@ export default function CadastroScreen() {
             placeholder="voce@email.com"
             keyboardType="email-address"
             autoCapitalize="none"
-            erro={erros.email}
+            error={erros.email}
           />
 
-          <Campo
+          <AuthField
             label="CPF"
             icon="card-outline"
             value={cpf}
@@ -181,10 +172,10 @@ export default function CadastroScreen() {
             placeholder="000.000.000-00"
             keyboardType="numeric"
             maxLength={14}
-            erro={erros.cpf}
+            error={erros.cpf}
           />
 
-          <Campo
+          <AuthField
             label="Telefone"
             icon="call-outline"
             value={telefone}
@@ -192,10 +183,10 @@ export default function CadastroScreen() {
             placeholder="(11) 99999-9999"
             keyboardType="phone-pad"
             maxLength={15}
-            erro={erros.telefone}
+            error={erros.telefone}
           />
 
-          <Campo
+          <AuthField
             label="Senha"
             icon="lock-closed-outline"
             value={senha}
@@ -204,10 +195,10 @@ export default function CadastroScreen() {
             isPassword
             showPassword={mostrarSenha}
             onTogglePassword={() => setMostrarSenha(v => !v)}
-            erro={erros.senha}
+            error={erros.senha}
           />
 
-          <Campo
+          <AuthField
             label="Confirmar senha"
             icon="lock-closed-outline"
             value={confirmarSenha}
@@ -216,7 +207,7 @@ export default function CadastroScreen() {
             isPassword
             showPassword={mostrarConfirmarSenha}
             onTogglePassword={() => setMostrarConfirmarSenha(v => !v)}
-            erro={erros.confirmarSenha}
+            error={erros.confirmarSenha}
           />
 
           <Pressable
@@ -225,7 +216,7 @@ export default function CadastroScreen() {
             disabled={cadastrando}
           >
             <Text style={s.btnAuthText}>{cadastrando ? 'Cadastrando...' : 'Criar conta'}</Text>
-            {!cadastrando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color="#fff" />}
+            {!cadastrando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.colors.onPrimary} />}
           </Pressable>
 
           <Link href="/login" asChild>
@@ -243,52 +234,8 @@ export default function CadastroScreen() {
   );
 }
 
-function Campo({
-  label, value, onChangeText, placeholder, keyboardType, maxLength,
-  erro, autoCapitalize, isPassword, showPassword, onTogglePassword, icon,
-}: any) {
-  const [focado, setFocado] = useState(false);
-  return (
-    <View style={s.campo}>
-      <Text style={s.fl}>{label}</Text>
-      <View style={[s.inputWrap, focado && s.inputWrapFocado, erro && s.fiErro]}>
-        <AppIcon name={icon} set="Ionicons" size={21} color={focado ? C.mintDeep : C.muted} style={{ marginRight: 12 }} />
-        <TextInput
-          style={s.fi}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={C.muted}
-          keyboardType={keyboardType}
-          maxLength={maxLength}
-          secureTextEntry={isPassword ? !showPassword : undefined}
-          autoCapitalize={autoCapitalize ?? (isPassword ? 'none' : undefined)}
-          onFocus={() => setFocado(true)}
-          onBlur={() => setFocado(false)}
-        />
-        {isPassword && (
-          <Pressable
-            onPress={onTogglePassword}
-            style={s.btnOlho}
-            hitSlop={8}
-            accessibilityLabel={showPassword ? 'Ocultar senha' : 'Exibir senha'}
-            accessibilityRole="button"
-          >
-            <AppIcon
-              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-              set="Ionicons"
-              size={22}
-              color={C.muted}
-            />
-          </Pressable>
-        )}
-      </View>
-      {erro ? <Text style={s.textoErro}>{erro}</Text> : null}
-    </View>
-  );
-}
-
-const s = StyleSheet.create({
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
   scroll: { flexGrow: 1 },
 
   hero: {
@@ -319,23 +266,23 @@ const s = StyleSheet.create({
   },
   selo: {
     width: 48, height: 48, borderRadius: 15,
-    backgroundColor: C.mint,
+    backgroundColor: theme.colors.primary,
     alignItems: 'center', justifyContent: 'center',
     shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10,
     shadowOffset: { width: 0, height: 5 }, elevation: 6,
   },
   seloImg: { width: 28, height: 28 },
-  marcaTexto: { fontSize: 19, fontWeight: '700', color: '#fff', letterSpacing: -0.3 },
+  marcaTexto: { fontSize: 19, fontWeight: '700', color: theme.colors.onNavigation, letterSpacing: -0.3 },
 
   heroTitulo: {
-    fontSize: 28, fontWeight: '800', color: '#fff',
+    fontSize: 28, fontWeight: '800', color: theme.colors.onNavigation,
     letterSpacing: -0.6, lineHeight: 33, marginBottom: 9, maxWidth: 300,
   },
-  heroSub: { fontSize: 14, fontWeight: '500', color: C.mintPale, lineHeight: 21, maxWidth: 280 },
+  heroSub: { fontSize: 14, fontWeight: '500', color: theme.colors.onNavigation, opacity: 0.8, lineHeight: 21, maxWidth: 280 },
 
   sheet: {
     flexGrow: 1,
-    backgroundColor: C.cream,
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     marginTop: -24,
@@ -344,49 +291,26 @@ const s = StyleSheet.create({
     paddingBottom: 32,
   },
 
-  campo: { marginBottom: 22 },
-  fl: { fontSize: 14, fontWeight: '600', color: C.ink, marginBottom: 10 },
-  inputWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: C.fill,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-    borderRadius: 16,
-    paddingHorizontal: 18,
-  },
-  inputWrapFocado: { borderColor: C.mint, backgroundColor: '#fff' },
-  fi: {
-    flex: 1,
-    paddingVertical: 19,
-    fontSize: 16,
-    color: C.ink,
-    backgroundColor: 'transparent',
-    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null),
-  },
-  btnOlho: { paddingLeft: 6, paddingVertical: 6, justifyContent: 'center', alignItems: 'center' },
-  fiErro: { borderColor: C.danger },
-  textoErro: { color: C.danger, fontSize: 12, marginTop: 6 },
-
   btnAuth: {
     flexDirection: 'row',
     gap: 8,
-    backgroundColor: C.mint,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 19,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    shadowColor: C.mint,
-    shadowOpacity: 0.35,
+    shadowColor: theme.colors.primary,
+    shadowOpacity: theme.mode === 'dark' ? 0 : 0.35,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
     elevation: 6,
   },
-  btnAuthPressed: { backgroundColor: C.mintDeep },
-  btnAuthText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  btnAuthPressed: { opacity: 0.86 },
+  btnAuthText: { color: theme.colors.onPrimary, fontSize: 16, fontWeight: '700' },
 
   linkSecundario: { marginTop: 'auto', paddingTop: 22, alignItems: 'center', paddingBottom: 4 },
-  linkSecundarioTexto: { fontSize: 13, color: C.muted },
-  linkSecundarioDestaque: { color: C.mintDeep, fontWeight: '700' },
-});
+  linkSecundarioTexto: { fontSize: 13, color: theme.colors.textSecondary },
+  linkSecundarioDestaque: { color: theme.colors.primary, fontWeight: '700' },
+  });
+}
