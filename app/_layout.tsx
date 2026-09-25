@@ -71,10 +71,16 @@ function RootNavigator() {
   return (
     <>
       {ehTutor && !carregando && erroPets && (
-        <View style={s.erroOverlay}>
+        <View style={s.erroOverlay} accessibilityRole="alert" accessibilityLiveRegion="polite">
           <Text style={s.erroTitulo}>Não foi possível carregar seus pets</Text>
           <Text style={s.erroSub}>Verifique sua conexão e tente novamente.</Text>
-          <Pressable style={s.erroBtn} onPress={() => recarregarPets()}>
+          <Pressable
+            style={s.erroBtn}
+            onPress={() => recarregarPets()}
+            accessibilityRole="button"
+            accessibilityLabel="Tentar novamente"
+            accessibilityHint="Recarrega a lista de pets"
+          >
             <Text style={s.erroBtnText}>Tentar novamente</Text>
           </Pressable>
         </View>
