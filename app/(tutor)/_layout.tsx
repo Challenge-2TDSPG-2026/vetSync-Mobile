@@ -30,6 +30,7 @@ export default function TabsLayout() {
         screenOptions={{
           tabBarActiveTintColor: theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.textSecondary,
+          animation: 'fade',
           headerStyle: { backgroundColor: theme.colors.navigation },
           headerBackground: () => <TutorHeaderBackground colors={theme.colors} />,
           headerShadowVisible: false,
