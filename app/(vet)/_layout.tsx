@@ -13,6 +13,7 @@ export default function VetTabsLayout() {
       screenOptions={{
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textSecondary,
+        animation: 'fade',
         headerStyle: { backgroundColor: theme.colors.navigation },
         headerTintColor: theme.colors.onNavigation,
         headerTitleAlign: 'left',
