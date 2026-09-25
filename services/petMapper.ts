@@ -1,4 +1,4 @@
-import type { Pet } from '../types';
+import type { Pet, Tutor } from '../types';
 
 export const ESPECIE_APP_PARA_API: Record<Pet['especie'], string> = {
   cachorro: 'CAO', gato: 'GATO', equino: 'EQUINO', bovino: 'BOVINO', suino: 'SUINO',
@@ -18,6 +18,9 @@ export interface PetResponseApi {
   idadeAnos: number;
   peso: number | null;
   idTutor: number | null;
+  nmTutor?: string | null;
+  emailTutor?: string | null;
+  telefoneTutor?: string | null;
 }
 
 function semAcento(valor: string): string {
@@ -40,10 +43,18 @@ function sexoApiParaApp(sexo: string | null | undefined): Pet['sexo'] {
 }
 
 export function paraPetApp(dto: PetResponseApi): Pet {
+  const tutor: Tutor | undefined = dto.idTutor == null || (!dto.nmTutor && !dto.emailTutor && !dto.telefoneTutor) ? undefined : {
+    id: String(dto.idTutor),
+    nome: dto.nmTutor ?? undefined,
+    email: dto.emailTutor ?? undefined,
+    telefone: dto.telefoneTutor ?? undefined,
+  };
+
   return {
     id: String(dto.idPet), nome: dto.nmPet, especie: especieApiParaApp(dto.especie),
     sexo: sexoApiParaApp(dto.sexo), raca: dto.raca ?? '', dataNascimento: dto.dtNascimento,
     peso: dto.peso != null ? String(dto.peso) : '',
+    ...(tutor ? { tutor } : {}),
   };
 }
 
