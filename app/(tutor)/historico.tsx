@@ -87,7 +87,13 @@ export default function HistoricoScreen() {
 
       {/* Taxa de conclusão — some no modo simples */}
       {!modoSimples && (
-        <View style={s.progressoCard}>
+        <View
+          style={s.progressoCard}
+          accessible
+          accessibilityRole="progressbar"
+          accessibilityLabel="Taxa de conclusão"
+          accessibilityValue={{ min: 0, max: 100, now: pct, text: `${pct}%` }}
+        >
           <View style={s.progressoHead}>
             <View>
               <Text style={s.progressoLbl}>Taxa de conclusão</Text>
@@ -121,7 +127,7 @@ export default function HistoricoScreen() {
         Object.entries(agrupados).map(([mes, evts]) => (
           <View key={mes} style={s.grupo}>
             <View style={s.mesRow}>
-              <Text style={[s.mesTitulo, modoSimples && sSimples.mesTitulo]}>{mes}</Text>
+              <Text style={[s.mesTitulo, modoSimples && sSimples.mesTitulo]} accessibilityRole="header">{mes}</Text>
               <View style={s.mesBadge}>
                 <Text style={s.mesBadgeText}>{evts.length}</Text>
               </View>
@@ -142,7 +148,12 @@ export default function HistoricoScreen() {
 
                 if (modoSimples) {
                   return (
-                    <View key={evento.id} style={[sSimples.linhaSimples, !isLast && s.tabelaRowBorder]}>
+                    <View
+                      key={evento.id}
+                      style={[sSimples.linhaSimples, !isLast && s.tabelaRowBorder]}
+                      accessible
+                      accessibilityLabel={`${evento.nomeTipoEvento}, ${formatarDataCurta(evento.data)}, ${sb.label}`}
+                    >
                       <View style={sSimples.linhaSimplesTopo}>
                         <View style={[s.rowIcone, sSimples.rowIcone, { backgroundColor: visual.cor }]}>
                           <AppIcon name={visual.icon} set={visual.iconSet} size={24} color={C.white} />
@@ -160,7 +171,12 @@ export default function HistoricoScreen() {
                 }
 
                 return (
-                  <View key={evento.id} style={[s.tabelaRow, !isLast && s.tabelaRowBorder]}>
+                  <View
+                    key={evento.id}
+                    style={[s.tabelaRow, !isLast && s.tabelaRowBorder]}
+                    accessible
+                    accessibilityLabel={`${evento.nomeTipoEvento}, com ${evento.nomeVeterinario}, ${formatarDataCurta(evento.data)}, ${sb.label}`}
+                  >
                     <View style={[s.tdEvento, { flex: 2 }]}>
                       <View style={[s.rowIcone, { backgroundColor: visual.cor }]}>
                         <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={C.white} />
@@ -191,7 +207,11 @@ export default function HistoricoScreen() {
 
 function StatCard({ valor, label, accentColor, simples }: { valor: number; label: string; accentColor: string; simples?: boolean }) {
   return (
-    <View style={[s.statCard, simples && sSimples.statCard, { borderBottomColor: accentColor }]}>
+    <View
+      style={[s.statCard, simples && sSimples.statCard, { borderBottomColor: accentColor }]}
+      accessible
+      accessibilityLabel={`${label}: ${valor}`}
+    >
       <Text style={[s.statLabel, simples && sSimples.statLabel]}>{label}</Text>
       <Text style={[s.statVal, simples && sSimples.statVal, { color: accentColor }]}>{valor}</Text>
     </View>
