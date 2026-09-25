@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useMeusResgates } from '../../hooks/useRecompensas';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
@@ -12,17 +13,12 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList, SkeletonCard } from '../../components/ui/Skeleton';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
-
-const C = {
-  g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
-  g500: '#22a06b', g200: '#a8e6c7', g100: '#d4f2e4', g50: '#edfaf3',
-  cream: '#fafaf8', w50: '#f9f7f4', w100: '#f0ece5',
-  text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff',
-  danger: '#dc3545', warn: '#e67e22', info: '#2563eb',
-};
+import type { AppTheme } from '../../constants/theme';
 
 export default function VetDashboardScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const { sessao } = useAuth();
   const { veterinarioAtivo, eventosAgendados, eventosDeHoje, carregando } = useVet();
   const { data: resgates = [] } = useMeusResgates(true);
@@ -47,12 +43,12 @@ export default function VetDashboardScreen() {
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
-      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.colors.surface} />}
     >
 
       <View style={s.welcome}>
         <View style={s.welcomeIconWrap}>
-          <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={30} color={C.white} />
+          <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={30} color={theme.colors.onNavigation} />
         </View>
         <View style={s.welcomeInfo}>
           <Text style={s.welcomeNome}>Olá, {veterinarioAtivo?.nome ?? sessao?.nome}</Text>
@@ -66,23 +62,23 @@ export default function VetDashboardScreen() {
         <DicaTela
           titulo="Seu painel"
           texto="Aqui você acompanha os atendimentos do dia e os próximos agendamentos. Use o menu abaixo pra ver consultas, pacientes e resgates."
-          accentColor={C.g600}
+          accentColor={theme.colors.primary}
           onFechar={fecharDica}
         />
       )}
 
       <View style={s.statsRow}>
-        <StatCard valor={eventosAgendados.length} label="Agendados" accentColor={C.info} />
-        <StatCard valor={eventosDeHoje.length} label="Hoje" accentColor={C.g500} />
+        <StatCard styles={s} valor={eventosAgendados.length} label="Agendados" accentColor={theme.colors.info} />
+        <StatCard styles={s} valor={eventosDeHoje.length} label="Hoje" accentColor={theme.colors.success} />
       </View>
 
       {resgatesPendentes.length > 0 && (
         <Pressable style={s.alertaResgates} onPress={() => router.push('/(vet)/resgates')}>
-          <AppIcon name="gift" set="Ionicons" size={18} color={C.white} />
+          <AppIcon name="gift" set="Ionicons" size={18} color={theme.colors.onPrimary} />
           <Text style={s.alertaResgatesText}>
             {resgatesPendentes.length} resgate{resgatesPendentes.length > 1 ? 's' : ''} aguardando validação
           </Text>
-          <AppIcon name="chevron-forward" set="Ionicons" size={16} color={C.white} />
+          <AppIcon name="chevron-forward" set="Ionicons" size={16} color={theme.colors.onPrimary} />
         </Pressable>
       )}
 
@@ -98,7 +94,7 @@ export default function VetDashboardScreen() {
           <EmptyState
             icon="checkmark-done-outline"
             title="Nenhum atendimento agendado"
-            accentColor={C.g600}
+            accentColor={theme.colors.primary}
             variant="plain"
           />
         ) : (
@@ -115,7 +111,7 @@ export default function VetDashboardScreen() {
                 onPress={() => router.push(`/paciente/${e.petId}`)}
               >
                 <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
-                  <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={C.white} />
+                  <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
                 </View>
                 <View style={s.eventoInfo}>
                   <Text style={s.eventoTitulo}>{e.nomeTipoEvento}</Text>
@@ -139,7 +135,7 @@ export default function VetDashboardScreen() {
           <EmptyState
             icon="calendar-outline"
             title="Nada agendado para hoje"
-            accentColor={C.info}
+            accentColor={theme.colors.info}
             variant="plain"
           />
         ) : (
@@ -153,7 +149,7 @@ export default function VetDashboardScreen() {
                 onPress={() => router.push(`/paciente/${e.petId}`)}
               >
                 <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
-                  <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={C.white} />
+                  <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
                 </View>
                 <View style={s.eventoInfo}>
                   <Text style={s.eventoTitulo}>{e.nomeTipoEvento}</Text>
@@ -172,22 +168,22 @@ export default function VetDashboardScreen() {
   );
 }
 
-function StatCard({ valor, label, accentColor }: { valor: number; label: string; accentColor: string }) {
+function StatCard({ styles, valor, label, accentColor }: { styles: ReturnType<typeof createStyles>; valor: number; label: string; accentColor: string }) {
   return (
-    <View style={[s.statCard, { borderBottomColor: accentColor }]}>
-      <Text style={s.statLabel}>{label}</Text>
-      <Text style={[s.statVal, { color: accentColor }]}>{valor}</Text>
+    <View style={[styles.statCard, { borderBottomColor: accentColor }]}>
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statVal, { color: accentColor }]}>{valor}</Text>
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.cream },
+const createStyles = (theme: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.colors.background },
   content: { padding: 20, paddingBottom: 32 },
-  loadingContainer: { flex: 1, backgroundColor: C.cream, justifyContent: 'center', alignItems: 'center' },
+  loadingContainer: { flex: 1, backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' },
 
   welcome: {
-    backgroundColor: C.g800,
+    backgroundColor: theme.colors.navigation,
     borderRadius: 16,
     padding: 20,
     flexDirection: 'row',
@@ -201,41 +197,41 @@ const s = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   welcomeInfo: { flex: 1 },
-  welcomeNome: { fontSize: 17, fontWeight: '700', color: C.white, letterSpacing: -0.3 },
-  welcomeSub: { fontSize: 12, color: 'rgba(168,230,199,0.85)', marginTop: 3 },
+  welcomeNome: { fontSize: 17, fontWeight: '700', color: theme.colors.onNavigation, letterSpacing: -0.3 },
+  welcomeSub: { fontSize: 12, color: theme.colors.onNavigation, opacity: 0.85, marginTop: 3 },
 
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
   statCard: {
-    flex: 1, backgroundColor: C.white, borderWidth: 1, borderColor: C.border,
+    flex: 1, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border,
     borderRadius: 12, padding: 14, borderBottomWidth: 3,
   },
-  statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: C.muted, marginBottom: 6 },
+  statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 6 },
   statVal: { fontSize: 26, fontWeight: '700', lineHeight: 28 },
 
   alertaResgates: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#c99a2e', borderRadius: 12,
+    backgroundColor: theme.domain.reward.gold, borderRadius: 12,
     paddingHorizontal: 16, paddingVertical: 13, marginBottom: 20,
   },
-  alertaResgatesText: { flex: 1, fontSize: 13, fontWeight: '700', color: C.white },
+  alertaResgatesText: { flex: 1, fontSize: 13, fontWeight: '700', color: theme.colors.onPrimary },
 
-  card: { backgroundColor: C.white, borderWidth: 1, borderColor: C.border, borderRadius: 16, marginBottom: 16, overflow: 'hidden' },
+  card: { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 16, marginBottom: 16, overflow: 'hidden' },
   cardHead: {
-    paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.border,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: C.w50,
+    paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.surfaceSubtle,
   },
-  cardTitle: { fontSize: 14, fontWeight: '700', color: C.text },
-  linkVer: { fontSize: 13, color: C.g600, fontWeight: '600' },
+  cardTitle: { fontSize: 14, fontWeight: '700', color: theme.colors.text },
+  linkVer: { fontSize: 13, color: theme.colors.primary, fontWeight: '600' },
 
   eventoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, gap: 12 },
-  eventoRowBorder: { borderBottomWidth: 1, borderBottomColor: C.border },
+  eventoRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   eventoIcone: { width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center' },
   eventoInfo: { flex: 1 },
-  eventoTitulo: { fontSize: 13, fontWeight: '600', color: C.text },
-  eventoData: { fontSize: 12, color: C.muted, marginTop: 2 },
+  eventoTitulo: { fontSize: 13, fontWeight: '600', color: theme.colors.text },
+  eventoData: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 2 },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 11, fontWeight: '700' },
 
   empty: { alignItems: 'center', paddingVertical: 28 },
-  emptyTitle: { fontSize: 13, fontWeight: '700', color: C.text },
+  emptyTitle: { fontSize: 13, fontWeight: '700', color: theme.colors.text },
 });
