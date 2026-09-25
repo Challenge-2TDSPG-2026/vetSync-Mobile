@@ -45,6 +45,9 @@ export default function LoginScreen() {
       // Navegação (para (tutor) ou (vet), conforme sessao.perfil) é reativa,
       // controlada pelo RootNavigator em app/_layout.tsx.
     } catch (e) {
+      if (e instanceof ApiError && e.campos) {
+        setErrosConta(prev => ({ ...prev, ...e.campos }));
+      }
       mostrarToast('erro', 'Não foi possível entrar', mensagemDeErro(e, 'Verifique seu e-mail e senha.'));
     } finally {
       setAutenticando(false);
