@@ -33,7 +33,12 @@ export function EmptyState({
   const s = useMemo(() => createStyles(theme), [theme]);
   const accent = accentColor ?? theme.colors.primary;
   return (
-    <View style={[s.container, variant === 'dashed' && s.dashed, style]}>
+    <View
+      style={[s.container, variant === 'dashed' && s.dashed, style]}
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={subtitle ? `${title}. ${subtitle}` : title}
+    >
       <View style={[s.orb, { backgroundColor: `${accent}1f` }]}>
         <AppIcon name={icon} set={iconSet} size={27} color={accent} />
       </View>
