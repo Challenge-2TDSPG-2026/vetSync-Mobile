@@ -90,9 +90,14 @@ export default function LoginScreen() {
             <View style={s.seloWrap}>
               <View style={s.seloGlowOut} />
               <View style={s.seloGlowIn} />
-              <View style={s.selo}>
+              <LinearGradient
+                colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0.03)']}
+                start={{ x: 0.2, y: 0 }}
+                end={{ x: 0.8, y: 1 }}
+                style={s.seloDisco}
+              >
                 <Image source={require('../assets/logo.png')} style={s.seloImg} resizeMode="contain" />
-              </View>
+              </LinearGradient>
             </View>
             <Text style={s.marcaTexto}>VetSync</Text>
           </View>
@@ -223,24 +228,24 @@ const s = StyleSheet.create({
   pegada2: { position: 'absolute', top: 22, left: 20, transform: [{ rotate: '-10deg' }] },
   pegada3: { position: 'absolute', top: 40, left: 42, transform: [{ rotate: '20deg' }] },
 
-  marca: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 30 },
-  seloWrap: { width: 60, height: 60, alignItems: 'center', justifyContent: 'center' },
+  marca: { flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 30 },
+  seloWrap: { width: 78, height: 78, alignItems: 'center', justifyContent: 'center' },
   seloGlowOut: {
-    position: 'absolute', width: 86, height: 86, borderRadius: 43,
-    backgroundColor: 'rgba(242,200,121,0.12)',
+    position: 'absolute', width: 112, height: 112, borderRadius: 56,
+    backgroundColor: 'rgba(242,200,121,0.10)',
   },
   seloGlowIn: {
-    position: 'absolute', width: 66, height: 66, borderRadius: 33,
-    backgroundColor: 'rgba(242,200,121,0.16)',
+    position: 'absolute', width: 92, height: 92, borderRadius: 46,
+    backgroundColor: 'rgba(242,200,121,0.14)',
   },
-  selo: {
-    width: 48, height: 48, borderRadius: 15,
-    backgroundColor: C.mint,
+  seloDisco: {
+    width: 78, height: 78, borderRadius: 39,
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 }, elevation: 6,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',
+    shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 }, elevation: 6,
   },
-  seloImg: { width: 28, height: 28 },
+  seloImg: { width: 54, height: 54 },
   marcaTexto: { fontSize: 19, fontWeight: '700', color: '#fff', letterSpacing: -0.3 },
 
   heroTitulo: {
