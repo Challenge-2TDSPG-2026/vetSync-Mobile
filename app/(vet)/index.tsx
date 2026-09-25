@@ -102,19 +102,34 @@ export default function VetDashboardScreen() {
       </View>
 
       <View style={s.quickActions}>
-        <Pressable style={s.quickAction} onPress={() => router.push('/(vet)/pacientes')}>
+        <Pressable
+          style={s.quickAction}
+          onPress={() => router.push('/(vet)/pacientes')}
+          accessibilityRole="button"
+          accessibilityLabel="Ver pacientes"
+        >
           <View style={[s.quickIcon, { backgroundColor: theme.colors.infoBackground }]}>
             <AppIcon name="paw" set="Ionicons" size={18} color={theme.colors.info} />
           </View>
           <Text style={s.quickLabel}>Ver pacientes</Text>
         </Pressable>
-        <Pressable style={s.quickAction} onPress={() => router.push('/(vet)/disponibilidade')}>
+        <Pressable
+          style={s.quickAction}
+          onPress={() => router.push('/(vet)/disponibilidade')}
+          accessibilityRole="button"
+          accessibilityLabel="Ajustar agenda"
+        >
           <View style={[s.quickIcon, { backgroundColor: theme.colors.successBackground }]}>
             <AppIcon name="time-outline" set="Ionicons" size={18} color={theme.colors.success} />
           </View>
           <Text style={s.quickLabel}>Ajustar agenda</Text>
         </Pressable>
-        <Pressable style={s.quickAction} onPress={() => router.push('/(vet)/resgates')}>
+        <Pressable
+          style={s.quickAction}
+          onPress={() => router.push('/(vet)/resgates')}
+          accessibilityRole="button"
+          accessibilityLabel="Resgates"
+        >
           <View style={[s.quickIcon, { backgroundColor: theme.colors.warningBackground }]}>
             <AppIcon name="gift-outline" set="Ionicons" size={18} color={theme.colors.warning} />
           </View>
@@ -123,7 +138,12 @@ export default function VetDashboardScreen() {
       </View>
 
       {resgatesPendentes.length > 0 && (
-        <Pressable style={s.alertaResgates} onPress={() => router.push('/(vet)/resgates')}>
+        <Pressable
+          style={s.alertaResgates}
+          onPress={() => router.push('/(vet)/resgates')}
+          accessibilityRole="button"
+          accessibilityLabel={`${resgatesPendentes.length} resgate${resgatesPendentes.length > 1 ? 's' : ''} aguardando validação`}
+        >
           <AppIcon name="gift" set="Ionicons" size={18} color={theme.colors.onPrimary} />
           <Text style={s.alertaResgatesText}>
             {resgatesPendentes.length} resgate{resgatesPendentes.length > 1 ? 's' : ''} aguardando validação
@@ -134,8 +154,12 @@ export default function VetDashboardScreen() {
 
       <View style={s.card}>
         <View style={s.cardHead}>
-          <Text style={s.cardTitle}>Próximos agendamentos</Text>
-          <Pressable onPress={() => router.push('/(vet)/consultas')}>
+          <Text style={s.cardTitle} accessibilityRole="header">Próximos agendamentos</Text>
+          <Pressable
+            onPress={() => router.push('/(vet)/consultas')}
+            accessibilityRole="button"
+            accessibilityLabel="Ver todas as consultas"
+          >
             <Text style={s.linkVer}>Ver todas</Text>
           </Pressable>
         </View>
@@ -159,6 +183,9 @@ export default function VetDashboardScreen() {
                 key={e.id}
                 style={[s.eventoRow, idx < arr.length - 1 && s.eventoRowBorder]}
                 onPress={() => router.push(`/paciente/${e.petId}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${e.nomeTipoEvento}, ${formatarDataHoraEvento(e.data)}, ${sb.label}`}
+                accessibilityHint="Abre a ficha do paciente"
               >
                 <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
                   <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
@@ -178,7 +205,7 @@ export default function VetDashboardScreen() {
 
       <View style={s.card}>
         <View style={s.cardHead}>
-          <Text style={s.cardTitle}>Atendimentos de hoje</Text>
+          <Text style={s.cardTitle} accessibilityRole="header">Atendimentos de hoje</Text>
         </View>
 
         {eventosDeHoje.length === 0 ? (
@@ -197,6 +224,9 @@ export default function VetDashboardScreen() {
                 key={e.id}
                 style={[s.eventoRow, idx < arr.length - 1 && s.eventoRowBorder]}
                 onPress={() => router.push(`/paciente/${e.petId}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${e.nomeTipoEvento}, ${formatarDataHoraEvento(e.data)}, ${sb.label}`}
+                accessibilityHint="Abre a ficha do paciente"
               >
                 <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
                   <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
@@ -216,8 +246,12 @@ export default function VetDashboardScreen() {
 
       <View style={s.card}>
         <View style={s.cardHead}>
-          <Text style={s.cardTitle}>Pacientes recentes</Text>
-          <Pressable onPress={() => router.push('/(vet)/pacientes')}>
+          <Text style={s.cardTitle} accessibilityRole="header">Pacientes recentes</Text>
+          <Pressable
+            onPress={() => router.push('/(vet)/pacientes')}
+            accessibilityRole="button"
+            accessibilityLabel="Ver todos os pacientes"
+          >
             <Text style={s.linkVer}>Ver todos</Text>
           </Pressable>
         </View>
@@ -229,6 +263,9 @@ export default function VetDashboardScreen() {
               key={pet.id}
               style={[s.pacienteRow, idx < Math.min(pacientes.length, 3) - 1 && s.eventoRowBorder]}
               onPress={() => router.push(`/paciente/${pet.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${pet.nome}, ${pet.tutor?.nome ?? 'tutor não informado'}, ${eventosPet.length} ${eventosPet.length === 1 ? 'evento' : 'eventos'}`}
+              accessibilityHint="Abre a ficha do paciente"
             >
               <View style={s.pacienteAvatar}>
                 <AppIcon name="paw" set="Ionicons" size={16} color={theme.colors.primary} />
@@ -252,7 +289,7 @@ export default function VetDashboardScreen() {
 
 function StatCard({ styles, valor, label, accentColor }: { styles: ReturnType<typeof createStyles>; valor: number; label: string; accentColor: string }) {
   return (
-    <View style={[styles.statCard, { borderBottomColor: accentColor }]}>
+    <View style={[styles.statCard, { borderBottomColor: accentColor }]} accessible accessibilityLabel={`${label}: ${valor}`}>
       <Text style={styles.statLabel}>{label}</Text>
       <Text style={[styles.statVal, { color: accentColor }]}>{valor}</Text>
     </View>
