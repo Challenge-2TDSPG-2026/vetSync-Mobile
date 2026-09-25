@@ -2,36 +2,38 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
-import { CORES } from '../../constants';
 import { VetSyncTabBar } from '../../components/navigation/VetSyncTabBar';
 import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAction';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useTheme } from '../../context/ThemeContext';
+import type { ThemeColors } from '../../constants/theme';
 
-function TutorHeaderBackground() {
+function TutorHeaderBackground({ colors }: { colors: ThemeColors }) {
   return (
     <LinearGradient
-      colors={['#0a2218', '#155c3f']}
+      colors={[colors.navigation, colors.navigationAccent]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={StyleSheet.absoluteFill}
     >
-      <View style={s.headerEdge} />
+      <View style={[s.headerEdge, { backgroundColor: colors.navigationBorder }]} />
     </LinearGradient>
   );
 }
 
 export default function TabsLayout() {
   const { modoSimples } = useAccessibility();
+  const { theme } = useTheme();
   return (
     <Tabs
         tabBar={(props) => <VetSyncTabBar {...props} />}
         screenOptions={{
-          tabBarActiveTintColor: CORES.primaria,
-          tabBarInactiveTintColor: CORES.textoSecundario,
-          headerStyle: { backgroundColor: '#0a2218' },
-          headerBackground: () => <TutorHeaderBackground />,
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.textSecondary,
+          headerStyle: { backgroundColor: theme.colors.navigation },
+          headerBackground: () => <TutorHeaderBackground colors={theme.colors} />,
           headerShadowVisible: false,
-          headerTintColor: '#fff',
+          headerTintColor: theme.colors.onNavigation,
           headerTitleAlign: 'left',
           headerTitleContainerStyle: { paddingLeft: 2 },
           headerTitleStyle: { fontWeight: '800', fontSize: modoSimples ? 27 : 20, letterSpacing: -0.35 },
@@ -105,5 +107,5 @@ export default function TabsLayout() {
 }
 
 const s = StyleSheet.create({
-  headerEdge: { position: 'absolute', right: 0, bottom: 0, left: 0, height: 1, backgroundColor: 'rgba(191, 233, 213, 0.18)' },
+  headerEdge: { position: 'absolute', right: 0, bottom: 0, left: 0, height: 1 },
 });
