@@ -6,6 +6,14 @@ export interface Pet {
   raca: string;
   dataNascimento: string;
   peso: string;
+  tutor?: Tutor;
+}
+
+export interface Tutor {
+  id: string;
+  nome?: string;
+  email?: string;
+  telefone?: string;
 }
 
 export type StatusEvento = 'AGENDADO' | 'CONCLUIDO' | 'CANCELADO';
