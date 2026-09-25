@@ -33,6 +33,8 @@ export function SkeletonBlock({ width = '100%', height = 16, borderRadius = 8, s
   const { theme } = useTheme();
   return (
     <Animated.View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
       style={[
         { width, height, borderRadius, backgroundColor: theme.colors.surfaceSubtle, opacity: opacidade },
         style,
@@ -44,7 +46,12 @@ export function SkeletonBlock({ width = '100%', height = 16, borderRadius = 8, s
 /** Uma "linha" de lista (ícone redondo + duas linhas de texto) — imita o padrão eventoRow usado no app todo. */
 export function SkeletonRow({ comIcone = true, style }: { comIcone?: boolean; style?: StyleProp<ViewStyle> }) {
   return (
-    <View style={[s.row, style]}>
+    <View
+      style={[s.row, style]}
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel="Carregando conteúdo"
+    >
       {comIcone && <SkeletonBlock width={46} height={46} borderRadius={16} />}
       <View style={s.rowTextos}>
         <SkeletonBlock width="55%" height={14} />
@@ -57,7 +64,7 @@ export function SkeletonRow({ comIcone = true, style }: { comIcone?: boolean; st
 /** Várias linhas seguidas — pra substituir o ActivityIndicator solto em listas de eventos/itens. */
 export function SkeletonList({ linhas = 3, comIcone = true }: { linhas?: number; comIcone?: boolean }) {
   return (
-    <View>
+    <View accessible accessibilityRole="progressbar" accessibilityLabel="Carregando itens">
       {Array.from({ length: linhas }).map((_, i) => (
         <SkeletonRow key={i} comIcone={comIcone} />
       ))}
@@ -67,7 +74,11 @@ export function SkeletonList({ linhas = 3, comIcone = true }: { linhas?: number;
 
 /** Um bloco maior, tipo card/banner/gráfico de progresso ainda carregando. */
 export function SkeletonCard({ height = 90, borderRadius = 22, style }: { height?: number; borderRadius?: number; style?: StyleProp<ViewStyle> }) {
-  return <SkeletonBlock height={height} borderRadius={borderRadius} style={style} />;
+  return (
+    <View accessible accessibilityRole="progressbar" accessibilityLabel="Carregando conteúdo">
+      <SkeletonBlock height={height} borderRadius={borderRadius} style={style} />
+    </View>
+  );
 }
 
 const s = StyleSheet.create({
