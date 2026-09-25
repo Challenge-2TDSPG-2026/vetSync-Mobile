@@ -75,6 +75,10 @@ export function ToastHost() {
   return (
     <Animated.View
       pointerEvents="none"
+      accessible
+      accessibilityRole="alert"
+      accessibilityLiveRegion={toast.tipo === 'erro' ? 'assertive' : 'polite'}
+      accessibilityLabel={toast.mensagem ? `${toast.titulo}. ${toast.mensagem}` : toast.titulo}
       style={[
         s.container,
         {
