@@ -9,13 +9,15 @@ import { useAuth } from '../../context/AuthContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { AppIcon } from '../../components/AppIcon';
 import { confirmar } from '../../utils/alert';
 import { mostrarToast } from '../../components/ui/Toast';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
 import { AppearancePreferences } from '../../components/AppearancePreferences';
+import { PetFoto } from '../../components/pet-foto/PetFoto';
+import { EditarFotoModal } from '../../components/pet-foto/EditarFotoModal';
 import type { AppTheme } from '../../constants/theme';
+import type { Pet } from '../../types';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -29,6 +31,7 @@ export default function PerfilScreen() {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
+  const [petFotoEditandoId, setPetFotoEditandoId] = useState<string | null>(null);
   const { sessao, logout } = useAuth();
   const { modoSimples } = useAccessibility();
   const { pets, removerPet } = usePet();
@@ -38,6 +41,7 @@ export default function PerfilScreen() {
   const email = sessao?.email?.trim() || 'E-mail não disponível';
   const perfil = sessao?.perfil === 'TUTOR' ? 'Tutor responsável' : sessao?.perfil || 'Perfil não informado';
   const iniciais = obterIniciais(sessao?.nome);
+  const petFotoEditando: Pet | null = pets.find(pet => pet.id === petFotoEditandoId) ?? null;
 
   function handleSair() {
     setModalSairVisivel(true);
@@ -159,9 +163,14 @@ export default function PerfilScreen() {
             return (
               <View key={pet.id}>
                 <View style={[s.petRow, modoSimples && sSimples.petRow]}>
-                  <View style={[s.petIcon, modoSimples && sSimples.petIcon]}>
-                    <AppIcon name={especie?.icon ?? 'paw'} set={especie?.iconSet ?? 'MaterialCommunityIcons'} size={modoSimples ? 28 : 21} color={theme.colors.primary} />
-                  </View>
+                  <Pressable
+                    style={[s.petFoto, modoSimples && sSimples.petFoto]}
+                    onPress={() => setPetFotoEditandoId(pet.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={pet.fotoUrl ? `Alterar foto de ${pet.nome}` : `Adicionar foto de ${pet.nome}`}
+                  >
+                    <PetFoto pet={pet} size={modoSimples ? 58 : 42} color={theme.colors.primary} backgroundColor={theme.colors.surfaceSubtle} accessibilityLabel={`Foto de ${pet.nome}`} />
+                  </Pressable>
                   <View style={s.petCopy}>
                     <Text style={[s.petName, modoSimples && sSimples.petName]}>{pet.nome}</Text>
                     <Text style={[s.petDetail, modoSimples && sSimples.petDetail]}>{especie?.label ?? 'Espécie não informada'}{pet.raca ? ` • ${pet.raca}` : ''}</Text>
@@ -192,6 +201,7 @@ export default function PerfilScreen() {
           <Text style={[s.logoutText, modoSimples && sSimples.logoutText]}>Sair da conta</Text>
         </Pressable>
       </ScrollView>
+      <EditarFotoModal pet={petFotoEditando} onFechar={() => setPetFotoEditandoId(null)} />
       <LogoutConfirmationModal
         visivel={modalSairVisivel}
         onFechar={() => setModalSairVisivel(false)}
@@ -275,6 +285,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
 
   petRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 13 },
   petIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle },
+  petFoto: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
   petCopy: { flex: 1, minWidth: 0 },
   petName: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
   petDetail: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3 },
@@ -307,6 +318,7 @@ const sSimples = StyleSheet.create({
   accessibilityDescription: { fontSize: 17, lineHeight: 23 },
   petRow: { paddingVertical: 19, gap: 16 },
   petIcon: { width: 58, height: 58, borderRadius: 18 },
+  petFoto: { width: 58, height: 58 },
   petName: { fontSize: 22 },
   petDetail: { fontSize: 17 },
   addPet: { paddingVertical: 21 },

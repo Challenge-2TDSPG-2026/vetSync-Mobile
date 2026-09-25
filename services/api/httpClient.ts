@@ -26,6 +26,12 @@ interface RequestOptions {
   timeoutMs?: number;
 }
 
+export interface ArquivoUpload {
+  uri: string;
+  nome: string;
+  tipoMime: string;
+}
+
 async function obterToken(): Promise<string | null> {
   const raw = await AsyncStorage.getItem(STORAGE_KEYS.SESSAO);
   if (!raw) return null;
@@ -55,6 +61,26 @@ function extrairErro(status: number, corpo: any): ApiError {
     }
   }
   return new ApiError(status, 'Não foi possível completar a solicitação. Tente novamente.');
+}
+
+async function interpretarResposta<T>(resposta: Response, autenticado: boolean): Promise<T> {
+  if (resposta.status === 204) return undefined as T;
+
+  const texto = await resposta.text();
+  let corpo: unknown = null;
+  try {
+    corpo = texto ? JSON.parse(texto) : null;
+  } catch {
+    corpo = texto;
+  }
+
+  if (resposta.status === 401 && autenticado) {
+    notificarExpiracaoSessao();
+    throw new ApiError(401, 'Sua sessão expirou. Entre novamente.');
+  }
+
+  if (!resposta.ok) throw extrairErro(resposta.status, corpo);
+  return corpo as T;
 }
 
 export async function apiRequest<T = unknown>({
@@ -91,31 +117,49 @@ export async function apiRequest<T = unknown>({
     clearTimeout(timeout);
   }
 
-  if (resposta.status === 204) {
-    return undefined as T;
+  return interpretarResposta<T>(resposta, autenticado);
+}
+
+async function uploadMultipart<T>(path: string, arquivo: ArquivoUpload, autenticado = true): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (autenticado) {
+    const token = await obterToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
   }
 
-  const texto = await resposta.text();
-  let corpo: unknown = null;
+  let resposta: Response;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
   try {
-    corpo = texto ? JSON.parse(texto) : null;
-  } catch {
-    corpo = texto;
-  }
-
-  if (resposta.status === 401) {
-    if (autenticado) {
-      notificarExpiracaoSessao();
-      throw new ApiError(401, 'Sua sessão expirou. Entre novamente.');
+    const formData = new FormData();
+    if (typeof window !== 'undefined') {
+      const arquivoResposta = await fetch(arquivo.uri);
+      const blob = await arquivoResposta.blob();
+      formData.append('arquivo', blob, arquivo.nome);
+    } else {
+      formData.append('arquivo', {
+        uri: arquivo.uri,
+        name: arquivo.nome,
+        type: arquivo.tipoMime,
+      } as unknown as Blob);
     }
-    throw extrairErro(resposta.status, corpo);
+
+    resposta = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'PUT',
+      headers,
+      body: formData,
+      signal: controller.signal,
+    });
+  } catch (erro) {
+    if (erro instanceof Error && erro.name === 'AbortError') {
+      throw new ApiError(0, 'O envio da foto demorou mais que o esperado. Tente novamente.');
+    }
+    throw new ApiError(0, 'Não foi possível enviar a foto. Verifique sua conexão e tente novamente.');
+  } finally {
+    clearTimeout(timeout);
   }
 
-  if (!resposta.ok) {
-    throw extrairErro(resposta.status, corpo);
-  }
-
-  return corpo as T;
+  return interpretarResposta<T>(resposta, autenticado);
 }
 
 export const api = {
@@ -128,4 +172,5 @@ export const api = {
     apiRequest<T>({ method: 'PATCH', path, body, autenticado }),
   delete: <T = void>(path: string, autenticado = true) =>
     apiRequest<T>({ method: 'DELETE', path, autenticado }),
+  uploadMultipart,
 };

@@ -1,4 +1,4 @@
-import { api } from './api/httpClient';
+import { api, type ArquivoUpload } from './api/httpClient';
 import { paraPetApp, paraRequestApi, type PetResponseApi } from './petMapper';
 import type { Pet } from '../types';
 
@@ -28,5 +28,14 @@ export const petService = {
 
   async removerPet(id: string): Promise<void> {
     await api.delete(`/pets/${id}`);
+  },
+
+  async enviarFoto(idPet: string, arquivo: ArquivoUpload): Promise<Pet> {
+    const dto = await api.uploadMultipart<PetResponseApi>(`/pets/${idPet}/foto`, arquivo);
+    return paraPetApp(dto);
+  },
+
+  async removerFoto(idPet: string): Promise<void> {
+    await api.delete(`/pets/${idPet}/foto`);
   },
 };

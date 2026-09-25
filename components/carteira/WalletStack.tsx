@@ -3,7 +3,7 @@ import { LayoutAnimation, Modal, Pressable, ScrollView, StyleSheet, Text, View }
 import { Ionicons } from '@expo/vector-icons';
 import type { Pet } from '../../types';
 import { ESPECIES } from '../../constants';
-import { AppIcon } from '../AppIcon';
+import { PetFoto } from '../pet-foto/PetFoto';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
@@ -18,7 +18,6 @@ function descricaoPet(pet: Pet) {
 type CartaoProps = { pet: Pet; indice: number; ativo: boolean; simples: boolean; ampliado?: boolean; onPress: () => void };
 
 function CartaoCarteira({ pet, indice, ativo, simples, ampliado = false, onPress }: CartaoProps) {
-  const especie = ESPECIES.find(item => item.valor === pet.especie);
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   return <Pressable
@@ -33,9 +32,7 @@ function CartaoCarteira({ pet, indice, ativo, simples, ampliado = false, onPress
       <Text style={s.cartaoIndice}>{String(indice + 1).padStart(2, '0')}</Text>
     </View>
     <View style={s.cartaoConteudo}>
-      <View style={[s.cartaoIcone, simples && sSimples.cartaoIcone]}>
-        <AppIcon name={especie?.icon ?? 'paw'} set={especie?.iconSet ?? 'MaterialCommunityIcons'} size={simples ? 31 : 24} color={theme.colors.primary} />
-      </View>
+      <PetFoto pet={pet} size={simples ? 58 : 42} color={theme.colors.primary} backgroundColor={theme.colors.surfaceSubtle} accessibilityLabel={`Foto de ${pet.nome}`} />
       <View style={s.cartaoInfo}>
         <Text style={[s.cartaoNome, simples && sSimples.cartaoNome]} numberOfLines={1}>{pet.nome}</Text>
         <Text style={[s.cartaoMeta, simples && sSimples.cartaoMeta]} numberOfLines={1}>{descricaoPet(pet)}</Text>

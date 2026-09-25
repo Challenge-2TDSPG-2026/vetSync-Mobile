@@ -17,10 +17,10 @@ export interface PetResponseApi {
   dtNascimento: string;
   idadeAnos: number;
   peso: number | null;
-  idTutor: number | null;
   nmTutor?: string | null;
   emailTutor?: string | null;
   telefoneTutor?: string | null;
+  fotoUrl?: string | null;
 }
 
 function semAcento(valor: string): string {
@@ -54,6 +54,7 @@ export function paraPetApp(dto: PetResponseApi): Pet {
     id: String(dto.idPet), nome: dto.nmPet, especie: especieApiParaApp(dto.especie),
     sexo: sexoApiParaApp(dto.sexo), raca: dto.raca ?? '', dataNascimento: dto.dtNascimento,
     peso: dto.peso != null ? String(dto.peso) : '',
+    fotoUrl: dto.fotoUrl ?? null,
     ...(tutor ? { tutor } : {}),
   };
 }

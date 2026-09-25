@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
+import { PetFoto } from '../../components/pet-foto/PetFoto';
 import { mostrarToast } from '../../components/ui/Toast';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
@@ -106,14 +107,7 @@ export default function FichaPacienteScreen() {
         )}
 
         <View style={s.petCard}>
-          <View style={s.petAvatar}>
-            <AppIcon
-              name={especieInfo?.icon ?? 'paw'}
-              set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
-              size={30}
-              color={C.g600}
-            />
-          </View>
+          <PetFoto pet={pet} size={58} color={C.g600} backgroundColor={C.g50} accessibilityLabel={`Foto de ${pet.nome}`} />
           <View style={{ flex: 1 }}>
             <Text style={s.petNome}>{pet.nome}</Text>
             <Text style={s.petDetalhe}>{especieInfo?.label}{pet.raca ? ` • ${pet.raca}` : ''}</Text>

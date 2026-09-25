@@ -17,7 +17,8 @@
       "bundleIdentifier": "com.vetsync.app",
       "infoPlist": {
         "NSCalendarsUsageDescription": "Precisamos acessar seu calendário para adicionar os eventos de saúde do seu pet.",
-        "NSRemindersUsageDescription": "Precisamos acessar seus lembretes para agendar notificações dos eventos."
+        "NSRemindersUsageDescription": "Precisamos acessar seus lembretes para agendar notificações dos eventos.",
+        "NSPhotoLibraryUsageDescription": "Precisamos acessar suas fotos para definir a foto do pet."
       }
     },
     "android": {
@@ -55,6 +56,12 @@
         {
           "icon": "./assets/logo.png",
           "color": "#22a06b"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Precisamos acessar suas fotos para definir a foto do pet."
         }
       ]
     ],

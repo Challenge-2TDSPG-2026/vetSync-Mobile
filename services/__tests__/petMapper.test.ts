@@ -12,6 +12,7 @@ describe('petMapper', () => {
       idadeAnos: 5,
       peso: 12.5,
       idTutor: 7,
+      fotoUrl: 'https://cdn.vetsync.com/pets/12/foto.jpg',
     };
 
     expect(paraPetApp(dto)).toEqual({
@@ -22,6 +23,7 @@ describe('petMapper', () => {
       raca: '',
       dataNascimento: '2020-12-25T00:00:00',
       peso: '12.5',
+      fotoUrl: 'https://cdn.vetsync.com/pets/12/foto.jpg',
     });
   });
 

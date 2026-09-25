@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { petService } from '../services/petService';
+import type { ArquivoUpload } from '../services/api/httpClient';
 import type { Pet } from '../types';
 import { petKeys } from './queryKeys';
 
@@ -65,6 +66,39 @@ export function useRemoverPet() {
         antigos.filter(p => p.id !== idRemovido)
       );
       queryClient.invalidateQueries({ queryKey: petKeys.all });
+    },
+  });
+}
+
+export function useEnviarFotoPet() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ idPet, arquivo }: { idPet: string; arquivo: ArquivoUpload }) =>
+      petService.enviarFoto(idPet, arquivo),
+    onSuccess: (petAtualizado) => {
+      queryClient.setQueryData<Pet[]>(petKeys.all, (antigos = []) =>
+        antigos.map(pet => (pet.id === petAtualizado.id ? petAtualizado : pet))
+      );
+      queryClient.setQueryData<Pet>(petKeys.detalhe(petAtualizado.id), petAtualizado);
+      queryClient.invalidateQueries({ queryKey: petKeys.all });
+      queryClient.invalidateQueries({ queryKey: petKeys.detalhe(petAtualizado.id) });
+    },
+  });
+}
+
+export function useRemoverFotoPet() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (idPet: string) => petService.removerFoto(idPet),
+    onSuccess: (_, idPet) => {
+      queryClient.setQueryData<Pet[]>(petKeys.all, (antigos = []) =>
+        antigos.map(pet => (pet.id === idPet ? { ...pet, fotoUrl: null } : pet))
+      );
+      queryClient.setQueryData<Pet | undefined>(petKeys.detalhe(idPet), pet =>
+        pet ? { ...pet, fotoUrl: null } : pet
+      );
+      queryClient.invalidateQueries({ queryKey: petKeys.all });
+      queryClient.invalidateQueries({ queryKey: petKeys.detalhe(idPet) });
     },
   });
 }

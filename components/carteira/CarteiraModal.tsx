@@ -10,6 +10,7 @@ import { ApiError } from '../../services/api/httpClient';
 import { carteiraCompartilhadaService, type CarteiraCompartilhadaAtiva } from '../../services/carteiraCompartilhadaService';
 import { confirmar } from '../../utils/alert';
 import { mostrarToast } from '../ui/Toast';
+import { PetFoto } from '../pet-foto/PetFoto';
 import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
 
@@ -130,7 +131,7 @@ export function CarteiraModal({ pet, eventos, onFechar }: Props) {
         <View style={s.handle} />
         <View style={s.header}><View><Text style={s.kicker}>Carteira de vacinação</Text><Text style={[s.title, modoSimples && sSimples.title]} numberOfLines={1}>{pet.nome}</Text></View><Pressable style={[s.close, modoSimples && sSimples.close]} onPress={onFechar} hitSlop={10} accessibilityLabel="Fechar"><Ionicons name="close" size={modoSimples ? 35 : 26} color={theme.colors.text} /></Pressable></View>
         <ScrollView contentContainerStyle={s.body} showsVerticalScrollIndicator={false}>
-          <View style={[s.identity, modoSimples && sSimples.identity]}><View style={[s.identityIcon, modoSimples && sSimples.identityIcon]}><Ionicons name="shield-checkmark" size={modoSimples ? 43 : 32} color={theme.colors.primary} /></View><View style={s.identityInfo}><Text style={[s.identityName, modoSimples && sSimples.identityName]}>{pet.nome}</Text><Text style={[s.identityMeta, modoSimples && sSimples.identityMeta]}>{especie?.label ?? 'Espécie não informada'}{pet.raca ? ` · ${pet.raca}` : ''}</Text></View></View>
+          <View style={[s.identity, modoSimples && sSimples.identity]}><PetFoto pet={pet} size={modoSimples ? 76 : 58} color={theme.colors.primary} backgroundColor={theme.colors.surfaceSubtle} accessibilityLabel={`Foto de ${pet.nome}`} /><View style={s.identityInfo}><Text style={[s.identityName, modoSimples && sSimples.identityName]}>{pet.nome}</Text><Text style={[s.identityMeta, modoSimples && sSimples.identityMeta]}>{especie?.label ?? 'Espécie não informada'}{pet.raca ? ` · ${pet.raca}` : ''}</Text></View></View>
           <View style={s.stats}><Resumo label="Registros" valor={vacinas.length} simples={modoSimples} /><Resumo label="Realizadas" valor={realizadas} simples={modoSimples} /><Resumo label="Agendadas" valor={proximas} simples={modoSimples} /></View>
           <CompartilhamentoQr
             carteira={carteiraCompartilhada}
