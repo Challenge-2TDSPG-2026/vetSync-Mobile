@@ -132,7 +132,14 @@ export default function CadastroScreen() {
               <View style={s.seloGlowOut} />
               <View style={s.seloGlowIn} />
               <View style={s.selo}>
-                <Image source={require('../assets/logo.png')} style={s.seloImg} resizeMode="contain" />
+                <Image
+                  source={require('../assets/logo.png')}
+                  style={s.seloImg}
+                  resizeMode="contain"
+                  accessible={false}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no"
+                />
               </View>
             </View>
             <Text style={s.marcaTexto}>VetSync</Text>
@@ -217,13 +224,21 @@ export default function CadastroScreen() {
             style={({ pressed }) => [s.btnAuth, pressed && s.btnAuthPressed, cadastrando && { opacity: 0.65 }]}
             onPress={handleCadastrar}
             disabled={cadastrando}
+            accessibilityRole="button"
+            accessibilityLabel={cadastrando ? 'Cadastrando' : 'Criar conta'}
+            accessibilityState={{ disabled: cadastrando, busy: cadastrando }}
           >
             <Text style={s.btnAuthText}>{cadastrando ? 'Cadastrando...' : 'Criar conta'}</Text>
             {!cadastrando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.colors.onPrimary} />}
           </Pressable>
 
           <Link href="/login" asChild>
-            <Pressable style={s.linkSecundario} disabled={cadastrando}>
+            <Pressable
+              style={s.linkSecundario}
+              disabled={cadastrando}
+              accessibilityRole="link"
+              accessibilityLabel="Já tem uma conta? Entrar"
+            >
               <Text style={s.linkSecundarioTexto}>
                 Já tem uma conta? <Text style={s.linkSecundarioDestaque}>Entrar</Text>
               </Text>
