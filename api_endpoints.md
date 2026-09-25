@@ -84,4 +84,4 @@ Gerenciamento de Push Notifications centralizado pelo servidor.
 
 | Método | Endpoint | Descrição |
 | :--- | :--- | :--- |
-| `POST` | `/api/notificacoes/registrar-token`| O app envia o Expo Push Token do dispositivo, para que o backend gerencie lembretes remotamente. |
+| `POST` | `/api/notificacoes/registrar-token`| O app envia o Expo Push Token do dispositivo autenticado, para que o backend gerencie lembretes remotamente e notifique o proprietário quando um convite de acesso for aceito. |
