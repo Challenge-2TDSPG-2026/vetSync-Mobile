@@ -17,6 +17,7 @@ export interface PetResponseApi {
   dtNascimento: string;
   idadeAnos: number;
   peso: number | null;
+  idTutor: number | null;
   nmTutor?: string | null;
   emailTutor?: string | null;
   telefoneTutor?: string | null;

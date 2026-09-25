@@ -5,6 +5,7 @@ export interface Pet {
   sexo: 'macho' | 'femea';
   raca: string;
   dataNascimento: string;
+  peso: string;
   tutor?: Tutor;
   fotoUrl?: string | null;
 }
