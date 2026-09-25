@@ -32,6 +32,10 @@ export function PetSwitcher() {
             key={p.id}
             style={[s.chip, modoSimples && sSimples.chip, ativo && s.chipAtivo]}
             onPress={() => selecionarPet(p.id)}
+            accessibilityRole="button"
+            accessibilityLabel={`Pet ${p.nome}`}
+            accessibilityState={{ selected: ativo }}
+            accessibilityHint="Troca o pet ativo"
           >
             <AppIcon
               name={especieInfo?.icon ?? 'paw'}
@@ -45,7 +49,13 @@ export function PetSwitcher() {
           </Pressable>
         );
       })}
-      <Pressable style={[s.addBtn, modoSimples && sSimples.chip]} onPress={() => router.push('/add-pet')}>
+      <Pressable
+        style={[s.addBtn, modoSimples && sSimples.chip]}
+        onPress={() => router.push('/add-pet')}
+        accessibilityRole="button"
+        accessibilityLabel="Novo pet"
+        accessibilityHint="Abre o formulário de cadastro de pet"
+      >
         <AppIcon name="add" set="Ionicons" size={modoSimples ? 27 : 20} color={theme.colors.primary} />
         <Text style={[s.addBtnText, modoSimples && sSimples.chipText]}>Novo pet</Text>
       </Pressable>
