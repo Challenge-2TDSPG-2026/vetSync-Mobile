@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import type * as NotificationsModule from 'expo-notifications';
 import { api } from './api/httpClient';
 
@@ -26,6 +27,10 @@ function obterNotificacoes(): typeof NotificationsModule | null {
 }
 
 export async function registrarTokenPush(token: string): Promise<void> {
+  if (!token.trim()) {
+    throw new Error('O Expo Push Token não foi fornecido.');
+  }
+
   await api.post('/notificacoes/registrar-token', { token });
 }
 
@@ -55,7 +60,8 @@ export async function configurarNotificacoesPush(): Promise<boolean> {
     });
   }
 
-  const resposta = await notificacoes.getExpoPushTokenAsync();
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+  const resposta = await notificacoes.getExpoPushTokenAsync({ projectId });
   await registrarTokenPush(resposta.data);
   return true;
 }
