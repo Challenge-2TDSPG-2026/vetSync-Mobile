@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Refre
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
@@ -22,22 +23,15 @@ import { DicaTela } from '../../components/ui/DicaTela';
 import { confirmar } from '../../utils/alert';
 import { META_CONSULTAS_RECOMPENSA } from '../../constants/gamification';
 import type { Recompensa } from '../../types';
-
-const C = {
-  g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
-  g500: '#22a06b', g400: '#3db87e', g200: '#a8e6c7', g100: '#d4f2e4', g50: '#edfaf3',
-  cream: '#fafaf8', w50: '#f9f7f4', w100: '#f0ece5',
-  text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff',
-  ouro: '#c99a2e', ouroClaro: '#fdf6e3',
-  roxo: '#6d4aa8', roxoClaro: '#f1ecfb',
-  danger: '#dc3545',
-};
+import type { AppTheme } from '../../constants/theme';
 
 function formatarData(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 export default function RecompensasScreen() {
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const { petAtivo, eventos, nivelInfo } = usePet();
   const { modoSimples } = useAccessibility();
   const { autenticado } = useAuth();
@@ -97,7 +91,7 @@ export default function RecompensasScreen() {
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
-      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.colors.surface} />}
     >
 
       <PetSwitcher />
@@ -106,7 +100,7 @@ export default function RecompensasScreen() {
         <DicaTela
           titulo="Como funcionam os pontos"
           texto="Complete eventos de saúde do seu pet pra ganhar pontos, e troque por benefícios na clínica na aba de recompensas abaixo."
-          accentColor={C.g600}
+          accentColor={theme.colors.primary}
           onFechar={fecharDica}
           simples={modoSimples}
         />
@@ -114,10 +108,10 @@ export default function RecompensasScreen() {
 
       {/* Banner — some no modo simples */}
       {!modoSimples && (
-        <LinearGradient colors={[C.g900, C.g700]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.banner}>
+        <LinearGradient colors={[theme.colors.navigation, theme.colors.navigationAccent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.banner}>
           <AppIcon name="paw" set="MaterialCommunityIcons" size={176} color="rgba(255,255,255,0.06)" style={s.bannerPaw} />
           <View style={s.bannerIconWrap}>
-            <AppIcon name="gift-outline" set="Ionicons" size={30} color={C.white} />
+            <AppIcon name="gift-outline" set="Ionicons" size={30} color={theme.colors.onNavigation} />
           </View>
           <Text style={s.bannerKicker}>CUIDADO QUE RECOMPENSA</Text>
           <Text style={s.bannerTitulo}>Programa de Fidelidade</Text>
@@ -173,7 +167,7 @@ export default function RecompensasScreen() {
                 style={[s.dotConsulta, i < consultasNoCicloAtual && s.dotConsultaPreenchida]}
               >
                 {i < consultasNoCicloAtual && (
-                  <AppIcon name="checkmark" set="Ionicons" size={12} color={C.white} />
+                  <AppIcon name="checkmark" set="Ionicons" size={12} color={theme.colors.onPrimary} />
                 )}
               </View>
             ))}
@@ -184,7 +178,7 @@ export default function RecompensasScreen() {
       <View style={s.secLabelRow}>
         <Text style={[s.secLabel, modoSimples && sSimples.secLabel]}>Benefícios do Catálogo</Text>
         <View style={s.saldoPill}>
-          <AppIcon name="sparkles" set="Ionicons" size={12} color={C.ouro} />
+          <AppIcon name="sparkles" set="Ionicons" size={12} color={theme.domain.reward.gold} />
           <Text style={s.secLabelContagem}>{saldoPontos} pts</Text>
         </View>
       </View>
@@ -196,7 +190,7 @@ export default function RecompensasScreen() {
           icon="ribbon-outline"
           title="Nenhum benefício disponível no momento"
           subtitle="Novas recompensas aparecerão aqui em breve."
-          accentColor={C.ouro}
+          accentColor={theme.domain.reward.gold}
         />
       ) : (
         <>
@@ -207,7 +201,7 @@ export default function RecompensasScreen() {
           return (
             <View key={r.id} style={[s.cupomCard, modoSimples && sSimples.cupomCard]}>
               <View style={[s.cupomIconWrap, modoSimples && sSimples.cupomIconWrap]}>
-                <AppIcon name="gift" set="Ionicons" size={modoSimples ? 30 : 24} color={C.ouro} />
+                <AppIcon name="gift" set="Ionicons" size={modoSimples ? 30 : 24} color={theme.domain.reward.gold} />
               </View>
               <View style={s.cupomInfo}>
                 <Text style={[s.cupomTitulo, modoSimples && sSimples.cupomTitulo]}>{r.nome}</Text>
@@ -221,7 +215,7 @@ export default function RecompensasScreen() {
                 disabled={!podeResgatar || isPending}
               >
                 {isPending ? (
-                  <ActivityIndicator size="small" color={C.white} />
+                  <ActivityIndicator size="small" color={theme.colors.onPrimary} />
                 ) : (
                   <Text style={[s.btnResgatarText, modoSimples && sSimples.btnResgatarText]}>Resgatar</Text>
                 )}
@@ -237,7 +231,7 @@ export default function RecompensasScreen() {
               accessibilityLabel={mostrarCatalogoCompleto ? 'Mostrar menos benefícios' : 'Ver mais benefícios'}
             >
               <Text style={s.verMaisCatalogoTexto}>{mostrarCatalogoCompleto ? 'Mostrar menos benefícios' : 'Ver mais benefícios'}</Text>
-              <AppIcon name={mostrarCatalogoCompleto ? 'chevron-up' : 'chevron-down'} set="Ionicons" size={20} color={C.g700} />
+              <AppIcon name={mostrarCatalogoCompleto ? 'chevron-up' : 'chevron-down'} set="Ionicons" size={20} color={theme.colors.primary} />
             </Pressable>
           )}
         </>
@@ -261,7 +255,7 @@ export default function RecompensasScreen() {
                     name={c.desbloqueada ? c.icon : 'lock-closed-outline'}
                     set={c.desbloqueada ? c.iconSet : 'Ionicons'}
                     size={20}
-                    color={c.desbloqueada ? C.white : C.muted}
+                    color={c.desbloqueada ? theme.colors.onPrimary : theme.colors.textMuted}
                   />
                 </View>
                 <Text style={[s.conquistaTitulo, !c.desbloqueada && s.conquistaTituloBloqueada]} numberOfLines={2}>
@@ -311,7 +305,7 @@ export default function RecompensasScreen() {
                   name={r.status === 'VALIDADO' ? 'checkmark-circle' : r.status === 'PENDENTE' ? 'time-outline' : 'close-circle'}
                   set="Ionicons"
                   size={modoSimples ? 28 : 20}
-                  color={r.status === 'VALIDADO' ? C.g500 : r.status === 'PENDENTE' ? C.ouro : C.danger}
+                  color={r.status === 'VALIDADO' ? theme.colors.success : r.status === 'PENDENTE' ? theme.domain.reward.gold : theme.colors.danger}
                 />
                 <View style={{ flex: 1 }}>
                   <Text style={[s.historicoTitulo, modoSimples && sSimples.historicoTitulo]}>{r.nomeRecompensa}</Text>
@@ -319,7 +313,7 @@ export default function RecompensasScreen() {
                     {formatarData(r.dataResgate)} • {r.status}
                   </Text>
                 </View>
-                <Text style={{ fontSize: modoSimples ? 16 : 13, fontWeight: '700', color: C.muted }}>-{r.custoPontos} pts</Text>
+                <Text style={{ fontSize: modoSimples ? 16 : 13, fontWeight: '700', color: theme.colors.textSecondary }}>-{r.custoPontos} pts</Text>
               </View>
             ))}
           </View>
@@ -331,8 +325,8 @@ export default function RecompensasScreen() {
 }
 
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.cream },
+const createStyles = (theme: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.colors.background },
   content: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 42 },
 
   banner: {
@@ -344,136 +338,138 @@ const s = StyleSheet.create({
   bannerPaw: { position: 'absolute', right: -30, top: -31, transform: [{ rotate: '-19deg' }] },
   bannerIconWrap: {
     width: 52, height: 52, borderRadius: 16,
-    backgroundColor: C.g500,
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center', alignItems: 'center',
     marginBottom: 17,
   },
-  bannerKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1.25, color: C.g200, marginBottom: 6 },
-  bannerTitulo: { fontSize: 25, lineHeight: 30, fontWeight: '800', color: C.white, letterSpacing: -0.45, marginBottom: 6 },
-  bannerSub: { maxWidth: 285, fontSize: 14, lineHeight: 20, color: 'rgba(212,242,228,0.86)' },
+  bannerKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1.25, color: theme.colors.onNavigation, marginBottom: 6 },
+  bannerTitulo: { fontSize: 25, lineHeight: 30, fontWeight: '800', color: theme.colors.onNavigation, letterSpacing: -0.45, marginBottom: 6 },
+  bannerSub: { maxWidth: 285, fontSize: 14, lineHeight: 20, color: theme.colors.onNavigation, opacity: 0.86 },
 
-  verMaisCatalogo: { minHeight: 48, marginTop: -2, marginBottom: 18, borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: C.g50 },
-  verMaisCatalogoTexto: { fontSize: 14, fontWeight: '700', color: C.g700 },
+  verMaisCatalogo: { minHeight: 48, marginTop: -2, marginBottom: 18, borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: theme.colors.surfaceSubtle },
+  verMaisCatalogoTexto: { fontSize: 14, fontWeight: '700', color: theme.colors.primary },
 
   nivelCard: {
-    backgroundColor: C.roxoClaro,
+    backgroundColor: theme.colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: theme.domain.reward.purple,
     borderRadius: 22,
     padding: 18,
     marginBottom: 18,
   },
-  nivelKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: C.roxo, marginBottom: 11 },
+  nivelKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: theme.domain.reward.purple, marginBottom: 11 },
   nivelHead: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 16 },
   nivelBadge: {
     width: 54, height: 54, borderRadius: 18,
-    backgroundColor: C.roxo,
+    backgroundColor: theme.domain.reward.purple,
     justifyContent: 'center', alignItems: 'center',
-    shadowColor: C.roxo, shadowOpacity: 0.22, shadowRadius: 9, shadowOffset: { width: 0, height: 4 }, elevation: 3,
+    shadowColor: theme.domain.reward.purple, shadowOpacity: 0.22, shadowRadius: 9, shadowOffset: { width: 0, height: 4 }, elevation: 3,
   },
-  nivelBadgeNumero: { fontSize: 21, fontWeight: '800', color: C.white },
-  nivelTitulo: { fontSize: 18, fontWeight: '800', color: C.text },
-  nivelSub: { fontSize: 14, color: C.muted, marginTop: 3 },
-  barraTrackRoxo: { height: 10, backgroundColor: 'rgba(109,74,168,0.16)', borderRadius: 5, overflow: 'hidden', marginBottom: 9 },
-  barraFillRoxo: { height: '100%', backgroundColor: C.roxo, borderRadius: 5 },
-  nivelHint: { fontSize: 13, color: C.text, fontWeight: '700', marginBottom: 3 },
-  nivelDica: { fontSize: 12, color: C.muted },
+  nivelBadgeNumero: { fontSize: 21, fontWeight: '800', color: theme.colors.onPrimary },
+  nivelTitulo: { fontSize: 18, fontWeight: '800', color: theme.colors.text },
+  nivelSub: { fontSize: 14, color: theme.colors.textSecondary, marginTop: 3 },
+  barraTrackRoxo: { height: 10, backgroundColor: theme.colors.surfaceSubtle, borderRadius: 5, overflow: 'hidden', marginBottom: 9 },
+  barraFillRoxo: { height: '100%', backgroundColor: theme.domain.reward.purple, borderRadius: 5 },
+  nivelHint: { fontSize: 13, color: theme.colors.text, fontWeight: '700', marginBottom: 3 },
+  nivelDica: { fontSize: 12, color: theme.colors.textSecondary },
 
   progressoCard: {
-    backgroundColor: C.white,
+    backgroundColor: theme.colors.surface,
     borderRadius: 22,
     padding: 18,
     marginBottom: 22,
-    shadowColor: '#281d15', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
+    shadowColor: theme.colors.text, shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   progressoHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 11 },
-  progressoLbl: { fontSize: 13, fontWeight: '700', color: C.muted, textTransform: 'uppercase', letterSpacing: 0.4 },
-  progressoContagem: { fontSize: 20, fontWeight: '800', color: C.g700 },
-  barraTrack: { height: 11, backgroundColor: C.w100, borderRadius: 6, overflow: 'hidden', marginBottom: 11 },
-  barraFill: { height: '100%', backgroundColor: C.g500, borderRadius: 6 },
-  progressoHint: { fontSize: 13, color: C.muted, marginBottom: 15 },
+  progressoLbl: { fontSize: 13, fontWeight: '700', color: theme.colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.4 },
+  progressoContagem: { fontSize: 20, fontWeight: '800', color: theme.colors.primary },
+  barraTrack: { height: 11, backgroundColor: theme.colors.surfaceSubtle, borderRadius: 6, overflow: 'hidden', marginBottom: 11 },
+  barraFill: { height: '100%', backgroundColor: theme.colors.primary, borderRadius: 6 },
+  progressoHint: { fontSize: 13, color: theme.colors.textSecondary, marginBottom: 15 },
 
   dotsRow: { flexDirection: 'row', gap: 9, justifyContent: 'center' },
   dotConsulta: {
     width: 30, height: 30, borderRadius: 15,
-    borderWidth: 1.5, borderColor: C.border,
-    backgroundColor: C.w50,
+    borderWidth: 1.5, borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceSubtle,
     justifyContent: 'center', alignItems: 'center',
   },
-  dotConsultaPreenchida: { backgroundColor: C.g500, borderColor: C.g500 },
+  dotConsultaPreenchida: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
 
   secLabel: {
     fontSize: 14, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase',
-    color: C.muted, marginBottom: 11, marginTop: 5, paddingLeft: 2,
+    color: theme.colors.textSecondary, marginBottom: 11, marginTop: 5, paddingLeft: 2,
   },
   secLabelRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 2,
   },
-  saldoPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: C.ouroClaro, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, marginBottom: 11 },
-  secLabelContagem: { fontSize: 12, fontWeight: '800', color: C.ouro },
+  saldoPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: theme.colors.surfaceSubtle, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, marginBottom: 11 },
+  secLabelContagem: { fontSize: 12, fontWeight: '800', color: theme.domain.reward.gold },
 
   emptyCard: {
-    backgroundColor: C.white, borderRadius: 22, borderWidth: 1, borderColor: C.border, borderStyle: 'dashed',
+    backgroundColor: theme.colors.surface, borderRadius: 22, borderWidth: 1, borderColor: theme.colors.border, borderStyle: 'dashed',
     padding: 26, alignItems: 'center', marginBottom: 22,
   },
-  emptyTitle: { fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 4 },
-  emptySub: { fontSize: 12, color: C.muted, textAlign: 'center' },
+  emptyTitle: { fontSize: 14, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
+  emptySub: { fontSize: 12, color: theme.colors.textSecondary, textAlign: 'center' },
 
   cupomCard: {
     flexDirection: 'row', alignItems: 'center', gap: 13,
-    backgroundColor: C.white, borderRadius: 20,
+    backgroundColor: theme.colors.surface, borderRadius: 20,
     padding: 15, marginBottom: 11,
-    shadowColor: '#281d15', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
+    shadowColor: theme.colors.text, shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   cupomIconWrap: {
     width: 48, height: 48, borderRadius: 16,
-    backgroundColor: C.ouroClaro, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: theme.colors.surfaceSubtle, justifyContent: 'center', alignItems: 'center',
   },
   cupomInfo: { flex: 1 },
-  cupomTitulo: { fontSize: 16, fontWeight: '800', color: C.text },
-  cupomSub: { fontSize: 13, color: C.muted, marginTop: 3 },
+  cupomTitulo: { fontSize: 16, fontWeight: '800', color: theme.colors.text },
+  cupomSub: { fontSize: 13, color: theme.colors.textSecondary, marginTop: 3 },
   btnResgatar: {
-    backgroundColor: C.ouro, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999,
+    backgroundColor: theme.colors.primary, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999,
   },
-  btnResgatarText: { color: C.white, fontSize: 14, fontWeight: '700' },
+  btnResgatarText: { color: theme.colors.onPrimary, fontSize: 14, fontWeight: '700' },
 
   conquistasGrid: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 11, marginBottom: 22,
   },
   conquistaCard: {
     width: '31%',
-    backgroundColor: C.white,
+    backgroundColor: theme.colors.surface,
     borderRadius: 18,
     padding: 11,
     alignItems: 'center',
-    shadowColor: '#281d15', shadowOpacity: 0.05, shadowRadius: 9, shadowOffset: { width: 0, height: 3 }, elevation: 1,
+    shadowColor: theme.colors.text, shadowOpacity: 0.05, shadowRadius: 9, shadowOffset: { width: 0, height: 3 }, elevation: 1,
   },
   conquistaCardBloqueada: { opacity: 0.55 },
   conquistaIconWrap: {
     width: 38, height: 38, borderRadius: 19,
-    backgroundColor: C.w100,
+    backgroundColor: theme.colors.surfaceSubtle,
     justifyContent: 'center', alignItems: 'center',
     marginBottom: 6,
   },
-  conquistaIconWrapAtiva: { backgroundColor: C.g500 },
-  conquistaTitulo: { fontSize: 10.5, fontWeight: '700', color: C.text, textAlign: 'center', marginBottom: 2 },
-  conquistaTituloBloqueada: { color: C.muted },
-  conquistaDescricao: { fontSize: 9, color: C.muted, textAlign: 'center', lineHeight: 12 },
+  conquistaIconWrapAtiva: { backgroundColor: theme.colors.primary },
+  conquistaTitulo: { fontSize: 10.5, fontWeight: '700', color: theme.colors.text, textAlign: 'center', marginBottom: 2 },
+  conquistaTituloBloqueada: { color: theme.colors.textMuted },
+  conquistaDescricao: { fontSize: 9, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 12 },
 
   statsCard: {
-    flexDirection: 'row', backgroundColor: C.white, borderRadius: 22,
-    marginBottom: 22, overflow: 'hidden', shadowColor: '#281d15', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
+    flexDirection: 'row', backgroundColor: theme.colors.surface, borderRadius: 22,
+    marginBottom: 22, overflow: 'hidden', shadowColor: theme.colors.text, shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   statItem: { flex: 1, alignItems: 'center', paddingVertical: 17 },
-  statValor: { fontSize: 23, fontWeight: '700', color: C.g700 },
-  statLabel: { fontSize: 11, color: C.muted, textAlign: 'center', marginTop: 4, paddingHorizontal: 4 },
-  statDivisor: { width: 1, backgroundColor: C.border },
+  statValor: { fontSize: 23, fontWeight: '700', color: theme.colors.primary },
+  statLabel: { fontSize: 11, color: theme.colors.textSecondary, textAlign: 'center', marginTop: 4, paddingHorizontal: 4 },
+  statDivisor: { width: 1, backgroundColor: theme.colors.border },
 
   historicoCard: {
-    backgroundColor: C.white, borderRadius: 22, overflow: 'hidden', shadowColor: '#281d15', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
+    backgroundColor: theme.colors.surface, borderRadius: 22, overflow: 'hidden', shadowColor: theme.colors.text, shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   historicoRow: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 16 },
-  historicoRowBorder: { borderBottomWidth: 1, borderBottomColor: C.border },
-  historicoTitulo: { fontSize: 14, fontWeight: '600', color: C.text },
-  historicoData: { fontSize: 12, color: C.muted, marginTop: 2 },
+  historicoRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  historicoTitulo: { fontSize: 14, fontWeight: '600', color: theme.colors.text },
+  historicoData: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 2 },
 });
 
 /** Modo simples: ~35% maior que o padrão. Sem banner, sem ciclo de atendimentos, sem conquistas e sem estatísticas. */
