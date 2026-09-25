@@ -10,6 +10,7 @@ import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ToastHost } from '../components/ui/Toast';
 import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
+import { configurarNotificacoesPush } from '../services/pushNotificationService';
 
 lockFontScaling();
 
@@ -102,6 +103,27 @@ function RootNavigator() {
   );
 }
 
+function PushNotificationRegistration() {
+  const { sessao } = useAuth();
+
+  useEffect(() => {
+    if (!sessao) return;
+
+    let ativo = true;
+    configurarNotificacoesPush().catch((erro) => {
+      if (ativo) {
+        console.warn('Não foi possível registrar as notificações push.', erro);
+      }
+    });
+
+    return () => {
+      ativo = false;
+    };
+  }, [sessao?.token]);
+
+  return null;
+}
+
 const s = StyleSheet.create({
   themeBootstrap: { flex: 1 },
   erroOverlay: {
@@ -148,6 +170,7 @@ function ThemedRootLayout() {
             <PetProvider>
               <VetProvider>
                 <RootNavigator />
+                <PushNotificationRegistration />
                 <ToastHost />
               </VetProvider>
             </PetProvider>
