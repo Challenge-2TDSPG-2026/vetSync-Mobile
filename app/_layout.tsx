@@ -79,16 +79,33 @@ function RootNavigator() {
           </Pressable>
         </View>
       )}
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="login" />
-        <Stack.Screen name="cadastro" />
-        <Stack.Screen name="(tutor)" />
-        <Stack.Screen name="(vet)" />
-        <Stack.Screen name="add-evento" options={{ presentation: 'modal', headerShown: false }} />
-        <Stack.Screen name="add-pet" options={{ presentation: 'modal', headerShown: false }} />
-        <Stack.Screen name="modo-simples" options={{ headerShown: false }} />
-        <Stack.Screen name="gerenciar-acessos" options={{ headerShown: false }} />
-        <Stack.Screen name="paciente/[id]" options={{ headerShown: true }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'fade_from_bottom',
+          animationDuration: 320,
+          gestureEnabled: true,
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      >
+        <Stack.Screen name="login" options={{ animation: 'fade' }} />
+        <Stack.Screen name="cadastro" options={{ animation: 'fade_from_bottom' }} />
+        <Stack.Screen name="(tutor)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(vet)" options={{ animation: 'fade' }} />
+        <Stack.Screen
+          name="add-evento"
+          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="add-pet"
+          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen name="modo-simples" options={{ animation: 'fade_from_bottom' }} />
+        <Stack.Screen name="gerenciar-acessos" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen
+          name="paciente/[id]"
+          options={{ headerShown: true, animation: 'slide_from_right' }}
+        />
         <Stack.Screen
           name="assistente"
           options={{
