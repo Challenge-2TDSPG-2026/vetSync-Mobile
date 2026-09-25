@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useCancelarEvento, useRemoverEvento } from '../../hooks/useEventos';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
@@ -19,14 +20,7 @@ import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento, formatarDataEve
 import { cancelarLembretes } from '../../services/calendarService';
 import { obterERemoverLembretesEvento } from '../../storage/petStorage';
 import type { Evento } from '../../types';
-
-const C = {
-  g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
-  g500: '#22a06b', g400: '#3db87e', g200: '#a8e6c7', g100: '#d4f2e4', g50: '#edfaf3',
-  cream: '#fafaf8', w50: '#f9f7f4', w100: '#f0ece5', w200: '#e0d8ce',
-  text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff',
-  danger: '#dc3545', warn: '#e67e22', info: '#2563eb',
-};
+import type { AppTheme } from '../../constants/theme';
 
 type Filtro = 'todos' | 'atrasado' | 'PREVENTIVO' | 'TERAPEUTICO' | 'BEM_ESTAR' | 'EMERGENCIA';
 
@@ -48,6 +42,8 @@ function formatarDataLonga(d: Date): string {
 
 export default function AgendaScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const { petAtivo, eventos, carregandoEventos } = usePet();
   const { modoSimples } = useAccessibility();
   const { atualizando, aoAtualizar } = useRecarregarDados();
@@ -166,7 +162,7 @@ export default function AgendaScreen() {
               name={f.icon}
               set={f.iconSet}
               size={modoSimples ? 19 : 15}
-              color={filtro === f.valor ? C.white : C.text}
+              color={filtro === f.valor ? theme.colors.onPrimary : theme.colors.text}
               style={{ marginRight: 6 }}
             />
             <Text style={[s.filtroText, modoSimples && sSimples.filtroText, filtro === f.valor && s.filtroTextAtivo]}>{f.label}</Text>
@@ -176,7 +172,7 @@ export default function AgendaScreen() {
 
       <ScrollView
         contentContainerStyle={s.scrollContent}
-        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={C.g600} colors={[C.g600]} />}
+        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.colors.surface} />}
       >
 
         <PetSwitcher />
@@ -185,7 +181,7 @@ export default function AgendaScreen() {
           <DicaTela
             titulo="Como funciona a agenda"
             texto="Toque numa data no calendário pra ver os eventos daquele dia. Use os filtros acima pra ver só o que interessa, e toque em ‘Novo evento’ pra agendar."
-            accentColor={C.g600}
+            accentColor={theme.colors.primary}
             onFechar={fecharDica}
             simples={modoSimples}
           />
@@ -219,7 +215,7 @@ export default function AgendaScreen() {
             icon="calendar-outline"
             title="Nenhum evento nesse dia"
             subtitle="Toque em outra data ou adicione um novo evento"
-            accentColor={C.g600}
+            accentColor={theme.colors.primary}
             style={modoSimples ? sSimples.empty : undefined}
           />
         ) : (
@@ -235,16 +231,16 @@ export default function AgendaScreen() {
               <View key={item.id} style={s.card}>
                 <View style={[s.cardRow, modoSimples && sSimples.cardRow]}>
                   <View style={[s.eventoIcone, modoSimples && sSimples.eventoIcone, { backgroundColor: visual.cor }]}>
-                    <AppIcon name={visual.icon} set={visual.iconSet} size={modoSimples ? 26 : 20} color={C.white} />
+                    <AppIcon name={visual.icon} set={visual.iconSet} size={modoSimples ? 26 : 20} color={theme.colors.onPrimary} />
                   </View>
                   <View style={s.eventoInfo}>
                     <Text style={[s.eventoTitulo, modoSimples && sSimples.eventoTitulo]}>{item.nomeTipoEvento}</Text>
                     {!modoSimples ? (
                       <View style={s.eventoMetaRow}>
-                        <AppIcon name="time-outline" set="Ionicons" size={12} color={C.muted} />
+                        <AppIcon name="time-outline" set="Ionicons" size={12} color={theme.colors.textMuted} />
                         <Text style={s.eventoMeta}>{formatarDataEvento(item.data)}</Text>
                         <Text style={s.eventoMetaDot}>•</Text>
-                        <AppIcon name="medical-outline" set="Ionicons" size={12} color={C.muted} />
+                        <AppIcon name="medical-outline" set="Ionicons" size={12} color={theme.colors.textMuted} />
                         <Text style={s.eventoMeta}>{item.nomeVeterinario}</Text>
                       </View>
                     ) : (
@@ -271,11 +267,11 @@ export default function AgendaScreen() {
                         disabled={cancelandoEste}
                       >
                         {cancelandoEste ? (
-                          <ActivityIndicator size="small" color={C.danger} />
+                          <ActivityIndicator size="small" color={theme.colors.danger} />
                         ) : (
                           <>
-                            <Ionicons name="close-circle-outline" size={modoSimples ? 20 : 15} color={C.danger} />
-                            <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: C.danger }]}>Cancelar</Text>
+                            <Ionicons name="close-circle-outline" size={modoSimples ? 20 : 15} color={theme.colors.danger} />
+                            <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.danger }]}>Cancelar</Text>
                           </>
                         )}
                       </Pressable>
@@ -287,11 +283,11 @@ export default function AgendaScreen() {
                         disabled={removendoEste}
                       >
                         {removendoEste ? (
-                          <ActivityIndicator size="small" color={C.muted} />
+                          <ActivityIndicator size="small" color={theme.colors.textMuted} />
                         ) : (
                           <>
-                            <Ionicons name="trash-outline" size={modoSimples ? 20 : 15} color={C.muted} />
-                            <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: C.muted }]}>Remover</Text>
+                            <Ionicons name="trash-outline" size={modoSimples ? 20 : 15} color={theme.colors.textMuted} />
+                            <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.textMuted }]}>Remover</Text>
                           </>
                         )}
                       </Pressable>
@@ -305,7 +301,7 @@ export default function AgendaScreen() {
       </ScrollView>
 
       <Pressable style={[s.fab, modoSimples && sSimples.fab]} onPress={() => router.push('/add-evento')}>
-        <Ionicons name="add" size={modoSimples ? 38 : 30} color="#fff" />
+        <Ionicons name="add" size={modoSimples ? 38 : 30} color={theme.colors.onPrimary} />
       </Pressable>
 
       <Modal visible={eventoParaCancelar !== null} transparent animationType="fade" onRequestClose={() => setEventoParaCancelar(null)}>
@@ -320,7 +316,7 @@ export default function AgendaScreen() {
               value={motivoCancelamento}
               onChangeText={setMotivoCancelamento}
               placeholder="Motivo do cancelamento"
-              placeholderTextColor={C.muted}
+              placeholderTextColor={theme.colors.placeholder}
               multiline
               numberOfLines={3}
               autoFocus
@@ -347,10 +343,10 @@ export default function AgendaScreen() {
 }
 
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.cream },
+const createStyles = (theme: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.colors.background },
 
-  filtroBar: { flexGrow: 0, flexShrink: 0, minHeight: 68, backgroundColor: C.cream },
+  filtroBar: { flexGrow: 0, flexShrink: 0, minHeight: 68, backgroundColor: theme.colors.background },
   filtroContent: { alignItems: 'center', paddingHorizontal: 18, paddingVertical: 10, gap: 8 },
   filtroBtn: {
     flexDirection: 'row',
@@ -358,18 +354,18 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderRadius: 999,
-    backgroundColor: C.white,
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: 'transparent',
-    shadowColor: '#281d15',
+    borderColor: theme.colors.border,
+    shadowColor: theme.colors.text,
     shadowOpacity: 0.04,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
   },
-  filtroBtnAtivo: { backgroundColor: C.g800, borderColor: C.g800 },
-  filtroText: { fontSize: 13, fontWeight: '700', color: C.text },
-  filtroTextAtivo: { color: C.white },
+  filtroBtnAtivo: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  filtroText: { fontSize: 13, fontWeight: '700', color: theme.colors.text },
+  filtroTextAtivo: { color: theme.colors.onPrimary },
 
   scrollContent: { paddingHorizontal: 18, paddingTop: 6, paddingBottom: 108 },
 
@@ -378,19 +374,19 @@ const s = StyleSheet.create({
     marginBottom: 12, paddingHorizontal: 4,
   },
   diaHeaderInfo: { flex: 1, minWidth: 0 },
-  diaHeaderKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: C.g600, marginBottom: 3 },
-  diaHeaderTexto: { fontSize: 17, fontWeight: '800', color: C.text, textTransform: 'capitalize' },
+  diaHeaderKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: theme.colors.primary, marginBottom: 3 },
+  diaHeaderTexto: { fontSize: 17, fontWeight: '800', color: theme.colors.text, textTransform: 'capitalize' },
   diaHeaderBadge: {
-    backgroundColor: C.g50, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6,
+    backgroundColor: theme.colors.surfaceSubtle, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6,
   },
-  diaHeaderBadgeText: { fontSize: 11, fontWeight: '800', color: C.g700 },
+  diaHeaderBadgeText: { fontSize: 11, fontWeight: '800', color: theme.colors.primary },
 
   card: {
-    backgroundColor: C.white,
+    backgroundColor: theme.colors.surface,
     borderRadius: 22,
     overflow: 'hidden',
     marginBottom: 12,
-    shadowColor: '#281d15',
+    shadowColor: theme.colors.text,
     shadowOpacity: 0.07,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 5 },
@@ -404,12 +400,12 @@ const s = StyleSheet.create({
   },
   eventoIcone: { width: 50, height: 50, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
   eventoInfo: { flex: 1, minWidth: 0 },
-  eventoTitulo: { fontSize: 16, fontWeight: '800', color: C.text },
+  eventoTitulo: { fontSize: 16, fontWeight: '800', color: theme.colors.text },
   eventoMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  eventoMeta: { fontSize: 13, color: C.muted },
-  eventoMetaDot: { fontSize: 13, color: C.muted, marginHorizontal: 2 },
-  eventoObs: { fontSize: 12, color: C.muted, marginTop: 5, fontStyle: 'italic' },
-  eventoMotivoCancelamento: { fontSize: 12, color: C.danger, marginTop: 5 },
+  eventoMeta: { fontSize: 13, color: theme.colors.textSecondary },
+  eventoMetaDot: { fontSize: 13, color: theme.colors.textMuted, marginHorizontal: 2 },
+  eventoObs: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 5, fontStyle: 'italic' },
+  eventoMotivoCancelamento: { fontSize: 12, color: theme.colors.danger, marginTop: 5 },
 
   cardFooter: {
     flexDirection: 'row',
@@ -417,9 +413,9 @@ const s = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 17,
     paddingVertical: 12,
-    backgroundColor: '#fcfbf8',
+    backgroundColor: theme.colors.surfaceSubtle,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: C.border,
+    borderTopColor: theme.colors.border,
   },
   badges: { flexDirection: 'row', gap: 6 },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
@@ -432,17 +428,17 @@ const s = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: C.g50,
+    backgroundColor: theme.colors.surfaceSubtle,
     minWidth: 40,
     justifyContent: 'center',
   },
-  btnAcaoDanger: { backgroundColor: '#fff5f5', borderColor: '#fecaca' },
+  btnAcaoDanger: { backgroundColor: theme.colors.dangerBackground, borderColor: theme.colors.danger },
   btnAcaoText: { fontSize: 14, fontWeight: '600' },
 
-  empty: { alignItems: 'center', backgroundColor: C.white, borderRadius: 22, borderWidth: 1, borderColor: C.border, borderStyle: 'dashed', paddingHorizontal: 24, paddingVertical: 36 },
-  emptyOrb: { width: 58, height: 58, borderRadius: 29, backgroundColor: C.g100, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  emptyTitle: { fontSize: 15, fontWeight: '800', color: C.text, marginBottom: 5 },
-  emptySub: { fontSize: 13, color: C.muted, textAlign: 'center', lineHeight: 18 },
+  empty: { alignItems: 'center', backgroundColor: theme.colors.surface, borderRadius: 22, borderWidth: 1, borderColor: theme.colors.border, borderStyle: 'dashed', paddingHorizontal: 24, paddingVertical: 36 },
+  emptyOrb: { width: 58, height: 58, borderRadius: 29, backgroundColor: theme.colors.infoBackground, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  emptyTitle: { fontSize: 15, fontWeight: '800', color: theme.colors.text, marginBottom: 5 },
+  emptySub: { fontSize: 13, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 18 },
 
   fab: {
     position: 'absolute',
@@ -451,11 +447,11 @@ const s = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: C.g600,
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 6,
-    shadowColor: C.g600,
+    shadowColor: theme.colors.primary,
     shadowOpacity: 0.3,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 7 },
@@ -463,34 +459,34 @@ const s = StyleSheet.create({
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(10,34,24,0.5)',
+    backgroundColor: theme.colors.overlay,
     justifyContent: 'center',
     padding: 24,
   },
   modalCard: {
-    backgroundColor: C.white,
+    backgroundColor: theme.colors.surfaceElevated,
     borderRadius: 16,
     padding: 22,
   },
-  modalTitulo: { fontSize: 18, fontWeight: '700', color: C.text, marginBottom: 5 },
-  modalSub: { fontSize: 14, color: C.muted, marginBottom: 16 },
+  modalTitulo: { fontSize: 18, fontWeight: '700', color: theme.colors.text, marginBottom: 5 },
+  modalSub: { fontSize: 14, color: theme.colors.textSecondary, marginBottom: 16 },
   modalInput: {
-    backgroundColor: C.w50,
+    backgroundColor: theme.colors.input,
     borderWidth: 1.5,
-    borderColor: C.border,
+    borderColor: theme.colors.border,
     borderRadius: 10,
     padding: 13,
     fontSize: 15,
-    color: C.text,
+    color: theme.colors.text,
     minHeight: 96,
     textAlignVertical: 'top',
     marginBottom: 18,
   },
   modalAcoes: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
   modalBtnCancelar: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 8 },
-  modalBtnCancelarText: { fontSize: 15, fontWeight: '600', color: C.muted },
-  modalBtnConfirmar: { backgroundColor: C.danger, paddingHorizontal: 18, paddingVertical: 12, borderRadius: 8 },
-  modalBtnConfirmarText: { color: C.white, fontSize: 15, fontWeight: '700' },
+  modalBtnCancelarText: { fontSize: 15, fontWeight: '600', color: theme.colors.textSecondary },
+  modalBtnConfirmar: { backgroundColor: theme.colors.danger, paddingHorizontal: 18, paddingVertical: 12, borderRadius: 8 },
+  modalBtnConfirmarText: { color: theme.colors.onPrimary, fontSize: 15, fontWeight: '700' },
 });
 
 /** Modo simples: ~35% maior que o padrão, com bem menos conteúdo por tela. */
