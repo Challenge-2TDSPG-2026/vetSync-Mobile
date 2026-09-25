@@ -42,7 +42,6 @@ export default function CarteirinhasScreen() {
     <>
       <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.cabecalho}>
-          <Text style={[s.titulo, modoSimples && sSimples.titulo]}>Carteiras de vacinação</Text>
           <Text style={[s.descricao, modoSimples && sSimples.descricao]}>
             Acesse os registros de vacina e compartilhe a carteira do seu pet quando precisar.
           </Text>
