@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { marcarDicaVista, verificarDicaVista } from '../../storage/petStorage';
 import { AppIcon } from '../AppIcon';
+import { useTheme } from '../../context/ThemeContext';
+import type { AppTheme } from '../../constants/theme';
 
 interface DicaTelaProps {
   titulo: string;
@@ -16,15 +18,18 @@ interface DicaTelaProps {
 export function DicaTela({
   titulo,
   texto,
-  accentColor = '#22a06b',
+  accentColor,
   onFechar,
   simples = false,
   style,
 }: DicaTelaProps) {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const accent = accentColor ?? theme.colors.primary;
   return (
-    <View style={[styles.container, { borderLeftColor: accentColor }, style]}>
+    <View style={[styles.container, { borderLeftColor: accent }, style]}>
       <View style={styles.iconWrap}>
-        <AppIcon name="bulb-outline" set="Ionicons" size={22} color={accentColor} />
+        <AppIcon name="bulb-outline" set="Ionicons" size={22} color={accent} />
       </View>
       <View style={styles.content}>
         <Text style={[styles.title, simples && styles.simpleTitle]}>{titulo}</Text>
@@ -37,7 +42,7 @@ export function DicaTela({
         accessibilityLabel="Fechar dica"
         style={styles.closeButton}
       >
-        <AppIcon name="close" set="Ionicons" size={18} color="#7a6a5e" />
+        <AppIcon name="close" set="Ionicons" size={18} color={theme.colors.textSecondary} />
       </Pressable>
     </View>
   );
@@ -73,7 +78,8 @@ export function useDicaPrimeiraVisita(idTela: string) {
   return { visivel, fechar };
 }
 
-const styles = StyleSheet.create({
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -83,7 +89,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderLeftWidth: 4,
     borderRadius: 12,
-    backgroundColor: '#f0ece5',
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   iconWrap: {
     paddingTop: 1,
@@ -93,7 +99,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   title: {
-    color: '#1a1512',
+    color: theme.colors.text,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -101,7 +107,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   text: {
-    color: '#7a6a5e',
+    color: theme.colors.textSecondary,
     fontSize: 13,
     lineHeight: 19,
   },
@@ -112,4 +118,5 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 2,
   },
-});
+  });
+}

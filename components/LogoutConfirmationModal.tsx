@@ -1,19 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAccessibility } from '../context/AccessibilityContext';
-
-const C = {
-  g900: '#0a2218',
-  g700: '#155c3f',
-  cream: '#fafaf8',
-  w50: '#f0ece5',
-  text: '#1a1512',
-  muted: '#7a6a5e',
-  border: '#e8e2da',
-  white: '#fff',
-  danger: '#dc3545',
-};
+import { useTheme } from '../context/ThemeContext';
+import type { AppTheme } from '../constants/theme';
 
 type Props = {
   visivel: boolean;
@@ -23,6 +13,8 @@ type Props = {
 
 export function LogoutConfirmationModal({ visivel, onFechar, onConfirmarSair }: Props) {
   const { modoSimples } = useAccessibility();
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const escala = useRef(new Animated.Value(0.92)).current;
   const opacidade = useRef(new Animated.Value(0)).current;
   const [saindo, setSaindo] = useState(false);
@@ -68,7 +60,7 @@ export function LogoutConfirmationModal({ visivel, onFechar, onConfirmarSair }: 
           accessibilityViewIsModal
         >
           <View style={[s.iconeWrap, modoSimples && sSimples.iconeWrap]}>
-            <Ionicons name="log-out-outline" size={modoSimples ? 34 : 26} color={C.g700} />
+            <Ionicons name="log-out-outline" size={modoSimples ? 34 : 26} color={theme.colors.primary} />
           </View>
           <Text style={[s.titulo, modoSimples && sSimples.titulo]}>Tem certeza que deseja sair?</Text>
           <Text style={[s.subtitulo, modoSimples && sSimples.subtitulo]}>
@@ -100,27 +92,28 @@ export function LogoutConfirmationModal({ visivel, onFechar, onConfirmarSair }: 
   );
 }
 
-const s = StyleSheet.create({
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(10,34,24,0.5)',
+    backgroundColor: theme.colors.overlay,
     justifyContent: 'center',
     padding: 24,
   },
   card: {
-    backgroundColor: C.white,
+    backgroundColor: theme.colors.surfaceElevated,
     borderRadius: 16,
     padding: 22,
     borderWidth: 1,
-    borderColor: C.border,
+    borderColor: theme.colors.border,
   },
   iconeWrap: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: C.cream,
+    backgroundColor: theme.colors.surfaceSubtle,
     borderWidth: 1,
-    borderColor: C.border,
+    borderColor: theme.colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
@@ -129,13 +122,13 @@ const s = StyleSheet.create({
   titulo: {
     fontSize: 18,
     fontWeight: '700',
-    color: C.text,
+    color: theme.colors.text,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitulo: {
     fontSize: 14,
-    color: C.muted,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 20,
@@ -150,27 +143,28 @@ const s = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: C.border,
-    backgroundColor: C.w50,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceSubtle,
   },
   btnFecharText: {
     fontSize: 15,
     fontWeight: '600',
-    color: C.text,
+    color: theme.colors.text,
   },
   btnSair: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
-    backgroundColor: C.danger,
+    backgroundColor: theme.colors.danger,
   },
   btnSairText: {
-    color: C.white,
+    color: theme.colors.onPrimary,
     fontSize: 15,
     fontWeight: '700',
   },
-});
+  });
+}
 
 const sSimples = StyleSheet.create({
   card: { padding: 28 },

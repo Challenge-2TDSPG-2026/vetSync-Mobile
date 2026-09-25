@@ -1,20 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { usePet } from '../context/PetContext';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { AppIcon } from './AppIcon';
 import { ESPECIES } from '../constants';
-
-const C = {
-  g600: '#1a7a52', g500: '#22a06b',
-  text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff', w50: '#f9f7f4',
-};
+import { useTheme } from '../context/ThemeContext';
+import type { AppTheme } from '../constants/theme';
 
 export function PetSwitcher() {
   const router = useRouter();
   const { pets, petAtivoId, selecionarPet } = usePet();
   const { modoSimples } = useAccessibility();
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
 
   if (pets.length === 0) return null;
 
@@ -38,7 +37,7 @@ export function PetSwitcher() {
               name={especieInfo?.icon ?? 'paw'}
               set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
               size={modoSimples ? 27 : 20}
-              color={ativo ? C.white : C.muted}
+              color={ativo ? theme.colors.onPrimary : theme.colors.textSecondary}
             />
             <Text style={[s.chipText, modoSimples && sSimples.chipText, ativo && s.chipTextAtivo]} numberOfLines={1}>
               {p.nome}
@@ -47,7 +46,7 @@ export function PetSwitcher() {
         );
       })}
       <Pressable style={[s.addBtn, modoSimples && sSimples.chip]} onPress={() => router.push('/add-pet')}>
-        <AppIcon name="add" set="Ionicons" size={modoSimples ? 27 : 20} color={C.g600} />
+        <AppIcon name="add" set="Ionicons" size={modoSimples ? 27 : 20} color={theme.colors.primary} />
         <Text style={[s.addBtnText, modoSimples && sSimples.chipText]}>Novo pet</Text>
       </Pressable>
     </ScrollView>
@@ -55,25 +54,27 @@ export function PetSwitcher() {
 }
 
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
-const s = StyleSheet.create({
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
   container: { flexGrow: 0, marginBottom: 16 },
   content: { gap: 10, paddingRight: 4 },
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 7,
     paddingHorizontal: 16, paddingVertical: 12, borderRadius: 22,
-    backgroundColor: C.w50, borderWidth: 1.5, borderColor: C.border,
+    backgroundColor: theme.colors.surfaceSubtle, borderWidth: 1.5, borderColor: theme.colors.border,
     maxWidth: 180,
   },
-  chipAtivo: { backgroundColor: C.g600, borderColor: C.g600 },
-  chipText: { fontSize: 15, fontWeight: '600', color: C.text },
-  chipTextAtivo: { color: C.white },
+  chipAtivo: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  chipText: { fontSize: 15, fontWeight: '600', color: theme.colors.text },
+  chipTextAtivo: { color: theme.colors.onPrimary },
   addBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     paddingHorizontal: 16, paddingVertical: 12, borderRadius: 22,
-    borderWidth: 1.5, borderColor: C.g500, borderStyle: 'dashed',
+    borderWidth: 1.5, borderColor: theme.colors.primary, borderStyle: 'dashed',
   },
-  addBtnText: { fontSize: 15, fontWeight: '700', color: C.g600 },
-});
+  addBtnText: { fontSize: 15, fontWeight: '700', color: theme.colors.primary },
+  });
+}
 
 /** Modo simples: ~35% maior que o padrão. */
 const sSimples = StyleSheet.create({

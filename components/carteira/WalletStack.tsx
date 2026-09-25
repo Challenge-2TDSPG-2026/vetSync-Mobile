@@ -5,8 +5,8 @@ import type { Pet } from '../../types';
 import { ESPECIES } from '../../constants';
 import { AppIcon } from '../AppIcon';
 import { useAccessibility } from '../../context/AccessibilityContext';
-
-const C = { green900: '#0a2218', green800: '#0e3326', green700: '#155c3f', green600: '#1a7a52', green100: '#d4f2e4', cream: '#fafaf8', white: '#ffffff', text: '#1a1512', muted: '#7a6a5e' };
+import { useTheme } from '../../context/ThemeContext';
+import type { AppTheme } from '../../constants/theme';
 
 type Props = { pets: Pet[]; petAtivoId?: string | null; onSelecionar: (pet: Pet) => void; onTrocarPetAtivo?: (petId: string) => void };
 
@@ -19,6 +19,8 @@ type CartaoProps = { pet: Pet; indice: number; ativo: boolean; simples: boolean;
 
 function CartaoCarteira({ pet, indice, ativo, simples, ampliado = false, onPress }: CartaoProps) {
   const especie = ESPECIES.find(item => item.valor === pet.especie);
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   return <Pressable
     onPress={onPress}
     accessibilityRole="button"
@@ -32,7 +34,7 @@ function CartaoCarteira({ pet, indice, ativo, simples, ampliado = false, onPress
     </View>
     <View style={s.cartaoConteudo}>
       <View style={[s.cartaoIcone, simples && sSimples.cartaoIcone]}>
-        <AppIcon name={especie?.icon ?? 'paw'} set={especie?.iconSet ?? 'MaterialCommunityIcons'} size={simples ? 31 : 24} color={C.green700} />
+        <AppIcon name={especie?.icon ?? 'paw'} set={especie?.iconSet ?? 'MaterialCommunityIcons'} size={simples ? 31 : 24} color={theme.colors.primary} />
       </View>
       <View style={s.cartaoInfo}>
         <Text style={[s.cartaoNome, simples && sSimples.cartaoNome]} numberOfLines={1}>{pet.nome}</Text>
@@ -40,7 +42,7 @@ function CartaoCarteira({ pet, indice, ativo, simples, ampliado = false, onPress
       </View>
     </View>
     <View style={s.cartaoRodape}>
-      <View style={s.seloDigital}><Ionicons name="shield-checkmark" size={14} color={C.green100} /><Text style={s.seloDigitalTexto}>Documento digital</Text></View>
+      <View style={s.seloDigital}><Ionicons name="shield-checkmark" size={14} color={theme.colors.onNavigation} /><Text style={s.seloDigitalTexto}>Documento digital</Text></View>
       {ativo && <View style={s.seloAtivo}><Text style={s.seloAtivoTexto}>Ativa</Text></View>}
     </View>
   </Pressable>;
@@ -48,6 +50,8 @@ function CartaoCarteira({ pet, indice, ativo, simples, ampliado = false, onPress
 
 export function WalletStack({ pets, petAtivoId, onSelecionar, onTrocarPetAtivo }: Props) {
   const { modoSimples } = useAccessibility();
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const [indiceFrontal, setIndiceFrontal] = useState(() => Math.max(0, pets.findIndex(pet => pet.id === petAtivoId)));
   const [seletorAberto, setSeletorAberto] = useState(false);
 
@@ -109,7 +113,7 @@ export function WalletStack({ pets, petAtivoId, onSelecionar, onTrocarPetAtivo }
           <View style={s.modalAlca} />
           <View style={s.modalCabecalho}>
             <View><Text style={s.modalRotulo}>Carteiras digitais</Text><Text style={[s.modalTitulo, modoSimples && sSimples.modalTitulo]}>Escolha uma carteira</Text></View>
-            <Pressable style={[s.modalFechar, modoSimples && sSimples.modalFechar]} onPress={() => setSeletorAberto(false)} hitSlop={10} accessibilityLabel="Fechar"><Ionicons name="close" size={modoSimples ? 33 : 24} color={C.text} /></Pressable>
+            <Pressable style={[s.modalFechar, modoSimples && sSimples.modalFechar]} onPress={() => setSeletorAberto(false)} hitSlop={10} accessibilityLabel="Fechar"><Ionicons name="close" size={modoSimples ? 33 : 24} color={theme.colors.text} /></Pressable>
           </View>
           <Text style={[s.modalDescricao, modoSimples && sSimples.modalDescricao]}>Toque na carteira do pet para consultar a carteira de vacinação.</Text>
           <ScrollView contentContainerStyle={s.modalLista} showsVerticalScrollIndicator={false}>
@@ -121,39 +125,41 @@ export function WalletStack({ pets, petAtivoId, onSelecionar, onTrocarPetAtivo }
   </>;
 }
 
-const s = StyleSheet.create({
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
   pilha: { marginBottom: 8, position: 'relative' },
   camada: { position: 'absolute' },
-  cartao: { minHeight: 148, borderRadius: 20, padding: 17, overflow: 'hidden', backgroundColor: C.green800, shadowColor: '#06150e', shadowOpacity: 0.2, shadowRadius: 9, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
+  cartao: { minHeight: 148, borderRadius: 20, padding: 17, overflow: 'hidden', backgroundColor: theme.colors.navigation, shadowColor: '#06150e', shadowOpacity: theme.mode === 'dark' ? 0 : 0.2, shadowRadius: 9, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
   cartaoAmpliado: { minHeight: 164, marginBottom: 14 },
-  cartaoAtivo: { backgroundColor: C.green700 },
-  cartaoAzul: { backgroundColor: '#1d4ed8' },
+  cartaoAtivo: { backgroundColor: theme.colors.navigationAccent },
+  cartaoAzul: { backgroundColor: theme.colors.info },
   pressed: { opacity: 0.86 },
   orbe: { position: 'absolute', width: 170, height: 170, borderRadius: 85, backgroundColor: 'rgba(255,255,255,0.07)', right: -56, top: -82 },
   cartaoCabecalho: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cartaoRotulo: { color: 'rgba(255,255,255,0.72)', fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.9 },
   cartaoIndice: { color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
   cartaoConteudo: { flexDirection: 'row', alignItems: 'center', flex: 1, paddingTop: 9 },
-  cartaoIcone: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: C.white, marginRight: 12 },
+  cartaoIcone: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface, marginRight: 12 },
   cartaoInfo: { flex: 1, minWidth: 0 },
-  cartaoNome: { color: C.white, fontSize: 20, fontWeight: '800' },
+  cartaoNome: { color: theme.colors.onNavigation, fontSize: 20, fontWeight: '800' },
   cartaoMeta: { color: 'rgba(255,255,255,0.74)', fontSize: 13, marginTop: 3 },
   cartaoRodape: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   seloDigital: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  seloDigitalTexto: { color: C.green100, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.45 },
-  seloAtivo: { backgroundColor: C.green100, borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3 },
-  seloAtivoTexto: { color: C.green800, fontSize: 10, fontWeight: '800' },
-  ajuda: { color: C.muted, fontSize: 12, textAlign: 'center', marginBottom: 20 },
-  modalFundo: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(10,34,24,0.56)' },
-  modalConteudo: { maxHeight: '88%', minHeight: '55%', borderTopLeftRadius: 26, borderTopRightRadius: 26, overflow: 'hidden', backgroundColor: C.cream },
-  modalAlca: { width: 42, height: 5, borderRadius: 3, alignSelf: 'center', marginTop: 10, backgroundColor: '#b7b3c2' },
+  seloDigitalTexto: { color: theme.colors.onNavigation, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.45 },
+  seloAtivo: { backgroundColor: theme.colors.surfaceSubtle, borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3 },
+  seloAtivoTexto: { color: theme.colors.navigation, fontSize: 10, fontWeight: '800' },
+  ajuda: { color: theme.colors.textSecondary, fontSize: 12, textAlign: 'center', marginBottom: 20 },
+  modalFundo: { flex: 1, justifyContent: 'flex-end', backgroundColor: theme.colors.overlay },
+  modalConteudo: { maxHeight: '88%', minHeight: '55%', borderTopLeftRadius: 26, borderTopRightRadius: 26, overflow: 'hidden', backgroundColor: theme.colors.surfaceElevated, borderWidth: theme.mode === 'dark' ? 1 : 0, borderColor: theme.colors.border },
+  modalAlca: { width: 42, height: 5, borderRadius: 3, alignSelf: 'center', marginTop: 10, backgroundColor: theme.colors.borderStrong },
   modalCabecalho: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 14 },
-  modalRotulo: { color: C.green600, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 },
-  modalTitulo: { color: C.text, fontSize: 23, fontWeight: '800', marginTop: 3 },
-  modalFechar: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.white, alignItems: 'center', justifyContent: 'center' },
-  modalDescricao: { color: C.muted, fontSize: 13, lineHeight: 18, marginHorizontal: 20, marginTop: 8 },
+  modalRotulo: { color: theme.colors.primary, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 },
+  modalTitulo: { color: theme.colors.text, fontSize: 23, fontWeight: '800', marginTop: 3 },
+  modalFechar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.colors.surfaceSubtle, alignItems: 'center', justifyContent: 'center' },
+  modalDescricao: { color: theme.colors.textSecondary, fontSize: 13, lineHeight: 18, marginHorizontal: 20, marginTop: 8 },
   modalLista: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 34 },
-});
+  });
+}
 
 const sSimples = StyleSheet.create({
   cartao: { minHeight: 188, padding: 22 },

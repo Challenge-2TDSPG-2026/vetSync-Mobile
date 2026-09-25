@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { AppIcon } from '../AppIcon';
-import { CORES } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
+import type { AppTheme } from '../../constants/theme';
 
 interface EmptyStateProps {
   icon: string;
@@ -25,13 +26,16 @@ export function EmptyState({
   title,
   subtitle,
   variant = 'dashed',
-  accentColor = CORES.secundaria,
+  accentColor,
   style,
 }: EmptyStateProps) {
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
+  const accent = accentColor ?? theme.colors.primary;
   return (
     <View style={[s.container, variant === 'dashed' && s.dashed, style]}>
-      <View style={[s.orb, { backgroundColor: `${accentColor}1f` }]}>
-        <AppIcon name={icon} set={iconSet} size={27} color={accentColor} />
+      <View style={[s.orb, { backgroundColor: `${accent}1f` }]}>
+        <AppIcon name={icon} set={iconSet} size={27} color={accent} />
       </View>
       <Text style={s.title}>{title}</Text>
       {subtitle ? <Text style={s.subtitle}>{subtitle}</Text> : null}
@@ -39,16 +43,18 @@ export function EmptyState({
   );
 }
 
-const s = StyleSheet.create({
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
   container: { alignItems: 'center', paddingHorizontal: 24, paddingVertical: 36 },
   dashed: {
-    backgroundColor: CORES.fundoCard,
+    backgroundColor: theme.colors.surface,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: CORES.borda,
+    borderColor: theme.colors.border,
     borderStyle: 'dashed',
   },
   orb: { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  title: { fontSize: 14, fontWeight: '700', color: CORES.texto, marginBottom: 4, textAlign: 'center' },
-  subtitle: { fontSize: 12, color: CORES.textoSecundario, textAlign: 'center', lineHeight: 17 },
-});
+  title: { fontSize: 14, fontWeight: '700', color: theme.colors.text, marginBottom: 4, textAlign: 'center' },
+  subtitle: { fontSize: 12, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 17 },
+  });
+}

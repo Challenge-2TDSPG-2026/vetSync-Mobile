@@ -13,6 +13,8 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ESPECIES, GRUPOS_ESPECIE } from '../../constants';
 import type { Pet } from '../../types';
 import { RacaSelector } from './RacaSelector';
+import { useTheme } from '../../context/ThemeContext';
+import type { AppTheme } from '../../constants/theme';
 
 type Especie = Pet['especie'];
 type Sexo = Pet['sexo'];
@@ -26,10 +28,6 @@ type Props = {
   onEspecieChange: (especie: Especie | null) => void;
 };
 
-const C = {
-  mint: '#22a06b', mintDeep: '#1a7a52', fill: '#f1ece1', ink: '#1a1512',
-  muted: '#7a6a5e', border: '#e8e2da', danger: '#dc3545',
-};
 const ESPECIES_PRINCIPAIS: Especie[] = ['cachorro', 'gato', 'coelho'];
 
 function mascaraData(texto: string): string {
@@ -56,6 +54,8 @@ function isoParaData(iso: string): string {
 }
 
 export function PetForm({ petInicial, editando, salvando, onSalvar, onCancelar, onEspecieChange }: Props) {
+  const { theme } = useTheme();
+  const estilos = useMemo(() => createStyles(theme), [theme]);
   const [nome, setNome] = useState('');
   const [especie, setEspecie] = useState<Especie | null>(null);
   const [sexo, setSexo] = useState<Sexo>('macho');
@@ -130,7 +130,7 @@ export function PetForm({ petInicial, editando, salvando, onSalvar, onCancelar, 
       <Pressable key={item.valor} onPress={() => selecionarEspecie(item.valor)}
         style={[estilos.chipEspecie, selecionado && estilos.chipEspecieAtivo]}
         accessibilityRole="radio" accessibilityState={{ selected: selecionado }} accessibilityLabel={item.label}>
-        <MaterialCommunityIcons name={item.icon as never} size={24} color={selecionado ? '#fff' : C.mintDeep} />
+        <MaterialCommunityIcons name={item.icon as never} size={24} color={selecionado ? theme.colors.onPrimary : theme.colors.primary} />
         <Text style={[estilos.textoChip, selecionado && estilos.textoChipAtivo]} numberOfLines={1}>{item.label}</Text>
       </Pressable>
     );
@@ -140,9 +140,9 @@ export function PetForm({ petInicial, editando, salvando, onSalvar, onCancelar, 
     <View style={estilos.sheet}>
       <Text style={estilos.rotulo}>Nome</Text>
       <View style={[estilos.inputWrap, erros.nome && estilos.inputWrapErro]}>
-        <Ionicons name="create-outline" size={18} color={C.muted} style={estilos.icone} />
+        <Ionicons name="create-outline" size={18} color={theme.colors.textSecondary} style={estilos.icone} />
         <TextInput style={estilos.campo} value={nome} onChangeText={texto => { setNome(texto); if (erros.nome) setErros(atual => ({ ...atual, nome: '' })); }}
-          placeholder="Como você chama seu pet" placeholderTextColor={C.muted} autoCapitalize="words" returnKeyType="next" />
+          placeholder="Como você chama seu pet" placeholderTextColor={theme.colors.placeholder} autoCapitalize="words" returnKeyType="next" />
       </View>
       {!!erros.nome && <Text style={estilos.erro}>{erros.nome}</Text>}
 
@@ -151,7 +151,7 @@ export function PetForm({ petInicial, editando, salvando, onSalvar, onCancelar, 
       <Pressable onPress={alternarMaisEspecies} style={estilos.botaoMaisEspecies} accessibilityRole="button"
         accessibilityLabel={mostrarMaisEspecies ? 'Ver menos espécies' : 'Ver mais espécies'}>
         <Text style={estilos.textoMaisEspecies}>{mostrarMaisEspecies ? 'Ver menos espécies' : 'Ver mais espécies'}</Text>
-        <Ionicons name={mostrarMaisEspecies ? 'chevron-up' : 'chevron-down'} size={16} color={C.mintDeep} />
+        <Ionicons name={mostrarMaisEspecies ? 'chevron-up' : 'chevron-down'} size={16} color={theme.colors.primary} />
       </Pressable>
       {mostrarMaisEspecies && especiesPorGrupo.map(({ grupo, itens }) => (
         <View key={grupo} style={estilos.grupo}><Text style={estilos.tituloGrupo}>{grupo}</Text><View style={estilos.gradeEspecies}>{itens.map(renderEspecie)}</View></View>
@@ -168,38 +168,40 @@ export function PetForm({ petInicial, editando, salvando, onSalvar, onCancelar, 
         const selecionado = sexo === opcao.valor;
         return <Pressable key={opcao.valor} onPress={() => setSexo(opcao.valor)} style={[estilos.botaoSexo, selecionado && estilos.botaoSexoAtivo]}
           accessibilityRole="radio" accessibilityState={{ selected: selecionado }}>
-          <MaterialCommunityIcons name={opcao.icon} size={20} color={selecionado ? '#fff' : C.mintDeep} />
+          <MaterialCommunityIcons name={opcao.icon} size={20} color={selecionado ? theme.colors.onPrimary : theme.colors.primary} />
           <Text style={[estilos.textoChip, selecionado && estilos.textoChipAtivo]}>{opcao.label}</Text>
         </Pressable>;
       })}</View>
 
       <View style={estilos.linhaDupla}>
         <View style={estilos.coluna}><Text style={estilos.rotulo}>Nascimento</Text><View style={[estilos.inputWrap, erros.dataNascimento && estilos.inputWrapErro]}>
-          <Ionicons name="calendar-outline" size={17} color={C.muted} style={estilos.iconePequeno} />
-          <TextInput style={estilos.campo} value={dataNascimento} onChangeText={texto => { setDataNascimento(mascaraData(texto)); if (erros.dataNascimento) setErros(atual => ({ ...atual, dataNascimento: '' })); }} placeholder="DD/MM/AAAA" placeholderTextColor={C.muted} keyboardType="number-pad" maxLength={10} />
+          <Ionicons name="calendar-outline" size={17} color={theme.colors.textSecondary} style={estilos.iconePequeno} />
+          <TextInput style={estilos.campo} value={dataNascimento} onChangeText={texto => { setDataNascimento(mascaraData(texto)); if (erros.dataNascimento) setErros(atual => ({ ...atual, dataNascimento: '' })); }} placeholder="DD/MM/AAAA" placeholderTextColor={theme.colors.placeholder} keyboardType="number-pad" maxLength={10} />
         </View></View>
         <View style={estilos.coluna}><Text style={estilos.rotulo}>Peso (kg)</Text><View style={[estilos.inputWrap, erros.peso && estilos.inputWrapErro]}>
-          <MaterialCommunityIcons name="weight-kilogram" size={17} color={C.muted} style={estilos.iconePequeno} />
-          <TextInput style={estilos.campo} value={peso} onChangeText={texto => { setPeso(texto); if (erros.peso) setErros(atual => ({ ...atual, peso: '' })); }} placeholder="Opcional" placeholderTextColor={C.muted} keyboardType="decimal-pad" />
+          <MaterialCommunityIcons name="weight-kilogram" size={17} color={theme.colors.textSecondary} style={estilos.iconePequeno} />
+          <TextInput style={estilos.campo} value={peso} onChangeText={texto => { setPeso(texto); if (erros.peso) setErros(atual => ({ ...atual, peso: '' })); }} placeholder="Opcional" placeholderTextColor={theme.colors.placeholder} keyboardType="decimal-pad" />
         </View></View>
       </View>
       {!!erros.dataNascimento && <Text style={estilos.erro}>{erros.dataNascimento}</Text>}
       {!!erros.peso && <Text style={estilos.erro}>{erros.peso}</Text>}
 
       <Pressable style={({ pressed }) => [estilos.botaoSalvar, pressed && estilos.botaoSalvarPressionado, salvando && estilos.botaoSalvando]} onPress={aoSalvar} disabled={salvando} accessibilityRole="button">
-        {salvando ? <ActivityIndicator color="#fff" /> : <><Text style={estilos.textoSalvar}>{editando ? 'Salvar alterações' : 'Cadastrar pet'}</Text><Ionicons name="arrow-forward" size={18} color="#fff" /></>}
+        {salvando ? <ActivityIndicator color={theme.colors.onPrimary} /> : <><Text style={estilos.textoSalvar}>{editando ? 'Salvar alterações' : 'Cadastrar pet'}</Text><Ionicons name="arrow-forward" size={18} color={theme.colors.onPrimary} /></>}
       </Pressable>
       <Pressable style={estilos.botaoCancelar} onPress={onCancelar}><Text style={estilos.textoCancelar}>Cancelar</Text></Pressable>
     </View>
   );
 }
 
-const estilos = StyleSheet.create({
-  sheet: { flexGrow: 1, backgroundColor: '#faf8f3', borderTopLeftRadius: 32, borderTopRightRadius: 32, marginTop: -24, paddingTop: 32, paddingHorizontal: 26, paddingBottom: 40 },
-  rotulo: { fontSize: 13, fontWeight: '600', color: C.ink, marginBottom: 8 }, rotuloEspacado: { marginTop: 22 }, erro: { fontSize: 12, color: C.danger, marginTop: 6, fontWeight: '600' },
-  inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.fill, borderWidth: 1.5, borderColor: 'transparent', borderRadius: 14, paddingHorizontal: 15 }, inputWrapErro: { borderColor: C.danger }, icone: { marginRight: 10 }, iconePequeno: { marginRight: 8 }, campo: { flex: 1, paddingVertical: 13, fontSize: 15, color: C.ink },
-  botaoMaisEspecies: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', marginTop: 12, paddingVertical: 4 }, textoMaisEspecies: { fontSize: 13, fontWeight: '700', color: C.mintDeep }, grupo: { marginTop: 18, marginBottom: 2 }, tituloGrupo: { fontSize: 12, fontWeight: '700', color: C.muted, marginBottom: 8 }, gradeEspecies: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chipEspecie: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 13, paddingVertical: 11, borderRadius: 13, backgroundColor: C.fill }, chipEspecieAtivo: { backgroundColor: C.mint, shadowColor: C.mint, shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 }, textoChip: { fontSize: 13, fontWeight: '600', color: C.ink }, textoChipAtivo: { color: '#fff' },
-  linhaSexo: { flexDirection: 'row', gap: 8 }, botaoSexo: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 13, borderRadius: 13, backgroundColor: C.fill }, botaoSexoAtivo: { backgroundColor: C.mint }, linhaDupla: { flexDirection: 'row', gap: 12, marginTop: 22 }, coluna: { flex: 1 },
-  botaoSalvar: { flexDirection: 'row', gap: 8, marginTop: 30, backgroundColor: C.mint, borderRadius: 999, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', shadowColor: C.mint, shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 6 }, botaoSalvarPressionado: { backgroundColor: C.mintDeep }, botaoSalvando: { opacity: 0.7 }, textoSalvar: { color: '#fff', fontSize: 15, fontWeight: '700' }, botaoCancelar: { marginTop: 14, paddingVertical: 10, alignItems: 'center' }, textoCancelar: { color: C.muted, fontSize: 13, fontWeight: '600' },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    sheet: { flexGrow: 1, backgroundColor: theme.colors.background, borderTopLeftRadius: 32, borderTopRightRadius: 32, marginTop: -24, paddingTop: 32, paddingHorizontal: 26, paddingBottom: 40 },
+    rotulo: { fontSize: 13, fontWeight: '600', color: theme.colors.text, marginBottom: 8 }, rotuloEspacado: { marginTop: 22 }, erro: { fontSize: 12, color: theme.colors.danger, marginTop: 6, fontWeight: '600' },
+    inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.input, borderWidth: 1.5, borderColor: theme.colors.border, borderRadius: 14, paddingHorizontal: 15 }, inputWrapErro: { borderColor: theme.colors.danger }, icone: { marginRight: 10 }, iconePequeno: { marginRight: 8 }, campo: { flex: 1, paddingVertical: 13, fontSize: 15, color: theme.colors.text },
+    botaoMaisEspecies: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', marginTop: 12, paddingVertical: 4 }, textoMaisEspecies: { fontSize: 13, fontWeight: '700', color: theme.colors.primary }, grupo: { marginTop: 18, marginBottom: 2 }, tituloGrupo: { fontSize: 12, fontWeight: '700', color: theme.colors.textSecondary, marginBottom: 8 }, gradeEspecies: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    chipEspecie: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 13, paddingVertical: 11, borderRadius: 13, backgroundColor: theme.colors.input }, chipEspecieAtivo: { backgroundColor: theme.colors.primary, shadowColor: theme.colors.primary, shadowOpacity: theme.mode === 'dark' ? 0 : 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 }, textoChip: { fontSize: 13, fontWeight: '600', color: theme.colors.text }, textoChipAtivo: { color: theme.colors.onPrimary },
+    linhaSexo: { flexDirection: 'row', gap: 8 }, botaoSexo: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 13, borderRadius: 13, backgroundColor: theme.colors.input }, botaoSexoAtivo: { backgroundColor: theme.colors.primary }, linhaDupla: { flexDirection: 'row', gap: 12, marginTop: 22 }, coluna: { flex: 1 },
+    botaoSalvar: { flexDirection: 'row', gap: 8, marginTop: 30, backgroundColor: theme.colors.primary, borderRadius: 999, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', shadowColor: theme.colors.primary, shadowOpacity: theme.mode === 'dark' ? 0 : 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 6 }, botaoSalvarPressionado: { opacity: 0.86 }, botaoSalvando: { opacity: 0.7 }, textoSalvar: { color: theme.colors.onPrimary, fontSize: 15, fontWeight: '700' }, botaoCancelar: { marginTop: 14, paddingVertical: 10, alignItems: 'center' }, textoCancelar: { color: theme.colors.textSecondary, fontSize: 13, fontWeight: '600' },
+  });
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
-import { CORES } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 
 /** Anima uma opacidade pulsando entre 0.35 e 0.85, em loop — o "pulso" clássico de skeleton. */
 function usePulso() {
@@ -30,10 +30,11 @@ interface SkeletonBlockProps {
 /** Bloco básico de skeleton — um retângulo cinza pulsando. Use pra montar qualquer formato. */
 export function SkeletonBlock({ width = '100%', height = 16, borderRadius = 8, style }: SkeletonBlockProps) {
   const opacidade = usePulso();
+  const { theme } = useTheme();
   return (
     <Animated.View
       style={[
-        { width, height, borderRadius, backgroundColor: CORES.fundoSutil, opacity: opacidade },
+        { width, height, borderRadius, backgroundColor: theme.colors.surfaceSubtle, opacity: opacidade },
         style,
       ]}
     />

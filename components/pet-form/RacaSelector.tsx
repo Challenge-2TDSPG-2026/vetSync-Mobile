@@ -4,6 +4,8 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useRacas } from '../../hooks/useRacas';
 import type { Pet } from '../../types';
+import { useTheme } from '../../context/ThemeContext';
+import type { AppTheme } from '../../constants/theme';
 
 type Props = {
   especie: Pet['especie'] | null;
@@ -11,16 +13,11 @@ type Props = {
   onChange: (raca: string) => void;
 };
 
-const C = {
-  fill: '#f1ece1',
-  ink: '#1a1512',
-  muted: '#7a6a5e',
-  border: '#e8e2da',
-};
-
 /** Campo de raça com sugestões reais da API para a espécie escolhida. */
 export function RacaSelector({ especie, raca, onChange }: Props) {
   const [focada, setFocada] = useState(false);
+  const { theme } = useTheme();
+  const estilos = useMemo(() => createStyles(theme), [theme]);
   const { data: racasSugeridas = [], isFetching, error } = useRacas(especie, raca);
 
   useEffect(() => {
@@ -36,7 +33,7 @@ export function RacaSelector({ especie, raca, onChange }: Props) {
   return (
     <>
       <View style={[estilos.inputWrap, !especie && estilos.inputWrapDesativado]}>
-        <Ionicons name="search-outline" size={18} color={C.muted} style={estilos.icone} />
+        <Ionicons name="search-outline" size={18} color={theme.colors.textSecondary} style={estilos.icone} />
         <TextInput
           style={estilos.campo}
           value={raca}
@@ -45,7 +42,7 @@ export function RacaSelector({ especie, raca, onChange }: Props) {
           onBlur={() => setTimeout(() => setFocada(false), 150)}
           editable={!!especie}
           placeholder={especie ? 'Comece a digitar e escolha uma sugestão' : 'Escolha a espécie primeiro'}
-          placeholderTextColor={C.muted}
+          placeholderTextColor={theme.colors.placeholder}
           autoCapitalize="words"
           autoCorrect={false}
         />
@@ -65,7 +62,7 @@ export function RacaSelector({ especie, raca, onChange }: Props) {
                 setFocada(false);
               }}
             >
-              <Ionicons name="paw-outline" size={15} color={C.muted} />
+              <Ionicons name="paw-outline" size={15} color={theme.colors.textSecondary} />
               <Text style={estilos.textoSugestao}>{sugestao}</Text>
             </Pressable>
           ))}
@@ -75,24 +72,26 @@ export function RacaSelector({ especie, raca, onChange }: Props) {
   );
 }
 
-const estilos = StyleSheet.create({
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
   inputWrap: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: C.fill,
-    borderWidth: 1.5, borderColor: 'transparent', borderRadius: 14, paddingHorizontal: 15,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.input,
+    borderWidth: 1.5, borderColor: theme.colors.border, borderRadius: 14, paddingHorizontal: 15,
   },
   inputWrapDesativado: { opacity: 0.6 },
   icone: { marginRight: 10 },
-  campo: { flex: 1, paddingVertical: 13, fontSize: 15, color: C.ink },
-  ajuda: { fontSize: 13, color: C.muted, marginTop: 6 },
-  erro: { fontSize: 12, color: '#dc3545', marginTop: 6, fontWeight: '600' },
+  campo: { flex: 1, paddingVertical: 13, fontSize: 15, color: theme.colors.text },
+  ajuda: { fontSize: 13, color: theme.colors.textSecondary, marginTop: 6 },
+  erro: { fontSize: 12, color: theme.colors.danger, marginTop: 6, fontWeight: '600' },
   listaSugestoes: {
-    marginTop: 8, borderRadius: 14, backgroundColor: '#fff', overflow: 'hidden',
-    shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10,
+    marginTop: 8, borderRadius: 14, backgroundColor: theme.colors.surfaceElevated, borderWidth: 1, borderColor: theme.colors.border, overflow: 'hidden',
+    shadowColor: '#000', shadowOpacity: theme.mode === 'dark' ? 0 : 0.08, shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   sugestao: {
     flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 15,
-    paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border,
+    paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border,
   },
-  textoSugestao: { fontSize: 14, color: C.ink },
-});
+  textoSugestao: { fontSize: 14, color: theme.colors.text },
+  });
+}

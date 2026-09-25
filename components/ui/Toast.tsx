@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppIcon } from '../AppIcon';
-import { CORES } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
+import type { AppTheme } from '../../constants/theme';
 
-type TipoToast = 'sucesso' | 'erro' | 'info';
+type TipoToast = 'sucesso' | 'erro' | 'aviso' | 'info';
 
 interface ToastData {
   id: number;
@@ -12,12 +13,6 @@ interface ToastData {
   titulo: string;
   mensagem?: string;
 }
-
-const ESTILO_POR_TIPO: Record<TipoToast, { fundo: string; borda: string; cor: string; icone: string }> = {
-  sucesso: { fundo: CORES.successBg, borda: CORES.success, cor: CORES.success, icone: 'checkmark-circle' },
-  erro: { fundo: CORES.alertaBg, borda: CORES.alerta, cor: CORES.alerta, icone: 'alert-circle' },
-  info: { fundo: CORES.infoBg, borda: CORES.info, cor: CORES.info, icone: 'information-circle' },
-};
 
 let idAtual = 0;
 let ouvinte: ((toast: ToastData) => void) | null = null;
@@ -36,6 +31,8 @@ export function mostrarToast(tipo: TipoToast, titulo: string, mensagem?: string)
 /** Monte uma única vez, na raiz do app (app/_layout.tsx), pra renderizar os toasts disparados por mostrarToast(). */
 export function ToastHost() {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const [toast, setToast] = useState<ToastData | null>(null);
   const opacidade = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-16)).current;
@@ -73,7 +70,7 @@ export function ToastHost() {
 
   if (!toast) return null;
 
-  const estilo = ESTILO_POR_TIPO[toast.tipo];
+  const estilo = estiloPorTipo(theme)[toast.tipo];
 
   return (
     <Animated.View
@@ -98,7 +95,17 @@ export function ToastHost() {
   );
 }
 
-const s = StyleSheet.create({
+function estiloPorTipo(theme: AppTheme): Record<TipoToast, { fundo: string; borda: string; cor: string; icone: string }> {
+  return {
+    sucesso: { fundo: theme.colors.successBackground, borda: theme.colors.success, cor: theme.colors.success, icone: 'checkmark-circle' },
+    erro: { fundo: theme.colors.dangerBackground, borda: theme.colors.danger, cor: theme.colors.danger, icone: 'alert-circle' },
+    aviso: { fundo: theme.colors.warningBackground, borda: theme.colors.warning, cor: theme.colors.warning, icone: 'warning' },
+    info: { fundo: theme.colors.infoBackground, borda: theme.colors.info, cor: theme.colors.info, icone: 'information-circle' },
+  };
+}
+
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
   container: {
     position: 'absolute',
     left: 16,
@@ -111,12 +118,13 @@ const s = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     shadowColor: '#000',
-    shadowOpacity: 0.12,
+    shadowOpacity: theme.mode === 'dark' ? 0 : 0.12,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
   },
   textos: { flex: 1 },
   titulo: { fontSize: 14, fontWeight: '700' },
-  mensagem: { fontSize: 13, color: CORES.textoSecundario, marginTop: 2 },
-});
+  mensagem: { fontSize: 13, color: theme.colors.textSecondary, marginTop: 2 },
+  });
+}
