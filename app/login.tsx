@@ -90,7 +90,14 @@ export default function LoginScreen() {
                 end={{ x: 0.8, y: 1 }}
                 style={s.seloDisco}
               >
-                <Image source={require('../assets/logo.png')} style={s.seloImg} resizeMode="contain" />
+                <Image
+                  source={require('../assets/logo.png')}
+                  style={s.seloImg}
+                  resizeMode="contain"
+                  accessible={false}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no"
+                />
               </LinearGradient>
             </View>
             <Text style={s.marcaTexto}>VetSync</Text>
@@ -135,13 +142,21 @@ export default function LoginScreen() {
             style={({ pressed }) => [s.btnAuth, pressed && s.btnAuthPressed, autenticando && { opacity: 0.65 }]}
             onPress={handleEntrar}
             disabled={autenticando}
+            accessibilityRole="button"
+            accessibilityLabel={autenticando ? 'Entrando' : 'Entrar'}
+            accessibilityState={{ disabled: autenticando, busy: autenticando }}
           >
             <Text style={s.btnAuthText}>{autenticando ? 'Entrando...' : 'Entrar'}</Text>
             {!autenticando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.colors.onPrimary} />}
           </Pressable>
 
           <Link href="/cadastro" asChild>
-            <Pressable style={s.linkSecundario} disabled={autenticando}>
+            <Pressable
+              style={s.linkSecundario}
+              disabled={autenticando}
+              accessibilityRole="link"
+              accessibilityLabel="Não tem conta? Cadastre-se"
+            >
               <Text style={s.linkSecundarioTexto}>
                 Não tem conta? <Text style={s.linkSecundarioDestaque}>Cadastre-se</Text>
               </Text>
