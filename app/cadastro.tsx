@@ -92,6 +92,9 @@ export default function CadastroScreen() {
       // Usuário autenticado como TUTOR com 0 pets. Redireciona para cadastrar o primeiro pet.
       router.replace('/add-pet');
     } catch (e) {
+      if (e instanceof ApiError && e.campos) {
+        setErros(prev => ({ ...prev, ...e.campos }));
+      }
       mostrarToast('erro', 'Não foi possível realizar o cadastro', mensagemDeErro(e, 'Verifique os dados e tente novamente.'));
     } finally {
       setCadastrando(false);
