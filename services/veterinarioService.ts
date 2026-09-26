@@ -7,6 +7,7 @@ interface VeterinarioResponseApi {
   nrCrmv: string;
   idClinica: number | null;
   nmClinica: string | null;
+  dsEspecialidade: string | null;
 }
 
 interface DisponibilidadeResponseApi {
@@ -30,6 +31,7 @@ function paraVeterinarioApp(dto: VeterinarioResponseApi): Veterinario {
     crmv: dto.nrCrmv,
     idClinica: dto.idClinica != null ? String(dto.idClinica) : null,
     nomeClinica: dto.nmClinica,
+    especialidade: dto.dsEspecialidade ?? null,
   };
 }
 
@@ -52,8 +54,11 @@ function paraBloqueioApp(dto: BloqueioResponseApi): BloqueioAgenda {
 }
 
 export const veterinarioService = {
-  async listarVeterinarios(): Promise<Veterinario[]> {
-    const dtos = await api.get<VeterinarioResponseApi[]>('/veterinarios');
+  async listarVeterinarios(especialidade?: string | null): Promise<Veterinario[]> {
+    const params = new URLSearchParams();
+    if (especialidade) params.set('especialidade', especialidade);
+    const query = params.toString();
+    const dtos = await api.get<VeterinarioResponseApi[]>(`/veterinarios${query ? `?${query}` : ''}`);
     return dtos.map(paraVeterinarioApp);
   },
 
