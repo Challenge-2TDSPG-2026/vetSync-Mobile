@@ -49,7 +49,7 @@ export default function CadastroScreen() {
     if (!nome.trim() || nome.trim().length < 2) {
       e.nome = 'Informe seu nome completo';
     }
-    if (!email.trim() || !email.includes('@')) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       e.email = 'E-mail inválido';
     }
     const cpfLimpo = cpf.replace(/\D/g, '');
@@ -60,8 +60,10 @@ export default function CadastroScreen() {
     if (telLimpo && telLimpo.length < 10) {
       e.telefone = 'Telefone deve ter 10 ou 11 dígitos';
     }
-    if (!senha.trim() || senha.length < 6) {
-      e.senha = 'A senha deve ter no mínimo 6 caracteres';
+    if (!senha.trim() || senha.length < 8) {
+      e.senha = 'A senha deve ter no mínimo 8 caracteres';
+    } else if (!/[A-Za-z]/.test(senha) || !/\d/.test(senha)) {
+      e.senha = 'Use pelo menos uma letra e um número';
     }
     if (senha !== confirmarSenha) {
       e.confirmarSenha = 'As senhas não coincidem';
@@ -149,7 +151,7 @@ export default function CadastroScreen() {
             icon="lock-closed-outline"
             value={senha}
             onChangeText={setSenha}
-            placeholder="Mínimo de 6 caracteres"
+            placeholder="Mínimo de 8 caracteres, com letra e número"
             isPassword
             showPassword={mostrarSenha}
             onTogglePassword={() => setMostrarSenha(v => !v)}
