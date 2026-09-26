@@ -9,7 +9,7 @@ import { usePet } from '../context/PetContext';
 import { useTiposEvento, useVeterinarios, useAgendarEvento } from '../hooks/useEventos';
 import { obterVisualTipoEvento } from '../constants';
 import { AppIcon } from '../components/AppIcon';
-import { ApiError } from '../services/api/httpClient';
+import { mensagemDeErro } from '../services/api/errorMessages';
 import { mostrarToast } from '../components/ui/Toast';
 import { DicaTela } from '../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../hooks/useDicaPrimeiraVisita';
@@ -43,10 +43,6 @@ function formatarHora(text: string): string {
 function paraIsoData(s: string): string {
   const [dd, mm, aaaa] = s.split('/');
   return `${aaaa}-${mm}-${dd}`;
-}
-
-function mensagemDeErro(e: unknown, fallback: string): string {
-  return e instanceof ApiError ? e.message : fallback;
 }
 
 export default function AddEventoScreen() {
@@ -105,6 +101,11 @@ export default function AddEventoScreen() {
         }
       }
 
+      mostrarToast(
+        'sucesso',
+        'Evento agendado',
+        `${tipoSelecionado.nome} com ${vetSelecionado.nome} em ${data} às ${hora}.`
+      );
       router.replace('/(tutor)');
     } catch (e) {
       mostrarToast('erro', 'Não foi possível agendar o evento', mensagemDeErro(e, 'Tente novamente em instantes.'));
