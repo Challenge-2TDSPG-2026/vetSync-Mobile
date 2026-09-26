@@ -170,6 +170,9 @@ export default function PerfilScreen() {
                     accessibilityLabel={pet.fotoUrl ? `Alterar foto de ${pet.nome}` : `Adicionar foto de ${pet.nome}`}
                   >
                     <PetFoto pet={pet} size={modoSimples ? 58 : 42} color={theme.colors.primary} backgroundColor={theme.colors.surfaceSubtle} accessibilityLabel={`Foto de ${pet.nome}`} />
+                    <View style={[s.addFotoBadge, modoSimples && sSimples.addFotoBadge, { backgroundColor: theme.colors.primary, borderColor: theme.colors.surface }]}>
+                      <Ionicons name="camera" size={modoSimples ? 15 : 12} color={theme.colors.onPrimary} />
+                    </View>
                   </Pressable>
                   <View style={s.petCopy}>
                     <Text style={[s.petName, modoSimples && sSimples.petName]}>{pet.nome}</Text>
@@ -285,7 +288,8 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
 
   petRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 13 },
   petIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle },
-  petFoto: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
+  petFoto: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  addFotoBadge: { position: 'absolute', bottom: -2, right: -2, width: 20, height: 20, borderRadius: 10, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   petCopy: { flex: 1, minWidth: 0 },
   petName: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
   petDetail: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3 },
@@ -319,6 +323,7 @@ const sSimples = StyleSheet.create({
   petRow: { paddingVertical: 19, gap: 16 },
   petIcon: { width: 58, height: 58, borderRadius: 18 },
   petFoto: { width: 58, height: 58 },
+  addFotoBadge: { width: 26, height: 26, borderRadius: 13 },
   petName: { fontSize: 22 },
   petDetail: { fontSize: 17 },
   addPet: { paddingVertical: 21 },

@@ -10,6 +10,7 @@ import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
+import { PetFoto } from '../../components/pet-foto/PetFoto';
 import { PetSwitcher } from '../../components/PetSwitcher';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
@@ -115,11 +116,12 @@ export default function DashboardScreen() {
             <View style={s.heroSealGlowOuter} />
             <View style={s.heroSealGlowInner} />
             <View style={s.heroSeal}>
-              <AppIcon
-                name={especieInfo?.icon ?? 'paw'}
-                set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
-                size={modoSimples ? 34 : 27}
+              <PetFoto
+                pet={petAtivo}
+                size={modoSimples ? 48 : 48}
                 color={theme.colors.onNavigation}
+                backgroundColor="transparent"
+                accessibilityLabel={`Foto de ${petAtivo.nome}`}
               />
             </View>
           </View>
@@ -174,11 +176,12 @@ export default function DashboardScreen() {
           />
           <View style={s.petTop}>
             <View style={[s.petAvatar, modoSimples && sSimples.petAvatar]}>
-              <AppIcon
-                name={especieInfo?.icon ?? 'paw'}
-                set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
-                size={modoSimples ? 34 : 26}
+              <PetFoto
+                pet={petAtivo}
+                size={modoSimples ? 76 : 58}
                 color={theme.colors.primary}
+                backgroundColor="transparent"
+                accessibilityLabel={`Foto de ${petAtivo.nome}`}
               />
             </View>
             <View style={s.petInfo}>
