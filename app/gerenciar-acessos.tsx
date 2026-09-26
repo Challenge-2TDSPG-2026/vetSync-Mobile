@@ -13,8 +13,8 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePet } from '../context/PetContext';
 import { useAccessibility } from '../context/AccessibilityContext';
-import { ApiError } from '../services/api/httpClient';
 import { type PermissaoPet, type RelacaoPet } from '../services/petAcessoService';
+import { mensagemDeErro } from '../services/api/errorMessages';
 import { useAcessosPet, useCriarConvitePet, useRevogarAcessoPet } from '../hooks/usePetAcessos';
 import { confirmar } from '../utils/alert';
 import { mostrarToast } from '../components/ui/Toast';
@@ -23,10 +23,6 @@ const C = {
   green: '#1a7a52', greenDark: '#0a2218', mint: '#d4f2e4', mintSoft: '#edf9f3',
   cream: '#fafaf8', white: '#fff', text: '#1a1512', muted: '#685f58', border: '#dfd9d1', danger: '#bd313f',
 };
-
-function mensagemErro(erro: unknown): string {
-  return erro instanceof ApiError ? erro.message : 'Não foi possível concluir esta ação. Tente novamente.';
-}
 
 export default function GerenciarAcessosScreen() {
   const router = useRouter();
@@ -59,7 +55,7 @@ export default function GerenciarAcessosScreen() {
       setEmail('');
       mostrarToast('sucesso', 'Convite enviado', `O convite para ${convite.email} expira em ${formatarData(convite.expiraEm)}.`);
     } catch (erro) {
-      mostrarToast('erro', 'Não foi possível enviar o convite', mensagemErro(erro));
+      mostrarToast('erro', 'Não foi possível enviar o convite', mensagemDeErro(erro, 'Não foi possível concluir esta ação. Tente novamente.'));
     }
   }
 
@@ -75,7 +71,7 @@ export default function GerenciarAcessosScreen() {
               await revogarAcesso.mutateAsync(idAcesso);
               mostrarToast('sucesso', 'Acesso revogado');
             } catch (erro) {
-              mostrarToast('erro', 'Não foi possível revogar o acesso', mensagemErro(erro));
+              mostrarToast('erro', 'Não foi possível revogar o acesso', mensagemDeErro(erro, 'Não foi possível concluir esta ação. Tente novamente.'));
             }
           },
         },
@@ -133,7 +129,7 @@ export default function GerenciarAcessosScreen() {
         <Text style={[s.sectionTitle, modoSimples && s.sectionTitleSimple]}>Pessoas com acesso</Text>
         <View style={s.card}>
           {acessos.isLoading ? <ActivityIndicator color={C.green} style={s.loader} /> : null}
-          {acessos.isError ? <Text style={s.errorText}>{mensagemErro(acessos.error)}</Text> : null}
+          {acessos.isError ? <Text style={s.errorText}>{mensagemDeErro(acessos.error, 'Não foi possível carregar as pessoas com acesso.')}</Text> : null}
           {!acessos.isLoading && !acessos.isError && (acessos.data?.length ?? 0) === 0 ? <Text style={[s.emptyText, modoSimples && s.cardIntroSimple]}>Ainda não há ninguém com acesso ativo a este pet.</Text> : null}
           {acessos.data?.map((acesso, index) => (
             <View key={acesso.idAcesso}>
