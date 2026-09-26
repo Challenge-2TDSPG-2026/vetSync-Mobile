@@ -32,6 +32,7 @@ export interface Veterinario {
   crmv: string;
   idClinica: string | null;
   nomeClinica: string | null;
+  especialidade: string | null;
 }
 
 export interface Evento {
