@@ -9,7 +9,6 @@ import { VetProvider } from '../context/VetContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ToastHost } from '../components/ui/Toast';
-import { OfflineBanner } from '../components/ui/OfflineBanner';
 import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
 import { configurarNotificacoesPush } from '../services/pushNotificationService';
@@ -132,7 +131,6 @@ function RootNavigator() {
           }}
         />
       </Stack>
-      <OfflineBanner />
     </>
   );
 }
