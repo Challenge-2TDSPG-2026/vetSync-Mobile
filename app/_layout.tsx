@@ -39,13 +39,14 @@ function RootNavigator() {
 
     const inLogin = segments.includes('login') || pathname === '/login' || pathname.startsWith('/login');
     const inCadastro = segments.includes('cadastro') || pathname === '/cadastro' || pathname.startsWith('/cadastro');
+    const inEsqueciSenha = segments.includes('esqueci-senha') || pathname === '/esqueci-senha' || pathname.startsWith('/esqueci-senha');
     const inTutor = segments.includes('(tutor)') || pathname.startsWith('/(tutor)');
     const inVet = segments.includes('(vet)') || pathname.startsWith('/(vet)');
     const inAddPet = segments.includes('add-pet') || pathname === '/add-pet';
     const inRotaLivre = ROTAS_FORA_DO_GRUPO.some(r => segments.includes(r) || pathname.includes(r));
 
     if (!autenticado) {
-      if (!inLogin && !inCadastro) router.replace('/login');
+      if (!inLogin && !inCadastro && !inEsqueciSenha) router.replace('/login');
       return;
     }
 
