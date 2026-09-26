@@ -2,8 +2,11 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import type * as NotificationsModule from 'expo-notifications';
 import { api } from './api/httpClient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from '../constants';
 
 let notifications: typeof NotificationsModule | null | undefined;
+let registroTokenEmAndamento: Promise<void> | null = null;
 
 function obterNotificacoes(): typeof NotificationsModule | null {
   if (notifications !== undefined) return notifications;
@@ -34,6 +37,23 @@ export async function registrarTokenPush(token: string): Promise<void> {
   await api.post('/notificacoes/registrar-token', { token });
 }
 
+async function registrarTokenPushUmaVez(token: string): Promise<void> {
+  if (registroTokenEmAndamento) return registroTokenEmAndamento;
+
+  registroTokenEmAndamento = (async () => {
+    const tokenAnterior = await AsyncStorage.getItem(STORAGE_KEYS.PUSH_TOKEN);
+    if (tokenAnterior === token) return;
+    await registrarTokenPush(token);
+    await AsyncStorage.setItem(STORAGE_KEYS.PUSH_TOKEN, token);
+  })();
+
+  try {
+    await registroTokenEmAndamento;
+  } finally {
+    registroTokenEmAndamento = null;
+  }
+}
+
 /**
  * Solicita a permissão e registra o token no backend para o usuário autenticado.
  * Retorna false em plataformas que não suportam push remoto ou quando a permissão
@@ -61,7 +81,10 @@ export async function configurarNotificacoesPush(): Promise<boolean> {
   }
 
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+  if (!projectId) {
+    throw new Error('O projectId do Expo não está configurado para notificações push.');
+  }
   const resposta = await notificacoes.getExpoPushTokenAsync({ projectId });
-  await registrarTokenPush(resposta.data);
+  await registrarTokenPushUmaVez(resposta.data);
   return true;
 }
