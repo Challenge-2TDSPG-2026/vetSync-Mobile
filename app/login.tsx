@@ -7,15 +7,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
+import { mensagemDeErro } from '../services/api/errorMessages';
 import { mostrarToast } from '../components/ui/Toast';
 import { AppIcon } from '../components/AppIcon';
 import { AuthField } from '../components/ui/AuthField';
 import { useTheme } from '../context/ThemeContext';
 import type { AppTheme } from '../constants/theme';
-
-function mensagemDeErro(e: unknown, fallback: string): string {
-  return e instanceof ApiError ? e.message : fallback;
-}
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -42,6 +39,7 @@ export default function LoginScreen() {
     setAutenticando(true);
     try {
       await login(email, senha);
+      mostrarToast('sucesso', 'Login realizado');
       // Navegação (para (tutor) ou (vet), conforme sessao.perfil) é reativa,
       // controlada pelo RootNavigator em app/_layout.tsx.
     } catch (e) {
