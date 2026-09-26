@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View, Text, TextInput, ScrollView, Pressable,
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { usePet } from '../context/PetContext';
 import { useTiposEvento, useVeterinarios, useAgendarEvento } from '../hooks/useEventos';
 import { obterVisualTipoEvento } from '../constants';
+import { ESPECIALIDADES_VET } from '../constants/vet';
 import { AppIcon } from '../components/AppIcon';
 import { mensagemDeErro } from '../services/api/errorMessages';
 import { mostrarToast } from '../components/ui/Toast';
@@ -50,7 +51,18 @@ export default function AddEventoScreen() {
   const { petAtivo } = usePet();
 
   const { data: tiposEvento = [], isLoading: carregandoTipos } = useTiposEvento(true);
-  const { data: veterinarios = [], isLoading: carregandoVets } = useVeterinarios(true);
+  const [especialidadeSelecionada, setEspecialidadeSelecionada] = useState<string | null>(null);
+  const { data: veterinarios = [], isLoading: carregandoVets } = useVeterinarios(true, especialidadeSelecionada);
+
+  // Filtro extra no cliente, garante o resultado correto mesmo se a API
+  // ainda não aplicar o filtro de especialidade no backend.
+  const veterinariosFiltrados = useMemo(
+    () => (especialidadeSelecionada
+      ? veterinarios.filter(v => v.especialidade === especialidadeSelecionada)
+      : veterinarios),
+    [veterinarios, especialidadeSelecionada]
+  );
+
   const agendarMutation = useAgendarEvento();
 
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoEvento | null>(null);
@@ -61,6 +73,17 @@ export default function AddEventoScreen() {
   const [lembretesSelecionados, setLembretesSelecionados] = useState<number[]>([7, 1]);
   const [erros, setErros] = useState<Record<string, string>>({});
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('add-evento');
+
+  function selecionarEspecialidade(esp: string) {
+    setEspecialidadeSelecionada(atual => {
+      const proxima = atual === esp ? null : esp;
+      // Se o veterinário já escolhido não atende a especialidade selecionada, limpa a seleção.
+      setVetSelecionado(vAtual => (
+        vAtual && proxima && vAtual.especialidade !== proxima ? null : vAtual
+      ));
+      return proxima;
+    });
+  }
 
   function alternarLembrete(diasAntes: number) {
     setLembretesSelecionados(atual => (
@@ -216,12 +239,42 @@ export default function AddEventoScreen() {
 
               <View style={s.secao}>
                 <View style={s.secaoHeadRow}>
+                  <AppIcon name="filter-outline" set="Ionicons" size={16} color={C.g700} />
+                  <Text style={s.secaoTitulo}>Especialidade</Text>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={{ flexDirection: 'row', gap: 8, paddingBottom: 6, paddingRight: 4 }}>
+                    {ESPECIALIDADES_VET.map(esp => {
+                      const ativo = especialidadeSelecionada === esp;
+                      return (
+                        <Pressable
+                          key={esp}
+                          style={[s.espBtn, ativo && { backgroundColor: C.g600 }]}
+                          onPress={() => selecionarEspecialidade(esp)}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: ativo }}
+                        >
+                          <Text style={[s.espBtnTexto, ativo && { color: C.white }]}>{esp}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+              </View>
+
+              <View style={s.secao}>
+                <View style={s.secaoHeadRow}>
                   <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={16} color={C.g700} />
                   <Text style={s.secaoTitulo}>Veterinário</Text>
                 </View>
+                {especialidadeSelecionada && veterinariosFiltrados.length === 0 ? (
+                  <Text style={s.vetVazio}>
+                    Nenhum veterinário com especialidade em {especialidadeSelecionada} no momento.
+                  </Text>
+                ) : (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={{ flexDirection: 'row', gap: 10, paddingBottom: 6, paddingRight: 4 }}>
-                    {veterinarios.map(v => {
+                    {veterinariosFiltrados.map(v => {
                       const ativo = vetSelecionado?.id === v.id;
                       return (
                         <Pressable
@@ -244,6 +297,7 @@ export default function AddEventoScreen() {
                     })}
                   </View>
                 </ScrollView>
+                )}
                 {erros.veterinario ? <Text style={s.textoErro}>{erros.veterinario}</Text> : null}
               </View>
             </>
@@ -474,6 +528,17 @@ const s = StyleSheet.create({
   },
   tipoLabel: { fontSize: 11, fontWeight: '700', color: C.text, textAlign: 'center' },
   tipoPontos: { fontSize: 9, fontWeight: '700', color: C.muted, marginTop: 3 },
+
+  espBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: C.w50,
+    borderWidth: 1,
+    borderColor: C.border,
+  },
+  espBtnTexto: { fontSize: 12, fontWeight: '700', color: C.text },
+  vetVazio: { color: C.muted, fontSize: 12, paddingVertical: 8 },
 
   vetBtn: {
     flexDirection: 'row',
