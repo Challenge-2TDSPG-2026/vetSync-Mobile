@@ -3,7 +3,8 @@ import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, StyleSheet, 
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import type { Pet } from '../../types';
-import { ApiError, type ArquivoUpload } from '../../services/api/httpClient';
+import { type ArquivoUpload } from '../../services/api/httpClient';
+import { mensagemDeErro } from '../../services/api/errorMessages';
 import { useEnviarFotoPet, useRemoverFotoPet } from '../../hooks/usePets';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -14,10 +15,7 @@ import { RecortadorFoto } from './RecortadorFoto';
 
 type Props = { pet: Pet | null; onFechar: () => void };
 
-function mensagemDeErro(erro: unknown, padrao: string): string {
-  if (erro instanceof ApiError && erro.status === 403) return 'Você não tem permissão para alterar a foto deste pet.';
-  return erro instanceof Error && erro.message ? erro.message : padrao;
-}
+const OVERRIDE_PERMISSAO_FOTO = { 403: 'Você não tem permissão para alterar a foto deste pet.' };
 
 export function EditarFotoModal({ pet, onFechar }: Props) {
   const { theme } = useTheme();
@@ -60,7 +58,7 @@ export function EditarFotoModal({ pet, onFechar }: Props) {
       onFechar();
       mostrarToast('sucesso', 'Foto atualizada', `A foto de ${petAtual.nome} foi atualizada.`);
     } catch (erroEnvio) {
-      setErro(mensagemDeErro(erroEnvio, 'Não foi possível enviar a foto. Tente novamente.'));
+      setErro(mensagemDeErro(erroEnvio, 'Não foi possível enviar a foto. Tente novamente.', OVERRIDE_PERMISSAO_FOTO));
     }
   }
 
@@ -76,7 +74,7 @@ export function EditarFotoModal({ pet, onFechar }: Props) {
               onFechar();
               mostrarToast('sucesso', 'Foto removida');
             },
-            erroRemocao => setErro(mensagemDeErro(erroRemocao, 'Não foi possível remover a foto.'))
+            erroRemocao => setErro(mensagemDeErro(erroRemocao, 'Não foi possível remover a foto.', OVERRIDE_PERMISSAO_FOTO))
           );
         },
       },
