@@ -13,6 +13,10 @@ export const authService = {
     return api.post<Sessao>('/auth/login', { email: email.trim().toLowerCase(), senha }, false);
   },
 
+  async solicitarRecuperacaoSenha(email: string): Promise<void> {
+    await api.post('/auth/recuperar-senha', { email: email.trim().toLowerCase() }, false);
+  },
+
   async registrar(dados: RegistrarPayload): Promise<Sessao> {
     return api.post<Sessao>(
       '/auth/registrar',
