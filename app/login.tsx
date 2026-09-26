@@ -148,6 +148,17 @@ export default function LoginScreen() {
             {!autenticando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.colors.onPrimary} />}
           </Pressable>
 
+          <Link href="/esqueci-senha" asChild>
+            <Pressable
+              style={s.linkRecuperacao}
+              disabled={autenticando}
+              accessibilityRole="link"
+              accessibilityLabel="Esqueci minha senha"
+            >
+              <Text style={s.linkRecuperacaoTexto}>Esqueci minha senha</Text>
+            </Pressable>
+          </Link>
+
           <Link href="/cadastro" asChild>
             <Pressable
               style={s.linkSecundario}
@@ -246,5 +257,7 @@ function createStyles(theme: AppTheme) {
   linkSecundario: { marginTop: 'auto', paddingTop: 22, alignItems: 'center', paddingBottom: 4 },
   linkSecundarioTexto: { fontSize: 13, color: theme.colors.textSecondary },
   linkSecundarioDestaque: { color: theme.colors.primary, fontWeight: '700' },
+  linkRecuperacao: { marginTop: 18, alignItems: 'center' },
+  linkRecuperacaoTexto: { fontSize: 13, color: theme.colors.primary, fontWeight: '700' },
   });
 }
