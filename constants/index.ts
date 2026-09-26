@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   MODO_SIMPLES: '@vetsync:modo_simples',
   THEME_PREFERENCE: '@vetsync:theme-preference',
   DICAS_VISTAS: '@vetsync:dicas_vistas',
+  PUSH_TOKEN: '@vetsync:push_token',
 };
 
 export const XP_POR_EVENTO = 10;
