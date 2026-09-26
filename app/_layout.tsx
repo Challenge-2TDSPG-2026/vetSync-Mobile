@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, StatusBar } from 'react-native';
 import { Stack, ThemeProvider as NavigationThemeProvider, useRouter, useSegments, usePathname } from 'expo-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
+import NetInfo from '@react-native-community/netinfo';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PetProvider, usePet } from '../context/PetContext';
 import { VetProvider } from '../context/VetContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ToastHost } from '../components/ui/Toast';
+import { OfflineBanner } from '../components/ui/OfflineBanner';
 import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
 import { configurarNotificacoesPush } from '../services/pushNotificationService';
@@ -19,9 +21,15 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       staleTime: 30_000,
+      refetchOnReconnect: true,
+      networkMode: 'online',
     },
   },
 });
+
+onlineManager.setEventListener(setOnline => NetInfo.addEventListener(state => {
+  setOnline(state.isConnected !== false && state.isInternetReachable !== false);
+}));
 
 function RootNavigator() {
   const { sessao, autenticado, carregando: carregandoAuth } = useAuth();
@@ -124,6 +132,7 @@ function RootNavigator() {
           }}
         />
       </Stack>
+      <OfflineBanner />
     </>
   );
 }
