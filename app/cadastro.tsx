@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
+import { mensagemDeErro } from '../services/api/errorMessages';
 import { mostrarToast } from '../components/ui/Toast';
 import { AppIcon } from '../components/AppIcon';
 import { AuthField } from '../components/ui/AuthField';
@@ -27,10 +28,6 @@ function formatarTelefone(text: string): string {
   if (n.length <= 6) return `(${n.slice(0, 2)}) ${n.slice(2)}`;
   if (n.length <= 10) return `(${n.slice(0, 2)}) ${n.slice(2, 6)}-${n.slice(6)}`;
   return `(${n.slice(0, 2)}) ${n.slice(2, 7)}-${n.slice(7, 11)}`;
-}
-
-function mensagemDeErro(e: unknown, fallback: string): string {
-  return e instanceof ApiError ? e.message : fallback;
 }
 
 export default function CadastroScreen() {
@@ -89,6 +86,7 @@ export default function CadastroScreen() {
         telefone: telefone.replace(/\D/g, '') || undefined,
       });
 
+      mostrarToast('sucesso', 'Cadastro realizado', `Bem-vindo(a), ${nome.trim().split(' ')[0]}! Agora cadastre seu primeiro pet.`);
       // Usuário autenticado como TUTOR com 0 pets. Redireciona para cadastrar o primeiro pet.
       router.replace('/add-pet');
     } catch (e) {
