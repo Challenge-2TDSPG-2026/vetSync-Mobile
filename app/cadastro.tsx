@@ -1,9 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import {
-  View, Text, ScrollView, Pressable, Image,
-  StyleSheet, KeyboardAvoidingView, Platform,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Text, Pressable, StyleSheet } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
@@ -11,6 +7,7 @@ import { mensagemDeErro } from '../services/api/errorMessages';
 import { mostrarToast } from '../components/ui/Toast';
 import { AppIcon } from '../components/AppIcon';
 import { AuthField } from '../components/ui/AuthField';
+import { AuthLayout } from '../components/auth/AuthLayout';
 import { useTheme } from '../context/ThemeContext';
 import type { AppTheme } from '../constants/theme';
 
@@ -100,57 +97,10 @@ export default function CadastroScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <AuthLayout
+      title="Crie sua conta."
+      subtitle="Acompanhe vacinas, consultas e o bem-estar do seu pet em um só lugar."
     >
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={s.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-
-        <LinearGradient
-          colors={[theme.colors.navigation, theme.colors.navigationAccent]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={s.hero}
-        >
-          <AppIcon
-            name="paw" set="MaterialCommunityIcons" size={190}
-            color="rgba(255,255,255,0.05)" style={s.pawMarca}
-          />
-          <AppIcon name="paw" set="MaterialCommunityIcons" size={11} color="rgba(191,233,213,0.3)" style={s.pegada1} />
-          <AppIcon name="paw" set="MaterialCommunityIcons" size={15} color="rgba(191,233,213,0.45)" style={s.pegada2} />
-          <AppIcon name="paw" set="MaterialCommunityIcons" size={19} color="rgba(191,233,213,0.6)" style={s.pegada3} />
-
-          <View style={s.marca}>
-            <View style={s.seloWrap}>
-              <View style={s.seloGlowOut} />
-              <View style={s.seloGlowIn} />
-              <View style={s.selo}>
-                <Image
-                  source={require('../assets/logo.png')}
-                  style={s.seloImg}
-                  resizeMode="contain"
-                  accessible={false}
-                  accessibilityElementsHidden
-                  importantForAccessibility="no"
-                />
-              </View>
-            </View>
-            <Text style={s.marcaTexto}>VetSync</Text>
-          </View>
-
-          <Text style={s.heroTitulo}>Crie sua conta.</Text>
-          <Text style={s.heroSub}>
-            Acompanhe vacinas, consultas e o bem-estar do seu pet em um só lugar.
-          </Text>
-        </LinearGradient>
-
-        <View style={s.sheet}>
-
           <AuthField
             label="Nome completo"
             icon="person-outline"
@@ -242,71 +192,12 @@ export default function CadastroScreen() {
               </Text>
             </Pressable>
           </Link>
-
-        </View>
-
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </AuthLayout>
   );
 }
 
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
-  scroll: { flexGrow: 1 },
-
-  hero: {
-    paddingTop: 56,
-    paddingHorizontal: 30,
-    paddingBottom: 46,
-    overflow: 'hidden',
-  },
-  pawMarca: {
-    position: 'absolute',
-    top: -20,
-    right: -28,
-    transform: [{ rotate: '-18deg' }],
-  },
-  pegada1: { position: 'absolute', top: 4, left: 2, transform: [{ rotate: '18deg' }] },
-  pegada2: { position: 'absolute', top: 18, left: 20, transform: [{ rotate: '-10deg' }] },
-  pegada3: { position: 'absolute', top: 34, left: 42, transform: [{ rotate: '20deg' }] },
-
-  marca: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 24 },
-  seloWrap: { width: 60, height: 60, alignItems: 'center', justifyContent: 'center' },
-  seloGlowOut: {
-    position: 'absolute', width: 86, height: 86, borderRadius: 43,
-    backgroundColor: 'rgba(242,200,121,0.12)',
-  },
-  seloGlowIn: {
-    position: 'absolute', width: 66, height: 66, borderRadius: 33,
-    backgroundColor: 'rgba(242,200,121,0.16)',
-  },
-  selo: {
-    width: 48, height: 48, borderRadius: 15,
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 }, elevation: 6,
-  },
-  seloImg: { width: 28, height: 28 },
-  marcaTexto: { fontSize: 19, fontWeight: '700', color: theme.colors.onNavigation, letterSpacing: -0.3 },
-
-  heroTitulo: {
-    fontSize: 28, fontWeight: '800', color: theme.colors.onNavigation,
-    letterSpacing: -0.6, lineHeight: 33, marginBottom: 9, maxWidth: 300,
-  },
-  heroSub: { fontSize: 14, fontWeight: '500', color: theme.colors.onNavigation, opacity: 0.8, lineHeight: 21, maxWidth: 280 },
-
-  sheet: {
-    flexGrow: 1,
-    backgroundColor: theme.colors.background,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    marginTop: -24,
-    paddingTop: 32,
-    paddingHorizontal: 28,
-    paddingBottom: 32,
-  },
-
   btnAuth: {
     flexDirection: 'row',
     gap: 8,
