@@ -23,10 +23,10 @@ export function useTiposEvento(habilitado: boolean) {
   });
 }
 
-export function useVeterinarios(habilitado: boolean) {
+export function useVeterinarios(habilitado: boolean, especialidade?: string | null) {
   return useQuery({
-    queryKey: CHAVE_VETERINARIOS,
-    queryFn: catalogoService.listarVeterinarios,
+    queryKey: [...CHAVE_VETERINARIOS, especialidade ?? null] as const,
+    queryFn: () => catalogoService.listarVeterinarios(especialidade),
     enabled: habilitado,
     staleTime: 5 * 60_000,
   });
@@ -74,3 +74,4 @@ export function useRemoverEvento() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
   });
 }
+ 
