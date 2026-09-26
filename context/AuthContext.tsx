@@ -37,6 +37,23 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+export function validarSessao(valor: unknown): valor is Sessao {
+  if (!valor || typeof valor !== 'object') return false;
+  const candidata = valor as Partial<Sessao>;
+  return (
+    typeof candidata.token === 'string' &&
+    candidata.token.trim().length > 0 &&
+    typeof candidata.idUsuario === 'number' &&
+    Number.isInteger(candidata.idUsuario) &&
+    candidata.idUsuario > 0 &&
+    typeof candidata.email === 'string' &&
+    candidata.email.trim().length > 0 &&
+    typeof candidata.nome === 'string' &&
+    candidata.nome.trim().length > 0 &&
+    (candidata.perfil === 'TUTOR' || candidata.perfil === 'VETERINARIO' || candidata.perfil === 'ADMIN')
+  );
+}
+
 async function salvarSessao(sessao: Sessao): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEYS.SESSAO, JSON.stringify(sessao));
 }
@@ -44,11 +61,18 @@ async function salvarSessao(sessao: Sessao): Promise<void> {
 async function carregarSessaoSalva(): Promise<Sessao | null> {
   const raw = await AsyncStorage.getItem(STORAGE_KEYS.SESSAO);
   if (!raw) return null;
+  let sessao: unknown;
   try {
-    return JSON.parse(raw) as Sessao;
+    sessao = JSON.parse(raw) as unknown;
   } catch {
+    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
     return null;
   }
+  if (!validarSessao(sessao)) {
+    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+    return null;
+  }
+  return sessao;
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -56,25 +80,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessao, setSessao] = useState<Sessao | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const encerrandoSessao = React.useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     async function restaurarSessao() {
-      const salva = await carregarSessaoSalva();
-      setSessao(salva);
-      setCarregando(false);
+      try {
+        const salva = await carregarSessaoSalva();
+        setSessao(salva);
+      } catch {
+        setSessao(null);
+        setErro('Não foi possível restaurar sua sessão. Entre novamente.');
+      } finally {
+        setCarregando(false);
+      }
     }
-    restaurarSessao();
+    void restaurarSessao();
   }, []);
 
   const encerrarSessaoLocal = useCallback(async () => {
-    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
-    setSessao(null);
-    queryClient.clear();
+    if (encerrandoSessao.current) return encerrandoSessao.current;
+    const encerramento = (async () => {
+      try {
+        await AsyncStorage.multiRemove([STORAGE_KEYS.SESSAO, STORAGE_KEYS.PUSH_TOKEN]);
+        setSessao(null);
+        queryClient.clear();
+      } finally {
+        encerrandoSessao.current = null;
+      }
+    })();
+    encerrandoSessao.current = encerramento;
+    return encerramento;
   }, [queryClient]);
 
   useEffect(() => {
     return assinarExpiracaoSessao(() => {
-      void encerrarSessaoLocal();
+      void encerrarSessaoLocal().catch(() => {
+        setErro('Não foi possível encerrar sua sessão. Tente novamente.');
+      });
     });
   }, [encerrarSessaoLocal]);
 
@@ -106,7 +148,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await encerrarSessaoLocal();
-    authService.logout().catch(() => {});
+    try {
+      await authService.logout();
+    } catch (erro) {
+      console.warn('Não foi possível invalidar a sessão no servidor.', erro);
+    }
   }, [encerrarSessaoLocal]);
 
   const limparErro = useCallback(() => setErro(null), []);
