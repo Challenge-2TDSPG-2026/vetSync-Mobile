@@ -11,4 +11,5 @@ export const STORAGE_KEYS = {
   VETERINARIO_ATIVO: '@vetsync:veterinario_ativo',
   DISPONIBILIDADE: '@vetsync:disponibilidade',
   BLOQUEIOS_AGENDA: '@vetsync:bloqueios_agenda',
+  PUSH_TOKEN: '@vetsync:push_token',
 };
