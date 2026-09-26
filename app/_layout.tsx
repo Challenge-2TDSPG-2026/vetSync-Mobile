@@ -32,7 +32,7 @@ function RootNavigator() {
   const ehTutor = sessao?.perfil === 'TUTOR';
   const ehVeterinario = sessao?.perfil === 'VETERINARIO';
   const carregando = carregandoAuth || (ehTutor && carregandoPet);
-  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente', 'cadastro', 'modo-simples', 'gerenciar-acessos'];
+  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'modo-simples', 'gerenciar-acessos'];
 
   useEffect(() => {
     if (carregando) return;
@@ -96,6 +96,7 @@ function RootNavigator() {
       >
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
         <Stack.Screen name="cadastro" options={{ animation: 'fade_from_bottom' }} />
+        <Stack.Screen name="esqueci-senha" options={{ animation: 'fade_from_bottom' }} />
         <Stack.Screen name="(tutor)" options={{ animation: 'fade' }} />
         <Stack.Screen name="(vet)" options={{ animation: 'fade' }} />
         <Stack.Screen
