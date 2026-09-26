@@ -9,6 +9,7 @@ Gerencia o registro, sessões e preferências dos usuários (Tutores e Veteriná
 | :--- | :--- | :--- |
 | `POST` | `/api/auth/registrar` | Cria uma conta e retorna token de sessão JWT. Requer email, senha e tipo (tutor/veterinario). |
 | `POST` | `/api/auth/login` | Autentica o usuário e retorna o token de sessão e dados do perfil. |
+| `POST` | `/api/auth/recuperar-senha` | Envia por e-mail um link para redefinição de senha. Não exige autenticação. |
 | `POST` | `/api/auth/logout` | Invalida o token de sessão atual no servidor. |
 | `GET` | `/api/auth/me` | Retorna os dados do usuário autenticado validando se o token está ativo. |
 | `PUT` | `/api/usuarios/preferencias`| Atualiza preferências de UI, onboarding concluído e notificações locais. |
