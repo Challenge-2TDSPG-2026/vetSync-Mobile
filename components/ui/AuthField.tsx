@@ -52,7 +52,7 @@ export function AuthField({
             accessibilityLabel={showPassword ? 'Ocultar senha' : 'Exibir senha'}
             accessibilityRole="button"
           >
-            <AppIcon name={showPassword ? 'eye-off-outline' : 'eye-outline'} set="Ionicons" size={22} color={theme.colors.textSecondary} />
+            <AppIcon name={showPassword ? 'eye-outline' : 'eye-off-outline'} set="Ionicons" size={22} color={theme.colors.textSecondary} />
           </Pressable>
         ) : null}
       </View>
