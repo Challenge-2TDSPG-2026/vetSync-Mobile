@@ -1,9 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import {
-  View, Text, ScrollView, Pressable, Image,
-  StyleSheet, KeyboardAvoidingView, Platform,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import { ApiError } from '../services/api/httpClient';
 import { authService } from '../services/authService';
@@ -11,6 +7,7 @@ import { mensagemDeErro } from '../services/api/errorMessages';
 import { mostrarToast } from '../components/ui/Toast';
 import { AppIcon } from '../components/AppIcon';
 import { AuthField } from '../components/ui/AuthField';
+import { AuthLayout } from '../components/auth/AuthLayout';
 import { useTheme } from '../context/ThemeContext';
 import type { AppTheme } from '../constants/theme';
 
@@ -49,41 +46,10 @@ export default function EsqueciSenhaScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <AuthLayout
+      title="Recupere sua senha."
+      subtitle="Enviaremos um link para você criar uma nova senha com segurança."
     >
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={s.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <LinearGradient
-          colors={[theme.colors.navigation, theme.colors.navigationAccent]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={s.hero}
-        >
-          <AppIcon name="paw" set="MaterialCommunityIcons" size={190} color="rgba(255,255,255,0.05)" style={s.pawMarca} />
-          <View style={s.marca}>
-            <View style={s.selo}>
-              <Image
-                source={require('../assets/logo.png')}
-                style={s.seloImg}
-                resizeMode="contain"
-                accessible={false}
-                accessibilityElementsHidden
-                importantForAccessibility="no"
-              />
-            </View>
-            <Text style={s.marcaTexto}>VetSync</Text>
-          </View>
-          <Text style={s.heroTitulo}>Recupere sua senha.</Text>
-          <Text style={s.heroSub}>Enviaremos um link para você criar uma nova senha com segurança.</Text>
-        </LinearGradient>
-
-        <View style={s.sheet}>
           {enviado ? (
             <View style={s.confirmacao}>
               <AppIcon name="mail-open-outline" set="Ionicons" size={42} color={theme.colors.primary} />
@@ -126,30 +92,12 @@ export default function EsqueciSenhaScreen() {
               <Text style={s.linkVoltarTexto}>Voltar para o login</Text>
             </Pressable>
           </Link>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </AuthLayout>
   );
 }
 
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
-    scroll: { flexGrow: 1 },
-    hero: { paddingTop: 64, paddingHorizontal: 30, paddingBottom: 56, overflow: 'hidden' },
-    pawMarca: { position: 'absolute', top: -26, right: -34, transform: [{ rotate: '-18deg' }] },
-    marca: { flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 30 },
-    selo: {
-      width: 78, height: 78, borderRadius: 39, alignItems: 'center', justifyContent: 'center',
-      backgroundColor: 'rgba(255,255,255,0.12)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',
-    },
-    seloImg: { width: 54, height: 54 },
-    marcaTexto: { fontSize: 19, fontWeight: '700', color: theme.colors.onNavigation, letterSpacing: -0.3 },
-    heroTitulo: { fontSize: 32, fontWeight: '800', color: theme.colors.onNavigation, letterSpacing: -0.7, lineHeight: 38, marginBottom: 10, maxWidth: 300 },
-    heroSub: { fontSize: 15, fontWeight: '500', color: theme.colors.onNavigation, opacity: 0.8, lineHeight: 22, maxWidth: 290 },
-    sheet: {
-      flexGrow: 1, backgroundColor: theme.colors.background, borderTopLeftRadius: 32, borderTopRightRadius: 32,
-      marginTop: -28, paddingTop: 36, paddingHorizontal: 28, paddingBottom: 32,
-    },
     btnAuth: {
       flexDirection: 'row', gap: 8, backgroundColor: theme.colors.primary, paddingVertical: 19,
       borderRadius: 999, alignItems: 'center', justifyContent: 'center', marginTop: 10,
