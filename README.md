@@ -56,15 +56,15 @@ Diferente do protótipo da Sprint 1 e 2 (dados mockados em `AsyncStorage`), a Sp
 
 | Tecnologia | Versão | Uso |
 |---|---|---|
-| React Native | 0.81.5 | Framework mobile |
-| Expo | ~54.0.0 | Plataforma e toolchain |
-| Expo Router | ~6.0.23 | Navegação baseada em arquivos, com grupos `(tutor)` e `(vet)` |
-| TypeScript | ~5.9.2 | Tipagem estática |
+| React Native | 0.86.3 | Framework mobile |
+| Expo | ~57.0.25 | Plataforma e toolchain |
+| Expo Router | ~57.0.23 | Navegação baseada em arquivos, com grupos `(tutor)` e `(vet)` |
+| TypeScript | ~6.0.3 | Tipagem estática |
 | TanStack Query | ^5.90.5 | Cache, requisições HTTP, invalidação e refetch automático |
 | AsyncStorage | 2.2.0 | Persistência local de sessão e preferências |
 | @expo/vector-icons | ^15.0.3 | Ícones (Ionicons, MaterialCommunityIcons) |
 | expo-calendar / expo-notifications | ~15.0.8 / ~0.32.17 | Integração com calendário nativo e lembretes locais |
-| React Navigation | ^7.0.14 | Base de navegação sob o Expo Router |
+| React Navigation | ^7.4.1 | Base de navegação sob o Expo Router |
 
 Backend consumido: **VetSync Java** (Spring Boot + Flyway + Oracle), repositório separado.
 
@@ -121,8 +121,8 @@ storage/          # petStorage.ts — únicas chaves ainda locais (pet ativo, on
 ## Configuração e Execução
 
 ### Pré-requisitos
-- Node.js 18+
-- Expo CLI / Expo Go (ou emulador Android/iOS)
+- Node.js 20.19+ (compatível com o Expo SDK 57)
+- Expo Go compatível com o SDK 57 (ou emulador Android/iOS)
 - Backend **VetSync Java** rodando localmente (porta `8080`) — ver repositório do backend para instruções
 
 ### Passo a passo
@@ -134,12 +134,31 @@ npm install
 npx expo start
 ```
 
+O projeto usa o `package-lock.json`; em ambientes de CI ou para uma instalação
+reprodutível, prefira `npm ci`. Não é necessário instalar o Expo CLI
+globalmente: os comandos usam a versão declarada no projeto.
+
 Execução direta por plataforma:
 
 ```bash
 npm run android   # Android (emulador ou dispositivo via Expo Go)
 npm run ios       # iOS (apenas macOS)
 npm run web       # Navegador
+```
+
+### Verificações de qualidade
+
+Os comandos abaixo podem ser executados antes de abrir um pull request. O
+`format` mantém os arquivos de configuração do projeto padronizados; a
+formatação do código existente deve ser feita de forma incremental para evitar
+alterações não relacionadas ao runtime:
+
+```bash
+npm run typecheck     # valida a tipagem TypeScript
+npm run lint          # ESLint com a configuração do Expo
+npm run format:check  # verifica a formatação com Prettier
+npm run check         # executa todas as verificações acima
+npm run format        # formata os arquivos de configuração
 ```
 
 > A URL da API é resolvida automaticamente em `constants/api.ts`: `http://localhost:8080` para iOS/Web e `http://10.0.2.2:8080` para o emulador Android — não precisa configurar nada manualmente ao rodar localmente.
