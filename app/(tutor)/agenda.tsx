@@ -44,7 +44,7 @@ export default function AgendaScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
-  const { petAtivo, eventos, carregandoEventos } = usePet();
+  const { eventos, carregandoEventos } = usePet();
   const { modoSimples } = useAccessibility();
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-agenda');
