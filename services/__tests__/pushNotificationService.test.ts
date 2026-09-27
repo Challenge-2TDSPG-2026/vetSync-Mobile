@@ -1,3 +1,6 @@
+import { api } from '../api/httpClient';
+import { registrarTokenPush } from '../pushNotificationService';
+
 jest.mock('react-native/Libraries/Utilities/Platform', () => {
   const platform = {
     OS: 'web',
@@ -16,9 +19,6 @@ jest.mock('../../constants', () => ({
 jest.mock('../api/httpClient', () => ({
   api: { post: jest.fn().mockResolvedValue(undefined) },
 }));
-
-import { api } from '../api/httpClient';
-import { registrarTokenPush } from '../pushNotificationService';
 
 describe('pushNotificationService', () => {
   beforeEach(() => {
