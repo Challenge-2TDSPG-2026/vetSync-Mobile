@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Text, Pressable, StyleSheet } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -12,7 +12,6 @@ import { useTheme } from '../context/ThemeContext';
 import type { AppTheme } from '../constants/theme';
 
 export default function LoginScreen() {
-  const router = useRouter();
   const { login } = useAuth();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
