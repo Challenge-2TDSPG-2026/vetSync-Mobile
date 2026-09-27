@@ -30,7 +30,7 @@ export default function EsqueciSenhaScreen() {
     if (!validar()) return;
     setEnviando(true);
     try {
-      await authService.solicitarRecuperacaoSenha(email);
+      await authService.esqueciSenha(email);
       setEnviado(true);
       mostrarToast('sucesso', 'E-mail enviado', 'Confira sua caixa de entrada e a pasta de spam.');
     } catch (e) {
