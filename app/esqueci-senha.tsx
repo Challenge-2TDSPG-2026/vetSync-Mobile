@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ApiError } from '../services/api/httpClient';
 import { authService } from '../services/authService';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -12,6 +12,7 @@ import { useTheme } from '../context/ThemeContext';
 import type { AppTheme } from '../constants/theme';
 
 export default function EsqueciSenhaScreen() {
+  const router = useRouter();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const [email, setEmail] = useState('');
@@ -55,8 +56,17 @@ export default function EsqueciSenhaScreen() {
               <AppIcon name="mail-open-outline" set="Ionicons" size={42} color={theme.colors.primary} />
               <Text style={s.confirmacaoTitulo}>Confira seu e-mail</Text>
               <Text style={s.confirmacaoTexto}>
-                Se existir uma conta para {email.trim().toLowerCase()}, enviaremos as instruções de recuperação.
+                Se existir uma conta para {email.trim().toLowerCase()}, enviamos um código de 6 dígitos válido por 15 minutos.
               </Text>
+              <Pressable
+                style={({ pressed }) => [s.btnAuth, s.btnCodigo, pressed && s.btnAuthPressed]}
+                onPress={() => router.push({ pathname: '/verificar-codigo', params: { email: email.trim().toLowerCase() } })}
+                accessibilityRole="button"
+                accessibilityLabel="Já tenho o código"
+              >
+                <Text style={s.btnAuthText}>Já tenho o código</Text>
+                <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.colors.onPrimary} />
+              </Pressable>
             </View>
           ) : (
             <>
@@ -108,6 +118,7 @@ function createStyles(theme: AppTheme) {
     confirmacao: { alignItems: 'center', paddingVertical: 12 },
     confirmacaoTitulo: { color: theme.colors.text, fontSize: 20, fontWeight: '800', marginTop: 14 },
     confirmacaoTexto: { color: theme.colors.textSecondary, fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 8 },
+    btnCodigo: { width: '100%', marginTop: 24 },
     linkVoltar: { marginTop: 'auto', paddingTop: 28, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 6 },
     linkVoltarTexto: { fontSize: 13, color: theme.colors.primary, fontWeight: '700' },
   });
