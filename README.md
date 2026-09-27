@@ -41,6 +41,9 @@ Diferente do protótipo da Sprint 1 e 2 (dados mockados em `AsyncStorage`), a Sp
 - **Programa de Fidelidade (Recompensas)** — pontos por evento concluído, catálogo de benefícios, resgate, conquistas e progressão por nível/XP.
 - **SIA (assistente de IA)** — chat contextual com o pet ativo, acionável de qualquer tela via tab bar.
 - **Perfil** — dados do pet, preferências de notificação, gerenciamento de múltiplos pets, logout.
+- **Acesso compartilhado** — convite de cuidadores por e-mail com permissão de leitura ou edição por pet, revogação de acesso.
+- **Modo simples** — modo de acessibilidade com textos maiores e botões ampliados.
+- **Recuperação de senha** — fluxo de 3 passos (e-mail → código de verificação → nova senha).
 
 ### Área do Veterinário
 - **Painel** — agendados, atendimentos de hoje, alertas de resgates pendentes.
@@ -178,6 +181,8 @@ npm run format        # formata os arquivos de configuração
 | Rota | Descrição |
 |---|---|
 | `/login` | Autenticação |
+| `/cadastro` | Criação de conta (tutor) |
+| `/esqueci-senha` → `/verificar-codigo` → `/redefinir-senha` | Fluxo de recuperação de senha em 3 passos (código por e-mail) |
 | `/(tutor)` | Dashboard do tutor |
 | `/(tutor)/agenda` | Agenda de saúde com calendário e filtros |
 | `/(tutor)/historico` | Histórico clínico agrupado por mês |
@@ -191,6 +196,8 @@ npm run format        # formata os arquivos de configuração
 | `/add-pet`, `/add-evento` | Modais de cadastro |
 | `/paciente/[id]` | Ficha clínica (rota dinâmica) |
 | `/assistente` | SIA — assistente de IA (modal transparente) |
+| `/gerenciar-acessos` | Convite e revogação de acesso compartilhado a um pet (cuidador/leitura ou edição) |
+| `/modo-simples` | Ativação do modo de acessibilidade com textos e botões ampliados |
 
 ---
 
