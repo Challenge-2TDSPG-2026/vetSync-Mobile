@@ -1,3 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api, apiRequest } from '../httpClient';
+import { assinarExpiracaoSessao } from '../sessionEvents';
+
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(),
   removeItem: jest.fn(),
@@ -8,10 +12,6 @@ jest.mock('@react-native-community/netinfo', () => ({
   __esModule: true,
   default: { fetch: (...args: unknown[]) => mockNetInfoFetch(...args) },
 }));
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api, apiRequest } from '../httpClient';
-import { assinarExpiracaoSessao } from '../sessionEvents';
 
 describe('apiRequest', () => {
   beforeEach(() => {
