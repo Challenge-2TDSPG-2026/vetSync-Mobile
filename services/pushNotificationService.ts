@@ -12,6 +12,7 @@ function obterNotificacoes(): typeof NotificationsModule | null {
   if (notifications !== undefined) return notifications;
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- carregamento sob demanda intencional, evita crash no Expo Go Android
     notifications = require('expo-notifications') as typeof NotificationsModule;
     notifications.setNotificationHandler({
       handleNotification: async () => ({
