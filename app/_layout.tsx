@@ -30,6 +30,8 @@ onlineManager.setEventListener(setOnline => NetInfo.addEventListener(state => {
   setOnline(state.isConnected !== false && state.isInternetReachable !== false);
 }));
 
+const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'verificar-codigo', 'redefinir-senha', 'modo-simples', 'gerenciar-acessos'];
+
 function RootNavigator() {
   const { sessao, autenticado, carregando: carregandoAuth } = useAuth();
   const { onboardingConcluido, carregando: carregandoPet, erroPets, recarregarPets } = usePet();
@@ -39,7 +41,6 @@ function RootNavigator() {
   const ehTutor = sessao?.perfil === 'TUTOR';
   const ehVeterinario = sessao?.perfil === 'VETERINARIO';
   const carregando = carregandoAuth || (ehTutor && carregandoPet);
-  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'verificar-codigo', 'redefinir-senha', 'modo-simples', 'gerenciar-acessos'];
 
   useEffect(() => {
     if (carregando) return;
@@ -77,7 +78,7 @@ function RootNavigator() {
     }
 
     if (!inLogin && !inCadastro) router.replace('/login');
-  }, [autenticado, ehTutor, ehVeterinario, onboardingConcluido, carregando, segments, pathname]);
+  }, [autenticado, ehTutor, ehVeterinario, onboardingConcluido, carregando, segments, pathname, router]);
 
   return (
     <>
@@ -156,6 +157,7 @@ function PushNotificationRegistration() {
     return () => {
       ativo = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- efeito deve rodar só quando o token mudar, não a cada atualização de `sessao`
   }, [sessao?.token]);
 
   return null;
