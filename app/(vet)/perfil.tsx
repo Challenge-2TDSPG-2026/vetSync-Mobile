@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { AppIcon } from '../../components/AppIcon';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
