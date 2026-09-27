@@ -39,7 +39,7 @@ function RootNavigator() {
   const ehTutor = sessao?.perfil === 'TUTOR';
   const ehVeterinario = sessao?.perfil === 'VETERINARIO';
   const carregando = carregandoAuth || (ehTutor && carregandoPet);
-  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'modo-simples', 'gerenciar-acessos'];
+  const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'verificar-codigo', 'redefinir-senha', 'modo-simples', 'gerenciar-acessos'];
 
   useEffect(() => {
     if (carregando) return;
@@ -47,13 +47,16 @@ function RootNavigator() {
     const inLogin = segments.includes('login') || pathname === '/login' || pathname.startsWith('/login');
     const inCadastro = segments.includes('cadastro') || pathname === '/cadastro' || pathname.startsWith('/cadastro');
     const inEsqueciSenha = segments.includes('esqueci-senha') || pathname === '/esqueci-senha' || pathname.startsWith('/esqueci-senha');
+    const inVerificarCodigo = segments.includes('verificar-codigo') || pathname.startsWith('/verificar-codigo');
+    const inRedefinirSenha = segments.includes('redefinir-senha') || pathname.startsWith('/redefinir-senha');
+    const inRecuperacaoSenha = inEsqueciSenha || inVerificarCodigo || inRedefinirSenha;
     const inTutor = segments.includes('(tutor)') || pathname.startsWith('/(tutor)');
     const inVet = segments.includes('(vet)') || pathname.startsWith('/(vet)');
     const inAddPet = segments.includes('add-pet') || pathname === '/add-pet';
     const inRotaLivre = ROTAS_FORA_DO_GRUPO.some(r => segments.includes(r) || pathname.includes(r));
 
     if (!autenticado) {
-      if (!inLogin && !inCadastro && !inEsqueciSenha) router.replace('/login');
+      if (!inLogin && !inCadastro && !inRecuperacaoSenha) router.replace('/login');
       return;
     }
 
@@ -105,6 +108,8 @@ function RootNavigator() {
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
         <Stack.Screen name="cadastro" options={{ animation: 'fade_from_bottom' }} />
         <Stack.Screen name="esqueci-senha" options={{ animation: 'fade_from_bottom' }} />
+        <Stack.Screen name="verificar-codigo" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="redefinir-senha" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="(tutor)" options={{ animation: 'fade' }} />
         <Stack.Screen name="(vet)" options={{ animation: 'fade' }} />
         <Stack.Screen
