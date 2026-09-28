@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { AppIcon } from '../AppIcon';
 import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
@@ -14,6 +14,8 @@ interface EmptyStateProps {
   /** Cor de destaque do ícone/orb — por padrão usa o verde do app, mas cada tela pode passar a sua. */
   accentColor?: string;
   style?: StyleProp<ViewStyle>;
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
 /**
@@ -28,6 +30,8 @@ export function EmptyState({
   variant = 'dashed',
   accentColor,
   style,
+  actionLabel,
+  onAction,
 }: EmptyStateProps) {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
@@ -44,6 +48,17 @@ export function EmptyState({
       </View>
       <Text style={s.title}>{title}</Text>
       {subtitle ? <Text style={s.subtitle}>{subtitle}</Text> : null}
+      {actionLabel && onAction ? (
+        <Pressable
+          style={[s.action, { backgroundColor: accent }]}
+          onPress={onAction}
+          accessibilityRole="button"
+          accessibilityLabel={actionLabel}
+        >
+          <Text style={s.actionText}>{actionLabel}</Text>
+          <AppIcon name="arrow-forward" set="Ionicons" size={15} color={theme.colors.onPrimary} />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -61,5 +76,7 @@ function createStyles(theme: AppTheme) {
   orb: { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
   title: { fontSize: 14, fontWeight: '700', color: theme.colors.text, marginBottom: 4, textAlign: 'center' },
   subtitle: { fontSize: 12, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 17 },
+  action: { marginTop: 16, minHeight: 42, paddingHorizontal: 16, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 7 },
+  actionText: { color: theme.colors.onPrimary, fontSize: 13, fontWeight: '800' },
   });
 }
