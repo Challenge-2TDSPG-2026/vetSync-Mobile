@@ -1,6 +1,6 @@
 import { IA_API_BASE_URL } from '../constants/api';
 import type { Pet } from '../types';
-import { apiRequest } from './api/httpClient';
+import { api, apiRequest } from './api/httpClient';
 
 export interface SiaHistoryMessage {
   role: 'user' | 'assistant';
@@ -9,10 +9,12 @@ export interface SiaHistoryMessage {
 
 interface SiaResponse {
   mensagem?: string;
+  acao?: { id: string; resumo: string; requerConfirmacao: boolean };
 }
 
 export interface SiaReply {
   texto: string;
+  acao?: { id: string; resumo: string; requerConfirmacao: boolean };
 }
 
 function montarContexto(pet: Pet | null, history: SiaHistoryMessage[]) {
@@ -41,6 +43,11 @@ export const iaService = {
     const texto = resposta.mensagem;
     if (!texto) throw new Error('A SIA respondeu sem uma mensagem para exibição.');
 
-    return { texto };
+    return { texto, acao: resposta.acao };
+  },
+
+  async confirmarAcao(id: string): Promise<SiaReply> {
+    const resposta = await api.post<{ resumo: string }>(`/ia/acoes/${encodeURIComponent(id)}/confirmar`);
+    return { texto: resposta.resumo };
   },
 };
