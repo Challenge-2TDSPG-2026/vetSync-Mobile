@@ -20,6 +20,48 @@ interface EventoCancelarResponseApi {
   novoEvento: EventoResponseApi | null;
 }
 
+export interface EventoDetalhes {
+  id: string;
+  pet: { id: string; nome: string };
+  tipo: { id: string; nome: string; categoria: Evento['categoriaTipoEvento'] };
+  status: StatusEvento;
+  dataAgendada: string;
+  criadoEm?: string;
+  tutorObservacao?: string | null;
+  observacaoClinica?: string | null;
+  diagnostico?: string | null;
+  conduta?: string | null;
+  custo?: number | null;
+  veterinario?: { id: string; nome: string; crmv?: string | null } | null;
+  cancelamento?: { motivo?: string | null; criadoEm?: string | null } | null;
+}
+
+interface EventoDetalhesApi extends EventoResponseApi {
+  observacaoTutor?: string | null;
+  observacaoClinica?: string | null;
+  diagnostico?: string | null;
+  conduta?: string | null;
+  criadoEm?: string | null;
+}
+
+function paraDetalhesApp(dto: EventoDetalhesApi): EventoDetalhes {
+  return {
+    id: String(dto.idEvento),
+    pet: { id: String(dto.idPet ?? ''), nome: 'Pet' },
+    tipo: { id: '', nome: dto.nmTipoEvento ?? 'Evento', categoria: dto.dsCategoria ?? null },
+    status: dto.status,
+    dataAgendada: `${dto.dtEvento}${dto.hrEvento ? `T${dto.hrEvento}` : ''}`,
+    criadoEm: dto.criadoEm ?? undefined,
+    tutorObservacao: dto.observacaoTutor ?? dto.dsObservacao ?? null,
+    observacaoClinica: dto.observacaoClinica ?? null,
+    diagnostico: dto.diagnostico ?? null,
+    conduta: dto.conduta ?? null,
+    custo: dto.vlCusto ?? null,
+    veterinario: dto.nmVeterinario ? { id: '', nome: dto.nmVeterinario } : null,
+    cancelamento: dto.motivoCancelamento ? { motivo: dto.motivoCancelamento } : null,
+  };
+}
+
 function paraEventoApp(dto: EventoResponseApi, idTipoEvento: string, idVeterinario: string): Evento {
   return {
     id: String(dto.idEvento),
@@ -51,6 +93,11 @@ export const eventoService = {
   async listarEventos(): Promise<Evento[]> {
     const dtos = await api.get<EventoResponseApi[]>('/eventos');
     return dtos.map(dto => paraEventoApp(dto, '', ''));
+  },
+
+  async buscarDetalhes(id: string): Promise<EventoDetalhes> {
+    const dto = await api.get<EventoDetalhesApi>(`/eventos/${id}/detalhes`);
+    return paraDetalhesApp(dto);
   },
 
   async agendarEvento(input: SolicitarEventoInput): Promise<Evento> {
