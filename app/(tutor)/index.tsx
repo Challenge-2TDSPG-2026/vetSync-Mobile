@@ -47,6 +47,17 @@ export default function DashboardScreen() {
   const proximos = [...pendentes, ...atrasados]
     .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
     .slice(0, limiteProximos);
+  const proximasAcoes = [
+    atrasados.length > 0
+      ? { id: 'atrasados', icon: 'alert-circle-outline', title: `${atrasados.length} evento${atrasados.length === 1 ? '' : 's'} atrasado${atrasados.length === 1 ? '' : 's'}`, subtitle: 'Veja o que precisa de atenção', color: theme.colors.danger, onPress: () => router.push('/(tutor)/agenda') }
+      : null,
+    pendentes.length > 0
+      ? { id: 'agenda', icon: 'calendar-outline', title: `${pendentes.length} evento${pendentes.length === 1 ? '' : 's'} na agenda`, subtitle: 'Acompanhe seus próximos cuidados', color: theme.colors.primary, onPress: () => router.push('/(tutor)/agenda') }
+      : null,
+    !petAtivo?.peso
+      ? { id: 'perfil', icon: 'scale-outline', title: 'Atualize o peso do pet', subtitle: 'Mantenha o perfil de saúde completo', color: theme.colors.info, onPress: () => router.push('/(tutor)/perfil') }
+      : null,
+  ].filter((acao): acao is NonNullable<typeof acao> => acao !== null).slice(0, 3);
   const especieInfo = ESPECIES.find(e => e.valor === petAtivo?.especie);
 
   if (carregando) {
@@ -156,6 +167,36 @@ export default function DashboardScreen() {
         <StatCard styles={s} valor={atrasados.length} label="Atrasados" accentColor={theme.colors.danger} simples={modoSimples} />
       </View>
 
+      <View style={s.acoesCard}>
+        <View style={s.cardHead}>
+          <View style={s.cardTitleWrap}>
+            <View style={s.cardTitleIcon}>
+              <AppIcon name="sparkles-outline" set="Ionicons" size={16} color={theme.colors.primary} />
+            </View>
+            <Text style={[s.cardTitle, modoSimples && sSimples.cardTitle]}>Próximas ações</Text>
+          </View>
+        </View>
+        {proximasAcoes.length === 0 ? (
+          <View style={s.acaoConcluida}>
+            <AppIcon name="checkmark-circle" set="Ionicons" size={22} color={theme.colors.success} />
+            <Text style={s.acaoConcluidaText}>Tudo em dia por aqui!</Text>
+          </View>
+        ) : (
+          proximasAcoes.map(acao => (
+            <Pressable key={acao.id} style={s.acaoRow} onPress={acao.onPress} accessibilityRole="button" accessibilityLabel={acao.title}>
+              <View style={[s.acaoIcon, { backgroundColor: `${acao.color}1f` }]}>
+                <AppIcon name={acao.icon} set="Ionicons" size={19} color={acao.color} />
+              </View>
+              <View style={s.acaoCopy}>
+                <Text style={s.acaoTitle}>{acao.title}</Text>
+                <Text style={s.acaoSubtitle}>{acao.subtitle}</Text>
+              </View>
+              <AppIcon name="chevron-forward" set="Ionicons" size={18} color={theme.colors.textMuted} />
+            </Pressable>
+          ))
+        )}
+      </View>
+
       {/* Pet card — no modo simples, só nome e espécie */}
       <View style={s.card}>
         <View style={s.cardHead}>
@@ -253,7 +294,7 @@ export default function DashboardScreen() {
             const sb = STATUS_EXIBICAO_BADGE[e.statusExibicao];
             const isLast = idx === proximos.length - 1;
             return (
-              <View key={e.id} style={[s.eventoRow, modoSimples && sSimples.eventoRow, !isLast && s.eventoRowBorder]}>
+              <Pressable key={e.id} style={[s.eventoRow, modoSimples && sSimples.eventoRow, !isLast && s.eventoRowBorder]} onPress={() => router.push({ pathname: '/evento/[id]', params: { id: e.id } })} accessibilityRole="button" accessibilityLabel={`Ver detalhes de ${e.nomeTipoEvento}`}>
                 <View style={[s.eventoIcone, modoSimples && sSimples.eventoIcone, { backgroundColor: visual.cor }]}>
                   <AppIcon name={visual.icon} set={visual.iconSet} size={modoSimples ? 24 : 18} color={theme.colors.onPrimary} />
                 </View>
@@ -264,7 +305,7 @@ export default function DashboardScreen() {
                 <View style={[s.badge, { backgroundColor: sb.bg }]}>
                   <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
                 </View>
-              </View>
+              </Pressable>
             );
           })
         )}
@@ -371,6 +412,24 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     elevation: 2,
   },
+  acoesCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 22,
+    marginBottom: 18,
+    overflow: 'hidden',
+    shadowColor: theme.colors.text,
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+  acaoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.border },
+  acaoIcon: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  acaoCopy: { flex: 1, marginLeft: 11 },
+  acaoTitle: { color: theme.colors.text, fontSize: 13, fontWeight: '800' },
+  acaoSubtitle: { color: theme.colors.textSecondary, fontSize: 11, marginTop: 3 },
+  acaoConcluida: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 18, paddingBottom: 18 },
+  acaoConcluidaText: { color: theme.colors.success, fontSize: 13, fontWeight: '700' },
   cardHead: {
     paddingHorizontal: 18,
     paddingTop: 18,
