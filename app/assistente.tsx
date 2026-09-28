@@ -13,7 +13,7 @@ import { mostrarToast } from '../components/ui/Toast';
 import type { AppTheme } from '../constants/theme';
 const DURACAO_TRANSICAO_TECLADO = 250;
 
-type Mensagem = { id: number; autoria: 'usuario' | 'sia'; texto: string; erro?: boolean };
+type Mensagem = { id: number; autoria: 'usuario' | 'sia'; texto: string; erro?: boolean; acao?: { id: string; resumo: string; requerConfirmacao: boolean } };
 
 const SUGESTOES_TUTOR = [
   { icon: 'calendar-outline' as const, texto: 'Quero agendar uma consulta para meu pet' },
@@ -100,6 +100,20 @@ export default function AssistenteScreen() {
     Animated.spring(deslocamento, { toValue: 0, useNativeDriver: true }).start();
   }
 
+  async function confirmarAcao(mensagem: Mensagem) {
+    if (!mensagem.acao || carregando) return;
+    setCarregando(true);
+    try {
+      const resposta = await iaService.confirmarAcao(mensagem.acao.id);
+      setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'sia', texto: resposta.texto }]);
+    } catch (erro) {
+      const detalhe = erro instanceof Error ? erro.message : 'Não foi possível confirmar a ação.';
+      setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'sia', texto: detalhe, erro: true }]);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
   async function enviar(textoDireto?: string) {
     const texto = (textoDireto ?? entrada).trim();
     if (!texto || carregando) return;
@@ -157,6 +171,11 @@ export default function AssistenteScreen() {
           {item.autoria === 'sia' && <View style={[s.avatar, item.erro && s.avatarError]}><Ionicons name={item.erro ? 'alert-circle-outline' : 'sparkles'} size={15} color={item.erro ? theme.colors.danger : theme.colors.primary} /></View>}
           <View style={[s.bubble, item.autoria === 'usuario' ? s.bubbleUser : s.bubbleSia, item.erro && s.bubbleError]}>
             <Text style={[s.messageText, item.autoria === 'usuario' && s.messageTextUser, item.erro && s.messageTextError]}>{item.texto}</Text>
+            {item.acao?.requerConfirmacao && (
+              <Pressable style={s.confirmAction} onPress={() => confirmarAcao(item)} disabled={carregando}>
+                <Text style={s.confirmActionText}>Confirmar ação</Text>
+              </Pressable>
+            )}
           </View>
         </View>)}
         {carregando && <View style={s.messageRow}><View style={s.avatar}><Ionicons name="sparkles" size={15} color={theme.colors.primary} /></View><View style={[s.bubble, s.bubbleSia]}><Text style={s.thinking}>SIA está pensando…</Text></View></View>}
@@ -190,5 +209,6 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   welcome: { alignItems: 'center', paddingTop: 22, paddingHorizontal: 12, marginBottom: 'auto' }, siaMark: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle, marginBottom: 15 }, welcomeTitle: { color: theme.colors.text, fontSize: 22, lineHeight: 28, fontWeight: '800', textAlign: 'center' }, welcomeText: { color: theme.colors.textSecondary, fontSize: 14, lineHeight: 20, textAlign: 'center', marginTop: 7, maxWidth: 360 },
   suggestionsAnimated: { overflow: 'hidden' }, suggestions: { borderRadius: 18, backgroundColor: theme.colors.surfaceSubtle, overflow: 'hidden' }, suggestion: { minHeight: 62, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: theme.colors.border }, pressed: { opacity: 0.7 }, suggestionIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface, marginRight: 11 }, suggestionText: { flex: 1, color: theme.colors.text, fontSize: 13, lineHeight: 18, fontWeight: '600', marginRight: 7 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 12, maxWidth: '88%' }, messageRowUser: { alignSelf: 'flex-end', justifyContent: 'flex-end' }, avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle, marginRight: 7 }, avatarError: { backgroundColor: theme.colors.dangerBackground }, bubble: { borderRadius: 17, paddingHorizontal: 13, paddingVertical: 10 }, bubbleSia: { backgroundColor: theme.colors.surfaceSubtle, borderBottomLeftRadius: 5 }, bubbleUser: { backgroundColor: theme.colors.primary, borderBottomRightRadius: 5 }, bubbleError: { backgroundColor: theme.colors.dangerBackground, borderWidth: 1, borderColor: theme.colors.danger }, messageText: { color: theme.colors.text, fontSize: 14, lineHeight: 20 }, messageTextUser: { color: theme.colors.onPrimary }, messageTextError: { color: theme.colors.danger }, thinking: { color: theme.colors.textSecondary, fontSize: 13, fontStyle: 'italic' },
+  confirmAction: { marginTop: 10, borderRadius: 9, backgroundColor: theme.colors.primary, paddingVertical: 8, paddingHorizontal: 12, alignSelf: 'flex-start' }, confirmActionText: { color: theme.colors.onPrimary, fontSize: 12, fontWeight: '800' },
   safety: { color: theme.colors.textMuted, fontSize: 9, textAlign: 'center', paddingHorizontal: 14, paddingBottom: 5 }, composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 9, paddingHorizontal: 14, paddingTop: 7, paddingBottom: 8, backgroundColor: theme.colors.surface }, composerField: { flex: 1, minHeight: 48, maxHeight: 108, flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.input, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 24, overflow: 'hidden' }, attach: { width: 44, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }, input: { flex: 1, minHeight: 46, maxHeight: 106, paddingLeft: 0, paddingRight: 14, paddingVertical: 12, color: theme.colors.text, fontSize: 16, textAlignVertical: 'top' }, send: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary }, sendDisabled: { backgroundColor: theme.colors.surfaceSubtle },
 });
