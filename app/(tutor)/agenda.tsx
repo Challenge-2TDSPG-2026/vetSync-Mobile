@@ -219,6 +219,8 @@ export default function AgendaScreen() {
             title="Nenhum evento nesse dia"
             subtitle="Toque em outra data ou adicione um novo evento"
             accentColor={theme.colors.primary}
+            actionLabel="Adicionar evento"
+            onAction={() => router.push('/add-evento')}
             style={modoSimples ? sSimples.empty : undefined}
           />
         ) : (
