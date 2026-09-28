@@ -28,8 +28,10 @@ describe('pushNotificationService', () => {
   it('registra o Expo Push Token no endpoint autenticado', async () => {
     await registrarTokenPush('ExponentPushToken[token]');
 
-    expect(api.post).toHaveBeenCalledWith('/notificacoes/registrar-token', {
+    expect(api.post).toHaveBeenCalledWith('/notificacoes/dispositivos', {
       token: 'ExponentPushToken[token]',
+      plataforma: 'WEB',
+      fusoHorario: expect.any(String),
     });
   });
 
