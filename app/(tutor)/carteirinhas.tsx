@@ -3,6 +3,8 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
+import { useAuth } from '../../context/AuthContext';
+import { useCarteiraVacinacao } from '../../hooks/usePetHealth';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
@@ -21,6 +23,8 @@ export default function CarteirinhasScreen() {
   const { modoSimples } = useAccessibility();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-carteirinhas');
   const { pets, petAtivo, petAtivoId, selecionarPet, eventos, carregandoEventos } = usePet();
+  const { autenticado } = useAuth();
+  const carteira = useCarteiraVacinacao(petAtivoId, autenticado);
   const [petCarteira, setPetCarteira] = useState<Pet | null>(null);
 
   const vacinas = useMemo(
@@ -32,6 +36,11 @@ export default function CarteirinhasScreen() {
     .filter(evento => statusExibicao(evento) === 'AGENDADO')
     .sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime());
   const proximaVacina = proximas[0];
+  const vacinasApi = carteira.data?.vacinas ?? [];
+  const resumoApi = carteira.data?.resumo;
+  const proximaApi = vacinasApi
+    .filter(vacina => vacina.proximaDoseEm && vacina.status !== 'ATRASADA')
+    .sort((a, b) => new Date(a.proximaDoseEm as string).getTime() - new Date(b.proximaDoseEm as string).getTime())[0];
 
   function abrirCarteira(pet: Pet) {
     selecionarPet(pet.id);
@@ -71,11 +80,11 @@ export default function CarteirinhasScreen() {
           {carregandoEventos ? <ActivityIndicator size="small" color={theme.colors.primary} /> : null}
         </View>
         <View style={[s.resumoCard, modoSimples && sSimples.resumoCard]}>
-          <Resumo styles={s} valor={vacinas.length} rotulo="Vacinas" cor={theme.colors.primary} simples={modoSimples} />
+          <Resumo styles={s} valor={resumoApi ? resumoApi.emDia + resumoApi.vencendo + resumoApi.atrasadas : vacinas.length} rotulo="Vacinas" cor={theme.colors.primary} simples={modoSimples} />
           <View style={s.resumoDivisor} />
-          <Resumo styles={s} valor={realizadas} rotulo="Realizadas" cor={theme.colors.success} simples={modoSimples} />
+          <Resumo styles={s} valor={resumoApi ? resumoApi.emDia : realizadas} rotulo="Realizadas" cor={theme.colors.success} simples={modoSimples} />
           <View style={s.resumoDivisor} />
-          <Resumo styles={s} valor={proximas.length} rotulo="Próximas" cor={theme.colors.warning} simples={modoSimples} />
+          <Resumo styles={s} valor={resumoApi ? resumoApi.vencendo : proximas.length} rotulo="Próximas" cor={theme.colors.warning} simples={modoSimples} />
         </View>
 
         <View style={[s.proximaCard, modoSimples && sSimples.proximaCard]}>
@@ -84,14 +93,14 @@ export default function CarteirinhasScreen() {
           </View>
           <View style={s.proximaInfo}>
             <Text style={[s.proximaRotulo, modoSimples && sSimples.proximaRotulo]}>PRÓXIMA VACINA</Text>
-            {proximaVacina ? (
+            {proximaApi || proximaVacina ? (
               <>
                 <Text style={[s.proximaTitulo, modoSimples && sSimples.proximaTitulo]} numberOfLines={1}>
-                  {proximaVacina.nomeTipoEvento}
+                  {proximaApi?.nome ?? proximaVacina?.nomeTipoEvento}
                 </Text>
                 <Text style={[s.proximaMeta, modoSimples && sSimples.proximaMeta]}>
-                  {formatarDataEvento(proximaVacina.data)}
-                  {proximaVacina.nomeVeterinario ? ` · ${proximaVacina.nomeVeterinario}` : ''}
+                  {proximaApi?.proximaDoseEm ? formatarDataEvento(proximaApi.proximaDoseEm) : formatarDataEvento(proximaVacina!.data)}
+                  {(proximaApi?.veterinario ?? proximaVacina?.nomeVeterinario) ? ` · ${proximaApi?.veterinario ?? proximaVacina?.nomeVeterinario}` : ''}
                 </Text>
               </>
             ) : (
