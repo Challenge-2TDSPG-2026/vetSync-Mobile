@@ -30,7 +30,7 @@ onlineManager.setEventListener(setOnline => NetInfo.addEventListener(state => {
   setOnline(state.isConnected !== false && state.isInternetReachable !== false);
 }));
 
-const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'verificar-codigo', 'redefinir-senha', 'modo-simples', 'gerenciar-acessos'];
+const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'evento', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'verificar-codigo', 'redefinir-senha', 'modo-simples', 'gerenciar-acessos'];
 
 function RootNavigator() {
   const { sessao, autenticado, carregando: carregandoAuth } = useAuth();
@@ -126,6 +126,10 @@ function RootNavigator() {
         <Stack.Screen
           name="paciente/[id]"
           options={{ headerShown: true, animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="evento/[id]"
+          options={{ headerShown: false, animation: 'slide_from_right' }}
         />
         <Stack.Screen
           name="assistente"
