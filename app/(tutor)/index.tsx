@@ -286,6 +286,8 @@ export default function DashboardScreen() {
             title="Nenhum evento pendente"
             subtitle="Adicione eventos de saúde para o seu pet"
             accentColor={theme.colors.primary}
+            actionLabel="Adicionar evento"
+            onAction={() => router.push('/add-evento')}
             style={[s.emptyEventos, modoSimples && sSimples.emptyEventos]}
           />
         ) : (
