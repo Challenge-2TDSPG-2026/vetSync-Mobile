@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { GestureResponderEvent } from 'react-native';
+import { ActivityIndicator, Image, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { GestureResponderEvent, PanResponderGestureState, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import type { ArquivoUpload } from '../../services/api/httpClient';
@@ -32,6 +32,9 @@ function distanciaEntreToques(toques: readonly { pageX: number; pageY: number }[
 function limitar(valor: number, max: number): number {
   return Math.min(Math.max(valor, -max), max);
 }
+
+// Na web, evita que o navegador use o arrasto/pinch para rolar a página ou dar zoom na tela.
+const webGesto = Platform.OS === 'web' ? ({ touchAction: 'none', cursor: 'grab', userSelect: 'none' } as unknown as ViewStyle) : undefined;
 
 /** Enquadramento manual: o usuário arrasta e ajusta o zoom pra escolher a área quadrada antes de enviar ao backend. */
 export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
@@ -78,36 +81,58 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
     setTy(v => limitar(v, maxTy));
   }
 
+  // O PanResponder é criado uma única vez, então seus callbacks enxergariam o estado da 1ª renderização
+  // (imagem ainda sem dimensões => limites de arrasto = 0). Guardamos os handlers mais recentes num ref
+  // e o PanResponder sempre chama a versão atual.
+  const handlers = useRef<{
+    grant: (evt: GestureResponderEvent) => void;
+    move: (evt: GestureResponderEvent, g: PanResponderGestureState) => void;
+  }>({ grant: () => {}, move: () => {} });
+
+  handlers.current = {
+    grant: evt => {
+      const toques = evt.nativeEvent.touches;
+      gesto.current.startTx = tx;
+      gesto.current.startTy = ty;
+      gesto.current.startScale = userScale;
+      gesto.current.startDist = toques && toques.length >= 2 ? distanciaEntreToques(toques) : 0;
+    },
+    // No navegador (mouse), nem sempre o array "touches" vem preenchido — por isso o arrasto
+    // usa gestureState.dx/dy, que o PanResponder calcula de forma confiável tanto pra touch quanto mouse.
+    move: (evt, gestureState) => {
+      const toques = evt.nativeEvent.touches;
+      if (toques && toques.length >= 2) {
+        const dist = distanciaEntreToques(toques);
+        if (gesto.current.startDist === 0) {
+          // segundo dedo entrou no meio do gesto: começa o pinch a partir daqui
+          gesto.current.startDist = dist;
+          gesto.current.startScale = userScale;
+        }
+        aplicarZoom(gesto.current.startScale * (dist / gesto.current.startDist));
+        return;
+      }
+      if (gesto.current.startDist !== 0) {
+        // voltou a 1 dedo depois do pinch: re-ancora o arrasto na posição atual
+        gesto.current.startDist = 0;
+        gesto.current.startTx = tx - gestureState.dx;
+        gesto.current.startTy = ty - gestureState.dy;
+      }
+      const { maxTx, maxTy } = limites(userScale);
+      setTx(limitar(gesto.current.startTx + gestureState.dx, maxTx));
+      setTy(limitar(gesto.current.startTy + gestureState.dy, maxTy));
+    },
+  };
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onStartShouldSetPanResponderCapture: () => true,
       onMoveShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
-      onPanResponderGrant: (evt: GestureResponderEvent) => {
-        const toques = evt.nativeEvent.touches;
-        gesto.current.startTx = tx;
-        gesto.current.startTy = ty;
-        gesto.current.startScale = userScale;
-        if (toques && toques.length >= 2) {
-          gesto.current.startDist = distanciaEntreToques(toques);
-        }
-      },
-      // No navegador (mouse), nem sempre o array "touches" vem preenchido — por isso o arrasto
-      // usa gestureState.dx/dy, que o PanResponder calcula de forma confiável tanto pra touch quanto mouse.
-      onPanResponderMove: (evt: GestureResponderEvent, gestureState) => {
-        const toques = evt.nativeEvent.touches;
-        if (toques && toques.length >= 2) {
-          const dist = distanciaEntreToques(toques);
-          if (gesto.current.startDist > 0) {
-            aplicarZoom(gesto.current.startScale * (dist / gesto.current.startDist));
-          }
-          return;
-        }
-        const { maxTx, maxTy } = limites(userScale);
-        setTx(limitar(gesto.current.startTx + gestureState.dx, maxTx));
-        setTy(limitar(gesto.current.startTy + gestureState.dy, maxTy));
-      },
+      // impede que o ScrollView do modal "roube" o gesto de arrasto
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: evt => handlers.current.grant(evt),
+      onPanResponderMove: (evt, g) => handlers.current.move(evt, g),
     })
   ).current;
 
@@ -140,7 +165,7 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
 
   return (
     <View style={s.container}>
-      <View style={[s.viewport, { borderColor: theme.colors.border }]} {...panResponder.panHandlers}>
+      <View style={[s.viewport, { borderColor: theme.colors.border }, webGesto]} {...panResponder.panHandlers}>
         {carregando ? (
           <ActivityIndicator color={theme.colors.primary} />
         ) : dimensoesImagem ? (
@@ -184,7 +209,7 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
         </Pressable>
       </View>
 
-      <Text style={[s.descricao, { color: theme.colors.textSecondary }]}>Arraste a foto para posicionar. A área dentro do círculo será usada.</Text>
+      <Text style={[s.descricao, { color: theme.colors.textSecondary }]}>Arraste para posicionar e use o zoom (ou pinça) para ajustar. A área dentro do círculo será usada.</Text>
       {erro ? <Text style={[s.erro, { color: theme.colors.danger }]} accessibilityRole="alert">{erro}</Text> : null}
       <View style={s.acoes}>
         <Pressable style={[s.secundario, { borderColor: theme.colors.border }]} onPress={onCancelar} disabled={processando} accessibilityRole="button">
