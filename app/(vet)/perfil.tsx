@@ -62,6 +62,15 @@ export default function VetPerfilScreen() {
 
         <AppearancePreferences />
 
+        <Pressable style={s.reportButton} onPress={() => router.push('/(vet)/relatorios')} accessibilityRole="button">
+          <Ionicons name="analytics-outline" size={19} color={theme.colors.primary} />
+          <View style={s.reportCopy}>
+            <Text style={s.reportTitle}>Relatórios da clínica</Text>
+            <Text style={s.reportDescription}>Acompanhe consultas, faturamento e retornos.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+
         <Text style={s.secLabel}>Dados profissionais</Text>
         <View style={s.card}>
           {[
@@ -128,4 +137,8 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
 
   btnSair: { backgroundColor: theme.colors.danger, paddingVertical: 14, borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
   btnSairText: { color: theme.colors.onPrimary, fontSize: 14, fontWeight: '700' },
+  reportButton: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, padding: 14, marginBottom: 24 },
+  reportCopy: { flex: 1 },
+  reportTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '700' },
+  reportDescription: { color: theme.colors.textSecondary, fontSize: 11, marginTop: 3 },
 });
