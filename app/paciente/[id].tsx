@@ -9,6 +9,8 @@ import { mostrarToast } from '../../components/ui/Toast';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
+import { usePerfilSaudePet } from '../../hooks/useRelatorios';
+import { useAuth } from '../../context/AuthContext';
 
 const C = {
   g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
@@ -33,6 +35,7 @@ export default function FichaPacienteScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pacientes, concluirEvento } = useVet();
+  const { autenticado } = useAuth();
 
   const [modalTipo, setModalTipo] = useState<ModalTipo>(null);
   const [eventoSelecionadoId, setEventoSelecionadoId] = useState<string | null>(null);
@@ -43,6 +46,7 @@ export default function FichaPacienteScreen() {
   const paciente = useMemo(() => pacientes.find(p => p.pet.id === id) ?? null, [pacientes, id]);
   const pet = paciente?.pet ?? null;
   const eventosDoPaciente = paciente?.eventos ?? [];
+  const perfilSaude = usePerfilSaudePet(id ?? null, autenticado && !!pet);
 
   const total = eventosDoPaciente.length;
   const concluidos = eventosDoPaciente.filter(e => e.status === 'CONCLUIDO').length;
@@ -88,6 +92,7 @@ export default function FichaPacienteScreen() {
           <Text style={s.btnVoltarText}>Voltar</Text>
         </Pressable>
       </View>
+
     );
   }
 
@@ -239,6 +244,15 @@ function StatCard({ valor, label, accentColor }: { valor: number; label: string;
   );
 }
 
+function HealthRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={s.healthRow}>
+      <Text style={s.healthLabel}>{label}</Text>
+      <Text style={s.healthValue}>{value}</Text>
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.cream },
   content: { padding: 16, paddingBottom: 40 },
@@ -264,6 +278,10 @@ const s = StyleSheet.create({
   tutorLabel: { fontSize: 10, fontWeight: '700', color: C.g700, textTransform: 'uppercase', letterSpacing: 0.5 },
   tutorNome: { fontSize: 13, fontWeight: '700', color: C.text, marginTop: 2 },
   tutorContato: { fontSize: 11, color: C.muted, marginTop: 2 },
+  healthCard: { backgroundColor: C.white, borderRadius: 12, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 16 },
+  healthRow: { paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: C.border },
+  healthLabel: { fontSize: 10, color: C.muted, fontWeight: '700', textTransform: 'uppercase' },
+  healthValue: { fontSize: 12, color: C.text, marginTop: 3, lineHeight: 17 },
 
   statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   statCard: { flex: 1, backgroundColor: C.white, borderWidth: 1, borderColor: C.border, borderRadius: 10, padding: 10, borderBottomWidth: 3 },
