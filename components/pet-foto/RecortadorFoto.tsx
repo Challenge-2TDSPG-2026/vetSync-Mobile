@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, PanResponder, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { GestureResponderEvent, PanResponderGestureState, ViewStyle } from 'react-native';
+import Svg, { ClipPath, Defs, G, Line, Path } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import type { ArquivoUpload } from '../../services/api/httpClient';
@@ -10,13 +11,17 @@ type Props = {
   uriOriginal: string;
   onConcluir: (arquivo: ArquivoUpload) => void;
   onCancelar: () => void;
+  /** Formato da moldura de recorte. O arquivo enviado é sempre um quadrado. */
+  formato?: 'circulo' | 'quadrado';
 };
 
 const TAMANHO_FINAL = 720;
-const VIEWPORT = 280;
+const STAGE_MAX = 360;
+const MARGEM_MOLDURA = 28;
 const ZOOM_MIN = 1;
-const ZOOM_MAX = 3;
-const ZOOM_PASSO = 0.35;
+const ZOOM_MAX = 4;
+const ZOOM_PASSO = 0.4;
+const ESCURECIMENTO = 0.6;
 
 function obterDimensoes(uri: string): Promise<{ largura: number; altura: number }> {
   return new Promise((resolve, reject) => {
@@ -36,18 +41,32 @@ function limitar(valor: number, max: number): number {
 // Na web, evita que o navegador use o arrasto/pinch para rolar a página ou dar zoom na tela.
 const webGesto = Platform.OS === 'web' ? ({ touchAction: 'none', cursor: 'grab', userSelect: 'none' } as unknown as ViewStyle) : undefined;
 
-/** Enquadramento manual: o usuário arrasta e ajusta o zoom pra escolher a área quadrada antes de enviar ao backend. */
-export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
+type Handlers = {
+  grant: (evt: GestureResponderEvent) => void;
+  move: (evt: GestureResponderEvent, g: PanResponderGestureState) => void;
+  fim: () => void;
+};
+
+/**
+ * Recorte no estilo Instagram: a foto ocupa toda a área, a moldura fica fixa no centro, o que está fora dela
+ * aparece escurecido e o usuário arrasta / dá zoom na foto por baixo. A moldura sempre fica 100% coberta pela foto.
+ */
+export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar, formato = 'circulo' }: Props) {
   const { theme } = useTheme();
+  const { width: larguraTela } = useWindowDimensions();
+  const STAGE = Math.min(STAGE_MAX, Math.max(240, larguraTela - 40));
+  const FRAME = STAGE - MARGEM_MOLDURA * 2;
+
   const [processando, setProcessando] = useState(false);
   const [carregando, setCarregando] = useState(true);
+  const [arrastando, setArrastando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [dimensoesImagem, setDimensoesImagem] = useState<{ largura: number; altura: number } | null>(null);
   const [tx, setTx] = useState(0);
   const [ty, setTy] = useState(0);
   const [userScale, setUserScale] = useState(1);
 
-  const gesto = useRef({ startTx: 0, startTy: 0, startScale: 1, startDist: 0, startX: 0, startY: 0 });
+  const gesto = useRef({ startTx: 0, startTy: 0, startScale: 1, startDist: 0 });
 
   useEffect(() => {
     setErro(null);
@@ -63,14 +82,16 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
       .finally(() => setCarregando(false));
   }, [uriOriginal]);
 
-  const baseScale = dimensoesImagem ? Math.max(VIEWPORT / dimensoesImagem.largura, VIEWPORT / dimensoesImagem.altura) : 1;
-  const baseLargura = dimensoesImagem ? dimensoesImagem.largura * baseScale : VIEWPORT;
-  const baseAltura = dimensoesImagem ? dimensoesImagem.altura * baseScale : VIEWPORT;
+  // Escala mínima: a foto cobre exatamente a moldura (como no Instagram). O zoom do usuário multiplica isso.
+  const baseScale = dimensoesImagem ? Math.max(FRAME / dimensoesImagem.largura, FRAME / dimensoesImagem.altura) : 1;
+  const baseLargura = dimensoesImagem ? dimensoesImagem.largura * baseScale : FRAME;
+  const baseAltura = dimensoesImagem ? dimensoesImagem.altura * baseScale : FRAME;
 
   function limites(escala: number) {
-    const maxTx = Math.max(0, (baseLargura * escala - VIEWPORT) / 2);
-    const maxTy = Math.max(0, (baseAltura * escala - VIEWPORT) / 2);
-    return { maxTx, maxTy };
+    return {
+      maxTx: Math.max(0, (baseLargura * escala - FRAME) / 2),
+      maxTy: Math.max(0, (baseAltura * escala - FRAME) / 2),
+    };
   }
 
   function aplicarZoom(novaEscalaBruta: number) {
@@ -81,13 +102,9 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
     setTy(v => limitar(v, maxTy));
   }
 
-  // O PanResponder é criado uma única vez, então seus callbacks enxergariam o estado da 1ª renderização
-  // (imagem ainda sem dimensões => limites de arrasto = 0). Guardamos os handlers mais recentes num ref
-  // e o PanResponder sempre chama a versão atual.
-  const handlers = useRef<{
-    grant: (evt: GestureResponderEvent) => void;
-    move: (evt: GestureResponderEvent, g: PanResponderGestureState) => void;
-  }>({ grant: () => {}, move: () => {} });
+  // O PanResponder é criado uma única vez, então seus callbacks enxergariam o estado da 1ª renderização.
+  // Guardamos os handlers mais recentes num ref e o PanResponder sempre chama a versão atual.
+  const handlers = useRef<Handlers>({ grant: () => {}, move: () => {}, fim: () => {} });
 
   handlers.current = {
     grant: evt => {
@@ -96,15 +113,14 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
       gesto.current.startTy = ty;
       gesto.current.startScale = userScale;
       gesto.current.startDist = toques && toques.length >= 2 ? distanciaEntreToques(toques) : 0;
+      setArrastando(true);
     },
-    // No navegador (mouse), nem sempre o array "touches" vem preenchido — por isso o arrasto
-    // usa gestureState.dx/dy, que o PanResponder calcula de forma confiável tanto pra touch quanto mouse.
+    // No navegador (mouse), "touches" nem sempre vem preenchido — o arrasto usa gestureState.dx/dy.
     move: (evt, gestureState) => {
       const toques = evt.nativeEvent.touches;
       if (toques && toques.length >= 2) {
         const dist = distanciaEntreToques(toques);
         if (gesto.current.startDist === 0) {
-          // segundo dedo entrou no meio do gesto: começa o pinch a partir daqui
           gesto.current.startDist = dist;
           gesto.current.startScale = userScale;
         }
@@ -121,6 +137,7 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
       setTx(limitar(gesto.current.startTx + gestureState.dx, maxTx));
       setTy(limitar(gesto.current.startTy + gestureState.dy, maxTy));
     },
+    fim: () => setArrastando(false),
   };
 
   const panResponder = useRef(
@@ -129,10 +146,11 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
       onStartShouldSetPanResponderCapture: () => true,
       onMoveShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
-      // impede que o ScrollView do modal "roube" o gesto de arrasto
-      onPanResponderTerminationRequest: () => false,
+      onPanResponderTerminationRequest: () => false, // o ScrollView do modal não rouba o gesto
       onPanResponderGrant: evt => handlers.current.grant(evt),
       onPanResponderMove: (evt, g) => handlers.current.move(evt, g),
+      onPanResponderRelease: () => handlers.current.fim(),
+      onPanResponderTerminate: () => handlers.current.fim(),
     })
   ).current;
 
@@ -142,9 +160,9 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
     setErro(null);
     try {
       const totalScale = baseScale * userScale;
-      const cropSize = VIEWPORT / totalScale;
-      let originX = dimensoesImagem.largura / 2 - (VIEWPORT / 2 + tx) / totalScale;
-      let originY = dimensoesImagem.altura / 2 - (VIEWPORT / 2 + ty) / totalScale;
+      const cropSize = FRAME / totalScale;
+      let originX = dimensoesImagem.largura / 2 - (FRAME / 2 + tx) / totalScale;
+      let originY = dimensoesImagem.altura / 2 - (FRAME / 2 + ty) / totalScale;
       originX = Math.min(Math.max(originX, 0), Math.max(0, dimensoesImagem.largura - cropSize));
       originY = Math.min(Math.max(originY, 0), Math.max(0, dimensoesImagem.altura - cropSize));
       const resultado = await manipulateAsync(
@@ -163,28 +181,56 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
     }
   }
 
+  // Overlay escuro com "buraco" no formato da moldura (regra evenodd).
+  const centro = STAGE / 2;
+  const raio = FRAME / 2;
+  const off = MARGEM_MOLDURA;
+  const caminhoTudo = `M0 0H${STAGE}V${STAGE}H0Z`;
+  const caminhoMoldura =
+    formato === 'circulo'
+      ? `M${centro - raio} ${centro}a${raio} ${raio} 0 1 0 ${FRAME} 0a${raio} ${raio} 0 1 0 ${-FRAME} 0Z`
+      : `M${off} ${off}h${FRAME}v${FRAME}h${-FRAME}Z`;
+  const terco = FRAME / 3;
+
   return (
     <View style={s.container}>
-      <View style={[s.viewport, { borderColor: theme.colors.border }, webGesto]} {...panResponder.panHandlers}>
+      <View style={[s.stage, { width: STAGE, height: STAGE }, webGesto]} {...panResponder.panHandlers}>
         {carregando ? (
-          <ActivityIndicator color={theme.colors.primary} />
+          <ActivityIndicator color="#fff" />
         ) : dimensoesImagem ? (
           <Image
             source={{ uri: uriOriginal }}
-            style={[
-              s.imagem,
-              {
-                width: baseLargura,
-                height: baseAltura,
-                left: (VIEWPORT - baseLargura) / 2,
-                top: (VIEWPORT - baseAltura) / 2,
-                transform: [{ translateX: tx }, { translateY: ty }, { scale: userScale }],
-              },
-            ]}
+            style={{
+              position: 'absolute',
+              width: baseLargura,
+              height: baseAltura,
+              left: (STAGE - baseLargura) / 2,
+              top: (STAGE - baseAltura) / 2,
+              transform: [{ translateX: tx }, { translateY: ty }, { scale: userScale }],
+            }}
             resizeMode="cover"
           />
         ) : null}
-        <View pointerEvents="none" style={s.moldura} />
+
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <Svg width={STAGE} height={STAGE}>
+            <Defs>
+              <ClipPath id="moldura">
+                <Path d={caminhoMoldura} />
+              </ClipPath>
+            </Defs>
+            <Path d={`${caminhoTudo}${caminhoMoldura}`} fill="#000" fillOpacity={ESCURECIMENTO} fillRule="evenodd" />
+            <Path d={caminhoMoldura} fill="none" stroke="#fff" strokeWidth={1.5} strokeOpacity={0.9} />
+            {arrastando ? (
+              <G clipPath="url(#moldura)" stroke="#fff" strokeOpacity={0.55} strokeWidth={1}>
+                <Line x1={off + terco} y1={off} x2={off + terco} y2={off + FRAME} />
+                <Line x1={off + terco * 2} y1={off} x2={off + terco * 2} y2={off + FRAME} />
+                <Line x1={off} y1={off + terco} x2={off + FRAME} y2={off + terco} />
+                <Line x1={off} y1={off + terco * 2} x2={off + FRAME} y2={off + terco * 2} />
+              </G>
+            ) : null}
+          </Svg>
+        </View>
       </View>
 
       <View style={s.zoomRow}>
@@ -209,7 +255,7 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
         </Pressable>
       </View>
 
-      <Text style={[s.descricao, { color: theme.colors.textSecondary }]}>Arraste para posicionar e use o zoom (ou pinça) para ajustar. A área dentro do círculo será usada.</Text>
+      <Text style={[s.descricao, { color: theme.colors.textSecondary }]}>Arraste a foto e use a pinça (ou os botões) para ajustar o zoom. A área dentro da moldura será usada.</Text>
       {erro ? <Text style={[s.erro, { color: theme.colors.danger }]} accessibilityRole="alert">{erro}</Text> : null}
       <View style={s.acoes}>
         <Pressable style={[s.secundario, { borderColor: theme.colors.border }]} onPress={onCancelar} disabled={processando} accessibilityRole="button">
@@ -224,10 +270,8 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar }: Props) {
 }
 
 const s = StyleSheet.create({
-  container: { alignItems: 'center', gap: 14 },
-  viewport: { width: VIEWPORT, height: VIEWPORT, borderRadius: VIEWPORT / 2, borderWidth: 1, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.05)' },
-  imagem: { position: 'absolute' },
-  moldura: { position: 'absolute', width: VIEWPORT, height: VIEWPORT, borderRadius: VIEWPORT / 2, borderWidth: 2, borderColor: 'rgba(255,255,255,0.55)' },
+  container: { alignItems: 'center', gap: 14, width: '100%' },
+  stage: { overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', borderRadius: 12 },
   zoomRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   zoomBtn: { width: 34, height: 34, borderRadius: 17, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   zoomLabel: { fontSize: 12, fontWeight: '700', minWidth: 40, textAlign: 'center' },
