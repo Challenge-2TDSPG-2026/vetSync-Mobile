@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePet } from '../../context/PetContext';
+import { useAuth } from '../../context/AuthContext';
+import { useProximasAcoes } from '../../hooks/usePetHealth';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
@@ -33,6 +35,8 @@ export default function DashboardScreen() {
   const s = useMemo(() => createStyles(theme), [theme]);
   const { modoSimples } = useAccessibility();
   const { pets, petAtivo, eventos, carregandoEventos, carregando } = usePet();
+  const { autenticado } = useAuth();
+  const acoesBackend = useProximasAcoes(petAtivo?.id ?? null, autenticado);
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-dashboard');
 
@@ -47,7 +51,7 @@ export default function DashboardScreen() {
   const proximos = [...pendentes, ...atrasados]
     .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
     .slice(0, limiteProximos);
-  const proximasAcoes = [
+  const proximasAcoesLocais = [
     atrasados.length > 0
       ? { id: 'atrasados', icon: 'alert-circle-outline', title: `${atrasados.length} evento${atrasados.length === 1 ? '' : 's'} atrasado${atrasados.length === 1 ? '' : 's'}`, subtitle: 'Veja o que precisa de atenção', color: theme.colors.danger, onPress: () => router.push('/(tutor)/agenda') }
       : null,
@@ -58,6 +62,18 @@ export default function DashboardScreen() {
       ? { id: 'perfil', icon: 'scale-outline', title: 'Atualize o peso do pet', subtitle: 'Mantenha o perfil de saúde completo', color: theme.colors.info, onPress: () => router.push('/(tutor)/perfil') }
       : null,
   ].filter((acao): acao is NonNullable<typeof acao> => acao !== null).slice(0, 3);
+  const proximasAcoes = acoesBackend.data?.length
+    ? acoesBackend.data.slice(0, 3).map(acao => ({
+      id: acao.id,
+      icon: acao.prioridade === 'ALTA' ? 'alert-circle-outline' : 'calendar-outline',
+      title: acao.titulo,
+      subtitle: acao.descricao,
+      color: acao.prioridade === 'ALTA' ? theme.colors.danger : theme.colors.primary,
+      onPress: () => acao.eventoReferenciaId
+        ? router.push(`/evento/${acao.eventoReferenciaId}`)
+        : router.push('/(tutor)/agenda'),
+    }))
+    : proximasAcoesLocais;
   const especieInfo = ESPECIES.find(e => e.valor === petAtivo?.especie);
 
   if (carregando) {
