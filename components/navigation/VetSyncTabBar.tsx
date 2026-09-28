@@ -5,6 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { usePet } from '../../context/PetContext';
+import { useVet } from '../../context/VetContext';
+import { useMeusResgates } from '../../hooks/useRecompensas';
+import { statusExibicao } from '../../utils/eventoStatus';
 import type { ThemeColors } from '../../constants/theme';
 
 // Tipo derivado diretamente do que o <Tabs tabBar={...}> do expo-router realmente entrega,
@@ -12,15 +17,18 @@ import type { ThemeColors } from '../../constants/theme';
 type TabBarRenderer = NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>;
 type VetSyncTabBarProps = Parameters<TabBarRenderer>[0];
 
-function TabItem({ label, icon, active, onPress, onLongPress, simples, colors }: { label: string; icon: React.ReactNode; active: boolean; onPress: () => void; onLongPress: () => void; simples?: boolean; colors: ThemeColors }) {
+function TabItem({ label, icon, active, onPress, onLongPress, simples, colors, badge }: { label: string; icon: React.ReactNode; active: boolean; onPress: () => void; onLongPress: () => void; simples?: boolean; colors: ThemeColors; badge?: number }) {
   const progress = useRef(new Animated.Value(active ? 1 : 0)).current;
   useEffect(() => {
     Animated.spring(progress, { toValue: active ? 1 : 0, useNativeDriver: true, friction: 7, tension: 120 }).start();
   }, [active, progress]);
   const translateY = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -13] });
   const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
-  return <Pressable accessibilityRole="button" accessibilityState={{ selected: active }} accessibilityLabel={label} onPress={onPress} onLongPress={onLongPress} style={s.item}>
-    <Animated.View style={[s.iconWrap, simples && sSimples.iconWrap, active && [s.iconWrapActive, { backgroundColor: colors.primary, shadowColor: colors.primary }], { transform: [{ translateY }, { scale }] }]}>{icon}</Animated.View>
+  return <Pressable accessibilityRole="button" accessibilityState={{ selected: active }} accessibilityLabel={badge ? `${label}, ${badge} pendência${badge === 1 ? '' : 's'}` : label} onPress={onPress} onLongPress={onLongPress} style={s.item}>
+    <Animated.View style={[s.iconWrap, simples && sSimples.iconWrap, active && [s.iconWrapActive, { backgroundColor: colors.primary, shadowColor: colors.primary }], { transform: [{ translateY }, { scale }] }]}>
+      {icon}
+      {badge ? <View style={[s.badge, { backgroundColor: colors.danger, borderColor: colors.surface }]}><Text style={s.badgeText}>{badge > 9 ? '9+' : badge}</Text></View> : null}
+    </Animated.View>
     <Text numberOfLines={1} style={[s.label, simples && sSimples.label, { color: active ? colors.primary : colors.textSecondary }]}>{label}</Text>
   </Pressable>;
 }
@@ -38,6 +46,15 @@ export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarP
   const insets = useSafeAreaInsets();
   const { modoSimples } = useAccessibility();
   const { theme } = useTheme();
+  const { sessao } = useAuth();
+  const { eventos } = usePet();
+  const { eventosDeHoje } = useVet();
+  const ehTutor = sessao?.perfil === 'TUTOR';
+  const ehVet = sessao?.perfil === 'VETERINARIO';
+  const { data: resgates = [] } = useMeusResgates(ehVet);
+  const pendenciasAgenda = eventos.filter(evento => statusExibicao(evento) === 'ATRASADO').length;
+  const pendenciasConsultas = eventosDeHoje.length;
+  const pendenciasResgates = resgates.filter(resgate => resgate.status === 'PENDENTE').length;
   const routesVisiveis = state.routes.filter(route => route.name !== 'perfil' && route.name !== 'historico');
   // A IA ocupa o centro da barra; Carteiras segue imediatamente à direita.
   const indiceDaIa = Math.min(2, routesVisiveis.length);
@@ -57,7 +74,16 @@ export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarP
         const handleLongPress = () => navigation.emit({ type: 'tabLongPress', target: route.key });
         return <React.Fragment key={route.key}>
           {index === indiceDaIa && <AssistantItem simples={modoSimples} color={theme.colors.textSecondary} />}
-          <TabItem label={label} icon={icon} active={active} onPress={handlePress} onLongPress={handleLongPress} simples={modoSimples} colors={theme.colors} />
+          <TabItem
+            label={label}
+            icon={icon}
+            active={active}
+            onPress={handlePress}
+            onLongPress={handleLongPress}
+            simples={modoSimples}
+            colors={theme.colors}
+            badge={ehTutor && route.name === 'agenda' ? pendenciasAgenda : ehVet && route.name === 'consultas' ? pendenciasConsultas : ehVet && route.name === 'resgates' ? pendenciasResgates : undefined}
+          />
         </React.Fragment>;
       })}
       {indiceDaIa === routesVisiveis.length && <AssistantItem simples={modoSimples} color={theme.colors.textSecondary} />}
@@ -71,6 +97,8 @@ const s = StyleSheet.create({
   item: { flex: 1, minWidth: 0, alignItems: 'center', justifyContent: 'flex-start' },
   iconWrap: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 24 },
   iconWrapActive: { shadowOpacity: 0.22, shadowRadius: 7, shadowOffset: { width: 0, height: 4 }, elevation: 5 },
+  badge: { position: 'absolute', top: -2, right: -2, minWidth: 19, height: 19, paddingHorizontal: 4, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
+  badgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
   label: { fontSize: 12, fontWeight: '700', marginTop: 2 },
 });
 
