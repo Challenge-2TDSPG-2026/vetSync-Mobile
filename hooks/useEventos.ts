@@ -74,4 +74,12 @@ export function useRemoverEvento() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
   });
 }
+
+export function useEventoDetalhes(id: string | null, habilitado: boolean) {
+  return useQuery({
+    queryKey: [...CHAVE_EVENTOS, 'detalhes', id] as const,
+    queryFn: () => eventoService.buscarDetalhes(id as string),
+    enabled: habilitado && !!id,
+  });
+}
  
