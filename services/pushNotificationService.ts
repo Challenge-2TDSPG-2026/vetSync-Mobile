@@ -35,7 +35,12 @@ export async function registrarTokenPush(token: string): Promise<void> {
     throw new Error('O Expo Push Token não foi fornecido.');
   }
 
-  await api.post('/notificacoes/registrar-token', { token });
+  const plataforma = Platform.OS === 'ios' ? 'IOS' : Platform.OS === 'android' ? 'ANDROID' : 'WEB';
+  await api.post('/notificacoes/dispositivos', {
+    token: token.trim(),
+    plataforma,
+    fusoHorario: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo',
+  });
 }
 
 async function registrarTokenPushUmaVez(token: string): Promise<void> {
