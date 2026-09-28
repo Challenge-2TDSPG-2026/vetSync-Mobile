@@ -1,5 +1,12 @@
 import { api } from './api/httpClient';
-import type { Veterinario, FaixaDisponibilidade, BloqueioAgenda } from '../types';
+import type {
+  Veterinario,
+  FaixaDisponibilidade,
+  BloqueioAgenda,
+  PerfilSaudePet,
+  RelatorioClinica,
+  RegistroAuditoria,
+} from '../types';
 
 interface VeterinarioResponseApi {
   idVeterinario: number;
@@ -107,5 +114,50 @@ export const veterinarioService = {
 
   async removerBloqueio(idVeterinario: string, idBloqueio: string): Promise<void> {
     await api.delete(`/veterinarios/${idVeterinario}/bloqueios/${idBloqueio}`);
+  },
+
+  async buscarRelatorio(inicio: string, fim: string): Promise<RelatorioClinica> {
+    const resposta = await api.get<{
+      consultasAgendadas: number;
+      consultasConcluidas: number;
+      cancelamentos: number;
+      faturamento: number;
+      pacientesAtendidos: number;
+      vacinasAplicadas: number;
+    }>(
+      `/veterinarios/me/relatorios/resumo?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`
+    );
+    return resposta;
+  },
+
+  async buscarPerfilSaude(idPet: string): Promise<PerfilSaudePet> {
+    return api.get<PerfilSaudePet>(`/pets/${idPet}/perfil-saude`);
+  },
+
+  async atualizarPerfilSaude(idPet: string, perfil: Omit<PerfilSaudePet, 'petId'>): Promise<PerfilSaudePet> {
+    return api.put<PerfilSaudePet>(`/pets/${idPet}/perfil-saude`, perfil);
+  },
+
+  async listarAuditoria(entidade: string, entidadeId: string): Promise<RegistroAuditoria[]> {
+    const resposta = await api.get<Array<{
+      id: number;
+      acao: string;
+      ator: string;
+      perfil: string;
+      valorAnterior?: string | null;
+      valorNovo?: string | null;
+      ocorridoEm: string;
+    }>>(
+      `/auditoria?entidade=${encodeURIComponent(entidade)}&entidadeId=${encodeURIComponent(entidadeId)}`
+    );
+    return resposta.map(item => ({
+      id: String(item.id),
+      usuarioResponsavel: item.ator,
+      perfil: item.perfil,
+      acao: item.acao,
+      dataHora: item.ocorridoEm,
+      valorAnterior: item.valorAnterior,
+      valorNovo: item.valorNovo,
+    }));
   },
 };
