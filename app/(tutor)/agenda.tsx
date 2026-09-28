@@ -231,7 +231,13 @@ export default function AgendaScreen() {
             const removendoEste = removerMutation.isPending && removerMutation.variables === item.id;
 
             return (
-              <View key={item.id} style={s.card}>
+              <Pressable
+                key={item.id}
+                style={s.card}
+                onPress={() => router.push({ pathname: '/evento/[id]', params: { id: item.id } })}
+                accessibilityRole="button"
+                accessibilityLabel={`Ver detalhes de ${item.nomeTipoEvento}`}
+              >
                 <View style={[s.cardRow, modoSimples && sSimples.cardRow]}>
                   <View style={[s.eventoIcone, modoSimples && sSimples.eventoIcone, { backgroundColor: visual.cor }]}>
                     <AppIcon name={visual.icon} set={visual.iconSet} size={modoSimples ? 26 : 20} color={theme.colors.onPrimary} />
@@ -303,7 +309,7 @@ export default function AgendaScreen() {
                     )}
                   </View>
                 </View>
-              </View>
+              </Pressable>
             );
           })
         )}
