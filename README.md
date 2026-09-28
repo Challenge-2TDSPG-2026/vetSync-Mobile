@@ -19,7 +19,7 @@ O vídeo demonstra: navegação entre telas, autenticação (login de tutor e ve
 
 O problema atacado pela CLYVO VET é a **descontinuidade do cuidado veterinário**: o tutor normalmente só aciona a clínica em emergências ou gatilhos óbvios (vacinação), negligenciando o acompanhamento preventivo contínuo.
 
-O **ClyvoVet** resolve isso unificando, em um único aplicativo, a jornada de saúde do pet e a rotina da clínica:
+A **VetSync** resolve isso unificando, em um único aplicativo, a jornada de saúde do pet e a rotina da clínica:
 
 - O **tutor** cadastra pets, agenda e acompanha eventos de saúde (vacinas, consultas, vermífugos, check-ups), consulta a carteira de vacinação digital e participa de um programa de fidelidade com pontos e recompensas.
 - O **veterinário** enxerga sua agenda, atende pacientes, conclui ou cancela consultas, define horários de disponibilidade/bloqueios e valida resgates de recompensas.
@@ -94,7 +94,7 @@ hooks/            # useEventos, usePets, useVeterinario, useRecompensas, useConq
 services/         # authService, petService, eventoService, veterinarioService,
                   # recompensaService, catalogoService, calendarService, iaService
 services/api/     # httpClient.ts — cliente HTTP único, tratamento de erros (ApiError)
-components/       # AppIcon, PetSwitcher, Calendario, navegação (ClyvoTabBar, AccountHeaderAction), carteira
+components/       # AppIcon, PetSwitcher, Calendario, navegação (VetSyncTabBar, AccountHeaderAction), carteira
 utils/            # eventoStatus (regras de status/atraso), alert (Alert.alert cross-platform)
 constants/        # api, storage, theme, events, gamification, vet
 types/            # Modelos de domínio (Pet, Evento, Veterinario, Recompensa, Resgate...)
