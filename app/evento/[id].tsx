@@ -3,10 +3,13 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
+import { useAuth } from '../../context/AuthContext';
+import { useEventoDetalhes } from '../../hooks/useEventos';
 import { useTheme } from '../../context/ThemeContext';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
+import { useAuditoria } from '../../hooks/useRelatorios';
 import type { AppTheme } from '../../constants/theme';
 
 export default function EventoDetalhesScreen() {
@@ -15,9 +18,12 @@ export default function EventoDetalhesScreen() {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const { eventos, petAtivo, carregandoEventos } = usePet();
+  const { autenticado } = useAuth();
   const evento = eventos.find(item => item.id === id);
+  const detalhes = useEventoDetalhes(id ?? null, autenticado);
+  const auditoria = useAuditoria('EVENTO', id ?? null, autenticado);
 
-  if (carregandoEventos) {
+  if (carregandoEventos || (detalhes.isLoading && !evento)) {
     return <View style={s.loading}><ActivityIndicator size="large" color={theme.colors.primary} /></View>;
   }
 
@@ -37,6 +43,7 @@ export default function EventoDetalhesScreen() {
   const visual = obterVisualTipoEvento(evento.nomeTipoEvento);
   const status = statusExibicao(evento);
   const badge = STATUS_EXIBICAO_BADGE[status];
+  const clinico = detalhes.data;
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
@@ -65,12 +72,33 @@ export default function EventoDetalhesScreen() {
         {evento.custo > 0 && <InfoRow icon="cash-outline" label="Custo" value={`R$ ${evento.custo.toFixed(2).replace('.', ',')}`} colors={theme.colors} />}
       </View>
 
-      {(evento.observacao || evento.motivoCancelamento) && (
+      {(evento.observacao || evento.motivoCancelamento || clinico?.tutorObservacao) && (
         <View style={s.card}>
           <Text style={s.sectionTitle}>{evento.status === 'CANCELADO' ? 'Motivo do cancelamento' : 'Observações'}</Text>
-          <Text style={s.description}>{evento.motivoCancelamento || evento.observacao}</Text>
+          <Text style={s.description}>{evento.motivoCancelamento || clinico?.tutorObservacao || evento.observacao}</Text>
         </View>
       )}
+
+      {clinico && (clinico.observacaoClinica || clinico.diagnostico || clinico.conduta) && (
+        <View style={s.card}>
+          <Text style={s.sectionTitle}>Informações clínicas</Text>
+          {clinico.observacaoClinica && <ClinicalRow label="Observação clínica" value={clinico.observacaoClinica} styles={s} />}
+          {clinico.diagnostico && <ClinicalRow label="Diagnóstico" value={clinico.diagnostico} styles={s} />}
+          {clinico.conduta && <ClinicalRow label="Conduta" value={clinico.conduta} styles={s} />}
+        </View>
+      )}
+
+      {auditoria.data?.length ? (
+        <View style={s.card}>
+          <Text style={s.sectionTitle}>Histórico de alterações</Text>
+          {auditoria.data.map((registro, index) => (
+            <View key={registro.id} style={[s.auditRow, index > 0 && s.auditDivider]}>
+              <Text style={s.auditAction}>{registro.acao}</Text>
+              <Text style={s.auditMeta}>{registro.usuarioResponsavel} • {new Date(registro.dataHora).toLocaleString('pt-BR')}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
 
       <Pressable style={s.secondaryButton} onPress={() => router.push('/(tutor)/agenda')}>
         <Ionicons name="calendar-outline" size={18} color={theme.colors.primary} />
@@ -78,6 +106,10 @@ export default function EventoDetalhesScreen() {
       </Pressable>
     </ScrollView>
   );
+}
+
+function ClinicalRow({ label, value, styles }: { label: string; value: string; styles: ReturnType<typeof createStyles> }) {
+  return <View style={styles.clinicalRow}><Text style={styles.clinicalLabel}>{label}</Text><Text style={styles.description}>{value}</Text></View>;
 }
 
 function InfoRow({ icon, label, value, colors }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string; colors: AppTheme['colors'] }) {
@@ -111,6 +143,12 @@ function createStyles(theme: AppTheme) {
     card: { marginHorizontal: 16, marginBottom: 14, padding: 18, borderRadius: 18, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border },
     sectionTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '800', marginBottom: 10 },
     description: { color: theme.colors.textSecondary, lineHeight: 22 },
+    clinicalRow: { marginBottom: 12 },
+    clinicalLabel: { color: theme.colors.textMuted, fontSize: 12, fontWeight: '700', marginBottom: 3 },
+    auditRow: { paddingVertical: 8 },
+    auditDivider: { borderTopWidth: 1, borderTopColor: theme.colors.border },
+    auditAction: { color: theme.colors.text, fontSize: 13, fontWeight: '700' },
+    auditMeta: { color: theme.colors.textMuted, fontSize: 11, marginTop: 3 },
     primaryButton: { marginTop: 20, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 13, backgroundColor: theme.colors.primary },
     primaryButtonText: { color: theme.colors.onPrimary, fontWeight: '800' },
     secondaryButton: { margin: 16, marginTop: 2, minHeight: 50, borderRadius: 14, borderWidth: 1, borderColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
