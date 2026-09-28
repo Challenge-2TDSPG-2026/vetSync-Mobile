@@ -168,8 +168,11 @@ export default function VetDashboardScreen() {
           <EmptyState
             icon="checkmark-done-outline"
             title="Nenhum atendimento agendado"
+            subtitle="Os próximos atendimentos aparecerão aqui."
             accentColor={theme.colors.primary}
             variant="plain"
+            actionLabel="Ver consultas"
+            onAction={() => router.push('/(vet)/consultas')}
           />
         ) : (
           [...eventosAgendados]
