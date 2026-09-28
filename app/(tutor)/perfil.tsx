@@ -125,6 +125,16 @@ export default function PerfilScreen() {
             onPress={() => router.push('/(tutor)/historico')}
             simples={modoSimples}
           />
+          <View style={s.divider} />
+          <AccountAction
+            styles={s}
+            theme={theme}
+            icon="notifications-outline"
+            title="Notificações e preferências"
+            description="Gerencie seus lembretes e avisos"
+            onPress={() => router.push('/(tutor)/notificacoes')}
+            simples={modoSimples}
+          />
         </View>
 
         <AppearancePreferences />
