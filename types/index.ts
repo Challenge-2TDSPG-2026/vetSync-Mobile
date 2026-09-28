@@ -80,3 +80,38 @@ export interface BloqueioAgenda {
   dataFim: string;
   motivo?: string;
 }
+
+export interface PerfilSaudePet {
+  petId: string;
+  pesoAtual: string | null;
+  pesoAtualizadoEm: string | null;
+  alergias: string | null;
+  medicamentosContinuos: string | null;
+  restricoesAlimentares: string | null;
+  condicoesPreExistentes: string | null;
+  observacoesImportantes: string | null;
+  contatoEmergencia: string | null;
+  veterinarioPreferencialId: string | null;
+}
+
+export interface RelatorioClinica {
+  consultasAgendadas: number;
+  consultasConcluidas: number;
+  cancelamentos: number;
+  faltas?: number;
+  faturamento: number;
+  pacientesAtendidos: number;
+  retornosPendentes?: number;
+  vacinasAplicadas: number;
+  tempoMedioConclusaoHoras?: number;
+}
+
+export interface RegistroAuditoria {
+  id: string;
+  usuarioResponsavel: string;
+  perfil: string;
+  acao: string;
+  dataHora: string;
+  valorAnterior?: string | null;
+  valorNovo?: string | null;
+}
