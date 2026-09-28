@@ -99,11 +99,11 @@ const s = StyleSheet.create({
   iconWrapActive: { shadowOpacity: 0.22, shadowRadius: 7, shadowOffset: { width: 0, height: 4 }, elevation: 5 },
   badge: { position: 'absolute', top: -2, right: -2, minWidth: 19, height: 19, paddingHorizontal: 4, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
-  label: { fontSize: 12, fontWeight: '700', marginTop: 2 },
+  label: { fontSize: 11, fontWeight: '700', marginTop: 2, maxWidth: '100%', paddingHorizontal: 2, textAlign: 'center' },
 });
 
 /** Overrides do modo simples (~35% maior que o padrão): ícones, rótulos e área de toque bem maiores. */
 const sSimples = StyleSheet.create({
   iconWrap: { width: 64, height: 64, borderRadius: 32 },
-  label: { fontSize: 16, marginTop: 3 },
+  label: { fontSize: 14, marginTop: 3 },
 });

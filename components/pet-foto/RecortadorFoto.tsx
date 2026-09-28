@@ -159,23 +159,35 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar, formato = 
     setProcessando(true);
     setErro(null);
     try {
+      // Área escolhida, em frações (0..1) da foto exibida na tela.
       const totalScale = baseScale * userScale;
-      const cropSize = FRAME / totalScale;
-      let originX = dimensoesImagem.largura / 2 - (FRAME / 2 + tx) / totalScale;
-      let originY = dimensoesImagem.altura / 2 - (FRAME / 2 + ty) / totalScale;
-      originX = Math.min(Math.max(originX, 0), Math.max(0, dimensoesImagem.largura - cropSize));
-      originY = Math.min(Math.max(originY, 0), Math.max(0, dimensoesImagem.altura - cropSize));
+      const fracLado = FRAME / totalScale; // lado do recorte em px da foto exibida
+      const fracX = (dimensoesImagem.largura / 2 - (FRAME / 2 + tx) / totalScale) / dimensoesImagem.largura;
+      const fracY = (dimensoesImagem.altura / 2 - (FRAME / 2 + ty) / totalScale) / dimensoesImagem.altura;
+
+      // Lê as dimensões REAIS do arquivo (podem diferir das de Image.getSize por causa de EXIF/orientação).
+      // Se o crop usar medidas fora da imagem real, o módulo nativo lança "crop rectangle is outside source image".
+      const real = await manipulateAsync(uriOriginal, [], { compress: 1, format: SaveFormat.JPEG });
+      const largReal = real.width;
+      const altReal = real.height;
+
+      const lado = Math.max(1, Math.floor(Math.min(fracLado * (largReal / dimensoesImagem.largura), fracLado * (altReal / dimensoesImagem.altura), largReal, altReal)));
+      const originX = Math.floor(Math.min(Math.max(fracX * largReal, 0), Math.max(0, largReal - lado)));
+      const originY = Math.floor(Math.min(Math.max(fracY * altReal, 0), Math.max(0, altReal - lado)));
+
       const resultado = await manipulateAsync(
-        uriOriginal,
+        real.uri,
         [
-          { crop: { originX, originY, width: cropSize, height: cropSize } },
+          { crop: { originX, originY, width: lado, height: lado } },
           { resize: { width: TAMANHO_FINAL, height: TAMANHO_FINAL } },
         ],
         { compress: 0.8, format: SaveFormat.JPEG }
       );
       onConcluir({ uri: resultado.uri, nome: 'foto-pet.jpg', tipoMime: 'image/jpeg' });
-    } catch {
-      setErro('Não foi possível preparar esta foto. Escolha outra imagem e tente novamente.');
+    } catch (e) {
+      console.warn('[RecortadorFoto] falha ao recortar', e);
+      const detalhe = e instanceof Error ? e.message : String(e);
+      setErro(`Não foi possível preparar esta foto. Escolha outra imagem e tente novamente.\n(${detalhe.slice(0, 140)})`);
     } finally {
       setProcessando(false);
     }

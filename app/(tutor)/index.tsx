@@ -84,6 +84,7 @@ export default function DashboardScreen() {
   if (!petAtivo) return null;
 
   const artigoPet = petAtivo.sexo === 'femea' ? 'a' : 'o';
+  const nomePet = petAtivo.nome.trim();
 
   return (
     <ScrollView
@@ -123,13 +124,13 @@ export default function DashboardScreen() {
         <AppIcon name="paw" set="MaterialCommunityIcons" size={21} color="rgba(191,233,213,0.5)" style={s.welcomePaw2} />
 
         <View style={s.welcomeTop}>
-          <View style={s.heroSealWrap}>
-            <View style={s.heroSealGlowOuter} />
-            <View style={s.heroSealGlowInner} />
-            <View style={s.heroSeal}>
+          <View style={[s.heroSealWrap, modoSimples && sSimples.heroSealWrap]}>
+            <View style={[s.heroSealGlowOuter, modoSimples && sSimples.heroSealGlowOuter]} />
+            <View style={[s.heroSealGlowInner, modoSimples && sSimples.heroSealGlowInner]} />
+            <View style={[s.heroSeal, modoSimples && sSimples.heroSeal]}>
               <PetFoto
                 pet={petAtivo}
-                size={modoSimples ? 48 : 48}
+                size={modoSimples ? 102 : 86}
                 color={theme.colors.onNavigation}
                 backgroundColor="transparent"
                 accessibilityLabel={`Foto de ${petAtivo.nome}`}
@@ -149,7 +150,7 @@ export default function DashboardScreen() {
 
         <View style={s.welcomeInfo}>
           <Text style={s.welcomeEyebrow}>CUIDADO DIÁRIO</Text>
-          <Text style={[s.welcomeNome, modoSimples && sSimples.welcomeNome]}>Como está {artigoPet} {petAtivo.nome}?</Text>
+          <Text style={[s.welcomeNome, modoSimples && sSimples.welcomeNome]}>Como está {artigoPet} {nomePet}?</Text>
           {!modoSimples && <Text style={s.welcomeSub}>Acompanhe cada cuidado e mantenha a saúde em dia.</Text>}
         </View>
       </LinearGradient>
@@ -206,6 +207,17 @@ export default function DashboardScreen() {
             </View>
             <Text style={[s.cardTitle, modoSimples && sSimples.cardTitle]}>Meu pet</Text>
           </View>
+          {!modoSimples && (
+            <Pressable
+              style={s.btnProntuario}
+              onPress={() => router.push('/(tutor)/agenda')}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir agenda de saúde"
+            >
+              <AppIcon name="pulse-outline" set="Ionicons" size={15} color={theme.colors.primary} />
+              <Text style={s.btnProntuarioText}>Agenda</Text>
+            </Pressable>
+          )}
         </View>
         <View style={[s.petFeature, modoSimples && sSimples.petFeature]}>
           <AppIcon
@@ -219,7 +231,7 @@ export default function DashboardScreen() {
             <View style={[s.petAvatar, modoSimples && sSimples.petAvatar]}>
               <PetFoto
                 pet={petAtivo}
-                size={modoSimples ? 76 : 58}
+                size={modoSimples ? 100 : 84}
                 color={theme.colors.primary}
                 backgroundColor="transparent"
                 accessibilityLabel={`Foto de ${petAtivo.nome}`}
@@ -234,17 +246,6 @@ export default function DashboardScreen() {
                 </Text>
               </View>
             </View>
-            {!modoSimples && (
-              <Pressable
-                style={s.btnProntuario}
-                onPress={() => router.push('/(tutor)/agenda')}
-                accessibilityRole="button"
-                accessibilityLabel="Abrir agenda de saúde"
-              >
-                <AppIcon name="pulse-outline" set="Ionicons" size={15} color={theme.colors.primary} />
-                <Text style={s.btnProntuarioText}>Agenda</Text>
-              </Pressable>
-            )}
           </View>
           {!modoSimples && (
             <View style={s.petMetas}>
@@ -338,7 +339,7 @@ function StatCard({ styles, valor, label, accentColor, simples }: { styles: Retu
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 36 },
+  content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 48 },
 
   loadingContainer: { flex: 1, backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' },
 
@@ -347,24 +348,24 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   semPetSub: { fontSize: 13, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 19 },
 
   welcome: {
-    minHeight: 218,
+    minHeight: 250,
     borderRadius: 28,
-    padding: 22,
-    marginBottom: 18,
+    padding: 24,
+    marginBottom: 20,
     overflow: 'hidden',
   },
   welcomePawLarge: { position: 'absolute', right: -35, top: -22, transform: [{ rotate: '-18deg' }] },
   welcomePaw1: { position: 'absolute', right: 57, top: 22, transform: [{ rotate: '16deg' }] },
   welcomePaw2: { position: 'absolute', right: 28, top: 51, transform: [{ rotate: '-18deg' }] },
-  welcomeTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroSealWrap: { width: 58, height: 58, justifyContent: 'center', alignItems: 'center' },
-  heroSealGlowOuter: { position: 'absolute', width: 78, height: 78, borderRadius: 39, backgroundColor: 'rgba(242,200,121,0.12)' },
-  heroSealGlowInner: { position: 'absolute', width: 62, height: 62, borderRadius: 31, backgroundColor: 'rgba(242,200,121,0.16)' },
-  heroSeal: { width: 48, height: 48, borderRadius: 15, backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center' },
-  welcomeInfo: { marginTop: 34, maxWidth: '86%' },
+  welcomeTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  heroSealWrap: { width: 104, height: 104, justifyContent: 'center', alignItems: 'center' },
+  heroSealGlowOuter: { position: 'absolute', width: 104, height: 104, borderRadius: 52, backgroundColor: 'rgba(242,200,121,0.12)' },
+  heroSealGlowInner: { position: 'absolute', width: 98, height: 98, borderRadius: 49, backgroundColor: 'rgba(242,200,121,0.16)' },
+  heroSeal: { width: 92, height: 92, borderRadius: 46, borderWidth: 3, borderColor: 'rgba(242,200,121,0.65)', backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
+  welcomeInfo: { marginTop: 22, maxWidth: '100%' },
   welcomeEyebrow: { fontSize: 10, fontWeight: '800', letterSpacing: 1.4, color: theme.colors.onNavigation, marginBottom: 7 },
   welcomeNome: { fontSize: 27, lineHeight: 33, fontWeight: '800', color: theme.colors.onNavigation, letterSpacing: -0.6 },
-  welcomeSub: { fontSize: 14, lineHeight: 20, color: theme.colors.onNavigation, opacity: 0.88, marginTop: 8, maxWidth: 260 },
+  welcomeSub: { fontSize: 14, lineHeight: 20, color: theme.colors.onNavigation, opacity: 0.88, marginTop: 8, maxWidth: '92%' },
   welcomeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -383,8 +384,8 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     alignItems: 'stretch',
     backgroundColor: theme.colors.surface,
     borderRadius: 22,
-    marginBottom: 18,
-    paddingVertical: 14,
+    marginBottom: 20,
+    paddingVertical: 16,
     shadowColor: theme.colors.text,
     shadowOpacity: 0.07,
     shadowRadius: 14,
@@ -406,7 +407,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   card: {
     backgroundColor: theme.colors.surface,
     borderRadius: 22,
-    marginBottom: 16,
+    marginBottom: 20,
     overflow: 'hidden',
     shadowColor: theme.colors.text,
     shadowOpacity: 0.07,
@@ -417,7 +418,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   acoesCard: {
     backgroundColor: theme.colors.surface,
     borderRadius: 22,
-    marginBottom: 18,
+    marginBottom: 20,
     overflow: 'hidden',
     shadowColor: theme.colors.text,
     shadowOpacity: 0.07,
@@ -434,8 +435,8 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   acaoConcluidaText: { color: theme.colors.success, fontSize: 13, fontWeight: '700' },
   cardHead: {
     paddingHorizontal: 18,
-    paddingTop: 18,
-    paddingBottom: 12,
+    paddingTop: 20,
+    paddingBottom: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -445,13 +446,13 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   cardTitle: { fontSize: 17, fontWeight: '700', color: theme.colors.text },
   linkVer: { fontSize: 13, color: theme.colors.primary, fontWeight: '700' },
 
-  petFeature: { marginHorizontal: 14, marginBottom: 14, padding: 14, borderRadius: 18, backgroundColor: theme.colors.surfaceSubtle, overflow: 'hidden' },
+  petFeature: { marginHorizontal: 16, marginBottom: 16, padding: 16, borderRadius: 18, backgroundColor: theme.colors.surfaceSubtle, overflow: 'hidden' },
   petPawMarca: { position: 'absolute', right: -19, bottom: -34, transform: [{ rotate: '-17deg' }] },
-  petTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  petTop: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   petAvatar: {
-    width: 58,
-    height: 58,
-    borderRadius: 20,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
     backgroundColor: theme.colors.surfaceElevated,
     justifyContent: 'center',
     alignItems: 'center',
@@ -462,24 +463,24 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     elevation: 2,
   },
   petInfo: { flex: 1, minWidth: 0 },
-  petNome: { fontSize: 18, fontWeight: '800', color: theme.colors.text },
+  petNome: { fontSize: 21, fontWeight: '800', color: theme.colors.text },
   petTipoPill: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 4, marginTop: 5, maxWidth: '100%' },
-  petDetalhe: { flexShrink: 1, fontSize: 12, color: theme.colors.primary, fontWeight: '600' },
+  petDetalhe: { flexShrink: 1, fontSize: 13, color: theme.colors.primary, fontWeight: '600' },
   btnProntuario: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: theme.colors.surfaceElevated,
+    backgroundColor: theme.colors.surfaceSubtle,
     borderRadius: 999,
-    paddingHorizontal: 9,
+    paddingHorizontal: 12,
     paddingVertical: 8,
   },
   btnProntuarioText: { fontSize: 11, fontWeight: '800', color: theme.colors.primary },
-  petMetas: { flexDirection: 'row', backgroundColor: theme.colors.surfaceElevated, borderRadius: 13, marginTop: 13, paddingVertical: 10 },
-  petMetaItem: { flex: 1, minWidth: 0, paddingHorizontal: 11 },
+  petMetas: { flexDirection: 'row', backgroundColor: theme.colors.surfaceElevated, borderRadius: 14, marginTop: 16, paddingVertical: 13 },
+  petMetaItem: { flex: 1, minWidth: 0, paddingHorizontal: 14 },
   petMetaDivider: { width: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border },
   petMetaLabel: { fontSize: 9, fontWeight: '800', letterSpacing: 0.7, color: theme.colors.primary },
-  petMetaValue: { fontSize: 12, fontWeight: '700', color: theme.colors.text, marginTop: 3 },
+  petMetaValue: { fontSize: 13, fontWeight: '700', color: theme.colors.text, marginTop: 3 },
 
   eventoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 15, gap: 12 },
   eventoRowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border },
@@ -516,6 +517,10 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
 /** Modo simples: ~35% maior que o padrão, com bem menos conteúdo por tela. */
 const sSimples = StyleSheet.create({
   welcome: { padding: 30 },
+  heroSealWrap: { width: 124, height: 124 },
+  heroSealGlowOuter: { width: 124, height: 124, borderRadius: 62 },
+  heroSealGlowInner: { width: 116, height: 116, borderRadius: 58 },
+  heroSeal: { width: 108, height: 108, borderRadius: 54 },
   welcomeNome: { fontSize: 30 },
   welcomeBtn: { paddingHorizontal: 19, paddingVertical: 14 },
   welcomeBtnText: { fontSize: 19 },
@@ -529,7 +534,7 @@ const sSimples = StyleSheet.create({
   linkVer: { fontSize: 20 },
 
   petFeature: { marginHorizontal: 18, marginBottom: 18, padding: 21 },
-  petAvatar: { width: 76, height: 76, borderRadius: 38 },
+  petAvatar: { width: 108, height: 108, borderRadius: 54 },
   petNome: { fontSize: 24 },
   petDetalhe: { fontSize: 19 },
 
