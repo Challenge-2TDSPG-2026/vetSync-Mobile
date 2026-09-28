@@ -29,7 +29,7 @@ function TabItem({ label, icon, active, onPress, onLongPress, simples, colors, b
       {icon}
       {badge ? <View style={[s.badge, { backgroundColor: colors.danger, borderColor: colors.surface }]}><Text style={s.badgeText}>{badge > 9 ? '9+' : badge}</Text></View> : null}
     </Animated.View>
-    <Text numberOfLines={1} style={[s.label, simples && sSimples.label, { color: active ? colors.primary : colors.textSecondary }]}>{label}</Text>
+    <Text numberOfLines={2} style={[s.label, simples && sSimples.label, { color: active ? colors.primary : colors.textSecondary }]}>{label}</Text>
   </Pressable>;
 }
 
@@ -58,7 +58,7 @@ export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarP
   const routesVisiveis = state.routes.filter(route => route.name !== 'perfil' && route.name !== 'historico');
   // A IA ocupa o centro da barra; Carteiras segue imediatamente à direita.
   const indiceDaIa = Math.min(2, routesVisiveis.length);
-  const altura = (modoSimples ? 96 : 82) + Math.max(insets.bottom, 6);
+  const altura = (modoSimples ? 116 : 94) + Math.max(insets.bottom, 6);
   return <View style={[s.shell, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border, paddingBottom: Math.max(insets.bottom, 6), height: altura }]}>
     <View style={s.bar}>
       {routesVisiveis.map((route, index) => {
@@ -99,11 +99,11 @@ const s = StyleSheet.create({
   iconWrapActive: { shadowOpacity: 0.22, shadowRadius: 7, shadowOffset: { width: 0, height: 4 }, elevation: 5 },
   badge: { position: 'absolute', top: -2, right: -2, minWidth: 19, height: 19, paddingHorizontal: 4, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
-  label: { fontSize: 11, fontWeight: '700', marginTop: 2, maxWidth: '100%', paddingHorizontal: 2, textAlign: 'center' },
+  label: { fontSize: 11, lineHeight: 13, fontWeight: '700', marginTop: 2, maxWidth: '100%', paddingHorizontal: 2, textAlign: 'center' },
 });
 
 /** Overrides do modo simples (~35% maior que o padrão): ícones, rótulos e área de toque bem maiores. */
 const sSimples = StyleSheet.create({
   iconWrap: { width: 64, height: 64, borderRadius: 32 },
-  label: { fontSize: 14, marginTop: 3 },
+  label: { fontSize: 14, lineHeight: 17, marginTop: 3 },
 });

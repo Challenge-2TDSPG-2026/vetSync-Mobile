@@ -85,7 +85,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="recompensas"
         options={{
-          title: 'Recompensas',
+          title: 'Programa Fidelidade',
           headerTitle: 'Programa de Fidelidade',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="gift" size={size} color={color} />
