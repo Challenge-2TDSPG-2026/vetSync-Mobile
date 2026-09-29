@@ -85,12 +85,26 @@ const ESTILOS = `
   body { margin: 0; font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1a1512; }
   .pagina { padding: 40px 44px; page-break-after: always; break-after: page; }
   .pagina:last-child { page-break-after: auto; break-after: auto; }
-  .marca { color: #0e3326; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+  .cabecalho { display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; border-bottom: 3px solid #0e3326; margin-bottom: 22px; }
+  .cabecalho-marca { display: flex; align-items: center; gap: 12px; }
+  .cabecalho-logo { width: 46px; height: auto; }
+  .marca { color: #0e3326; font-size: 22px; font-weight: 800; letter-spacing: 0.4px; line-height: 1; }
+  .lema { color: #155c3f; font-size: 10px; font-weight: 700; letter-spacing: 0.9px; text-transform: uppercase; margin-top: 4px; }
+  .selo { text-align: right; font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #7a6a5e; line-height: 1.5; }
+  .selo b { color: #0e3326; }
   h1 { font-size: 22px; margin: 6px 0 4px; color: #0e3326; }
   .sub { color: #7a6a5e; font-size: 12px; margin: 0 0 24px; }
-  .cartao { background: #0e3326; color: #ffffff; border-radius: 18px; padding: 28px; margin-top: 8px; }
+  .rodape { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e6e0d6; display: flex; align-items: center; gap: 10px; font-size: 9px; line-height: 1.5; color: #7a6a5e; }
+  .rodape img { width: 22px; height: auto; flex: none; }
+  .rodape strong { color: #0e3326; }
+  .cartao { position: relative; overflow: hidden; background: linear-gradient(135deg, #0a2218 0%, #0e3326 55%, #155c3f 100%); color: #ffffff; border-radius: 18px; padding: 28px; margin-top: 8px; }
+  .cartao-marca-dagua { position: absolute; right: -18px; bottom: -22px; width: 200px; height: auto; opacity: 0.10; }
+  .cartao-topo-marca { display: flex; align-items: center; gap: 8px; }
+  .cartao-topo-marca img { width: 26px; height: auto; }
+  .cartao-topo-marca span { font-size: 15px; font-weight: 800; letter-spacing: 0.4px; color: #ffffff; text-transform: none; }
+  .cartao-faixa { height: 4px; border-radius: 2px; background: #f2c879; width: 56px; margin-top: 18px; }
   .cartao-topo { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: #f2c879; }
-  .cartao-corpo { display: flex; align-items: center; gap: 20px; margin: 26px 0; }
+  .cartao-corpo { position: relative; display: flex; align-items: center; gap: 20px; margin: 22px 0 26px; }
   .avatar { width: 84px; height: 84px; border-radius: 50%; background: #f2c879; color: #0e3326; font-size: 38px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
   .pet-nome { font-size: 30px; font-weight: 800; margin: 0; word-break: break-word; }
   .pet-meta { font-size: 14px; margin: 4px 0 0; color: #d6e6dc; }
@@ -112,20 +126,52 @@ const ESTILOS = `
   td.nome { font-weight: 800; }
   .status { display: inline-block; border-radius: 8px; padding: 3px 8px; font-size: 11px; font-weight: 800; white-space: nowrap; }
   .vazio { text-align: center; color: #7a6a5e; padding: 28px 10px; }
-  .aviso { margin-top: 24px; font-size: 10px; line-height: 1.5; color: #7a6a5e; }
 `;
+
+/** Logos embutidos como data URI (o PDF é gerado sem acesso aos arquivos do app). */
+export interface LogosPdf {
+  /** Versão branca, para fundos escuros (cartão). */
+  branco?: string | null;
+  /** Versão colorida, para fundo branco (cabeçalho e rodapé). */
+  cor?: string | null;
+}
 
 export interface DadosCarteiraPdf {
   pet: Pet;
   carteira: CarteiraVacinacao;
   geradoEm?: Date;
+  logos?: LogosPdf;
+}
+
+const LEMA = 'Cuidado contínuo para o seu pet';
+
+function imagem(src: string | null | undefined, classe: string): string {
+  // data URI gerado pelo app; só aceita imagem PNG em base64 para nunca injetar HTML.
+  return src && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(src) ? `<img class="${classe}" src="${src}" alt="" />` : '';
+}
+
+function cabecalho(logos: LogosPdf, selo: string): string {
+  return `<header class="cabecalho">
+      <div class="cabecalho-marca">
+        ${imagem(logos.cor, 'cabecalho-logo')}
+        <div><div class="marca">VetSync</div><div class="lema">${LEMA}</div></div>
+      </div>
+      <div class="selo"><b>${selo}</b><br />Documento digital VetSync</div>
+    </header>`;
+}
+
+function rodape(logos: LogosPdf, emissao: string, extra: string): string {
+  return `<footer class="rodape">
+      ${imagem(logos.cor, 'rodape-logo')}
+      <div><strong>VetSync</strong> · ${LEMA} · em parceria com a CLYVO VET.<br />${extra}Emitido em ${escaparHtml(emissao)}.</div>
+    </footer>`;
 }
 
 /**
  * Monta o HTML do PDF: página 1 = carteirinha (identificação do pet),
  * página 2 em diante = carteira de vacinação. Todo texto vindo da API é escapado.
  */
-export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date() }: DadosCarteiraPdf): string {
+export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date(), logos = {} }: DadosCarteiraPdf): string {
   const especie = ESPECIES.find(item => item.valor === pet.especie)?.label ?? 'Espécie não informada';
   const raca = pet.raca?.trim() ? ` · ${escaparHtml(pet.raca.trim())}` : '';
   const inicial = escaparHtml((pet.nome.trim()[0] ?? '?').toLocaleUpperCase('pt-BR'));
@@ -147,11 +193,16 @@ export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date() }: 
 </head>
 <body>
   <section class="pagina">
-    <div class="marca">VetSync</div>
+    ${cabecalho(logos, 'Carteirinha')}
     <h1>Carteirinha do pet</h1>
     <p class="sub">Documento de identificação digital</p>
     <div class="cartao">
-      <div class="cartao-topo"><span>Carteirinha</span><span>VetSync</span></div>
+      ${imagem(logos.branco, 'cartao-marca-dagua')}
+      <div class="cartao-topo">
+        <div class="cartao-topo-marca">${imagem(logos.branco, 'cartao-logo')}<span>VetSync</span></div>
+        <span>Carteirinha do pet</span>
+      </div>
+      <div class="cartao-faixa"></div>
       <div class="cartao-corpo">
         <div class="avatar">${inicial}</div>
         <div>
@@ -159,7 +210,7 @@ export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date() }: 
           <p class="pet-meta">${escaparHtml(especie)}${raca}</p>
         </div>
       </div>
-      <div class="cartao-rodape">Documento digital</div>
+      <div class="cartao-rodape">VetSync · ${LEMA}</div>
     </div>
     <div class="dados">
       ${campo('Espécie', escaparHtml(especie))}
@@ -171,11 +222,11 @@ export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date() }: 
       ${campo('Tutor', textoOuTraco(pet.tutor?.nome))}
       ${campo('Contato do tutor', textoOuTraco(pet.tutor?.telefone ?? pet.tutor?.email))}
     </div>
-    <p class="aviso">Emitido em ${escaparHtml(emissao)}.</p>
+    ${rodape(logos, emissao, 'Apresente esta carteirinha na clínica parceira. ')}
   </section>
 
   <section class="pagina">
-    <div class="marca">VetSync</div>
+    ${cabecalho(logos, 'Carteira de vacinação')}
     <h1>Carteira de vacinação</h1>
     <p class="sub">${escaparHtml(pet.nome)} · ${escaparHtml(especie)}${raca}</p>
     <div class="resumo">
@@ -188,7 +239,7 @@ export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date() }: 
       <thead><tr><th>Vacina</th><th>Aplicada em</th><th>Próxima dose</th><th>Veterinário</th><th>Situação</th></tr></thead>
       <tbody>${corpoTabela}</tbody>
     </table>
-    <p class="aviso">Esta carteira exibe somente registros disponíveis na conta do tutor no VetSync, emitida em ${escaparHtml(emissao)}. Para incluir ou corrigir uma vacina, fale com a clínica responsável.</p>
+    ${rodape(logos, emissao, 'Registros disponíveis na conta do tutor no VetSync. Para incluir ou corrigir uma vacina, fale com a clínica responsável. ')}
   </section>
 </body>
 </html>`;

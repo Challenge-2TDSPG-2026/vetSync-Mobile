@@ -70,6 +70,20 @@ describe('carteiraPdf', () => {
     expect(formatarDataPdf('lixo')).toBe('—');
   });
 
+  it('embute os logos VetSync e ignora valores que não sejam PNG em base64', () => {
+    const png = 'data:image/png;base64,iVBORw0KGgo=';
+    const html = montarHtmlCarteiraPdf({ pet, carteira, logos: { branco: png, cor: png } });
+    expect(html).toContain('cartao-marca-dagua');
+    expect(html).toContain('cabecalho-logo');
+    expect(html).toContain('Cuidado contínuo para o seu pet');
+    expect(html).toContain('CLYVO VET');
+
+    const malicioso = montarHtmlCarteiraPdf({ pet, carteira, logos: { branco: '"><script>x</script>', cor: 'javascript:alert(1)' } });
+    expect(malicioso).not.toContain('<script>x');
+    expect(malicioso).not.toContain('javascript:');
+    expect(malicioso).not.toContain('<img');
+  });
+
   it('gera nome de arquivo seguro', () => {
     expect(nomeArquivoCarteiraPdf({ nome: 'Luna da Silva' })).toBe('carteira-luna-da-silva.pdf');
     expect(nomeArquivoCarteiraPdf({ nome: 'Thór/Ção' })).toBe('carteira-thor-cao.pdf');
