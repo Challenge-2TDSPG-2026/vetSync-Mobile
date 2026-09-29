@@ -1,4 +1,4 @@
-export { CORES } from './theme';
+import { DOMAIN_COLORS } from './theme';
 
 export const STORAGE_KEYS = {
 
@@ -112,17 +112,17 @@ interface VisualTipoEvento {
 }
 
 const REGRAS_VISUAL_TIPO_EVENTO: { palavras: string[]; visual: VisualTipoEvento }[] = [
-  { palavras: ['vacin'], visual: { icon: 'needle', iconSet: 'MaterialCommunityIcons', cor: '#22a06b' } },
-  { palavras: ['vermif'], visual: { icon: 'bug-outline', iconSet: 'Ionicons', cor: '#9B59B6' } },
-  { palavras: ['consult'], visual: { icon: 'medical-bag', iconSet: 'MaterialCommunityIcons', cor: '#2563eb' } },
-  { palavras: ['medicamento', 'adesão', 'adesao'], visual: { icon: 'medkit-outline', iconSet: 'Ionicons', cor: '#e67e22' } },
-  { palavras: ['check-up', 'checkup'], visual: { icon: 'pulse-outline', iconSet: 'Ionicons', cor: '#1ABC9C' } },
-  { palavras: ['cirurg'], visual: { icon: 'cut-outline', iconSet: 'Ionicons', cor: '#dc3545' } },
-  { palavras: ['banho', 'tosa'], visual: { icon: 'water-outline', iconSet: 'Ionicons', cor: '#2563eb' } },
-  { palavras: ['emergênc', 'emergenc', 'triagem'], visual: { icon: 'alert-circle-outline', iconSet: 'Ionicons', cor: '#dc3545' } },
+  { palavras: ['vacin'], visual: { icon: 'needle', iconSet: 'MaterialCommunityIcons', cor: DOMAIN_COLORS.event.vaccine } },
+  { palavras: ['vermif'], visual: { icon: 'bug-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.deworming } },
+  { palavras: ['consult'], visual: { icon: 'medical-bag', iconSet: 'MaterialCommunityIcons', cor: DOMAIN_COLORS.event.grooming } },
+  { palavras: ['medicamento', 'adesão', 'adesao'], visual: { icon: 'medkit-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.medication } },
+  { palavras: ['check-up', 'checkup'], visual: { icon: 'pulse-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.checkup } },
+  { palavras: ['cirurg'], visual: { icon: 'cut-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.surgery } },
+  { palavras: ['banho', 'tosa'], visual: { icon: 'water-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.grooming } },
+  { palavras: ['emergênc', 'emergenc', 'triagem'], visual: { icon: 'alert-circle-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.surgery } },
 ];
 
-const VISUAL_PADRAO: VisualTipoEvento = { icon: 'document-text-outline', iconSet: 'Ionicons', cor: '#7a6a5e' };
+const VISUAL_PADRAO: VisualTipoEvento = { icon: 'document-text-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.other };
 
 export function obterVisualTipoEvento(nomeTipo: string): VisualTipoEvento {
   const nomeNormalizado = nomeTipo.toLowerCase();

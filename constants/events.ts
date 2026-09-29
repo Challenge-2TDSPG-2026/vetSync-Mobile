@@ -1,3 +1,4 @@
+import { DOMAIN_COLORS } from './theme';
 import type { StatusEventoExibicao } from '../types';
 
 export const ESPECIES = [
@@ -8,12 +9,12 @@ export const ESPECIES = [
 ] as const;
 
 export const TIPOS_EVENTO = [
-  { valor: 'vacina', label: 'Vacina', icon: 'needle', iconSet: 'MaterialCommunityIcons', cor: '#22a06b' },
-  { valor: 'vermifugo', label: 'Vermífugo', icon: 'bug-outline', iconSet: 'Ionicons', cor: '#9B59B6' },
-  { valor: 'consulta', label: 'Consulta', icon: 'medical-bag', iconSet: 'MaterialCommunityIcons', cor: '#2563eb' },
-  { valor: 'medicamento', label: 'Medicamento', icon: 'medkit-outline', iconSet: 'Ionicons', cor: '#e67e22' },
-  { valor: 'checkup', label: 'Check-up', icon: 'pulse-outline', iconSet: 'Ionicons', cor: '#1ABC9C' },
-  { valor: 'outro', label: 'Outro', icon: 'document-text-outline', iconSet: 'Ionicons', cor: '#7a6a5e' },
+  { valor: 'vacina', label: 'Vacina', icon: 'needle', iconSet: 'MaterialCommunityIcons', cor: DOMAIN_COLORS.event.vaccine },
+  { valor: 'vermifugo', label: 'Vermífugo', icon: 'bug-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.deworming },
+  { valor: 'consulta', label: 'Consulta', icon: 'medical-bag', iconSet: 'MaterialCommunityIcons', cor: DOMAIN_COLORS.event.consultation },
+  { valor: 'medicamento', label: 'Medicamento', icon: 'medkit-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.medication },
+  { valor: 'checkup', label: 'Check-up', icon: 'pulse-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.checkup },
+  { valor: 'outro', label: 'Outro', icon: 'document-text-outline', iconSet: 'Ionicons', cor: DOMAIN_COLORS.event.other },
 ] as const;
 
 export const SUGESTOES_TITULO: Record<string, Record<string, string[]>> = {
@@ -56,8 +57,8 @@ export const SUGESTOES_TITULO: Record<string, Record<string, string[]>> = {
 };
 
 export const STATUS_EVENTO: Record<StatusEventoExibicao, { label: string; bg: string; color: string }> = {
-  AGENDADO: { label: 'Agendado', bg: '#dbeafe', color: '#1e40af' },
-  CONCLUIDO: { label: 'Realizado', bg: '#dcfce7', color: '#166534' },
-  CANCELADO: { label: 'Cancelada', bg: '#f3f4f6', color: '#4b5563' },
-  ATRASADO: { label: 'Atrasado', bg: '#fee2e2', color: '#991b1b' },
+  AGENDADO: { label: 'Agendado', bg: DOMAIN_COLORS.eventStatus.scheduled.background, color: DOMAIN_COLORS.eventStatus.scheduled.text },
+  CONCLUIDO: { label: 'Realizado', bg: DOMAIN_COLORS.eventStatus.completed.background, color: DOMAIN_COLORS.eventStatus.completed.text },
+  CANCELADO: { label: 'Cancelada', bg: DOMAIN_COLORS.eventStatus.cancelled.background, color: DOMAIN_COLORS.eventStatus.cancelled.text },
+  ATRASADO: { label: 'Atrasado', bg: DOMAIN_COLORS.eventStatus.overdue.background, color: DOMAIN_COLORS.eventStatus.overdue.text },
 };
