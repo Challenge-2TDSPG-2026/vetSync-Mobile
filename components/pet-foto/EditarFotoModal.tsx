@@ -83,10 +83,10 @@ export function EditarFotoModal({ pet, onFechar }: Props) {
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={ocupado ? undefined : onFechar} statusBarTranslucent>
-      <View style={s.backdrop}>
+      <View style={[s.backdrop, { backgroundColor: theme.colors.overlay }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={ocupado ? undefined : onFechar} accessibilityLabel="Fechar" />
-        <View style={[s.sheet, { backgroundColor: theme.colors.surface }]} accessibilityViewIsModal>
-          <View style={[s.handle, { backgroundColor: theme.colors.border }]} />
+        <View style={[s.sheet, { backgroundColor: theme.pages.shared.card }]} accessibilityViewIsModal>
+          <View style={[s.handle, { backgroundColor: theme.pages.shared.border }]} />
           <View style={s.header}>
             <View><Text style={[s.kicker, { color: theme.colors.textSecondary }]}>FOTO DO PET</Text><Text style={[s.titulo, { color: theme.colors.text }, modoSimples && s.tituloSimples]}>{petAtual.nome}</Text></View>
             <Pressable onPress={onFechar} disabled={ocupado} hitSlop={10} accessibilityLabel="Fechar"><Ionicons name="close" size={modoSimples ? 32 : 24} color={theme.colors.text} /></Pressable>
@@ -96,7 +96,7 @@ export function EditarFotoModal({ pet, onFechar }: Props) {
               <RecortadorFoto uriOriginal={uriOriginal} onCancelar={() => setUriOriginal(null)} onConcluir={arquivo => void enviarFoto(arquivo)} />
             ) : (
               <>
-                <PetFoto pet={petAtual} size={modoSimples ? 156 : 128} backgroundColor={theme.colors.surfaceSubtle} accessibilityLabel={`Foto de ${petAtual.nome}`} />
+                <PetFoto pet={petAtual} size={modoSimples ? 156 : 128} backgroundColor={theme.pages.shared.cardSecondary} accessibilityLabel={`Foto de ${petAtual.nome}`} />
                 <Text style={[s.descricao, { color: theme.colors.textSecondary }, modoSimples && s.descricaoSimples]}>Escolha uma foto da galeria para usar no perfil e nas carteiras digitais de {petAtual.nome}.</Text>
                 {erro ? <Text style={[s.erro, { color: theme.colors.danger }]} accessibilityRole="alert">{erro}</Text> : null}
                 <Pressable style={[s.primario, { backgroundColor: theme.colors.primary }, ocupado && s.desativado]} onPress={() => void escolherDaGaleria()} disabled={ocupado} accessibilityRole="button">
@@ -114,7 +114,7 @@ export function EditarFotoModal({ pet, onFechar }: Props) {
 }
 
 const s = StyleSheet.create({
-  backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0, 0, 0, 0.48)' },
+  backdrop: { flex: 1, justifyContent: 'flex-end' },
   sheet: { maxHeight: '88%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingBottom: 28 },
   handle: { alignSelf: 'center', width: 42, height: 4, borderRadius: 2, marginTop: 10, marginBottom: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

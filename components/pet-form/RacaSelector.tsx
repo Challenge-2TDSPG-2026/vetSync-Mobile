@@ -82,7 +82,7 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
   inputWrap: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.input,
-    borderWidth: 1.5, borderColor: theme.colors.border, borderRadius: 14, paddingHorizontal: 15,
+    borderWidth: 1.5, borderColor: theme.pages.addPet.border, borderRadius: 14, paddingHorizontal: 15,
   },
   inputWrapDesativado: { opacity: 0.6 },
   icone: { marginRight: 10 },
@@ -90,13 +90,13 @@ function createStyles(theme: AppTheme) {
   ajuda: { fontSize: 13, color: theme.colors.textSecondary, marginTop: 6 },
   erro: { fontSize: 12, color: theme.colors.danger, marginTop: 6, fontWeight: '600' },
   listaSugestoes: {
-    marginTop: 8, borderRadius: 14, backgroundColor: theme.colors.surfaceElevated, borderWidth: 1, borderColor: theme.colors.border, overflow: 'hidden',
+    marginTop: 8, borderRadius: 14, backgroundColor: theme.pages.addPet.cardElevated, borderWidth: 1, borderColor: theme.pages.addPet.border, overflow: 'hidden',
     shadowColor: '#000', shadowOpacity: theme.mode === 'dark' ? 0 : 0.08, shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   sugestao: {
     flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 15,
-    paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border,
+    paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.pages.addPet.border,
   },
   textoSugestao: { fontSize: 14, color: theme.colors.text },
   });

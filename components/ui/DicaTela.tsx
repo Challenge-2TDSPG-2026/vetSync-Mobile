@@ -89,7 +89,7 @@ function createStyles(theme: AppTheme) {
     padding: 14,
     borderLeftWidth: 4,
     borderRadius: 12,
-    backgroundColor: theme.colors.surfaceSubtle,
+    backgroundColor: theme.pages.shared.cardSecondary,
   },
   iconWrap: {
     paddingTop: 1,

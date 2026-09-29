@@ -48,7 +48,7 @@ export function AccountHeaderAction({ href }: Props) {
         <Ionicons
           name="person"
           size={16}
-          color={theme.colors.navigation}
+          color={theme.components.header.accountIcon}
         />
       </View>
     </Pressable>
@@ -66,9 +66,9 @@ function createStyles(theme: AppTheme) {
       paddingRight: 4,
       paddingLeft: 10,
       borderRadius: 999,
-      backgroundColor: 'rgba(255,255,255,0.10)',
+      backgroundColor: theme.components.header.accountBackground,
       borderWidth: 1,
-      borderColor: theme.colors.navigationBorder,
+      borderColor: theme.components.header.border,
     },
 
     copy: {
@@ -77,14 +77,14 @@ function createStyles(theme: AppTheme) {
     },
 
     greeting: {
-      color: theme.colors.onNavigation,
+      color: theme.components.header.accountText,
       fontSize: 12,
       fontWeight: '800',
       maxWidth: 94,
     },
 
     caption: {
-      color: theme.colors.onNavigation,
+      color: theme.components.header.accountText,
       opacity: 0.67,
       fontSize: 8,
       letterSpacing: 0.7,
@@ -99,7 +99,7 @@ function createStyles(theme: AppTheme) {
       marginLeft: 7,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: theme.colors.surfaceSubtle,
+      backgroundColor: theme.components.header.accountIconBackground,
     },
   });
 }

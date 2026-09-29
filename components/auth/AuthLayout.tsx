@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppIcon } from '../AppIcon';
 import { useTheme } from '../../context/ThemeContext';
-import type { AppTheme } from '../../constants/theme';
+import { withAlpha, type AppTheme } from '../../constants/theme';
 
 type AuthLayoutProps = {
   title: string;
@@ -35,7 +35,7 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
-          colors={[theme.colors.navigation, theme.colors.navigationAccent]}
+          colors={[theme.pages.authentication.heroBackground, theme.pages.authentication.heroAccent]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.hero}
@@ -44,7 +44,7 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
             name="paw"
             set="MaterialCommunityIcons"
             size={230}
-            color="rgba(255,255,255,0.05)"
+            color={withAlpha(theme.pages.authentication.heroText, 0.05)}
             style={styles.pawMarca}
           />
           <AppIcon name="paw" set="MaterialCommunityIcons" size={11} color="rgba(191,233,213,0.3)" style={styles.pegada1} />
@@ -56,7 +56,7 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
               <View style={styles.seloGlowOut} />
               <View style={styles.seloGlowIn} />
               <LinearGradient
-                colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0.03)']}
+                colors={[withAlpha(theme.pages.authentication.heroText, 0.16), withAlpha(theme.pages.authentication.heroText, 0.03)]}
                 start={{ x: 0.2, y: 0 }}
                 end={{ x: 0.8, y: 1 }}
                 style={styles.seloDisco}
@@ -108,27 +108,27 @@ function createStyles(theme: AppTheme) {
     seloWrap: { width: 78, height: 78, alignItems: 'center', justifyContent: 'center' },
     seloGlowOut: {
       position: 'absolute', width: 112, height: 112, borderRadius: 56,
-      backgroundColor: 'rgba(242,200,121,0.10)',
+      backgroundColor: withAlpha(theme.colors.brandAccent, 0.10),
     },
     seloGlowIn: {
       position: 'absolute', width: 92, height: 92, borderRadius: 46,
-      backgroundColor: 'rgba(242,200,121,0.14)',
+      backgroundColor: withAlpha(theme.colors.brandAccent, 0.14),
     },
     seloDisco: {
       width: 78, height: 78, borderRadius: 39,
       alignItems: 'center', justifyContent: 'center',
-      borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',
+      borderWidth: 1, borderColor: withAlpha(theme.pages.authentication.heroText, 0.22),
       shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 12,
       shadowOffset: { width: 0, height: 6 }, elevation: 6,
     },
     seloImg: { width: 54, height: 54 },
-    marcaTexto: { fontSize: 19, fontWeight: '700', color: theme.colors.onNavigation, letterSpacing: -0.3 },
+    marcaTexto: { fontSize: 19, fontWeight: '700', color: theme.pages.authentication.heroText, letterSpacing: -0.3 },
     heroTitulo: {
-      fontSize: 32, fontWeight: '800', color: theme.colors.onNavigation,
+      fontSize: 32, fontWeight: '800', color: theme.pages.authentication.heroText,
       letterSpacing: -0.7, lineHeight: 38, marginBottom: 10, maxWidth: 300,
     },
     heroSub: {
-      fontSize: 15, fontWeight: '500', color: theme.colors.onNavigation,
+      fontSize: 15, fontWeight: '500', color: theme.pages.authentication.heroText,
       opacity: 0.8, lineHeight: 22, maxWidth: 270,
     },
     sheet: {

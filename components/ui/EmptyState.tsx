@@ -67,10 +67,10 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
   container: { alignItems: 'center', paddingHorizontal: 24, paddingVertical: 36 },
   dashed: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.pages.shared.card,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.pages.shared.border,
     borderStyle: 'dashed',
   },
   orb: { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },

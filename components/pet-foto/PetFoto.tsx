@@ -58,7 +58,7 @@ export function PetFoto({ pet, size = 48, color, backgroundColor, accessibilityL
   const uriImagem = Platform.OS === 'web' ? fotoWebUrl : pet.fotoUrl;
   const temFoto = Boolean(uriImagem) && Boolean(sessao?.token) && !falhouAoCarregar;
   const corIcone = color ?? theme.colors.primary;
-  const corFundo = backgroundColor ?? theme.colors.surface;
+  const corFundo = backgroundColor ?? theme.pages.shared.card;
   const rotulo = accessibilityLabel ?? `Foto de ${especieInfo?.label ?? 'pet'}`;
 
   return (

@@ -32,14 +32,14 @@ function CartaoCarteira({ pet, indice, ativo, simples, ampliado = false, onPress
       <Text style={s.cartaoIndice}>{String(indice + 1).padStart(2, '0')}</Text>
     </View>
     <View style={s.cartaoConteudo}>
-      <PetFoto pet={pet} size={simples ? 80 : 64} color={theme.colors.primary} backgroundColor={theme.colors.surfaceSubtle} accessibilityLabel={`Foto de ${pet.nome}`} style={s.cartaoFoto} />
+      <PetFoto pet={pet} size={simples ? 80 : 64} color={theme.pages.vaccinationWallet.walletCard.icon} backgroundColor={theme.pages.vaccinationWallet.walletCard.photoBackground} accessibilityLabel={`Foto de ${pet.nome}`} style={s.cartaoFoto} />
       <View style={s.cartaoInfo}>
         <Text style={[s.cartaoNome, simples && sSimples.cartaoNome]} numberOfLines={1}>{pet.nome}</Text>
         <Text style={[s.cartaoMeta, simples && sSimples.cartaoMeta]} numberOfLines={1}>{descricaoPet(pet)}</Text>
       </View>
     </View>
     <View style={s.cartaoRodape}>
-      <View style={s.seloDigital}><Ionicons name="shield-checkmark" size={14} color={theme.colors.onNavigation} /><Text style={s.seloDigitalTexto}>Documento digital</Text></View>
+      <View style={s.seloDigital}><Ionicons name="shield-checkmark" size={14} color={theme.pages.vaccinationWallet.walletCard.documentText} /><Text style={s.seloDigitalTexto}>Documento digital</Text></View>
       {ativo && <View style={s.seloAtivo}><Text style={s.seloAtivoTexto}>Ativa</Text></View>}
     </View>
   </Pressable>;
@@ -126,34 +126,34 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
   pilha: { marginBottom: 8, position: 'relative' },
   camada: { position: 'absolute' },
-  cartao: { minHeight: 168, borderRadius: 20, padding: 18, overflow: 'hidden', backgroundColor: theme.colors.navigation, shadowColor: '#06150e', shadowOpacity: theme.mode === 'dark' ? 0 : 0.2, shadowRadius: 9, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
+  cartao: { minHeight: 168, borderRadius: 20, padding: 18, overflow: 'hidden', backgroundColor: theme.pages.vaccinationWallet.walletCard.background, shadowColor: '#06150e', shadowOpacity: theme.mode === 'dark' ? 0 : 0.2, shadowRadius: 9, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
   cartaoAmpliado: { minHeight: 184, marginBottom: 16 },
-  cartaoAtivo: { backgroundColor: theme.colors.navigationAccent },
+  cartaoAtivo: { backgroundColor: theme.pages.vaccinationWallet.walletCard.secondaryBackground },
   cartaoAzul: { backgroundColor: theme.colors.info },
   pressed: { opacity: 0.86 },
-  orbe: { position: 'absolute', width: 170, height: 170, borderRadius: 85, backgroundColor: 'rgba(255,255,255,0.07)', right: -56, top: -82 },
+  orbe: { position: 'absolute', width: 170, height: 170, borderRadius: 85, backgroundColor: theme.pages.vaccinationWallet.walletCard.decoration, right: -56, top: -82 },
   cartaoCabecalho: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cartaoRotulo: { color: 'rgba(255,255,255,0.72)', fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.9 },
-  cartaoIndice: { color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
+  cartaoRotulo: { color: theme.pages.vaccinationWallet.walletCard.title, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.9 },
+  cartaoIndice: { color: theme.pages.vaccinationWallet.walletCard.counter, fontSize: 11, fontWeight: '800', letterSpacing: 1 },
   cartaoConteudo: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: 14, paddingVertical: 10 },
-  cartaoFoto: { borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.85)' },
-  cartaoIcone: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface, marginRight: 12 },
+  cartaoFoto: { borderWidth: 2.5, borderColor: theme.pages.vaccinationWallet.walletCard.border },
+  cartaoIcone: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.vaccinationWallet.walletCard.iconBackground, marginRight: 12 },
   cartaoInfo: { flex: 1, minWidth: 0 },
-  cartaoNome: { color: theme.colors.onNavigation, fontSize: 20, fontWeight: '800' },
-  cartaoMeta: { color: 'rgba(255,255,255,0.74)', fontSize: 13, marginTop: 3 },
+  cartaoNome: { color: theme.pages.vaccinationWallet.walletCard.petName, fontSize: 20, fontWeight: '800' },
+  cartaoMeta: { color: theme.pages.vaccinationWallet.walletCard.petInfo, fontSize: 13, marginTop: 3 },
   cartaoRodape: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   seloDigital: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  seloDigitalTexto: { color: theme.colors.onNavigation, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.45 },
-  seloAtivo: { backgroundColor: theme.colors.surfaceSubtle, borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3 },
-  seloAtivoTexto: { color: theme.colors.navigation, fontSize: 10, fontWeight: '800' },
+  seloDigitalTexto: { color: theme.pages.vaccinationWallet.walletCard.documentText, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.45 },
+  seloAtivo: { backgroundColor: theme.pages.vaccinationWallet.walletCard.activeBadgeBackground, borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3 },
+  seloAtivoTexto: { color: theme.pages.vaccinationWallet.walletCard.activeBadgeText, fontSize: 10, fontWeight: '800' },
   ajuda: { color: theme.colors.textSecondary, fontSize: 12, textAlign: 'center', marginBottom: 20 },
   modalFundo: { flex: 1, justifyContent: 'flex-end', backgroundColor: theme.colors.overlay },
-  modalConteudo: { maxHeight: '88%', minHeight: '55%', borderTopLeftRadius: 26, borderTopRightRadius: 26, overflow: 'hidden', backgroundColor: theme.colors.surfaceElevated, borderWidth: theme.mode === 'dark' ? 1 : 0, borderColor: theme.colors.border },
-  modalAlca: { width: 42, height: 5, borderRadius: 3, alignSelf: 'center', marginTop: 10, backgroundColor: theme.colors.borderStrong },
+  modalConteudo: { maxHeight: '88%', minHeight: '55%', borderTopLeftRadius: 26, borderTopRightRadius: 26, overflow: 'hidden', backgroundColor: theme.pages.vaccinationWallet.modal.cardElevated, borderWidth: theme.mode === 'dark' ? 1 : 0, borderColor: theme.pages.vaccinationWallet.modal.border },
+  modalAlca: { width: 42, height: 5, borderRadius: 3, alignSelf: 'center', marginTop: 10, backgroundColor: theme.pages.vaccinationWallet.modal.borderStrong },
   modalCabecalho: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 14 },
   modalRotulo: { color: theme.colors.primary, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 },
   modalTitulo: { color: theme.colors.text, fontSize: 23, fontWeight: '800', marginTop: 3 },
-  modalFechar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.colors.surfaceSubtle, alignItems: 'center', justifyContent: 'center' },
+  modalFechar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.pages.vaccinationWallet.modal.cardSecondary, alignItems: 'center', justifyContent: 'center' },
   modalDescricao: { color: theme.colors.textSecondary, fontSize: 13, lineHeight: 18, marginHorizontal: 20, marginTop: 8 },
   modalLista: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 34 },
   });

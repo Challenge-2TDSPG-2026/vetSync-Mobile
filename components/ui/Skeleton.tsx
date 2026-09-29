@@ -36,7 +36,7 @@ export function SkeletonBlock({ width = '100%', height = 16, borderRadius = 8, s
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={[
-        { width, height, borderRadius, backgroundColor: theme.colors.surfaceSubtle, opacity: opacidade },
+        { width, height, borderRadius, backgroundColor: theme.pages.shared.cardSecondary, opacity: opacidade },
         style,
       ]}
     />

@@ -70,11 +70,11 @@ function createStyles(theme: AppTheme) {
       alignItems: 'center',
       backgroundColor: theme.colors.input,
       borderWidth: 1.5,
-      borderColor: theme.colors.border,
+      borderColor: theme.pages.authentication.border,
       borderRadius: 16,
       paddingHorizontal: 18,
     },
-    inputWrapFocused: { borderColor: theme.colors.primary, backgroundColor: theme.colors.surfaceElevated },
+    inputWrapFocused: { borderColor: theme.colors.primary, backgroundColor: theme.pages.authentication.cardElevated },
     inputWrapError: { borderColor: theme.colors.danger },
     leadingIcon: { marginRight: 12 },
     input: {

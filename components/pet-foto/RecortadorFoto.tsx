@@ -247,7 +247,7 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar, formato = 
 
       <View style={s.zoomRow}>
         <Pressable
-          style={[s.zoomBtn, { borderColor: theme.colors.border }, userScale <= ZOOM_MIN && s.desativado]}
+          style={[s.zoomBtn, { borderColor: theme.pages.shared.border }, userScale <= ZOOM_MIN && s.desativado]}
           onPress={() => aplicarZoom(userScale - ZOOM_PASSO)}
           disabled={userScale <= ZOOM_MIN || carregando}
           accessibilityRole="button"
@@ -257,7 +257,7 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar, formato = 
         </Pressable>
         <Text style={[s.zoomLabel, { color: theme.colors.textSecondary }]}>{Math.round(userScale * 100)}%</Text>
         <Pressable
-          style={[s.zoomBtn, { borderColor: theme.colors.border }, userScale >= ZOOM_MAX && s.desativado]}
+          style={[s.zoomBtn, { borderColor: theme.pages.shared.border }, userScale >= ZOOM_MAX && s.desativado]}
           onPress={() => aplicarZoom(userScale + ZOOM_PASSO)}
           disabled={userScale >= ZOOM_MAX || carregando}
           accessibilityRole="button"
@@ -270,7 +270,7 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar, formato = 
       <Text style={[s.descricao, { color: theme.colors.textSecondary }]}>Arraste a foto e use a pinça (ou os botões) para ajustar o zoom. A área dentro da moldura será usada.</Text>
       {erro ? <Text style={[s.erro, { color: theme.colors.danger }]} accessibilityRole="alert">{erro}</Text> : null}
       <View style={s.acoes}>
-        <Pressable style={[s.secundario, { borderColor: theme.colors.border }]} onPress={onCancelar} disabled={processando} accessibilityRole="button">
+        <Pressable style={[s.secundario, { borderColor: theme.pages.shared.border }]} onPress={onCancelar} disabled={processando} accessibilityRole="button">
           <Text style={{ color: theme.colors.text }}>Cancelar</Text>
         </Pressable>
         <Pressable style={[s.primario, { backgroundColor: theme.colors.primary }, processando && s.desativado]} onPress={() => void concluir()} disabled={processando || carregando} accessibilityRole="button">

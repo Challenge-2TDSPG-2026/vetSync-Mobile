@@ -58,17 +58,17 @@ export function AppearancePreferences() {
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   wrapper: { marginBottom: 22 },
   sectionTitle: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '800', letterSpacing: 0.85, textTransform: 'uppercase', marginBottom: 10, paddingLeft: 2 },
-  card: { backgroundColor: theme.colors.surface, borderRadius: 18, borderWidth: 1, borderColor: theme.colors.border, overflow: 'hidden' },
+  card: { backgroundColor: theme.pages.shared.card, borderRadius: 18, borderWidth: 1, borderColor: theme.pages.shared.border, overflow: 'hidden' },
   option: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 13 },
-  optionSelected: { backgroundColor: theme.colors.surfaceSubtle },
-  icon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle },
+  optionSelected: { backgroundColor: theme.pages.shared.cardSecondary },
+  icon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.shared.cardSecondary },
   iconSelected: { backgroundColor: theme.colors.primary },
   copy: { flex: 1, minWidth: 0 },
   title: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
   description: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3, lineHeight: 17 },
-  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: theme.colors.borderStrong, alignItems: 'center', justifyContent: 'center' },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: theme.pages.shared.borderStrong, alignItems: 'center', justifyContent: 'center' },
   radioSelected: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-  divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border, marginLeft: 65 },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.pages.shared.border, marginLeft: 65 },
 });
 
 const sSimples = StyleSheet.create({

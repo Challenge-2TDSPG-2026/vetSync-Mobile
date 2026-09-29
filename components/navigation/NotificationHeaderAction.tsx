@@ -16,7 +16,7 @@ export function NotificationHeaderAction() {
       accessibilityLabel="Abrir notificações"
       hitSlop={8}
     >
-      <Ionicons name="notifications-outline" size={23} color={theme.colors.onNavigation} />
+      <Ionicons name="notifications-outline" size={23} color={theme.components.header.icon} />
     </Pressable>
   );
 }
