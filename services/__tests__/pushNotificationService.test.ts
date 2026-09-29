@@ -31,6 +31,7 @@ describe('pushNotificationService', () => {
     expect(api.post).toHaveBeenCalledWith('/notificacoes/dispositivos', {
       token: 'ExponentPushToken[token]',
       plataforma: 'WEB',
+      nomeDispositivo: 'Dispositivo móvel',
       fusoHorario: expect.any(String),
     });
   });
