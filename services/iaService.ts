@@ -7,7 +7,7 @@ export interface SiaHistoryMessage {
   text: string;
 }
 
-export type SiaBlockType = 'SELECIONAR_DATA' | 'SELECIONAR_TIPO_ATENDIMENTO' | 'SELECIONAR_HORARIO' | 'SELECIONAR_PET' | 'CONFIRMAR_RESERVA';
+export type SiaBlockType = 'SELECIONAR_DATA' | 'SELECIONAR_TIPO_ATENDIMENTO' | 'SELECIONAR_HORARIO' | 'SELECIONAR_PET' | 'SELECIONAR_PET_ACOMPANHAMENTO' | 'CONFIRMAR_RESERVA';
 
 export interface SiaBlockOption {
   id: string;
@@ -64,10 +64,10 @@ export const iaService = {
     return { texto, bloco: resposta.bloco, acao: resposta.acao };
   },
 
-  async selecionarBloco(sessaoId: string, opcaoId: string): Promise<SiaReply> {
+  async selecionarBloco(sessaoId: string, opcaoId: string, tipo?: SiaBlockType): Promise<SiaReply> {
     const resposta = await apiRequest<SiaResponse>({
       method: 'POST',
-      path: `/api/v1/ia/orquestrador/agendamentos/sessoes/${encodeURIComponent(sessaoId)}/selecoes`,
+      path: tipo === 'SELECIONAR_PET_ACOMPANHAMENTO' ? `/api/v1/ia/orquestrador/acompanhamentos/sessoes/${encodeURIComponent(sessaoId)}/selecoes` : `/api/v1/ia/orquestrador/agendamentos/sessoes/${encodeURIComponent(sessaoId)}/selecoes`,
       body: { opcaoId },
       baseUrl: IA_API_BASE_URL,
       timeoutMs: 60_000,

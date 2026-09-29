@@ -126,7 +126,7 @@ export default function AssistenteScreen() {
     setCarregando(true);
     setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'usuario', texto: opcao.rotulo }]);
     try {
-      const resposta = await iaService.selecionarBloco(mensagem.bloco.sessaoId, opcao.id);
+      const resposta = await iaService.selecionarBloco(mensagem.bloco.sessaoId, opcao.id, mensagem.bloco.tipo);
       setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'sia', ...resposta }]);
     } catch (erro) {
       const detalhe = erro instanceof ApiError || erro instanceof Error ? erro.message : 'Não foi possível registrar esta escolha.';
