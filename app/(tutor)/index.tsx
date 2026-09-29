@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { PetFoto } from '../../components/pet-foto/PetFoto';
+import { EditarFotoModal } from '../../components/pet-foto/EditarFotoModal';
 import { PetSwitcher } from '../../components/PetSwitcher';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
@@ -39,6 +40,7 @@ export default function DashboardScreen() {
   const acoesBackend = useProximasAcoes(petAtivo?.id ?? null, autenticado);
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-dashboard');
+  const [fotoEmEdicao, setFotoEmEdicao] = useState(false);
 
   const eventosComStatus = useMemo(
     () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
@@ -103,6 +105,7 @@ export default function DashboardScreen() {
   const nomePet = petAtivo.nome.trim();
 
   return (
+    <>
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
@@ -143,15 +146,26 @@ export default function DashboardScreen() {
           <View style={[s.heroSealWrap, modoSimples && sSimples.heroSealWrap]}>
             <View style={[s.heroSealGlowOuter, modoSimples && sSimples.heroSealGlowOuter]} />
             <View style={[s.heroSealGlowInner, modoSimples && sSimples.heroSealGlowInner]} />
-            <View style={[s.heroSeal, modoSimples && sSimples.heroSeal]}>
-              <PetFoto
-                pet={petAtivo}
-                size={modoSimples ? 102 : 86}
-                color={theme.colors.onNavigation}
-                backgroundColor="transparent"
-                accessibilityLabel={`Foto de ${petAtivo.nome}`}
-              />
-            </View>
+            <Pressable
+              style={[s.heroPhotoButton, modoSimples && sSimples.heroPhotoButton]}
+              onPress={() => setFotoEmEdicao(true)}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={petAtivo.fotoUrl ? `Alterar foto de ${petAtivo.nome}` : `Adicionar foto de ${petAtivo.nome}`}
+            >
+              <View style={[s.heroSeal, modoSimples && sSimples.heroSeal]}>
+                <PetFoto
+                  pet={petAtivo}
+                  size={modoSimples ? 102 : 86}
+                  color={theme.colors.onNavigation}
+                  backgroundColor="transparent"
+                  accessibilityLabel={`Foto de ${petAtivo.nome}`}
+                />
+              </View>
+              <View style={[s.heroPhotoBadge, modoSimples && sSimples.heroPhotoBadge, { backgroundColor: theme.colors.primary, borderColor: theme.colors.navigation }]}>
+                <Ionicons name="camera" size={modoSimples ? 18 : 14} color={theme.colors.onPrimary} />
+              </View>
+            </Pressable>
           </View>
           <Pressable
             style={[s.welcomeBtn, modoSimples && sSimples.welcomeBtn]}
@@ -337,6 +351,8 @@ export default function DashboardScreen() {
       </Pressable>
 
     </ScrollView>
+    <EditarFotoModal pet={fotoEmEdicao ? petAtivo : null} onFechar={() => setFotoEmEdicao(false)} />
+    </>
   );
 }
 
@@ -377,7 +393,9 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   heroSealWrap: { width: 104, height: 104, justifyContent: 'center', alignItems: 'center' },
   heroSealGlowOuter: { position: 'absolute', width: 104, height: 104, borderRadius: 52, backgroundColor: 'rgba(242,200,121,0.12)' },
   heroSealGlowInner: { position: 'absolute', width: 98, height: 98, borderRadius: 49, backgroundColor: 'rgba(242,200,121,0.16)' },
+  heroPhotoButton: { width: 92, height: 92, position: 'relative' },
   heroSeal: { width: 92, height: 92, borderRadius: 46, borderWidth: 3, borderColor: 'rgba(242,200,121,0.65)', backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
+  heroPhotoBadge: { position: 'absolute', right: -3, bottom: -3, width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   welcomeInfo: { marginTop: 22, maxWidth: '100%' },
   welcomeEyebrow: { fontSize: 10, fontWeight: '800', letterSpacing: 1.4, color: theme.colors.onNavigation, marginBottom: 7 },
   welcomeNome: { fontSize: 27, lineHeight: 33, fontWeight: '800', color: theme.colors.onNavigation, letterSpacing: -0.6 },
@@ -536,7 +554,9 @@ const sSimples = StyleSheet.create({
   heroSealWrap: { width: 124, height: 124 },
   heroSealGlowOuter: { width: 124, height: 124, borderRadius: 62 },
   heroSealGlowInner: { width: 116, height: 116, borderRadius: 58 },
+  heroPhotoButton: { width: 108, height: 108 },
   heroSeal: { width: 108, height: 108, borderRadius: 54 },
+  heroPhotoBadge: { width: 34, height: 34, borderRadius: 17, right: -4, bottom: -4 },
   welcomeNome: { fontSize: 30 },
   welcomeBtn: { paddingHorizontal: 19, paddingVertical: 14 },
   welcomeBtnText: { fontSize: 19 },
