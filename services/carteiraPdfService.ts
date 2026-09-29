@@ -5,6 +5,7 @@ import { File, Paths } from 'expo-file-system';
 import type { Pet } from '../types';
 import type { CarteiraVacinacao } from './petHealthService';
 import { montarHtmlCarteiraPdf, nomeArquivoCarteiraPdf } from '../utils/carteiraPdf';
+import { carregarLogosPdf } from '../utils/carteiraPdfLogos';
 
 /** Folha A4 em pontos (72 dpi), usada pelo expo-print no celular. */
 const A4_LARGURA = 595;
@@ -59,7 +60,8 @@ export const carteiraPdfService = {
    * (salvar em Arquivos, WhatsApp, e-mail, imprimir...).
    */
   async exportar(pet: Pet, carteira: CarteiraVacinacao): Promise<void> {
-    const html = montarHtmlCarteiraPdf({ pet, carteira });
+    const logos = await carregarLogosPdf();
+    const html = montarHtmlCarteiraPdf({ pet, carteira, logos });
 
     if (Platform.OS === 'web') {
       await imprimirHtmlNaWeb(html);
