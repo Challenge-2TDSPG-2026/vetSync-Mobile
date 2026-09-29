@@ -2,7 +2,6 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { VetSyncTabBar } from '../../components/navigation/VetSyncTabBar';
 import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAction';
-import { NotificationHeaderAction } from '../../components/navigation/NotificationHeaderAction';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function VetTabsLayout() {
@@ -24,10 +23,7 @@ export default function VetTabsLayout() {
           fontWeight: '700',
         },
         headerRight: () => (
-          <>
-            <NotificationHeaderAction />
-            <AccountHeaderAction href="/(vet)/perfil" />
-          </>
+          <AccountHeaderAction href="/(vet)/perfil" />
         ),
       }}
     >
