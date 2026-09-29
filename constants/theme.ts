@@ -228,6 +228,13 @@ function makeTheme(mode: ResolvedTheme): AppTheme {
   const loyaltyHeroBackground = mode === 'dark' ? '#183727' : '#0a2218';
   const loyaltyHeroAccent = mode === 'dark' ? '#2c2c2c' : '#155c3f';
   const loyaltyPurple = mode === 'dark' ? '#b59be4' : '#6d4aa8';
+  const loyaltyLevelBackground = mode === 'dark' ? '#57416f' : '#eee5f7';
+  const loyaltyLevelBorder = mode === 'dark' ? '#9a7abe' : '#d2c1e6';
+  const loyaltyLevelText = mode === 'dark' ? '#f2f7f2' : colors.text;
+  const loyaltyLevelSecondaryText = mode === 'dark' ? '#d5c8e4' : colors.textSecondary;
+  const loyaltyLevelProgressBackground = mode === 'dark' ? '#49365e' : '#e2d7ef';
+  const loyaltyLevelProgressFill = mode === 'dark' ? '#c9b1e8' : loyaltyPurple;
+  const loyaltyLevelBadgeText = mode === 'dark' ? '#261b35' : '#ffffff';
   const home: HomeThemeColors = {
     background: colors.background,
     petSelector: { background: mode === 'dark' ? '#292929' : '#f5f5f5', selectedBackground: mode === 'dark' ? '#3a3a3a' : '#e6e6e6', border: basePage.border, text: colors.textSecondary, selectedText: colors.text, icon: mode === 'dark' ? '#252525' : '#333333' },
@@ -248,7 +255,7 @@ function makeTheme(mode: ResolvedTheme): AppTheme {
   const loyalty: LoyaltyThemeColors = {
     pageBackground: colors.background,
     heroCard: { background: loyaltyHeroBackground, backgroundAccent: loyaltyHeroAccent, iconBackground: colors.primary, icon: '#ffffff', eyebrow: '#ffffff', title: '#ffffff', description: '#ffffff', decoration: mode === 'dark' ? 'rgba(190,190,190,0.045)' : 'rgba(60,60,60,0.05)' },
-    levelCard: { background: basePage.cardElevated, border: loyaltyPurple, label: loyaltyPurple, badgeBackground: loyaltyPurple, badgeText: '#ffffff', levelName: colors.text, levelDescription: colors.textSecondary, progressBackground: basePage.cardSecondary, progressFill: loyaltyPurple, remainingText: colors.text, helperText: colors.textSecondary },
+    levelCard: { background: loyaltyLevelBackground, border: loyaltyLevelBorder, label: mode === 'dark' ? '#e2d0f4' : loyaltyPurple, badgeBackground: loyaltyPurple, badgeText: loyaltyLevelBadgeText, levelName: loyaltyLevelText, levelDescription: loyaltyLevelSecondaryText, progressBackground: loyaltyLevelProgressBackground, progressFill: loyaltyLevelProgressFill, remainingText: loyaltyLevelText, helperText: loyaltyLevelSecondaryText },
     cycleCard: { background: basePage.card, border: basePage.border, title: colors.textSecondary, counter: colors.primary, progressBackground: basePage.cardSecondary, progressFill: colors.primary, description: colors.textSecondary, emptyStep: basePage.cardSecondary, completedStep: colors.primary },
     catalogCard: { background: basePage.card, border: basePage.border, title: colors.text, description: colors.textSecondary, iconBackground: basePage.cardSecondary, actionBackground: colors.primary, actionText: colors.onPrimary },
     statsCard: { background: basePage.card, divider: basePage.border, value: colors.primary, label: colors.textSecondary },
