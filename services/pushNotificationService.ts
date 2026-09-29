@@ -11,6 +11,14 @@ let registroTokenEmAndamento: Promise<void> | null = null;
 function obterNotificacoes(): typeof NotificationsModule | null {
   if (notifications !== undefined) return notifications;
 
+  // Desde o SDK 53, o Expo Go para Android não inclui a implementação nativa
+  // necessária para push remoto. A checagem precisa acontecer antes do require,
+  // pois o próprio carregamento do módulo lança uma exceção nesse ambiente.
+  if (Platform.OS === 'android' && Constants.appOwnership === 'expo') {
+    notifications = null;
+    return notifications;
+  }
+
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports -- carregamento sob demanda intencional, evita crash no Expo Go Android
     notifications = require('expo-notifications') as typeof NotificationsModule;
