@@ -39,6 +39,7 @@ export async function registrarTokenPush(token: string): Promise<void> {
   await api.post('/notificacoes/dispositivos', {
     token: token.trim(),
     plataforma,
+    nomeDispositivo: 'Dispositivo móvel',
     fusoHorario: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo',
   });
 }
