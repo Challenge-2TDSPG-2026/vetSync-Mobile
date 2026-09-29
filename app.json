@@ -63,7 +63,8 @@
         {
           "photosPermission": "Precisamos acessar suas fotos para definir a foto do pet."
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "extra": {
       "router": {},
