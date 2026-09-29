@@ -30,6 +30,19 @@ export type ThemeColors = {
   navigationAccent: string;
   onNavigation: string;
   navigationBorder: string;
+  cardAccent: string;
+  cardSurface: string;
+  petSwitcherActive: string;
+  petSwitcherInactive: string;
+  petSwitcherIconActive: string;
+  welcomePaw: string;
+  neutralBorder: string;
+  pawWatermark: string;
+  appHeader: string;
+  appHeaderAccent: string;
+  appHeaderBorder: string;
+  tabBar: string;
+  tabBarBorder: string;
 };
 
 /** Cores de domínio estáveis entre temas: eventos e recompensas. */
@@ -80,21 +93,34 @@ const lightColors: ThemeColors = {
   navigationAccent: '#155c3f',
   onNavigation: '#ffffff',
   navigationBorder: 'rgba(191, 233, 213, 0.18)',
+  cardAccent: '#155c3f',
+  cardSurface: '#f0ece5',
+  petSwitcherActive: '#e6e6e6',
+  petSwitcherInactive: '#f5f5f5',
+  petSwitcherIconActive: '#333333',
+  welcomePaw: 'rgba(21, 92, 63, 0.12)',
+  neutralBorder: '#e8e2da',
+  pawWatermark: 'rgba(60, 60, 60, 0.05)',
+  appHeader: '#0a2218',
+  appHeaderAccent: '#155c3f',
+  appHeaderBorder: 'rgba(191, 233, 213, 0.18)',
+  tabBar: '#ffffff',
+  tabBarBorder: '#e8e2da',
 };
 
 const darkColors: ThemeColors = {
-  background: '#101512',
-  surface: '#17211b',
-  surfaceSubtle: '#203027',
-  surfaceElevated: '#25362c',
+  background: '#1c1c1c',
+  surface: '#202020',
+  surfaceSubtle: '#292929',
+  surfaceElevated: '#303030',
   text: '#f2f7f2',
   textSecondary: '#c2cec4',
   textMuted: '#91a092',
-  border: '#33463a',
-  borderStrong: '#4b6251',
-  primary: '#54c98a',
-  onPrimary: '#062115',
-  input: '#203027',
+  border: '#3a3a3a',
+  borderStrong: '#515151',
+  primary: '#65d99a',
+  onPrimary: '#092617',
+  input: '#303030',
   placeholder: '#a8b7aa',
   overlay: 'rgba(0,0,0,0.68)',
   success: '#62d88c',
@@ -105,10 +131,23 @@ const darkColors: ThemeColors = {
   dangerBackground: '#4b2024',
   info: '#85b8ff',
   infoBackground: '#19395d',
-  navigation: '#0d1711',
-  navigationAccent: '#183727',
+  navigation: '#252525',
+  navigationAccent: '#2c2c2c',
   onNavigation: '#f2f7f2',
-  navigationBorder: '#365341',
+  navigationBorder: '#3a3a3a',
+  cardAccent: '#183727',
+  cardSurface: '#292929',
+  petSwitcherActive: '#3a3a3a',
+  petSwitcherInactive: '#292929',
+  petSwitcherIconActive: '#252525',
+  welcomePaw: 'rgba(101, 217, 154, 0.12)',
+  neutralBorder: '#3a3a3a',
+  pawWatermark: 'rgba(190, 190, 190, 0.045)',
+  appHeader: '#252525',
+  appHeaderAccent: '#2c2c2c',
+  appHeaderBorder: '#3a3a3a',
+  tabBar: '#252525',
+  tabBarBorder: '#3a3a3a',
 };
 
 export const lightTheme: AppTheme = {

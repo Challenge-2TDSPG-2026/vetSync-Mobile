@@ -16,7 +16,7 @@ function TutorHeaderBackground({
 }) {
   return (
     <LinearGradient
-      colors={[colors.navigation, colors.navigationAccent]}
+      colors={[colors.appHeader, colors.appHeaderAccent]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={StyleSheet.absoluteFill}
@@ -24,7 +24,7 @@ function TutorHeaderBackground({
       <View
         style={[
           s.headerEdge,
-          { backgroundColor: colors.navigationBorder },
+          { backgroundColor: colors.appHeaderBorder },
         ]}
       />
     </LinearGradient>
@@ -43,7 +43,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: theme.colors.textSecondary,
         animation: 'fade',
         headerStyle: {
-          backgroundColor: theme.colors.navigation,
+          backgroundColor: theme.colors.appHeader,
         },
         headerBackground: () => (
           <TutorHeaderBackground colors={theme.colors} />

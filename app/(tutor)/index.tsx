@@ -133,11 +133,11 @@ export default function DashboardScreen() {
           name="paw"
           set="MaterialCommunityIcons"
           size={220}
-          color="rgba(255,255,255,0.07)"
+          color={theme.colors.welcomePaw}
           style={s.welcomePawLarge}
         />
-        <AppIcon name="paw" set="MaterialCommunityIcons" size={15} color="rgba(191,233,213,0.36)" style={s.welcomePaw1} />
-        <AppIcon name="paw" set="MaterialCommunityIcons" size={21} color="rgba(191,233,213,0.5)" style={s.welcomePaw2} />
+        <AppIcon name="paw" set="MaterialCommunityIcons" size={15} color={theme.colors.welcomePaw} style={s.welcomePaw1} />
+        <AppIcon name="paw" set="MaterialCommunityIcons" size={21} color={theme.colors.welcomePaw} style={s.welcomePaw2} />
 
         <View style={s.welcomeTop}>
           <View style={[s.heroSealWrap, modoSimples && sSimples.heroSealWrap]}>
@@ -462,7 +462,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   cardTitle: { fontSize: 17, fontWeight: '700', color: theme.colors.text },
   linkVer: { fontSize: 13, color: theme.colors.primary, fontWeight: '700' },
 
-  petFeature: { marginHorizontal: 16, marginBottom: 16, padding: 16, borderRadius: 18, backgroundColor: theme.colors.surfaceSubtle, overflow: 'hidden' },
+  petFeature: { marginHorizontal: 16, marginBottom: 16, padding: 16, borderRadius: 18, backgroundColor: theme.mode === 'dark' ? theme.colors.cardSurface : theme.colors.surfaceSubtle, overflow: 'hidden' },
   petPawMarca: { position: 'absolute', right: -19, bottom: -34, transform: [{ rotate: '-17deg' }] },
   petTop: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   petAvatar: {
@@ -486,13 +486,13 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: theme.colors.surfaceSubtle,
+    backgroundColor: theme.mode === 'dark' ? theme.colors.cardSurface : theme.colors.surfaceSubtle,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   btnProntuarioText: { fontSize: 11, fontWeight: '800', color: theme.colors.primary },
-  petMetas: { flexDirection: 'row', backgroundColor: theme.colors.surfaceElevated, borderRadius: 14, marginTop: 16, paddingVertical: 13 },
+  petMetas: { flexDirection: 'row', backgroundColor: theme.mode === 'dark' ? theme.colors.cardSurface : theme.colors.surfaceElevated, borderRadius: 14, marginTop: 16, paddingVertical: 13 },
   petMetaItem: { flex: 1, minWidth: 0, paddingHorizontal: 14 },
   petMetaDivider: { width: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border },
   petMetaLabel: { fontSize: 9, fontWeight: '800', letterSpacing: 0.7, color: theme.colors.primary },

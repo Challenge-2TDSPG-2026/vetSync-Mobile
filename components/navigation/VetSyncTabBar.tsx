@@ -64,7 +64,7 @@ export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarP
   // A IA ocupa o centro da barra; Carteiras segue imediatamente à direita.
   const indiceDaIa = Math.min(2, routesVisiveis.length);
   const altura = (modoSimples ? 116 : 94) + Math.max(insets.bottom, 6);
-  return <View style={[s.shell, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border, paddingBottom: Math.max(insets.bottom, 6), height: altura }]}>
+  return <View style={[s.shell, { backgroundColor: theme.colors.tabBar, borderTopColor: theme.colors.tabBarBorder, paddingBottom: Math.max(insets.bottom, 6), height: altura }]}>
     <View style={s.bar}>
       {routesVisiveis.map((route, index) => {
         const { options } = descriptors[route.key];

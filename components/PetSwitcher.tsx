@@ -41,7 +41,7 @@ export function PetSwitcher() {
               name={especieInfo?.icon ?? 'paw'}
               set={especieInfo?.iconSet ?? 'MaterialCommunityIcons'}
               size={modoSimples ? 27 : 20}
-              color={ativo ? theme.colors.onPrimary : theme.colors.textSecondary}
+              color={ativo && theme.mode === 'dark' ? theme.colors.petSwitcherIconActive : ativo ? theme.colors.onPrimary : theme.colors.textSecondary}
             />
             <Text style={[s.chipText, modoSimples && sSimples.chipText, ativo && s.chipTextAtivo]} numberOfLines={1}>
               {p.nome}
@@ -71,12 +71,12 @@ function createStyles(theme: AppTheme) {
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 7,
     paddingHorizontal: 16, paddingVertical: 12, borderRadius: 22,
-    backgroundColor: theme.colors.surfaceSubtle, borderWidth: 1.5, borderColor: theme.colors.border,
+    backgroundColor: theme.mode === 'dark' ? theme.colors.petSwitcherInactive : theme.colors.surfaceSubtle, borderWidth: 1.5, borderColor: theme.mode === 'dark' ? theme.colors.neutralBorder : theme.colors.border,
     maxWidth: 180,
   },
-  chipAtivo: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  chipAtivo: { backgroundColor: theme.colors.petSwitcherActive, borderColor: theme.mode === 'dark' ? theme.colors.neutralBorder : theme.colors.primary },
   chipText: { fontSize: 15, fontWeight: '600', color: theme.colors.text },
-  chipTextAtivo: { color: theme.colors.onPrimary },
+  chipTextAtivo: { color: theme.mode === 'dark' ? theme.colors.text : theme.colors.onPrimary },
   addBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     paddingHorizontal: 16, paddingVertical: 12, borderRadius: 22,
