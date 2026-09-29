@@ -19,7 +19,7 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, formatarDataEvento } from '../../utils/eventoStatus';
-import type { AppTheme } from '../../constants/theme';
+import { withAlpha, type AppTheme } from '../../constants/theme';
 
 function calcularIdade(d: string): string {
   const nasc = new Date(d), hoje = new Date();
@@ -110,7 +110,7 @@ export default function DashboardScreen() {
       style={s.container}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.colors.surface} />}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.home.background} />}
     >
 
       <PetSwitcher />
@@ -127,7 +127,7 @@ export default function DashboardScreen() {
 
       {/* Hero inspirado nos fluxos de cadastro: gradiente, selo e patinhas decorativas. */}
       <LinearGradient
-        colors={[theme.colors.navigation, theme.colors.navigationAccent]}
+        colors={[theme.pages.home.heroCard.background, theme.pages.home.heroCard.backgroundAccent]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[s.welcome, modoSimples && sSimples.welcome]}
@@ -136,11 +136,11 @@ export default function DashboardScreen() {
           name="paw"
           set="MaterialCommunityIcons"
           size={220}
-          color={theme.colors.welcomePaw}
+          color={theme.pages.home.heroCard.decoration}
           style={s.welcomePawLarge}
         />
-        <AppIcon name="paw" set="MaterialCommunityIcons" size={15} color={theme.colors.welcomePaw} style={s.welcomePaw1} />
-        <AppIcon name="paw" set="MaterialCommunityIcons" size={21} color={theme.colors.welcomePaw} style={s.welcomePaw2} />
+        <AppIcon name="paw" set="MaterialCommunityIcons" size={15} color={theme.pages.home.heroCard.decoration} style={s.welcomePaw1} />
+        <AppIcon name="paw" set="MaterialCommunityIcons" size={21} color={theme.pages.home.heroCard.decoration} style={s.welcomePaw2} />
 
         <View style={s.welcomeTop}>
           <View style={[s.heroSealWrap, modoSimples && sSimples.heroSealWrap]}>
@@ -157,12 +157,12 @@ export default function DashboardScreen() {
                 <PetFoto
                   pet={petAtivo}
                   size={modoSimples ? 102 : 86}
-                  color={theme.colors.onNavigation}
+                  color={theme.pages.home.heroCard.title}
                   backgroundColor="transparent"
                   accessibilityLabel={`Foto de ${petAtivo.nome}`}
                 />
               </View>
-              <View style={[s.heroPhotoBadge, modoSimples && sSimples.heroPhotoBadge, { backgroundColor: theme.colors.primary, borderColor: theme.colors.navigation }]}>
+              <View style={[s.heroPhotoBadge, modoSimples && sSimples.heroPhotoBadge, { backgroundColor: theme.pages.home.heroCard.iconBackground, borderColor: theme.pages.home.heroCard.background }]}>
                 <Ionicons name="camera" size={modoSimples ? 18 : 14} color={theme.colors.onPrimary} />
               </View>
             </Pressable>
@@ -173,7 +173,7 @@ export default function DashboardScreen() {
             accessibilityRole="button"
             accessibilityLabel="Adicionar evento de saúde"
           >
-            <Ionicons name="add" size={modoSimples ? 24 : 18} color={theme.colors.onNavigation} />
+            <Ionicons name="add" size={modoSimples ? 24 : 18} color={theme.pages.home.heroCard.title} />
             <Text style={[s.welcomeBtnText, modoSimples && sSimples.welcomeBtnText]}>Evento</Text>
           </Pressable>
         </View>
@@ -193,9 +193,9 @@ export default function DashboardScreen() {
             <View style={s.statDivider} />
           </>
         )}
-        <StatCard styles={s} valor={pendentes.length} label="Pendentes" accentColor={theme.colors.warning} simples={modoSimples} />
+        <StatCard styles={s} valor={pendentes.length} label="Pendentes" accentColor={theme.pages.home.statsCard.valueWarning} simples={modoSimples} />
         <View style={s.statDivider} />
-        <StatCard styles={s} valor={atrasados.length} label="Atrasados" accentColor={theme.colors.danger} simples={modoSimples} />
+        <StatCard styles={s} valor={atrasados.length} label="Atrasados" accentColor={theme.pages.home.statsCard.valueDanger} simples={modoSimples} />
       </View>
 
       <View style={s.acoesCard}>
@@ -391,15 +391,15 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   welcomePaw2: { position: 'absolute', right: 28, top: 51, transform: [{ rotate: '-18deg' }] },
   welcomeTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   heroSealWrap: { width: 104, height: 104, justifyContent: 'center', alignItems: 'center' },
-  heroSealGlowOuter: { position: 'absolute', width: 104, height: 104, borderRadius: 52, backgroundColor: 'rgba(242,200,121,0.12)' },
-  heroSealGlowInner: { position: 'absolute', width: 98, height: 98, borderRadius: 49, backgroundColor: 'rgba(242,200,121,0.16)' },
+  heroSealGlowOuter: { position: 'absolute', width: 104, height: 104, borderRadius: 52, backgroundColor: withAlpha(theme.colors.brandAccent, 0.12) },
+  heroSealGlowInner: { position: 'absolute', width: 98, height: 98, borderRadius: 49, backgroundColor: withAlpha(theme.colors.brandAccent, 0.16) },
   heroPhotoButton: { width: 92, height: 92, position: 'relative' },
-  heroSeal: { width: 92, height: 92, borderRadius: 46, borderWidth: 3, borderColor: 'rgba(242,200,121,0.65)', backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
+  heroSeal: { width: 92, height: 92, borderRadius: 46, borderWidth: 3, borderColor: withAlpha(theme.colors.brandAccent, 0.65), backgroundColor: theme.pages.home.heroCard.iconBackground, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   heroPhotoBadge: { position: 'absolute', right: -3, bottom: -3, width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   welcomeInfo: { marginTop: 22, maxWidth: '100%' },
-  welcomeEyebrow: { fontSize: 10, fontWeight: '800', letterSpacing: 1.4, color: theme.colors.onNavigation, marginBottom: 7 },
-  welcomeNome: { fontSize: 27, lineHeight: 33, fontWeight: '800', color: theme.colors.onNavigation, letterSpacing: -0.6 },
-  welcomeSub: { fontSize: 14, lineHeight: 20, color: theme.colors.onNavigation, opacity: 0.88, marginTop: 8, maxWidth: '92%' },
+  welcomeEyebrow: { fontSize: 10, fontWeight: '800', letterSpacing: 1.4, color: theme.pages.home.heroCard.title, marginBottom: 7 },
+  welcomeNome: { fontSize: 27, lineHeight: 33, fontWeight: '800', color: theme.pages.home.heroCard.title, letterSpacing: -0.6 },
+  welcomeSub: { fontSize: 14, lineHeight: 20, color: theme.pages.home.heroCard.title, opacity: 0.88, marginTop: 8, maxWidth: '92%' },
   welcomeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -411,12 +411,12 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.2)',
   },
-  welcomeBtnText: { color: theme.colors.onNavigation, fontSize: 13, fontWeight: '700' },
+  welcomeBtnText: { color: theme.pages.home.heroCard.title, fontSize: 13, fontWeight: '700' },
 
   statsRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.pages.home.statsCard.background,
     borderRadius: 22,
     marginBottom: 20,
     paddingVertical: 16,
@@ -432,14 +432,14 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     paddingHorizontal: 16,
     justifyContent: 'center',
   },
-  statDivider: { width: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border, marginVertical: 3 },
+  statDivider: { width: StyleSheet.hairlineWidth, backgroundColor: theme.pages.home.statsCard.border, marginVertical: 3 },
   statLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   statAccent: { width: 6, height: 6, borderRadius: 3 },
-  statLabel: { flexShrink: 1, fontSize: 10, fontWeight: '700', letterSpacing: 0.15, color: theme.colors.textSecondary },
+  statLabel: { flexShrink: 1, fontSize: 10, fontWeight: '700', letterSpacing: 0.15, color: theme.pages.home.statsCard.label },
   statVal: { fontSize: 28, fontWeight: '800', lineHeight: 33, marginTop: 5, letterSpacing: -0.5 },
 
   card: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.pages.home.eventCard.background,
     borderRadius: 22,
     marginBottom: 20,
     overflow: 'hidden',
@@ -450,7 +450,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     elevation: 2,
   },
   acoesCard: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.pages.home.nextActionsCard.background,
     borderRadius: 22,
     marginBottom: 20,
     overflow: 'hidden',
@@ -460,11 +460,11 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     elevation: 2,
   },
-  acaoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.border },
+  acaoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.pages.home.statsCard.border },
   acaoIcon: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   acaoCopy: { flex: 1, marginLeft: 11 },
-  acaoTitle: { color: theme.colors.text, fontSize: 13, fontWeight: '800' },
-  acaoSubtitle: { color: theme.colors.textSecondary, fontSize: 11, marginTop: 3 },
+  acaoTitle: { color: theme.pages.home.nextActionsCard.title, fontSize: 13, fontWeight: '800' },
+  acaoSubtitle: { color: theme.pages.home.nextActionsCard.text, fontSize: 11, marginTop: 3 },
   acaoConcluida: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 18, paddingBottom: 18 },
   acaoConcluidaText: { color: theme.colors.success, fontSize: 13, fontWeight: '700' },
   cardHead: {
@@ -476,18 +476,18 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     justifyContent: 'space-between',
   },
   cardTitleWrap: { flexDirection: 'row', alignItems: 'center', gap: 9 },
-  cardTitleIcon: { width: 28, height: 28, borderRadius: 10, backgroundColor: theme.colors.surfaceSubtle, justifyContent: 'center', alignItems: 'center' },
+  cardTitleIcon: { width: 28, height: 28, borderRadius: 10, backgroundColor: theme.pages.home.nextActionsCard.iconBackground, justifyContent: 'center', alignItems: 'center' },
   cardTitle: { fontSize: 17, fontWeight: '700', color: theme.colors.text },
   linkVer: { fontSize: 13, color: theme.colors.primary, fontWeight: '700' },
 
-  petFeature: { marginHorizontal: 16, marginBottom: 16, padding: 16, borderRadius: 18, backgroundColor: theme.mode === 'dark' ? theme.colors.cardSurface : theme.colors.surfaceSubtle, overflow: 'hidden' },
+  petFeature: { marginHorizontal: 16, marginBottom: 16, padding: 16, borderRadius: 18, backgroundColor: theme.pages.home.petCard.background, overflow: 'hidden' },
   petPawMarca: { position: 'absolute', right: -19, bottom: -34, transform: [{ rotate: '-17deg' }] },
   petTop: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   petAvatar: {
     width: 92,
     height: 92,
     borderRadius: 46,
-    backgroundColor: theme.colors.surfaceElevated,
+    backgroundColor: theme.pages.home.petCard.secondaryBackground,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: theme.colors.text,
@@ -499,25 +499,25 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   petInfo: { flex: 1, minWidth: 0 },
   petNome: { fontSize: 21, fontWeight: '800', color: theme.colors.text },
   petTipoPill: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 4, marginTop: 5, maxWidth: '100%' },
-  petDetalhe: { flexShrink: 1, fontSize: 13, color: theme.colors.primary, fontWeight: '600' },
+  petDetalhe: { flexShrink: 1, fontSize: 13, color: theme.pages.home.petCard.text, fontWeight: '600' },
   btnProntuario: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: theme.mode === 'dark' ? theme.colors.cardSurface : theme.colors.surfaceSubtle,
+    backgroundColor: theme.pages.home.petCard.background,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   btnProntuarioText: { fontSize: 11, fontWeight: '800', color: theme.colors.primary },
-  petMetas: { flexDirection: 'row', backgroundColor: theme.mode === 'dark' ? theme.colors.cardSurface : theme.colors.surfaceElevated, borderRadius: 14, marginTop: 16, paddingVertical: 13 },
+  petMetas: { flexDirection: 'row', backgroundColor: theme.mode === 'dark' ? theme.pages.home.petCard.background : theme.pages.home.petCard.secondaryBackground, borderRadius: 14, marginTop: 16, paddingVertical: 13 },
   petMetaItem: { flex: 1, minWidth: 0, paddingHorizontal: 14 },
-  petMetaDivider: { width: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border },
+  petMetaDivider: { width: StyleSheet.hairlineWidth, backgroundColor: theme.pages.home.statsCard.border },
   petMetaLabel: { fontSize: 9, fontWeight: '800', letterSpacing: 0.7, color: theme.colors.primary },
   petMetaValue: { fontSize: 13, fontWeight: '700', color: theme.colors.text, marginTop: 3 },
 
   eventoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 15, gap: 12 },
-  eventoRowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border },
+  eventoRowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.pages.home.statsCard.border },
   eventoIcone: { width: 46, height: 46, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   eventoInfo: { flex: 1 },
   eventoTitulo: { fontSize: 16, fontWeight: '600', color: theme.colors.text },
@@ -526,7 +526,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   badgeText: { fontSize: 11, fontWeight: '700' },
 
   empty: { alignItems: 'center', paddingHorizontal: 20, paddingVertical: 34 },
-  emptyEventos: { marginHorizontal: 14, marginBottom: 14, borderRadius: 18, backgroundColor: theme.colors.surfaceSubtle, borderWidth: 1, borderColor: theme.colors.border, borderStyle: 'dashed' },
+  emptyEventos: { marginHorizontal: 14, marginBottom: 14, borderRadius: 18, backgroundColor: theme.pages.home.eventCard.background, borderWidth: 1, borderColor: theme.pages.home.eventCard.border, borderStyle: 'dashed' },
   emptyOrb: { width: 54, height: 54, borderRadius: 27, backgroundColor: theme.colors.successBackground, justifyContent: 'center', alignItems: 'center', marginBottom: 11 },
   emptyTitle: { fontSize: 14, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
   emptySub: { fontSize: 12, color: theme.colors.textSecondary, textAlign: 'center' },

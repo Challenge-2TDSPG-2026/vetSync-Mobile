@@ -175,7 +175,7 @@ export default function AgendaScreen() {
 
       <ScrollView
         contentContainerStyle={s.scrollContent}
-        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.colors.surface} />}
+        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.agenda.card} />}
       >
 
         <PetSwitcher />
@@ -388,9 +388,9 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderRadius: 999,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.pages.agenda.filter.background,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.pages.agenda.filter.border,
     shadowColor: theme.colors.text,
     shadowOpacity: 0.04,
     shadowRadius: 6,
@@ -411,12 +411,12 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   diaHeaderKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: theme.colors.primary, marginBottom: 3 },
   diaHeaderTexto: { fontSize: 17, fontWeight: '800', color: theme.colors.text, textTransform: 'capitalize' },
   diaHeaderBadge: {
-    backgroundColor: theme.colors.surfaceSubtle, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6,
+    backgroundColor: theme.pages.agenda.cardSecondary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6,
   },
   diaHeaderBadgeText: { fontSize: 11, fontWeight: '800', color: theme.colors.primary },
 
   card: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.pages.agenda.eventCard.background,
     borderRadius: 22,
     overflow: 'hidden',
     marginBottom: 12,
@@ -447,9 +447,9 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 17,
     paddingVertical: 12,
-    backgroundColor: theme.colors.surfaceSubtle,
+    backgroundColor: theme.pages.agenda.eventCard.footerBackground,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: theme.colors.border,
+    borderTopColor: theme.pages.agenda.eventCard.border,
   },
   badges: { flexDirection: 'row', gap: 6 },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
@@ -462,15 +462,15 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: theme.colors.surfaceSubtle,
+    backgroundColor: theme.pages.agenda.eventCard.footerBackground,
     minWidth: 40,
     justifyContent: 'center',
   },
   btnAcaoDanger: { backgroundColor: theme.colors.dangerBackground, borderColor: theme.colors.danger },
   btnAcaoText: { fontSize: 14, fontWeight: '600' },
 
-  empty: { alignItems: 'center', backgroundColor: theme.colors.surface, borderRadius: 22, borderWidth: 1, borderColor: theme.colors.border, borderStyle: 'dashed', paddingHorizontal: 24, paddingVertical: 36 },
-  emptyOrb: { width: 58, height: 58, borderRadius: 29, backgroundColor: theme.colors.infoBackground, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  empty: { alignItems: 'center', backgroundColor: theme.pages.agenda.emptyState.background, borderRadius: 22, borderWidth: 1, borderColor: theme.pages.agenda.emptyState.border, borderStyle: 'dashed', paddingHorizontal: 24, paddingVertical: 36 },
+  emptyOrb: { width: 58, height: 58, borderRadius: 29, backgroundColor: theme.pages.agenda.emptyState.iconBackground, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
   emptyTitle: { fontSize: 15, fontWeight: '800', color: theme.colors.text, marginBottom: 5 },
   emptySub: { fontSize: 13, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 18 },
 
@@ -498,7 +498,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     padding: 24,
   },
   modalCard: {
-    backgroundColor: theme.colors.surfaceElevated,
+    backgroundColor: theme.pages.agenda.cardElevated,
     borderRadius: 16,
     padding: 22,
   },
@@ -507,7 +507,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   modalInput: {
     backgroundColor: theme.colors.input,
     borderWidth: 1.5,
-    borderColor: theme.colors.border,
+    borderColor: theme.pages.agenda.border,
     borderRadius: 10,
     padding: 13,
     fontSize: 15,

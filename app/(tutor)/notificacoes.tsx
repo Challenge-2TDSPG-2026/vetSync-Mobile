@@ -200,7 +200,7 @@ export default function NotificacoesScreen() {
                   s.icon,
                   {
                     backgroundColor: notificacao.lida
-                      ? theme.colors.surfaceSubtle
+                      ? theme.pages.notifications.cardSecondary
                       : theme.colors.infoBackground,
                   },
                 ]}
@@ -287,9 +287,9 @@ function createStyles(theme: AppTheme) {
       padding: 15,
       marginBottom: 10,
       borderRadius: 16,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.pages.notifications.card,
       borderWidth: 1,
-      borderColor: theme.colors.border,
+      borderColor: theme.pages.notifications.border,
     },
 
     unread: {

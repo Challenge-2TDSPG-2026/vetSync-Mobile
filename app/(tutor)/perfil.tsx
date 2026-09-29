@@ -16,7 +16,7 @@ import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModa
 import { AppearancePreferences } from '../../components/AppearancePreferences';
 import { PetFoto } from '../../components/pet-foto/PetFoto';
 import { EditarFotoModal } from '../../components/pet-foto/EditarFotoModal';
-import type { AppTheme } from '../../constants/theme';
+import { withAlpha, type AppTheme } from '../../constants/theme';
 import type { Pet } from '../../types';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -71,7 +71,7 @@ export default function PerfilScreen() {
   return (
     <>
       <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={[theme.colors.navigation, theme.colors.navigationAccent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
+        <LinearGradient colors={[theme.pages.tutorProfile.heroBackground, theme.pages.tutorProfile.heroAccent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
           <View style={s.heroGlowOne} />
           <View style={s.heroGlowTwo} />
 
@@ -88,7 +88,7 @@ export default function PerfilScreen() {
 
           <View style={s.heroFooter}>
             <View style={s.rolePill}>
-              <Ionicons name="shield-checkmark-outline" size={14} color={theme.colors.onNavigation} />
+              <Ionicons name="shield-checkmark-outline" size={14} color={theme.pages.tutorProfile.heroText} />
               <Text style={s.rolePillText}>{perfil}</Text>
             </View>
             <Text style={s.petCount}>{pets.length} {pets.length === 1 ? 'pet vinculado' : 'pets vinculados'}</Text>
@@ -179,8 +179,8 @@ export default function PerfilScreen() {
                     accessibilityRole="button"
                     accessibilityLabel={pet.fotoUrl ? `Alterar foto de ${pet.nome}` : `Adicionar foto de ${pet.nome}`}
                   >
-                    <PetFoto pet={pet} size={modoSimples ? 58 : 42} color={theme.colors.primary} backgroundColor={theme.colors.surfaceSubtle} accessibilityLabel={`Foto de ${pet.nome}`} />
-                    <View style={[s.addFotoBadge, modoSimples && sSimples.addFotoBadge, { backgroundColor: theme.colors.primary, borderColor: theme.colors.surface }]}>
+                    <PetFoto pet={pet} size={modoSimples ? 58 : 42} color={theme.colors.primary} backgroundColor={theme.pages.tutorProfile.cardSecondary} accessibilityLabel={`Foto de ${pet.nome}`} />
+                    <View style={[s.addFotoBadge, modoSimples && sSimples.addFotoBadge, { backgroundColor: theme.colors.primary, borderColor: theme.pages.tutorProfile.card }]}>
                       <Ionicons name="camera" size={modoSimples ? 15 : 12} color={theme.colors.onPrimary} />
                     </View>
                   </Pressable>
@@ -254,50 +254,50 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   content: { padding: 16, paddingBottom: 38 },
   hero: { borderRadius: 24, padding: 20, marginBottom: 24, overflow: 'hidden' },
   heroGlowOne: { position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(168,230,199,0.10)', right: -52, top: -70 },
-  heroGlowTwo: { position: 'absolute', width: 84, height: 84, borderRadius: 42, backgroundColor: 'rgba(242,200,121,0.10)', right: 30, bottom: -48 },
+  heroGlowTwo: { position: 'absolute', width: 84, height: 84, borderRadius: 42, backgroundColor: withAlpha(theme.colors.brandAccent, 0.10), right: 30, bottom: -48 },
   heroTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  avatar: { width: 62, height: 62, borderRadius: 22, backgroundColor: theme.colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 62, height: 62, borderRadius: 22, backgroundColor: theme.pages.tutorProfile.cardElevated, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: theme.colors.primary, fontSize: 21, fontWeight: '800', letterSpacing: -0.5 },
   heroInfo: { flex: 1, minWidth: 0 },
-  overline: { color: theme.colors.onNavigation, opacity: 0.62, fontSize: 10, fontWeight: '800', letterSpacing: 1.1 },
-  heroNome: { color: theme.colors.onNavigation, fontSize: 22, fontWeight: '800', letterSpacing: -0.55, marginTop: 4 },
-  heroEmail: { color: theme.colors.onNavigation, opacity: 0.77, fontSize: 13, marginTop: 3 },
+  overline: { color: theme.pages.tutorProfile.heroText, opacity: 0.62, fontSize: 10, fontWeight: '800', letterSpacing: 1.1 },
+  heroNome: { color: theme.pages.tutorProfile.heroText, fontSize: 22, fontWeight: '800', letterSpacing: -0.55, marginTop: 4 },
+  heroEmail: { color: theme.pages.tutorProfile.heroText, opacity: 0.77, fontSize: 13, marginTop: 3 },
   heroFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, gap: 10 },
-  rolePill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.colors.navigationAccent, borderWidth: 1, borderColor: theme.colors.navigationBorder, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
-  rolePillText: { color: theme.colors.onNavigation, fontSize: 11, fontWeight: '800' },
-  petCount: { color: theme.colors.onNavigation, opacity: 0.7, fontSize: 11, fontWeight: '700', textAlign: 'right' },
+  rolePill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.pages.tutorProfile.heroAccent, borderWidth: 1, borderColor: theme.pages.tutorProfile.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
+  rolePillText: { color: theme.pages.tutorProfile.heroText, fontSize: 11, fontWeight: '800' },
+  petCount: { color: theme.pages.tutorProfile.heroText, opacity: 0.7, fontSize: 11, fontWeight: '700', textAlign: 'right' },
 
   sectionTitle: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '800', letterSpacing: 0.85, textTransform: 'uppercase', marginBottom: 10, paddingLeft: 2 },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 2 },
-  countBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle, marginBottom: 10 },
+  countBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary, marginBottom: 10 },
   countBadgeText: { color: theme.colors.primary, fontSize: 11, fontWeight: '800' },
-  card: { backgroundColor: theme.colors.surface, borderRadius: 18, borderWidth: 1, borderColor: theme.colors.border, overflow: 'hidden', marginBottom: 22 },
-  divider: { height: 1, backgroundColor: theme.colors.border },
+  card: { backgroundColor: theme.pages.tutorProfile.card, borderRadius: 18, borderWidth: 1, borderColor: theme.pages.tutorProfile.border, overflow: 'hidden', marginBottom: 22 },
+  divider: { height: 1, backgroundColor: theme.pages.tutorProfile.border },
 
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 14 },
-  infoIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle },
+  infoIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary },
   infoCopy: { flex: 1, minWidth: 0 },
   infoLabel: { color: theme.colors.textSecondary, fontSize: 11, fontWeight: '700', marginBottom: 2 },
   infoValue: { color: theme.colors.text, fontSize: 15, fontWeight: '700' },
 
   accountAction: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
-  actionIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle },
+  actionIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary },
   actionCopy: { flex: 1, minWidth: 0 },
   actionTitle: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
   actionDescription: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3, lineHeight: 17 },
 
   accessibilityAction: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
-  accessibilityIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle },
+  accessibilityIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary },
   accessibilityCopy: { flex: 1, minWidth: 0 },
   accessibilityTitle: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
   accessibilityDescription: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3, lineHeight: 17 },
-  modeStatus: { borderRadius: 999, backgroundColor: theme.colors.surfaceSubtle, paddingHorizontal: 8, paddingVertical: 4 },
+  modeStatus: { borderRadius: 999, backgroundColor: theme.pages.tutorProfile.cardSecondary, paddingHorizontal: 8, paddingVertical: 4 },
   modeStatusActive: { backgroundColor: theme.colors.successBackground },
   modeStatusText: { color: theme.colors.textSecondary, fontSize: 10, fontWeight: '800' },
   modeStatusTextActive: { color: theme.colors.success, fontSize: 10, fontWeight: '800' },
 
   petRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 13 },
-  petIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceSubtle },
+  petIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary },
   petFoto: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', position: 'relative' },
   addFotoBadge: { position: 'absolute', bottom: -2, right: -2, width: 20, height: 20, borderRadius: 10, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   petCopy: { flex: 1, minWidth: 0 },
@@ -307,7 +307,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   addPet: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 15 },
   addPetText: { color: theme.colors.primary, fontSize: 14, fontWeight: '800' },
 
-  logout: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16, borderRadius: 16, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
+  logout: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16, borderRadius: 16, borderWidth: 1, borderColor: theme.pages.tutorProfile.border, backgroundColor: theme.pages.tutorProfile.card },
   logoutText: { color: theme.colors.primary, fontSize: 15, fontWeight: '800' },
 });
 

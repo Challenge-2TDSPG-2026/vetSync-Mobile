@@ -7,16 +7,16 @@ import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAc
 import { NotificationHeaderAction } from '../../components/navigation/NotificationHeaderAction';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
-import type { ThemeColors } from '../../constants/theme';
+import type { HeaderThemeColors } from '../../constants/theme';
 
 function TutorHeaderBackground({
   colors,
 }: {
-  colors: ThemeColors;
+  colors: HeaderThemeColors;
 }) {
   return (
     <LinearGradient
-      colors={[colors.appHeader, colors.appHeaderAccent]}
+      colors={[colors.background, colors.backgroundAccent]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={StyleSheet.absoluteFill}
@@ -24,7 +24,7 @@ function TutorHeaderBackground({
       <View
         style={[
           s.headerEdge,
-          { backgroundColor: colors.appHeaderBorder },
+          { backgroundColor: colors.border },
         ]}
       />
     </LinearGradient>
@@ -43,13 +43,13 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: theme.colors.textSecondary,
         animation: 'fade',
         headerStyle: {
-          backgroundColor: theme.colors.appHeader,
+          backgroundColor: theme.components.header.background,
         },
         headerBackground: () => (
-          <TutorHeaderBackground colors={theme.colors} />
+          <TutorHeaderBackground colors={theme.components.header} />
         ),
         headerShadowVisible: false,
-        headerTintColor: theme.colors.onNavigation,
+        headerTintColor: theme.components.header.title,
         headerTitleAlign: 'left',
         headerTitleContainerStyle: {
           paddingLeft: 2,

@@ -1,4 +1,6 @@
-import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import type { AppTheme } from '../../constants/theme';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -9,19 +11,13 @@ import { useMeusResgates, useValidarResgate } from '../../hooks/useRecompensas';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { confirmar } from '../../utils/alert';
 
-const C = {
-  g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52', g500: '#22a06b',
-  g100: '#d4f2e4', g50: '#edfaf3',
-  cream: '#fafaf8', w50: '#f9f7f4',
-  text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff',
-  danger: '#dc3545', ouro: '#c99a2e', ouroClaro: '#fdf6e3',
-};
-
 function formatarData(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 export default function ResgatesPendentesScreen() {
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const { data: resgates = [], isLoading, refetch, isRefetching } = useMeusResgates(true);
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-resgates');
   const validar = useValidarResgate();
@@ -68,11 +64,11 @@ export default function ResgatesPendentesScreen() {
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={C.g600} colors={[C.g600]} />}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.pages.vetRedemptions.primary} colors={[theme.pages.vetRedemptions.primary]} />}
     >
       <View style={s.banner}>
         <View style={s.bannerIconWrap}>
-          <AppIcon name="gift-outline" set="Ionicons" size={26} color={C.white} />
+          <AppIcon name="gift-outline" set="Ionicons" size={26} color={theme.pages.vetRedemptions.white} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.bannerTitulo}>Resgates aguardando validação</Text>
@@ -86,7 +82,7 @@ export default function ResgatesPendentesScreen() {
         <DicaTela
           titulo="Como validar um resgate"
           texto="Confira a entrega com o tutor pessoalmente e toque em aprovar ou negar em cada card abaixo. Aprovar debita os pontos definitivamente."
-          accentColor={C.ouro}
+          accentColor={theme.domain.reward.gold}
           onFechar={fecharDica}
         />
       )}
@@ -96,14 +92,14 @@ export default function ResgatesPendentesScreen() {
           icon="checkmark-done-outline"
           title="Nenhum resgate pendente"
           subtitle="Quando um tutor resgatar uma recompensa, ela aparece aqui para validação."
-          accentColor={C.g600}
+          accentColor={theme.pages.vetRedemptions.primary}
         />
       ) : (
         pendentes.map(r => (
           <View key={r.id} style={s.card}>
             <View style={s.cardRow}>
               <View style={s.cardIconWrap}>
-                <AppIcon name="gift" set="Ionicons" size={20} color={C.ouro} />
+                <AppIcon name="gift" set="Ionicons" size={20} color={theme.domain.reward.gold} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={s.cardTitulo}>{r.nomeRecompensa}</Text>
@@ -116,16 +112,16 @@ export default function ResgatesPendentesScreen() {
                 onPress={() => handleValidar(r.id, r.nomeRecompensa, false)}
                 disabled={validar.isPending}
               >
-                <AppIcon name="close" set="Ionicons" size={15} color={C.danger} />
-                <Text style={[s.btnAcaoText, { color: C.danger }]}>Negar</Text>
+                <AppIcon name="close" set="Ionicons" size={15} color={theme.pages.vetRedemptions.danger} />
+                <Text style={[s.btnAcaoText, { color: theme.pages.vetRedemptions.danger }]}>Negar</Text>
               </Pressable>
               <Pressable
                 style={[s.btnAcao, s.btnAprovar]}
                 onPress={() => handleValidar(r.id, r.nomeRecompensa, true)}
                 disabled={validar.isPending}
               >
-                <AppIcon name="checkmark" set="Ionicons" size={15} color={C.white} />
-                <Text style={[s.btnAcaoText, { color: C.white }]}>Aprovar</Text>
+                <AppIcon name="checkmark" set="Ionicons" size={15} color={theme.pages.vetRedemptions.white} />
+                <Text style={[s.btnAcaoText, { color: theme.pages.vetRedemptions.white }]}>Aprovar</Text>
               </Pressable>
             </View>
           </View>
@@ -135,13 +131,13 @@ export default function ResgatesPendentesScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.cream },
+const createStyles = (theme: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.pages.vetRedemptions.background },
   content: { padding: 20, paddingBottom: 40 },
-  loadingContainer: { flex: 1, backgroundColor: C.cream, justifyContent: 'center', alignItems: 'center' },
+  loadingContainer: { flex: 1, backgroundColor: theme.pages.vetRedemptions.background, justifyContent: 'center', alignItems: 'center' },
 
   banner: {
-    backgroundColor: C.g800,
+    backgroundColor: theme.pages.vetRedemptions.primary,
     borderRadius: 16,
     padding: 18,
     flexDirection: 'row',
@@ -154,41 +150,41 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.14)',
     justifyContent: 'center', alignItems: 'center',
   },
-  bannerTitulo: { fontSize: 15, fontWeight: '700', color: C.white, marginBottom: 4 },
+  bannerTitulo: { fontSize: 15, fontWeight: '700', color: theme.pages.vetRedemptions.white, marginBottom: 4 },
   bannerSub: { fontSize: 11, color: 'rgba(255,255,255,0.75)', lineHeight: 16 },
 
   btnAtualizar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     alignSelf: 'flex-start',
     paddingHorizontal: 12, paddingVertical: 7,
-    borderRadius: 20, borderWidth: 1.5, borderColor: C.g100,
-    backgroundColor: C.g50, marginBottom: 18,
+    borderRadius: 20, borderWidth: 1.5, borderColor: theme.pages.vetRedemptions.successBackground,
+    backgroundColor: theme.pages.vetRedemptions.cardSecondary, marginBottom: 18,
   },
-  btnAtualizarText: { fontSize: 12, fontWeight: '700', color: C.g600 },
+  btnAtualizarText: { fontSize: 12, fontWeight: '700', color: theme.pages.vetRedemptions.primary },
 
   empty: { alignItems: 'center', paddingVertical: 56 },
-  emptyTitle: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 4 },
-  emptySub: { fontSize: 13, color: C.muted, textAlign: 'center', paddingHorizontal: 16 },
+  emptyTitle: { fontSize: 15, fontWeight: '700', color: theme.pages.vetRedemptions.text, marginBottom: 4 },
+  emptySub: { fontSize: 13, color: theme.pages.vetRedemptions.textSecondary, textAlign: 'center', paddingHorizontal: 16 },
 
   card: {
-    backgroundColor: C.white, borderRadius: 14, borderWidth: 1.5, borderColor: C.ouro,
+    backgroundColor: theme.pages.vetRedemptions.card, borderRadius: 14, borderWidth: 1.5, borderColor: theme.domain.reward.gold,
     padding: 14, marginBottom: 12,
   },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
   cardIconWrap: {
     width: 42, height: 42, borderRadius: 21,
-    backgroundColor: C.ouroClaro, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: C.ouro,
+    backgroundColor: theme.pages.vetRedemptions.warningBackground, justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: theme.domain.reward.gold,
   },
-  cardTitulo: { fontSize: 14, fontWeight: '700', color: C.text },
-  cardSub: { fontSize: 11, color: C.muted, marginTop: 2 },
+  cardTitulo: { fontSize: 14, fontWeight: '700', color: theme.pages.vetRedemptions.text },
+  cardSub: { fontSize: 11, color: theme.pages.vetRedemptions.textSecondary, marginTop: 2 },
 
   cardAcoes: { flexDirection: 'row', gap: 10 },
   btnAcao: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     paddingVertical: 10, borderRadius: 10,
   },
-  btnNegar: { backgroundColor: '#fff5f5', borderWidth: 1.5, borderColor: '#fecaca' },
-  btnAprovar: { backgroundColor: C.g600 },
+  btnNegar: { backgroundColor: theme.pages.vetRedemptions.dangerBackground, borderWidth: 1.5, borderColor: theme.pages.vetRedemptions.danger },
+  btnAprovar: { backgroundColor: theme.pages.vetRedemptions.primary },
   btnAcaoText: { fontSize: 13, fontWeight: '700' },
 });

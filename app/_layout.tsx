@@ -34,6 +34,7 @@ onlineManager.setEventListener(setOnline => NetInfo.addEventListener(state => {
 const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'evento', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'verificar-codigo', 'redefinir-senha', 'modo-simples', 'gerenciar-acessos', 'notificacoes'];
 
 function RootNavigator() {
+  const { theme } = useTheme();
   const { sessao, autenticado, carregando: carregandoAuth } = useAuth();
   const { onboardingConcluido, carregando: carregandoPet, erroPets, recarregarPets } = usePet();
   const router = useRouter();
@@ -84,17 +85,17 @@ function RootNavigator() {
   return (
     <>
       {ehTutor && !carregando && erroPets && (
-        <View style={s.erroOverlay} accessibilityRole="alert" accessibilityLiveRegion="polite">
-          <Text style={s.erroTitulo}>Não foi possível carregar seus pets</Text>
-          <Text style={s.erroSub}>Verifique sua conexão e tente novamente.</Text>
+        <View style={[s.erroOverlay, { backgroundColor: theme.colors.dangerBackground, borderBottomColor: theme.colors.danger }]} accessibilityRole="alert" accessibilityLiveRegion="polite">
+          <Text style={[s.erroTitulo, { color: theme.colors.danger }]}>Não foi possível carregar seus pets</Text>
+          <Text style={[s.erroSub, { color: theme.colors.textSecondary }]}>Verifique sua conexão e tente novamente.</Text>
           <Pressable
-            style={s.erroBtn}
+            style={[s.erroBtn, { backgroundColor: theme.colors.danger }]}
             onPress={() => recarregarPets()}
             accessibilityRole="button"
             accessibilityLabel="Tentar novamente"
             accessibilityHint="Recarrega a lista de pets"
           >
-            <Text style={s.erroBtnText}>Tentar novamente</Text>
+            <Text style={[s.erroBtnText, { color: theme.colors.onPrimary }]}>Tentar novamente</Text>
           </Pressable>
         </View>
       )}
@@ -176,22 +177,19 @@ const s = StyleSheet.create({
     position: 'absolute',
     top: 0, left: 0, right: 0,
     zIndex: 50,
-    backgroundColor: '#fff2f2',
     borderBottomWidth: 1,
-    borderBottomColor: '#f3c2c2',
     padding: 16,
     alignItems: 'center',
   },
-  erroTitulo: { fontSize: 13, fontWeight: '700', color: '#7a1f1f', textAlign: 'center' },
-  erroSub: { fontSize: 12, color: '#9a4a4a', marginTop: 2, textAlign: 'center' },
+  erroTitulo: { fontSize: 13, fontWeight: '700', textAlign: 'center' },
+  erroSub: { fontSize: 12, marginTop: 2, textAlign: 'center' },
   erroBtn: {
     marginTop: 10,
-    backgroundColor: '#dc3545',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
   },
-  erroBtnText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  erroBtnText: { fontSize: 12, fontWeight: '700' },
 });
 
 function ThemedRootLayout() {

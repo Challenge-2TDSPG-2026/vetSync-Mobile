@@ -80,16 +80,16 @@ export default function CarteirinhasScreen() {
           {carregandoEventos ? <ActivityIndicator size="small" color={theme.colors.primary} /> : null}
         </View>
         <View style={[s.resumoCard, modoSimples && sSimples.resumoCard]}>
-          <Resumo styles={s} valor={resumoApi ? resumoApi.emDia + resumoApi.vencendo + resumoApi.atrasadas : vacinas.length} rotulo="Vacinas" cor={theme.colors.primary} simples={modoSimples} />
+          <Resumo styles={s} valor={resumoApi ? resumoApi.emDia + resumoApi.vencendo + resumoApi.atrasadas : vacinas.length} rotulo="Vacinas" cor={theme.pages.vaccinationWallet.summaryCard.vaccineValue} simples={modoSimples} />
           <View style={s.resumoDivisor} />
-          <Resumo styles={s} valor={resumoApi ? resumoApi.emDia : realizadas} rotulo="Realizadas" cor={theme.colors.success} simples={modoSimples} />
+          <Resumo styles={s} valor={resumoApi ? resumoApi.emDia : realizadas} rotulo="Realizadas" cor={theme.pages.vaccinationWallet.summaryCard.completedValue} simples={modoSimples} />
           <View style={s.resumoDivisor} />
-          <Resumo styles={s} valor={resumoApi ? resumoApi.vencendo : proximas.length} rotulo="Próximas" cor={theme.colors.warning} simples={modoSimples} />
+          <Resumo styles={s} valor={resumoApi ? resumoApi.vencendo : proximas.length} rotulo="Próximas" cor={theme.pages.vaccinationWallet.summaryCard.upcomingValue} simples={modoSimples} />
         </View>
 
         <View style={[s.proximaCard, modoSimples && sSimples.proximaCard]}>
           <View style={[s.proximaIcone, modoSimples && sSimples.proximaIcone]}>
-            <AppIcon name="medical" set="Ionicons" size={modoSimples ? 27 : 20} color={theme.colors.primary} />
+            <AppIcon name="medical" set="Ionicons" size={modoSimples ? 27 : 20} color={theme.pages.vaccinationWallet.nextVaccineCard.icon} />
           </View>
           <View style={s.proximaInfo}>
             <Text style={[s.proximaRotulo, modoSimples && sSimples.proximaRotulo]}>PRÓXIMA VACINA</Text>
@@ -116,13 +116,13 @@ export default function CarteirinhasScreen() {
             accessibilityRole="button"
             accessibilityLabel="Abrir agenda de saúde"
           >
-            <Ionicons name="arrow-forward" size={modoSimples ? 25 : 18} color={theme.colors.primary} />
+            <Ionicons name="arrow-forward" size={modoSimples ? 25 : 18} color={theme.pages.vaccinationWallet.nextVaccineCard.actionIcon} />
           </Pressable>
         </View>
 
         <View style={[s.compartilharCard, modoSimples && sSimples.compartilharCard]}>
           <View style={[s.compartilharIcone, modoSimples && sSimples.compartilharIcone]}>
-            <Ionicons name="qr-code-outline" size={modoSimples ? 29 : 22} color={theme.colors.onNavigation} />
+            <Ionicons name="qr-code-outline" size={modoSimples ? 29 : 22} color={theme.pages.vaccinationWallet.qrCard.icon} />
           </View>
           <View style={s.compartilharInfo}>
             <Text style={[s.compartilharTitulo, modoSimples && sSimples.compartilharTitulo]}>Leve a carteira com você</Text>
@@ -138,7 +138,7 @@ export default function CarteirinhasScreen() {
             accessibilityLabel="Abrir carteira para compartilhar"
           >
             <Text style={[s.btnCompartilharTexto, modoSimples && sSimples.btnCompartilharTexto]}>Abrir carteira</Text>
-            <Ionicons name="arrow-forward" size={modoSimples ? 22 : 16} color={theme.colors.primary} />
+            <Ionicons name="arrow-forward" size={modoSimples ? 22 : 16} color={theme.pages.vaccinationWallet.nextVaccineCard.actionIcon} />
           </Pressable>
         </View>
       </ScrollView>
@@ -171,29 +171,29 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   secaoHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 5, marginBottom: 10 },
   secaoTitulo: { color: theme.colors.text, fontSize: 17, fontWeight: '800', letterSpacing: -0.2 },
   resumoCard: {
-    flexDirection: 'row', alignItems: 'stretch', backgroundColor: theme.colors.surface, borderRadius: 18,
+    flexDirection: 'row', alignItems: 'stretch', backgroundColor: theme.pages.vaccinationWallet.summaryCard.background, borderRadius: 18,
     paddingVertical: 15, marginBottom: 14, shadowColor: theme.colors.text, shadowOpacity: 0.06,
     shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   resumoItem: { flex: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center' },
-  resumoDivisor: { width: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border, marginVertical: 4 },
+  resumoDivisor: { width: StyleSheet.hairlineWidth, backgroundColor: theme.pages.vaccinationWallet.summaryCard.divider, marginVertical: 4 },
   resumoValor: { fontSize: 25, fontWeight: '800', lineHeight: 30, letterSpacing: -0.5 },
   resumoRotulo: { color: theme.colors.textSecondary, fontSize: 11, fontWeight: '700', marginTop: 2 },
 
-  proximaCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, borderRadius: 18, padding: 15, gap: 11, marginBottom: 14 },
+  proximaCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.pages.vaccinationWallet.nextVaccineCard.background, borderRadius: 18, padding: 15, gap: 11, marginBottom: 14 },
   proximaIcone: { width: 44, height: 44, borderRadius: 14, backgroundColor: theme.colors.successBackground, justifyContent: 'center', alignItems: 'center' },
   proximaInfo: { flex: 1, minWidth: 0 },
-  proximaRotulo: { color: theme.colors.primary, fontSize: 10, fontWeight: '800', letterSpacing: 0.75, marginBottom: 3 },
-  proximaTitulo: { color: theme.colors.text, fontSize: 14, fontWeight: '800' },
-  proximaMeta: { color: theme.colors.textSecondary, fontSize: 11, lineHeight: 16, marginTop: 2 },
-  btnAgenda: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.colors.surfaceSubtle, justifyContent: 'center', alignItems: 'center' },
+  proximaRotulo: { color: theme.pages.vaccinationWallet.nextVaccineCard.label, fontSize: 10, fontWeight: '800', letterSpacing: 0.75, marginBottom: 3 },
+  proximaTitulo: { color: theme.pages.vaccinationWallet.nextVaccineCard.title, fontSize: 14, fontWeight: '800' },
+  proximaMeta: { color: theme.pages.vaccinationWallet.nextVaccineCard.description, fontSize: 11, lineHeight: 16, marginTop: 2 },
+  btnAgenda: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.pages.vaccinationWallet.nextVaccineCard.actionBackground, justifyContent: 'center', alignItems: 'center' },
 
-  compartilharCard: { borderRadius: 20, backgroundColor: theme.colors.navigation, padding: 18, overflow: 'hidden' },
+  compartilharCard: { borderRadius: 20, backgroundColor: theme.pages.vaccinationWallet.qrCard.background, padding: 18, overflow: 'hidden' },
   compartilharIcone: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary, marginBottom: 14 },
   compartilharInfo: { maxWidth: 310 },
-  compartilharTitulo: { color: theme.colors.onNavigation, fontSize: 18, fontWeight: '800', letterSpacing: -0.25 },
-  compartilharDescricao: { color: theme.colors.onNavigation, opacity: 0.82, fontSize: 13, lineHeight: 18, marginTop: 5 },
-  btnCompartilhar: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, backgroundColor: theme.colors.surfaceElevated, paddingHorizontal: 14, paddingVertical: 10, marginTop: 16 },
+  compartilharTitulo: { color: theme.pages.vaccinationWallet.qrCard.title, fontSize: 18, fontWeight: '800', letterSpacing: -0.25 },
+  compartilharDescricao: { color: theme.pages.vaccinationWallet.qrCard.description, opacity: 0.82, fontSize: 13, lineHeight: 18, marginTop: 5 },
+  btnCompartilhar: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, backgroundColor: theme.pages.vaccinationWallet.qrCard.actionBackground, paddingHorizontal: 14, paddingVertical: 10, marginTop: 16 },
   btnCompartilharTexto: { color: theme.colors.primary, fontSize: 13, fontWeight: '800' },
   btnDesativado: { opacity: 0.5 },
 });

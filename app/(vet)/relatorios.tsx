@@ -30,28 +30,21 @@ export default function VetRelatoriosScreen() {
       {isError ? <Text style={s.error}>Não foi possível carregar os relatórios. Tente novamente mais tarde.</Text> : null}
       {data ? (
         <View style={s.grid}>
-          <Metric label="Agendadas" value={data.consultasAgendadas} />
-          <Metric label="Concluídas" value={data.consultasConcluidas} accent={theme.colors.success} />
-          <Metric label="Cancelamentos" value={data.cancelamentos} accent={theme.colors.danger} />
-          <Metric label="Pacientes atendidos" value={data.pacientesAtendidos} accent={theme.colors.info} />
-          <Metric label="Vacinas aplicadas" value={data.vacinasAplicadas} accent={theme.domain.event.vaccine} />
-          <Metric label="Faturamento" value={`R$ ${data.faturamento.toFixed(2).replace('.', ',')}`} wide />
+          <Metric styles={s} theme={theme} label="Agendadas" value={data.consultasAgendadas} />
+          <Metric styles={s} theme={theme} label="Concluídas" value={data.consultasConcluidas} accent={theme.colors.success} />
+          <Metric styles={s} theme={theme} label="Cancelamentos" value={data.cancelamentos} accent={theme.colors.danger} />
+          <Metric styles={s} theme={theme} label="Pacientes atendidos" value={data.pacientesAtendidos} accent={theme.colors.info} />
+          <Metric styles={s} theme={theme} label="Vacinas aplicadas" value={data.vacinasAplicadas} accent={theme.domain.event.vaccine} />
+          <Metric styles={s} theme={theme} label="Faturamento" value={`R$ ${data.faturamento.toFixed(2).replace('.', ',')}`} wide />
         </View>
       ) : null}
     </ScrollView>
   );
 }
 
-function Metric({ label, value, accent, wide }: { label: string; value: string | number; accent?: string; wide?: boolean }) {
-  return <View style={[metricStyles.card, wide && metricStyles.wide]}><Text style={[metricStyles.value, accent ? { color: accent } : null]}>{value}</Text><Text style={metricStyles.label}>{label}</Text></View>;
+function Metric({ styles: s, theme, label, value, accent, wide }: { styles: ReturnType<typeof styles>; theme: AppTheme; label: string; value: string | number; accent?: string; wide?: boolean }) {
+  return <View style={[s.metricCard, wide && s.metricWide]}><Text style={[s.metricValue, accent ? { color: accent } : null]}>{value}</Text><Text style={s.metricLabel}>{label}</Text></View>;
 }
-
-const metricStyles = StyleSheet.create({
-  card: { width: '48%', backgroundColor: '#fff', borderRadius: 14, padding: 15, borderWidth: 1, borderColor: '#e8e2da', marginBottom: 10 },
-  wide: { width: '100%' },
-  value: { fontSize: 22, fontWeight: '800', color: '#1a7a52' },
-  label: { color: '#7a6a5e', fontSize: 11, marginTop: 5, fontWeight: '700' },
-});
 
 const styles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
@@ -61,4 +54,8 @@ const styles = (theme: AppTheme) => StyleSheet.create({
   loading: { marginTop: 30 },
   error: { color: theme.colors.danger, backgroundColor: theme.colors.dangerBackground, borderRadius: 10, padding: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  metricCard: { width: '48%', backgroundColor: theme.pages.vetReports.card, borderRadius: 14, padding: 15, borderWidth: 1, borderColor: theme.pages.vetReports.border, marginBottom: 10 },
+  metricWide: { width: '100%' },
+  metricValue: { fontSize: 22, fontWeight: '800', color: theme.pages.vetReports.primary },
+  metricLabel: { color: theme.pages.vetReports.textSecondary, fontSize: 11, marginTop: 5, fontWeight: '700' },
 });

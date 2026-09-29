@@ -27,7 +27,7 @@ export default function ConsultasScreen() {
     <View style={s.container}>
       <ScrollView
         contentContainerStyle={s.content}
-        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.colors.surface} />}
+        refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.vetAppointments.card} />}
       >
         {dicaVisivel && (
           <DicaTela
@@ -88,17 +88,17 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   emptyTitle: { fontSize: 15, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
   emptySub: { fontSize: 13, color: theme.colors.textSecondary, textAlign: 'center' },
 
-  card: { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, overflow: 'hidden', marginBottom: 10 },
-  cardRow: { flexDirection: 'row', alignItems: 'flex-start', padding: 14, gap: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  card: { backgroundColor: theme.pages.vetAppointments.card, borderWidth: 1, borderColor: theme.pages.vetAppointments.border, borderRadius: 12, overflow: 'hidden', marginBottom: 10 },
+  cardRow: { flexDirection: 'row', alignItems: 'flex-start', padding: 14, gap: 12, borderBottomWidth: 1, borderBottomColor: theme.pages.vetAppointments.border },
   eventoIcone: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   eventoInfo: { flex: 1 },
   eventoTitulo: { fontSize: 14, fontWeight: '700', color: theme.colors.text },
   eventoMeta: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 3 },
   eventoObs: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 4, fontStyle: 'italic' },
 
-  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 10, backgroundColor: theme.colors.surfaceSubtle },
+  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 10, backgroundColor: theme.pages.vetAppointments.cardSecondary },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 11, fontWeight: '700' },
-  btnFicha: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8, borderWidth: 1.5, borderColor: theme.colors.border },
+  btnFicha: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8, borderWidth: 1.5, borderColor: theme.pages.vetAppointments.border },
   btnFichaText: { color: theme.colors.text, fontSize: 12, fontWeight: '600' },
 });

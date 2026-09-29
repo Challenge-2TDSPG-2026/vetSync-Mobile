@@ -10,7 +10,7 @@ import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 import { useAuditoria } from '../../hooks/useRelatorios';
-import type { AppTheme } from '../../constants/theme';
+import { withAlpha, type AppTheme } from '../../constants/theme';
 
 export default function EventoDetalhesScreen() {
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function EventoDetalhesScreen() {
     <ScrollView style={s.container} contentContainerStyle={s.content}>
       <View style={s.header}>
         <Pressable onPress={() => router.back()} style={s.backButton} accessibilityLabel="Voltar">
-          <Ionicons name="chevron-back" size={24} color={theme.colors.onNavigation} />
+          <Ionicons name="chevron-back" size={24} color={theme.pages.eventDetails.heroText} />
         </Pressable>
         <Text style={s.headerTitle}>Detalhes do evento</Text>
       </View>
@@ -131,22 +131,22 @@ function createStyles(theme: AppTheme) {
     loading: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: theme.colors.background },
     emptyTitle: { marginTop: 14, fontSize: 18, fontWeight: '800', color: theme.colors.text },
     emptyText: { marginTop: 8, textAlign: 'center', color: theme.colors.textSecondary, lineHeight: 20 },
-    header: { height: 104, paddingTop: 44, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.navigation },
+    header: { height: 104, paddingTop: 44, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', backgroundColor: theme.pages.eventDetails.heroBackground },
     backButton: { marginRight: 10 },
-    headerTitle: { color: theme.colors.onNavigation, fontSize: 20, fontWeight: '800' },
+    headerTitle: { color: theme.pages.eventDetails.heroText, fontSize: 20, fontWeight: '800' },
     hero: { margin: 16, borderRadius: 22, padding: 22, alignItems: 'center' },
-    heroIcon: { width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.2)' },
+    heroIcon: { width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center', backgroundColor: withAlpha(theme.pages.eventDetails.heroText, 0.2) },
     heroTitle: { marginTop: 12, color: theme.colors.onPrimary, fontSize: 23, fontWeight: '800', textAlign: 'center' },
-    heroPet: { marginTop: 4, color: 'rgba(255,255,255,0.86)', fontSize: 14 },
+    heroPet: { marginTop: 4, color: withAlpha(theme.pages.eventDetails.heroText, 0.86), fontSize: 14 },
     badge: { marginTop: 14, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
     badgeText: { fontSize: 12, fontWeight: '800' },
-    card: { marginHorizontal: 16, marginBottom: 14, padding: 18, borderRadius: 18, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border },
+    card: { marginHorizontal: 16, marginBottom: 14, padding: 18, borderRadius: 18, backgroundColor: theme.pages.eventDetails.card, borderWidth: 1, borderColor: theme.pages.eventDetails.border },
     sectionTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '800', marginBottom: 10 },
     description: { color: theme.colors.textSecondary, lineHeight: 22 },
     clinicalRow: { marginBottom: 12 },
     clinicalLabel: { color: theme.colors.textMuted, fontSize: 12, fontWeight: '700', marginBottom: 3 },
     auditRow: { paddingVertical: 8 },
-    auditDivider: { borderTopWidth: 1, borderTopColor: theme.colors.border },
+    auditDivider: { borderTopWidth: 1, borderTopColor: theme.pages.eventDetails.border },
     auditAction: { color: theme.colors.text, fontSize: 13, fontWeight: '700' },
     auditMeta: { color: theme.colors.textMuted, fontSize: 11, marginTop: 3 },
     primaryButton: { marginTop: 20, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 13, backgroundColor: theme.colors.primary },

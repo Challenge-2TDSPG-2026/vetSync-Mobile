@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import type { AppTheme } from '../../constants/theme';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
 import { useVet } from '../../context/VetContext';
 import { AppIcon } from '../../components/AppIcon';
@@ -6,12 +8,6 @@ import { confirmar } from '../../utils/alert';
 import { mostrarToast } from '../../components/ui/Toast';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-
-const C = {
-  g800: '#0e3326', g600: '#1a7a52', g100: '#d4f2e4',
-  cream: '#fafaf8', w50: '#f9f7f4', text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff',
-  danger: '#dc3545',
-};
 
 // Convenção do Java: 1=segunda ... 7=domingo (não é a mesma do Date.getDay() do JS)
 const DIAS_SEMANA = [
@@ -38,6 +34,8 @@ function paraIso(dataBr: string): string {
 }
 
 export default function DisponibilidadeScreen() {
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const {
     disponibilidade, adicionarFaixaDisponibilidade, removerFaixaDisponibilidade,
     bloqueios, adicionarBloqueio, removerBloqueio, carregando,
@@ -120,7 +118,7 @@ export default function DisponibilidadeScreen() {
         <DicaTela
           titulo="Sua disponibilidade"
           texto="Defina abaixo os horários fixos que você atende em cada dia da semana, e use a seção de bloqueios pra marcar férias ou folgas."
-          accentColor={C.g600}
+          accentColor={theme.pages.vetAvailability.primary}
           onFechar={fecharDica}
         />
       )}
@@ -144,7 +142,7 @@ export default function DisponibilidadeScreen() {
             value={horaInicio}
             onChangeText={v => setHoraInicio(formatarHora(v))}
             placeholder="08:00"
-            placeholderTextColor={C.muted}
+            placeholderTextColor={theme.pages.vetAvailability.textSecondary}
             keyboardType="numeric"
             maxLength={5}
           />
@@ -154,17 +152,17 @@ export default function DisponibilidadeScreen() {
             value={horaFim}
             onChangeText={v => setHoraFim(formatarHora(v))}
             placeholder="18:00"
-            placeholderTextColor={C.muted}
+            placeholderTextColor={theme.pages.vetAvailability.textSecondary}
             keyboardType="numeric"
             maxLength={5}
           />
           <Pressable style={[s.btnAdicionar, salvandoFaixa && { opacity: 0.6 }]} onPress={handleAdicionarFaixa} disabled={salvandoFaixa}>
-            {salvandoFaixa ? <ActivityIndicator size="small" color={C.white} /> : <AppIcon name="add" set="Ionicons" size={18} color={C.white} />}
+            {salvandoFaixa ? <ActivityIndicator size="small" color={theme.pages.vetAvailability.white} /> : <AppIcon name="add" set="Ionicons" size={18} color={theme.pages.vetAvailability.white} />}
           </Pressable>
         </View>
 
         {carregando ? (
-          <ActivityIndicator color={C.g600} style={{ marginVertical: 12 }} />
+          <ActivityIndicator color={theme.pages.vetAvailability.primary} style={{ marginVertical: 12 }} />
         ) : disponibilidade.length === 0 ? (
           <Text style={s.vazioTexto}>Nenhum horário fixo cadastrado ainda.</Text>
         ) : (
@@ -176,7 +174,7 @@ export default function DisponibilidadeScreen() {
                   {DIAS_SEMANA.find(d => d.valor === f.diaSemana)?.label ?? f.diaSemana} · {f.horaInicio} – {f.horaFim}
                 </Text>
                 <Pressable onPress={() => handleRemoverFaixa(f.id)} hitSlop={8}>
-                  <AppIcon name="trash-outline" set="Ionicons" size={16} color={C.danger} />
+                  <AppIcon name="trash-outline" set="Ionicons" size={16} color={theme.pages.vetAvailability.danger} />
                 </Pressable>
               </View>
             ))
@@ -191,7 +189,7 @@ export default function DisponibilidadeScreen() {
             value={dataInicioBloqueio}
             onChangeText={v => setDataInicioBloqueio(formatarDataBR(v))}
             placeholder="Início DD/MM/AAAA"
-            placeholderTextColor={C.muted}
+            placeholderTextColor={theme.pages.vetAvailability.textSecondary}
             keyboardType="numeric"
             maxLength={10}
           />
@@ -200,7 +198,7 @@ export default function DisponibilidadeScreen() {
             value={dataFimBloqueio}
             onChangeText={v => setDataFimBloqueio(formatarDataBR(v))}
             placeholder="Fim DD/MM/AAAA"
-            placeholderTextColor={C.muted}
+            placeholderTextColor={theme.pages.vetAvailability.textSecondary}
             keyboardType="numeric"
             maxLength={10}
           />
@@ -210,7 +208,7 @@ export default function DisponibilidadeScreen() {
           value={motivoBloqueio}
           onChangeText={setMotivoBloqueio}
           placeholder="Motivo (opcional)"
-          placeholderTextColor={C.muted}
+          placeholderTextColor={theme.pages.vetAvailability.textSecondary}
         />
         <Pressable style={[s.btnAdicionarBloqueio, salvandoBloqueio && { opacity: 0.6 }]} onPress={handleAdicionarBloqueio} disabled={salvandoBloqueio}>
           <Text style={s.btnAdicionarBloqueioText}>{salvandoBloqueio ? 'Adicionando...' : 'Adicionar bloqueio'}</Text>
@@ -226,7 +224,7 @@ export default function DisponibilidadeScreen() {
                 {b.motivo ? <Text style={s.motivoTexto}>{b.motivo}</Text> : null}
               </View>
               <Pressable onPress={() => handleRemoverBloqueio(b.id)} hitSlop={8}>
-                <AppIcon name="trash-outline" set="Ionicons" size={16} color={C.danger} />
+                <AppIcon name="trash-outline" set="Ionicons" size={16} color={theme.pages.vetAvailability.danger} />
               </Pressable>
             </View>
           ))
@@ -237,44 +235,44 @@ export default function DisponibilidadeScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.cream },
+const createStyles = (theme: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.pages.vetAvailability.background },
   content: { padding: 16, paddingBottom: 40 },
 
   secLabel: {
     fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase',
-    color: C.muted, marginBottom: 10, marginTop: 4, paddingLeft: 2,
+    color: theme.pages.vetAvailability.textSecondary, marginBottom: 10, marginTop: 4, paddingLeft: 2,
   },
-  card: { backgroundColor: C.white, borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 16, marginBottom: 20 },
+  card: { backgroundColor: theme.pages.vetAvailability.card, borderRadius: 14, borderWidth: 1, borderColor: theme.pages.vetAvailability.border, padding: 16, marginBottom: 20 },
 
   diasRow: { flexDirection: 'row', gap: 6, marginBottom: 14, flexWrap: 'wrap' },
-  diaBtn: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 8, backgroundColor: C.w50, borderWidth: 1, borderColor: C.border },
-  diaBtnAtivo: { backgroundColor: C.g600, borderColor: C.g600 },
-  diaBtnText: { fontSize: 11, fontWeight: '700', color: C.text },
-  diaBtnTextAtivo: { color: C.white },
+  diaBtn: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 8, backgroundColor: theme.pages.vetAvailability.cardSecondary, borderWidth: 1, borderColor: theme.pages.vetAvailability.border },
+  diaBtnAtivo: { backgroundColor: theme.pages.vetAvailability.primary, borderColor: theme.pages.vetAvailability.primary },
+  diaBtnText: { fontSize: 11, fontWeight: '700', color: theme.pages.vetAvailability.text },
+  diaBtnTextAtivo: { color: theme.pages.vetAvailability.white },
 
   horaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
   horaInput: {
-    backgroundColor: C.w50, borderWidth: 1.5, borderColor: C.border, borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: C.text, textAlign: 'center', minWidth: 70,
+    backgroundColor: theme.pages.vetAvailability.cardSecondary, borderWidth: 1.5, borderColor: theme.pages.vetAvailability.border, borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: theme.pages.vetAvailability.text, textAlign: 'center', minWidth: 70,
   },
-  horaSep: { fontSize: 12, color: C.muted },
-  btnAdicionar: { backgroundColor: C.g600, width: 38, height: 38, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  horaSep: { fontSize: 12, color: theme.pages.vetAvailability.textSecondary },
+  btnAdicionar: { backgroundColor: theme.pages.vetAvailability.primary, width: 38, height: 38, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
 
-  vazioTexto: { fontSize: 12, color: C.muted, fontStyle: 'italic', paddingVertical: 6 },
+  vazioTexto: { fontSize: 12, color: theme.pages.vetAvailability.textSecondary, fontStyle: 'italic', paddingVertical: 6 },
 
   faixaRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 10, borderTopWidth: 1, borderTopColor: C.border,
+    paddingVertical: 10, borderTopWidth: 1, borderTopColor: theme.pages.vetAvailability.border,
   },
-  faixaTexto: { fontSize: 13, color: C.text, fontWeight: '600' },
-  motivoTexto: { fontSize: 11, color: C.muted, marginTop: 2 },
+  faixaTexto: { fontSize: 13, color: theme.pages.vetAvailability.text, fontWeight: '600' },
+  motivoTexto: { fontSize: 11, color: theme.pages.vetAvailability.textSecondary, marginTop: 2 },
 
   dataRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
   motivoInput: {
-    backgroundColor: C.w50, borderWidth: 1.5, borderColor: C.border, borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: C.text, marginBottom: 10,
+    backgroundColor: theme.pages.vetAvailability.cardSecondary, borderWidth: 1.5, borderColor: theme.pages.vetAvailability.border, borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: theme.pages.vetAvailability.text, marginBottom: 10,
   },
-  btnAdicionarBloqueio: { backgroundColor: C.g600, paddingVertical: 10, borderRadius: 10, alignItems: 'center', marginBottom: 4 },
-  btnAdicionarBloqueioText: { color: C.white, fontSize: 13, fontWeight: '700' },
+  btnAdicionarBloqueio: { backgroundColor: theme.pages.vetAvailability.primary, paddingVertical: 10, borderRadius: 10, alignItems: 'center', marginBottom: 4 },
+  btnAdicionarBloqueioText: { color: theme.pages.vetAvailability.white, fontSize: 13, fontWeight: '700' },
 });

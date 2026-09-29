@@ -15,9 +15,9 @@ export default function VetTabsLayout() {
         tabBarInactiveTintColor: theme.colors.textSecondary,
         animation: 'fade',
         headerStyle: {
-          backgroundColor: theme.colors.appHeader,
+          backgroundColor: theme.components.header.background,
         },
-        headerTintColor: theme.colors.onNavigation,
+        headerTintColor: theme.components.header.title,
         headerTitleAlign: 'left',
         headerTitleStyle: {
           fontWeight: '700',

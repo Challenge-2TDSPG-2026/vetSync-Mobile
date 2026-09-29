@@ -1,3 +1,5 @@
+import { useTheme } from '../context/ThemeContext';
+import { withAlpha, type AppTheme } from '../constants/theme';
 import React, { useMemo, useState } from 'react';
 import {
   View, Text, TextInput, ScrollView, Pressable,
@@ -18,16 +20,6 @@ import { agendarLembretes } from '../services/calendarService';
 import { salvarLembretesEvento } from '../storage/petStorage';
 import type { TipoEvento, Veterinario } from '../types';
 
-const C = {
-  night: '#0a2218', forest: '#123d29',
-  g900: '#0a2218', g800: '#0e3326', g700: '#155c3f', g600: '#1a7a52',
-  g500: '#22a06b', g400: '#3db87e', g200: '#a8e6c7', g100: '#d4f2e4', g50: '#edfaf3',
-  glow: '#f2c879',
-  cream: '#f6f4ef', w50: '#f9f7f4', w100: '#f0ece5',
-  text: '#1a1512', muted: '#7a6a5e', border: '#e8e2da', white: '#fff',
-  danger: '#dc3545', dangerLight: '#fff2f2', warn: '#e67e22',
-};
-
 function formatarData(text: string): string {
   const n = text.replace(/\D/g, '');
   if (n.length <= 2) return n;
@@ -47,6 +39,8 @@ function paraIsoData(s: string): string {
 }
 
 export default function AddEventoScreen() {
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
   const router = useRouter();
   const { petAtivo } = usePet();
 
@@ -137,10 +131,10 @@ export default function AddEventoScreen() {
 
   const visualTipo = tipoSelecionado ? obterVisualTipoEvento(tipoSelecionado.nome) : null;
   const carregandoCatalogo = carregandoTipos || carregandoVets;
-  const corTema = visualTipo?.cor ?? C.g600;
+  const corTema = visualTipo?.cor ?? theme.pages.addEvent.primary;
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.night }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.pages.addEvent.heroBackground }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={s.scroll}
@@ -148,8 +142,8 @@ export default function AddEventoScreen() {
         showsVerticalScrollIndicator={false}
       >
 
-        <LinearGradient colors={[C.night, corTema]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
-          <AppIcon name="paw" set="MaterialCommunityIcons" size={190} color="rgba(255,255,255,0.05)" style={s.pawMarca} />
+        <LinearGradient colors={[theme.pages.addEvent.heroBackground, corTema]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
+          <AppIcon name="paw" set="MaterialCommunityIcons" size={190} color={withAlpha(theme.pages.addEvent.white, 0.05)} style={s.pawMarca} />
 
           <Pressable
             onPress={() => router.replace('/(tutor)')}
@@ -158,7 +152,7 @@ export default function AddEventoScreen() {
             accessibilityRole="button"
             accessibilityLabel="Fechar"
           >
-            <AppIcon name="close" set="Ionicons" size={20} color="#fff" />
+            <AppIcon name="close" set="Ionicons" size={20} color={theme.pages.addEvent.white} />
           </Pressable>
 
           <View style={s.seloWrap}>
@@ -169,7 +163,7 @@ export default function AddEventoScreen() {
                 name={visualTipo?.icon ?? 'document-text-outline'}
                 set={visualTipo?.iconSet ?? 'Ionicons'}
                 size={26}
-                color="#fff"
+                color={theme.pages.addEvent.white}
               />
             </View>
           </View>
@@ -180,7 +174,7 @@ export default function AddEventoScreen() {
           </Text>
           {petAtivo ? (
             <View style={s.petPill}>
-              <AppIcon name="paw" set="MaterialCommunityIcons" size={12} color="#fff" />
+              <AppIcon name="paw" set="MaterialCommunityIcons" size={12} color={theme.pages.addEvent.white} />
               <Text style={s.petPillTexto}>Para {petAtivo.nome}</Text>
             </View>
           ) : null}
@@ -192,20 +186,20 @@ export default function AddEventoScreen() {
             <DicaTela
               titulo="Como agendar"
               texto="Escolha o tipo de evento, o veterinário, a data e o horário abaixo. Você também pode ativar lembretes pra não esquecer."
-              accentColor={C.g600}
+              accentColor={theme.pages.addEvent.primary}
               onFechar={fecharDica}
             />
           )}
 
           {carregandoCatalogo ? (
             <View style={s.loadingBox}>
-              <ActivityIndicator color={C.g600} />
+              <ActivityIndicator color={theme.pages.addEvent.primary} />
             </View>
           ) : (
             <>
               <View style={s.secao}>
                 <View style={s.secaoHeadRow}>
-                  <AppIcon name="clipboard-pulse-outline" set="MaterialCommunityIcons" size={16} color={C.g700} />
+                  <AppIcon name="clipboard-pulse-outline" set="MaterialCommunityIcons" size={16} color={theme.pages.addEvent.primary} />
                   <Text style={s.secaoTitulo}>Tipo de evento</Text>
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -224,11 +218,11 @@ export default function AddEventoScreen() {
                               <AppIcon name="checkmark" set="Ionicons" size={11} color={v.cor} />
                             </View>
                           )}
-                          <View style={[s.tipoIconCirculo, { backgroundColor: ativo ? 'rgba(255,255,255,0.2)' : v.cor + '18' }]}>
-                            <AppIcon name={v.icon} set={v.iconSet} size={20} color={ativo ? C.white : v.cor} />
+                          <View style={[s.tipoIconCirculo, { backgroundColor: ativo ? withAlpha(theme.pages.addEvent.white, 0.2) : v.cor + '18' }]}>
+                            <AppIcon name={v.icon} set={v.iconSet} size={20} color={ativo ? theme.pages.addEvent.white : v.cor} />
                           </View>
-                          <Text style={[s.tipoLabel, ativo && { color: C.white }]}>{t.nome}</Text>
-                          <Text style={[s.tipoPontos, ativo && { color: 'rgba(255,255,255,0.85)' }]}>{t.pontos} pts</Text>
+                          <Text style={[s.tipoLabel, ativo && { color: theme.pages.addEvent.white }]}>{t.nome}</Text>
+                          <Text style={[s.tipoPontos, ativo && { color: withAlpha(theme.pages.addEvent.white, 0.85) }]}>{t.pontos} pts</Text>
                         </Pressable>
                       );
                     })}
@@ -239,7 +233,7 @@ export default function AddEventoScreen() {
 
               <View style={s.secao}>
                 <View style={s.secaoHeadRow}>
-                  <AppIcon name="filter-outline" set="Ionicons" size={16} color={C.g700} />
+                  <AppIcon name="filter-outline" set="Ionicons" size={16} color={theme.pages.addEvent.primary} />
                   <Text style={s.secaoTitulo}>Especialidade</Text>
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -249,12 +243,12 @@ export default function AddEventoScreen() {
                       return (
                         <Pressable
                           key={esp}
-                          style={[s.espBtn, ativo && { backgroundColor: C.g600 }]}
+                          style={[s.espBtn, ativo && { backgroundColor: theme.pages.addEvent.primary }]}
                           onPress={() => selecionarEspecialidade(esp)}
                           accessibilityRole="button"
                           accessibilityState={{ selected: ativo }}
                         >
-                          <Text style={[s.espBtnTexto, ativo && { color: C.white }]}>{esp}</Text>
+                          <Text style={[s.espBtnTexto, ativo && { color: theme.pages.addEvent.white }]}>{esp}</Text>
                         </Pressable>
                       );
                     })}
@@ -264,7 +258,7 @@ export default function AddEventoScreen() {
 
               <View style={s.secao}>
                 <View style={s.secaoHeadRow}>
-                  <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={16} color={C.g700} />
+                  <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={16} color={theme.pages.addEvent.primary} />
                   <Text style={s.secaoTitulo}>Veterinário</Text>
                 </View>
                 {especialidadeSelecionada && veterinariosFiltrados.length === 0 ? (
@@ -282,16 +276,16 @@ export default function AddEventoScreen() {
                           style={[s.vetBtn, ativo && s.vetBtnAtivo]}
                           onPress={() => setVetSelecionado(v)}
                         >
-                          <View style={[s.vetAvatar, ativo && { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-                            <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={16} color={ativo ? C.white : C.g600} />
+                          <View style={[s.vetAvatar, ativo && { backgroundColor: withAlpha(theme.pages.addEvent.white, 0.2) }]}>
+                            <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={16} color={ativo ? theme.pages.addEvent.white : theme.pages.addEvent.primary} />
                           </View>
                           <View style={{ flex: 1 }}>
-                            <Text style={[s.vetNome, ativo && { color: C.white }]} numberOfLines={1}>{v.nome}</Text>
+                            <Text style={[s.vetNome, ativo && { color: theme.pages.addEvent.white }]} numberOfLines={1}>{v.nome}</Text>
                             {v.nomeClinica ? (
-                              <Text style={[s.vetClinica, ativo && { color: 'rgba(255,255,255,0.8)' }]} numberOfLines={1}>{v.nomeClinica}</Text>
+                              <Text style={[s.vetClinica, ativo && { color: withAlpha(theme.pages.addEvent.white, 0.8) }]} numberOfLines={1}>{v.nomeClinica}</Text>
                             ) : null}
                           </View>
-                          {ativo && <AppIcon name="checkmark-circle" set="Ionicons" size={16} color={C.white} />}
+                          {ativo && <AppIcon name="checkmark-circle" set="Ionicons" size={16} color={theme.pages.addEvent.white} />}
                         </Pressable>
                       );
                     })}
@@ -305,19 +299,19 @@ export default function AddEventoScreen() {
 
           <View style={s.secao}>
             <View style={s.secaoHeadRow}>
-              <AppIcon name="calendar-outline" set="Ionicons" size={16} color={C.g700} />
+              <AppIcon name="calendar-outline" set="Ionicons" size={16} color={theme.pages.addEvent.primary} />
               <Text style={s.secaoTitulo}>Data e horário</Text>
             </View>
             <View style={s.fr}>
               <View style={{ flex: 1 }}>
                 <View style={[s.inputWrap, erros.data && s.inputWrapErro]}>
-                  <AppIcon name="calendar-outline" set="Ionicons" size={16} color={C.muted} style={{ marginRight: 8 }} />
+                  <AppIcon name="calendar-outline" set="Ionicons" size={16} color={theme.pages.addEvent.textSecondary} style={{ marginRight: 8 }} />
                   <TextInput
                     style={s.fiInput}
                     value={data}
                     onChangeText={v => setData(formatarData(v))}
                     placeholder="DD/MM/AAAA"
-                    placeholderTextColor={C.muted}
+                    placeholderTextColor={theme.pages.addEvent.textSecondary}
                     keyboardType="numeric"
                     maxLength={10}
                   />
@@ -326,13 +320,13 @@ export default function AddEventoScreen() {
               </View>
               <View style={{ width: 118 }}>
                 <View style={[s.inputWrap, erros.hora && s.inputWrapErro]}>
-                  <AppIcon name="time-outline" set="Ionicons" size={16} color={C.muted} style={{ marginRight: 8 }} />
+                  <AppIcon name="time-outline" set="Ionicons" size={16} color={theme.pages.addEvent.textSecondary} style={{ marginRight: 8 }} />
                   <TextInput
                     style={s.fiInput}
                     value={hora}
                     onChangeText={v => setHora(formatarHora(v))}
                     placeholder="HH:MM"
-                    placeholderTextColor={C.muted}
+                    placeholderTextColor={theme.pages.addEvent.textSecondary}
                     keyboardType="numeric"
                     maxLength={5}
                   />
@@ -344,7 +338,7 @@ export default function AddEventoScreen() {
 
           <View style={s.secao}>
             <View style={s.secaoHeadRow}>
-              <AppIcon name="create-outline" set="Ionicons" size={16} color={C.g700} />
+              <AppIcon name="create-outline" set="Ionicons" size={16} color={theme.pages.addEvent.primary} />
               <Text style={s.secaoTitulo}>Observação</Text>
             </View>
             <View style={[s.inputWrap, s.inputWrapTextarea]}>
@@ -353,7 +347,7 @@ export default function AddEventoScreen() {
                 value={observacao}
                 onChangeText={setObservacao}
                 placeholder="Sintomas, contexto, pedidos específicos..."
-                placeholderTextColor={C.muted}
+                placeholderTextColor={theme.pages.addEvent.textSecondary}
                 multiline
                 numberOfLines={3}
               />
@@ -362,7 +356,7 @@ export default function AddEventoScreen() {
 
           <View style={s.secao}>
             <View style={s.secaoHeadRow}>
-              <AppIcon name="notifications-outline" set="Ionicons" size={16} color={C.g700} />
+              <AppIcon name="notifications-outline" set="Ionicons" size={16} color={theme.pages.addEvent.primary} />
               <Text style={s.secaoTitulo}>Lembretes</Text>
             </View>
             <Text style={s.lembreteAjuda}>Escolha quando deseja ser avisado sobre este evento.</Text>
@@ -382,7 +376,7 @@ export default function AddEventoScreen() {
                     accessibilityState={{ selected: selecionado }}
                     accessibilityLabel={`${opcao.label}${selecionado ? ', selecionado' : ''}`}
                   >
-                    {selecionado && <AppIcon name="checkmark" set="Ionicons" size={13} color={C.white} />}
+                    {selecionado && <AppIcon name="checkmark" set="Ionicons" size={13} color={theme.pages.addEvent.white} />}
                     <Text style={[s.lembreteOpcaoTexto, selecionado && s.lembreteOpcaoTextoSelecionado]}>{opcao.label}</Text>
                   </Pressable>
                 );
@@ -403,7 +397,7 @@ export default function AddEventoScreen() {
             ) : (
               <>
                 <Text style={s.btnSalvarText}>Agendar evento</Text>
-                <AppIcon name="arrow-forward" set="Ionicons" size={18} color="#fff" />
+                <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.pages.addEvent.white} />
               </>
             )}
           </Pressable>
@@ -419,7 +413,7 @@ export default function AddEventoScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const createStyles = (theme: AppTheme) => StyleSheet.create({
   scroll: { flexGrow: 1 },
 
   hero: {
@@ -436,14 +430,14 @@ const s = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: withAlpha(theme.pages.addEvent.white, 0.14),
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   seloWrap: { width: 60, height: 60, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  seloGlowOut: { position: 'absolute', width: 86, height: 86, borderRadius: 43, backgroundColor: 'rgba(242,200,121,0.12)' },
-  seloGlowIn: { position: 'absolute', width: 66, height: 66, borderRadius: 33, backgroundColor: 'rgba(242,200,121,0.16)' },
+  seloGlowOut: { position: 'absolute', width: 86, height: 86, borderRadius: 43, backgroundColor: withAlpha(theme.colors.brandAccent, 0.12) },
+  seloGlowIn: { position: 'absolute', width: 66, height: 66, borderRadius: 33, backgroundColor: withAlpha(theme.colors.brandAccent, 0.16) },
   selo: {
     width: 48, height: 48, borderRadius: 15,
     alignItems: 'center', justifyContent: 'center',
@@ -451,21 +445,21 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 }, elevation: 6,
   },
 
-  heroTitulo: { fontSize: 24, fontWeight: '800', color: C.white, letterSpacing: -0.5, lineHeight: 29, marginBottom: 8, maxWidth: 300 },
-  heroSub: { fontSize: 13, fontWeight: '500', color: 'rgba(255,255,255,0.8)', lineHeight: 18 },
+  heroTitulo: { fontSize: 24, fontWeight: '800', color: theme.pages.addEvent.white, letterSpacing: -0.5, lineHeight: 29, marginBottom: 8, maxWidth: 300 },
+  heroSub: { fontSize: 13, fontWeight: '500', color: withAlpha(theme.pages.addEvent.white, 0.8), lineHeight: 18 },
   petPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    backgroundColor: withAlpha(theme.pages.addEvent.white, 0.16),
     paddingHorizontal: 10, paddingVertical: 5,
     borderRadius: 999,
     marginTop: 12,
   },
-  petPillTexto: { fontSize: 11, fontWeight: '700', color: '#fff' },
+  petPillTexto: { fontSize: 11, fontWeight: '700', color: theme.pages.addEvent.white },
 
   sheet: {
     flexGrow: 1,
-    backgroundColor: C.cream,
+    backgroundColor: theme.pages.addEvent.background,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     marginTop: -24,
@@ -478,7 +472,7 @@ const s = StyleSheet.create({
 
   secao: { marginBottom: 24 },
   secaoHeadRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 },
-  secaoTitulo: { fontSize: 14, fontWeight: '700', color: C.text },
+  secaoTitulo: { fontSize: 14, fontWeight: '700', color: theme.pages.addEvent.text },
 
   fr: { flexDirection: 'row', gap: 10 },
 
@@ -486,39 +480,39 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    backgroundColor: C.w50,
+    backgroundColor: theme.pages.addEvent.cardSecondary,
     borderWidth: 1.5,
     borderColor: 'transparent',
     borderRadius: 14,
     paddingHorizontal: 14,
   },
-  inputWrapErro: { borderColor: C.danger, backgroundColor: C.dangerLight },
+  inputWrapErro: { borderColor: theme.pages.addEvent.danger, backgroundColor: theme.pages.addEvent.dangerBackground },
   inputWrapTextarea: { alignItems: 'flex-start', paddingVertical: 4 },
-  fiInput: { flex: 1, paddingVertical: 13, fontSize: 14, color: C.text },
+  fiInput: { flex: 1, paddingVertical: 13, fontSize: 14, color: theme.pages.addEvent.text },
   fiTextarea: { minHeight: 80, textAlignVertical: 'top', paddingVertical: 12 },
-  textoErro: { color: C.danger, fontSize: 12, marginTop: 6, fontWeight: '600' },
+  textoErro: { color: theme.pages.addEvent.danger, fontSize: 12, marginTop: 6, fontWeight: '600' },
 
-  lembreteAjuda: { color: C.muted, fontSize: 12, lineHeight: 17, marginTop: -4, marginBottom: 11 },
+  lembreteAjuda: { color: theme.pages.addEvent.textSecondary, fontSize: 12, lineHeight: 17, marginTop: -4, marginBottom: 11 },
   lembreteOpcoes: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  lembreteOpcao: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 999, backgroundColor: C.w50, borderWidth: 1, borderColor: C.border, paddingHorizontal: 12, paddingVertical: 9 },
-  lembreteOpcaoSelecionada: { backgroundColor: C.g600, borderColor: C.g600 },
-  lembreteOpcaoTexto: { color: C.text, fontSize: 12, fontWeight: '700' },
-  lembreteOpcaoTextoSelecionado: { color: C.white },
-  lembreteSemAviso: { color: C.muted, fontSize: 11, marginTop: 10 },
+  lembreteOpcao: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 999, backgroundColor: theme.pages.addEvent.cardSecondary, borderWidth: 1, borderColor: theme.pages.addEvent.border, paddingHorizontal: 12, paddingVertical: 9 },
+  lembreteOpcaoSelecionada: { backgroundColor: theme.pages.addEvent.primary, borderColor: theme.pages.addEvent.primary },
+  lembreteOpcaoTexto: { color: theme.pages.addEvent.text, fontSize: 12, fontWeight: '700' },
+  lembreteOpcaoTextoSelecionado: { color: theme.pages.addEvent.white },
+  lembreteSemAviso: { color: theme.pages.addEvent.textSecondary, fontSize: 11, marginTop: 10 },
 
   tipoBtn: {
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 16,
-    backgroundColor: C.w50,
+    backgroundColor: theme.pages.addEvent.cardSecondary,
     minWidth: 118,
     position: 'relative',
   },
   checkBadge: {
     position: 'absolute', top: 8, right: 8,
     width: 18, height: 18, borderRadius: 9,
-    backgroundColor: C.white,
+    backgroundColor: theme.pages.addEvent.card,
     justifyContent: 'center', alignItems: 'center',
   },
   tipoIconCirculo: {
@@ -526,19 +520,19 @@ const s = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     marginBottom: 8,
   },
-  tipoLabel: { fontSize: 11, fontWeight: '700', color: C.text, textAlign: 'center' },
-  tipoPontos: { fontSize: 9, fontWeight: '700', color: C.muted, marginTop: 3 },
+  tipoLabel: { fontSize: 11, fontWeight: '700', color: theme.pages.addEvent.text, textAlign: 'center' },
+  tipoPontos: { fontSize: 9, fontWeight: '700', color: theme.pages.addEvent.textSecondary, marginTop: 3 },
 
   espBtn: {
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderRadius: 999,
-    backgroundColor: C.w50,
+    backgroundColor: theme.pages.addEvent.cardSecondary,
     borderWidth: 1,
-    borderColor: C.border,
+    borderColor: theme.pages.addEvent.border,
   },
-  espBtnTexto: { fontSize: 12, fontWeight: '700', color: C.text },
-  vetVazio: { color: C.muted, fontSize: 12, paddingVertical: 8 },
+  espBtnTexto: { fontSize: 12, fontWeight: '700', color: theme.pages.addEvent.text },
+  vetVazio: { color: theme.pages.addEvent.textSecondary, fontSize: 12, paddingVertical: 8 },
 
   vetBtn: {
     flexDirection: 'row',
@@ -547,17 +541,17 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 14,
-    backgroundColor: C.w50,
+    backgroundColor: theme.pages.addEvent.cardSecondary,
     minWidth: 180,
   },
-  vetBtnAtivo: { backgroundColor: C.g600 },
+  vetBtnAtivo: { backgroundColor: theme.pages.addEvent.primary },
   vetAvatar: {
     width: 32, height: 32, borderRadius: 16,
-    backgroundColor: C.g50,
+    backgroundColor: theme.pages.addEvent.cardSecondary,
     justifyContent: 'center', alignItems: 'center',
   },
-  vetNome: { fontSize: 12, fontWeight: '700', color: C.text },
-  vetClinica: { fontSize: 10, color: C.muted, marginTop: 1 },
+  vetNome: { fontSize: 12, fontWeight: '700', color: theme.pages.addEvent.text },
+  vetClinica: { fontSize: 10, color: theme.pages.addEvent.textSecondary, marginTop: 1 },
 
   btnSalvar: {
     flexDirection: 'row',
@@ -573,8 +567,8 @@ const s = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
   },
-  btnSalvarText: { color: C.white, fontSize: 15, fontWeight: '700' },
+  btnSalvarText: { color: theme.pages.addEvent.white, fontSize: 15, fontWeight: '700' },
 
   btnCancelar: { marginTop: 12, paddingVertical: 10, alignItems: 'center' },
-  btnCancelarText: { fontSize: 13, fontWeight: '600', color: C.muted },
+  btnCancelarText: { fontSize: 13, fontWeight: '600', color: theme.pages.addEvent.textSecondary },
 });

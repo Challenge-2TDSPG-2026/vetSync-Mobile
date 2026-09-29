@@ -46,12 +46,12 @@ export default function VetDashboardScreen() {
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
-      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.colors.surface} />}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.vetDashboard.card} />}
     >
 
       <View style={s.welcome}>
         <View style={s.welcomeIconWrap}>
-          <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={30} color={theme.colors.onNavigation} />
+          <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={30} color={theme.pages.vetDashboard.heroText} />
         </View>
         <View style={s.welcomeInfo}>
           <Text style={s.welcomeNome}>Olá, {veterinarioAtivo?.nome ?? sessao?.nome}</Text>
@@ -305,7 +305,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   loadingContainer: { flex: 1, backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' },
 
   welcome: {
-    backgroundColor: theme.colors.navigation,
+    backgroundColor: theme.pages.vetDashboard.heroBackground,
     borderRadius: 16,
     padding: 20,
     flexDirection: 'row',
@@ -319,17 +319,17 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   welcomeInfo: { flex: 1 },
-  welcomeNome: { fontSize: 17, fontWeight: '700', color: theme.colors.onNavigation, letterSpacing: -0.3 },
-  welcomeSub: { fontSize: 12, color: theme.colors.onNavigation, opacity: 0.85, marginTop: 3 },
+  welcomeNome: { fontSize: 17, fontWeight: '700', color: theme.pages.vetDashboard.heroText, letterSpacing: -0.3 },
+  welcomeSub: { fontSize: 12, color: theme.pages.vetDashboard.heroText, opacity: 0.85, marginTop: 3 },
 
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
   statCard: {
-    flex: 1, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border,
+    flex: 1, backgroundColor: theme.pages.vetDashboard.statsCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.statsCard.border,
     borderRadius: 12, padding: 14, borderBottomWidth: 3,
   },
   statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 6 },
   statVal: { fontSize: 26, fontWeight: '700', lineHeight: 28 },
-  resumoCard: { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 16, padding: 16, marginBottom: 16 },
+  resumoCard: { backgroundColor: theme.pages.vetDashboard.summaryCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.summaryCard.border, borderRadius: 16, padding: 16, marginBottom: 16 },
   resumoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   resumoEyebrow: { fontSize: 10, color: theme.colors.primary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
   resumoTitle: { fontSize: 15, color: theme.colors.text, fontWeight: '700', marginTop: 3 },
@@ -337,9 +337,9 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   resumoMetric: { flex: 1 },
   resumoValue: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
   resumoLabel: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 3 },
-  resumoDivider: { width: 1, height: 34, backgroundColor: theme.colors.border, marginHorizontal: 14 },
+  resumoDivider: { width: 1, height: 34, backgroundColor: theme.pages.vetDashboard.summaryCard.divider, marginHorizontal: 14 },
   quickActions: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  quickAction: { flex: 1, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, padding: 11, alignItems: 'center', gap: 7 },
+  quickAction: { flex: 1, backgroundColor: theme.pages.vetDashboard.quickActionCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.quickActionCard.border, borderRadius: 12, padding: 11, alignItems: 'center', gap: 7 },
   quickIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
   quickLabel: { fontSize: 10, color: theme.colors.text, fontWeight: '700', textAlign: 'center' },
 
@@ -350,16 +350,16 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   },
   alertaResgatesText: { flex: 1, fontSize: 13, fontWeight: '700', color: theme.colors.onPrimary },
 
-  card: { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 16, marginBottom: 16, overflow: 'hidden' },
+  card: { backgroundColor: theme.pages.vetDashboard.eventListCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.eventListCard.border, borderRadius: 16, marginBottom: 16, overflow: 'hidden' },
   cardHead: {
-    paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.colors.border,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.surfaceSubtle,
+    paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.pages.vetDashboard.eventListCard.border,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.pages.vetDashboard.eventListCard.headerBackground,
   },
   cardTitle: { fontSize: 14, fontWeight: '700', color: theme.colors.text },
   linkVer: { fontSize: 13, color: theme.colors.primary, fontWeight: '600' },
 
   eventoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, gap: 12 },
-  eventoRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  eventoRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.pages.vetDashboard.border },
   eventoIcone: { width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center' },
   eventoInfo: { flex: 1 },
   eventoTitulo: { fontSize: 13, fontWeight: '600', color: theme.colors.text },

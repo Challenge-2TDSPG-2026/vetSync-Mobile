@@ -91,7 +91,7 @@ export default function RecompensasScreen() {
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
-      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.colors.surface} />}
+      refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.loyalty.pageBackground} />}
     >
 
       <PetSwitcher />
@@ -108,10 +108,10 @@ export default function RecompensasScreen() {
 
       {/* Banner — some no modo simples */}
       {!modoSimples && (
-        <LinearGradient colors={[theme.colors.navigation, theme.colors.navigationAccent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.banner}>
+        <LinearGradient colors={[theme.pages.loyalty.heroCard.background, theme.pages.loyalty.heroCard.backgroundAccent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.banner}>
           <AppIcon name="paw" set="MaterialCommunityIcons" size={176} color="rgba(255,255,255,0.06)" style={s.bannerPaw} />
           <View style={s.bannerIconWrap}>
-            <AppIcon name="gift-outline" set="Ionicons" size={30} color={theme.colors.onNavigation} />
+            <AppIcon name="gift-outline" set="Ionicons" size={30} color={theme.pages.loyalty.heroCard.title} />
           </View>
           <Text style={s.bannerKicker}>CUIDADO QUE RECOMPENSA</Text>
           <Text style={s.bannerTitulo}>Programa de Fidelidade</Text>
@@ -167,7 +167,7 @@ export default function RecompensasScreen() {
                 style={[s.dotConsulta, i < consultasNoCicloAtual && s.dotConsultaPreenchida]}
               >
                 {i < consultasNoCicloAtual && (
-                  <AppIcon name="checkmark" set="Ionicons" size={12} color={theme.colors.onPrimary} />
+                  <AppIcon name="checkmark" set="Ionicons" size={12} color={theme.pages.loyalty.levelCard.badgeText} />
                 )}
               </View>
             ))}
@@ -342,39 +342,39 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     marginBottom: 17,
   },
-  bannerKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1.25, color: theme.colors.onNavigation, marginBottom: 6 },
-  bannerTitulo: { fontSize: 25, lineHeight: 30, fontWeight: '800', color: theme.colors.onNavigation, letterSpacing: -0.45, marginBottom: 6 },
-  bannerSub: { maxWidth: 285, fontSize: 14, lineHeight: 20, color: theme.colors.onNavigation, opacity: 0.86 },
+  bannerKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1.25, color: theme.pages.loyalty.heroCard.title, marginBottom: 6 },
+  bannerTitulo: { fontSize: 25, lineHeight: 30, fontWeight: '800', color: theme.pages.loyalty.heroCard.title, letterSpacing: -0.45, marginBottom: 6 },
+  bannerSub: { maxWidth: 285, fontSize: 14, lineHeight: 20, color: theme.pages.loyalty.heroCard.title, opacity: 0.86 },
 
-  verMaisCatalogo: { minHeight: 48, marginTop: -2, marginBottom: 18, borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: theme.colors.surfaceSubtle },
+  verMaisCatalogo: { minHeight: 48, marginTop: -2, marginBottom: 18, borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: theme.pages.loyalty.cycleCard.progressBackground },
   verMaisCatalogoTexto: { fontSize: 14, fontWeight: '700', color: theme.colors.primary },
 
   nivelCard: {
-    backgroundColor: theme.colors.surfaceElevated,
+    backgroundColor: theme.pages.loyalty.levelCard.background,
     borderWidth: 1,
-    borderColor: theme.domain.reward.purple,
+    borderColor: theme.pages.loyalty.levelCard.border,
     borderRadius: 22,
     padding: 18,
     marginBottom: 18,
   },
-  nivelKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: theme.domain.reward.purple, marginBottom: 11 },
+  nivelKicker: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: theme.pages.loyalty.levelCard.label, marginBottom: 11 },
   nivelHead: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 16 },
   nivelBadge: {
     width: 54, height: 54, borderRadius: 18,
-    backgroundColor: theme.domain.reward.purple,
+    backgroundColor: theme.pages.loyalty.levelCard.badgeBackground,
     justifyContent: 'center', alignItems: 'center',
-    shadowColor: theme.domain.reward.purple, shadowOpacity: 0.22, shadowRadius: 9, shadowOffset: { width: 0, height: 4 }, elevation: 3,
+    shadowColor: theme.pages.loyalty.levelCard.label, shadowOpacity: 0.22, shadowRadius: 9, shadowOffset: { width: 0, height: 4 }, elevation: 3,
   },
-  nivelBadgeNumero: { fontSize: 21, fontWeight: '800', color: theme.colors.onPrimary },
-  nivelTitulo: { fontSize: 18, fontWeight: '800', color: theme.colors.text },
-  nivelSub: { fontSize: 14, color: theme.colors.textSecondary, marginTop: 3 },
-  barraTrackRoxo: { height: 10, backgroundColor: theme.colors.surfaceSubtle, borderRadius: 5, overflow: 'hidden', marginBottom: 9 },
-  barraFillRoxo: { height: '100%', backgroundColor: theme.domain.reward.purple, borderRadius: 5 },
-  nivelHint: { fontSize: 13, color: theme.colors.text, fontWeight: '700', marginBottom: 3 },
-  nivelDica: { fontSize: 12, color: theme.colors.textSecondary },
+  nivelBadgeNumero: { fontSize: 21, fontWeight: '800', color: theme.pages.loyalty.levelCard.badgeText },
+  nivelTitulo: { fontSize: 18, fontWeight: '800', color: theme.pages.loyalty.levelCard.levelName },
+  nivelSub: { fontSize: 14, color: theme.pages.loyalty.levelCard.levelDescription, marginTop: 3 },
+  barraTrackRoxo: { height: 10, backgroundColor: theme.pages.loyalty.levelCard.progressBackground, borderRadius: 5, overflow: 'hidden', marginBottom: 9 },
+  barraFillRoxo: { height: '100%', backgroundColor: theme.pages.loyalty.levelCard.progressFill, borderRadius: 5 },
+  nivelHint: { fontSize: 13, color: theme.pages.loyalty.levelCard.remainingText, fontWeight: '700', marginBottom: 3 },
+  nivelDica: { fontSize: 12, color: theme.pages.loyalty.levelCard.helperText },
 
   progressoCard: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.pages.loyalty.cycleCard.background,
     borderRadius: 22,
     padding: 18,
     marginBottom: 22,
@@ -383,18 +383,18 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   progressoHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 11 },
   progressoLbl: { fontSize: 13, fontWeight: '700', color: theme.colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.4 },
   progressoContagem: { fontSize: 20, fontWeight: '800', color: theme.colors.primary },
-  barraTrack: { height: 11, backgroundColor: theme.colors.surfaceSubtle, borderRadius: 6, overflow: 'hidden', marginBottom: 11 },
-  barraFill: { height: '100%', backgroundColor: theme.colors.primary, borderRadius: 6 },
+  barraTrack: { height: 11, backgroundColor: theme.pages.loyalty.cycleCard.progressBackground, borderRadius: 6, overflow: 'hidden', marginBottom: 11 },
+  barraFill: { height: '100%', backgroundColor: theme.pages.loyalty.cycleCard.progressFill, borderRadius: 6 },
   progressoHint: { fontSize: 13, color: theme.colors.textSecondary, marginBottom: 15 },
 
   dotsRow: { flexDirection: 'row', gap: 9, justifyContent: 'center' },
   dotConsulta: {
     width: 30, height: 30, borderRadius: 15,
-    borderWidth: 1.5, borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surfaceSubtle,
+    borderWidth: 1.5, borderColor: theme.pages.loyalty.cycleCard.border,
+    backgroundColor: theme.pages.loyalty.cycleCard.progressBackground,
     justifyContent: 'center', alignItems: 'center',
   },
-  dotConsultaPreenchida: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  dotConsultaPreenchida: { backgroundColor: theme.pages.loyalty.cycleCard.completedStep, borderColor: theme.pages.loyalty.cycleCard.completedStep },
 
   secLabel: {
     fontSize: 14, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase',
@@ -403,11 +403,11 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   secLabelRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 2,
   },
-  saldoPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: theme.colors.surfaceSubtle, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, marginBottom: 11 },
+  saldoPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: theme.pages.loyalty.cycleCard.progressBackground, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, marginBottom: 11 },
   secLabelContagem: { fontSize: 12, fontWeight: '800', color: theme.domain.reward.gold },
 
   emptyCard: {
-    backgroundColor: theme.colors.surface, borderRadius: 22, borderWidth: 1, borderColor: theme.colors.border, borderStyle: 'dashed',
+    backgroundColor: theme.pages.loyalty.emptyCard.background, borderRadius: 22, borderWidth: 1, borderColor: theme.pages.loyalty.emptyCard.border, borderStyle: 'dashed',
     padding: 26, alignItems: 'center', marginBottom: 22,
   },
   emptyTitle: { fontSize: 14, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
@@ -415,13 +415,13 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
 
   cupomCard: {
     flexDirection: 'row', alignItems: 'center', gap: 13,
-    backgroundColor: theme.colors.surface, borderRadius: 20,
+    backgroundColor: theme.pages.loyalty.catalogCard.background, borderRadius: 20,
     padding: 15, marginBottom: 11,
     shadowColor: theme.colors.text, shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   cupomIconWrap: {
     width: 48, height: 48, borderRadius: 16,
-    backgroundColor: theme.colors.surfaceSubtle, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: theme.pages.loyalty.catalogCard.iconBackground, justifyContent: 'center', alignItems: 'center',
   },
   cupomInfo: { flex: 1 },
   cupomTitulo: { fontSize: 16, fontWeight: '800', color: theme.colors.text },
@@ -436,7 +436,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   },
   conquistaCard: {
     width: '31%',
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.pages.loyalty.catalogCard.background,
     borderRadius: 18,
     padding: 11,
     alignItems: 'center',
@@ -445,7 +445,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   conquistaCardBloqueada: { opacity: 0.55 },
   conquistaIconWrap: {
     width: 38, height: 38, borderRadius: 19,
-    backgroundColor: theme.colors.surfaceSubtle,
+    backgroundColor: theme.pages.loyalty.cycleCard.progressBackground,
     justifyContent: 'center', alignItems: 'center',
     marginBottom: 6,
   },
@@ -455,19 +455,19 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   conquistaDescricao: { fontSize: 9, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 12 },
 
   statsCard: {
-    flexDirection: 'row', backgroundColor: theme.colors.surface, borderRadius: 22,
+    flexDirection: 'row', backgroundColor: theme.pages.loyalty.statsCard.background, borderRadius: 22,
     marginBottom: 22, overflow: 'hidden', shadowColor: theme.colors.text, shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   statItem: { flex: 1, alignItems: 'center', paddingVertical: 17 },
-  statValor: { fontSize: 23, fontWeight: '700', color: theme.colors.primary },
+  statValor: { fontSize: 23, fontWeight: '700', color: theme.pages.loyalty.statsCard.value },
   statLabel: { fontSize: 11, color: theme.colors.textSecondary, textAlign: 'center', marginTop: 4, paddingHorizontal: 4 },
-  statDivisor: { width: 1, backgroundColor: theme.colors.border },
+  statDivisor: { width: 1, backgroundColor: theme.pages.loyalty.statsCard.divider },
 
   historicoCard: {
-    backgroundColor: theme.colors.surface, borderRadius: 22, overflow: 'hidden', shadowColor: theme.colors.text, shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
+    backgroundColor: theme.pages.loyalty.historyCard.background, borderRadius: 22, overflow: 'hidden', shadowColor: theme.colors.text, shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2,
   },
   historicoRow: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 16 },
-  historicoRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  historicoRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.pages.loyalty.cycleCard.border },
   historicoTitulo: { fontSize: 14, fontWeight: '600', color: theme.colors.text },
   historicoData: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 2 },
 });
