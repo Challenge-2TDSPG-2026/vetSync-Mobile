@@ -58,8 +58,9 @@ export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarP
   const routesVisiveis = state.routes.filter(
     route =>
       route.name !== 'perfil' &&
-      route.name !== 'historico'
-    );
+      route.name !== 'historico' &&
+      route.name !== 'notificacoes'
+  );
   // A IA ocupa o centro da barra; Carteiras segue imediatamente à direita.
   const indiceDaIa = Math.min(2, routesVisiveis.length);
   const altura = (modoSimples ? 116 : 94) + Math.max(insets.bottom, 6);
