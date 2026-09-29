@@ -8,12 +8,19 @@ import { usePet } from '../context/PetContext';
 import { useTheme } from '../context/ThemeContext';
 import { AppIcon } from '../components/AppIcon';
 import { ApiError } from '../services/api/httpClient';
-import { iaService } from '../services/iaService';
+import { iaService, type SiaBlock, type SiaBlockOption } from '../services/iaService';
 import { mostrarToast } from '../components/ui/Toast';
 import type { AppTheme } from '../constants/theme';
 const DURACAO_TRANSICAO_TECLADO = 250;
 
-type Mensagem = { id: number; autoria: 'usuario' | 'sia'; texto: string; erro?: boolean; acao?: { id: string; resumo: string; requerConfirmacao: boolean } };
+type Mensagem = {
+  id: number;
+  autoria: 'usuario' | 'sia';
+  texto: string;
+  erro?: boolean;
+  bloco?: SiaBlock;
+  acao?: { id: string; resumo: string; requerConfirmacao: boolean };
+};
 
 const SUGESTOES_TUTOR = [
   { icon: 'calendar-outline' as const, texto: 'Quero agendar uma consulta para meu pet' },
@@ -114,6 +121,21 @@ export default function AssistenteScreen() {
     }
   }
 
+  async function selecionarBloco(mensagem: Mensagem, opcao: SiaBlockOption) {
+    if (!mensagem.bloco || !opcao.habilitado || carregando) return;
+    setCarregando(true);
+    setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'usuario', texto: opcao.rotulo }]);
+    try {
+      const resposta = await iaService.selecionarBloco(mensagem.bloco.sessaoId, opcao.id);
+      setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'sia', ...resposta }]);
+    } catch (erro) {
+      const detalhe = erro instanceof ApiError || erro instanceof Error ? erro.message : 'Não foi possível registrar esta escolha.';
+      setMensagens(atuais => [...atuais, { id: ++idRef.current, autoria: 'sia', texto: detalhe, erro: true }]);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
   async function enviar(textoDireto?: string) {
     const texto = (textoDireto ?? entrada).trim();
     if (!texto || carregando) return;
@@ -176,6 +198,27 @@ export default function AssistenteScreen() {
                 <Text style={s.confirmActionText}>Confirmar ação</Text>
               </Pressable>
             )}
+            {item.bloco && (
+              <View style={s.selectionBlock} accessibilityLabel={item.bloco.titulo}>
+                <Text style={s.selectionTitle}>{item.bloco.titulo}</Text>
+                {item.bloco.opcoes.map(opcao => (
+                  <Pressable
+                    key={opcao.id}
+                    style={({ pressed }) => [s.selectionOption, pressed && s.pressed, (!opcao.habilitado || carregando) && s.selectionOptionDisabled]}
+                    onPress={() => selecionarBloco(item, opcao)}
+                    disabled={!opcao.habilitado || carregando}
+                    accessibilityRole="button"
+                    accessibilityLabel={opcao.descricao ? `${opcao.rotulo}, ${opcao.descricao}` : opcao.rotulo}
+                  >
+                    <View style={s.selectionOptionCopy}>
+                      <Text style={s.selectionOptionText}>{opcao.rotulo}</Text>
+                      {opcao.descricao && <Text style={s.selectionOptionDescription}>{opcao.descricao}</Text>}
+                    </View>
+                    <Ionicons name="chevron-forward" size={17} color={theme.colors.primary} />
+                  </Pressable>
+                ))}
+              </View>
+            )}
           </View>
         </View>)}
         {carregando && <View style={s.messageRow}><View style={s.avatar}><Ionicons name="sparkles" size={15} color={theme.colors.primary} /></View><View style={[s.bubble, s.bubbleSia]}><Text style={s.thinking}>SIA está pensando…</Text></View></View>}
@@ -210,5 +253,6 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   suggestionsAnimated: { overflow: 'hidden' }, suggestions: { borderRadius: 18, backgroundColor: theme.pages.assistant.suggestions.background, borderWidth: 1, borderColor: theme.pages.assistant.suggestions.border, overflow: 'hidden' }, suggestion: { minHeight: 62, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: theme.pages.assistant.suggestions.border }, pressed: { opacity: 0.7 }, suggestionIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.assistant.suggestions.rowBackground, marginRight: 11 }, suggestionText: { flex: 1, color: theme.colors.text, fontSize: 13, lineHeight: 18, fontWeight: '600', marginRight: 7 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 12, maxWidth: '88%' }, messageRowUser: { alignSelf: 'flex-end', justifyContent: 'flex-end' }, avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.assistant.messages.avatarBackground, marginRight: 7 }, avatarError: { backgroundColor: theme.colors.dangerBackground }, bubble: { borderRadius: 17, paddingHorizontal: 13, paddingVertical: 10 }, bubbleSia: { backgroundColor: theme.pages.assistant.messages.assistantBackground, borderBottomLeftRadius: 5 }, bubbleUser: { backgroundColor: theme.colors.primary, borderBottomRightRadius: 5 }, bubbleError: { backgroundColor: theme.colors.dangerBackground, borderWidth: 1, borderColor: theme.colors.danger }, messageText: { color: theme.colors.text, fontSize: 14, lineHeight: 20 }, messageTextUser: { color: theme.colors.onPrimary }, messageTextError: { color: theme.colors.danger }, thinking: { color: theme.colors.textSecondary, fontSize: 13, fontStyle: 'italic' },
   confirmAction: { marginTop: 10, borderRadius: 9, backgroundColor: theme.colors.primary, paddingVertical: 8, paddingHorizontal: 12, alignSelf: 'flex-start' }, confirmActionText: { color: theme.colors.onPrimary, fontSize: 12, fontWeight: '800' },
+  selectionBlock: { marginTop: 11, gap: 7 }, selectionTitle: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '800', marginBottom: 1 }, selectionOption: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 11, paddingVertical: 8, borderRadius: 11, backgroundColor: theme.pages.assistant.cardSecondary, borderWidth: 1, borderColor: theme.pages.assistant.sheet.border }, selectionOptionDisabled: { opacity: 0.5 }, selectionOptionCopy: { flex: 1, minWidth: 0 }, selectionOptionText: { color: theme.colors.text, fontSize: 13, fontWeight: '800' }, selectionOptionDescription: { color: theme.colors.textSecondary, fontSize: 11, marginTop: 2 },
   safety: { color: theme.colors.textMuted, fontSize: 9, textAlign: 'center', paddingHorizontal: 14, paddingBottom: 5 }, composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 9, paddingHorizontal: 14, paddingTop: 7, paddingBottom: 8, backgroundColor: theme.pages.assistant.composer.background }, composerField: { flex: 1, minHeight: 48, maxHeight: 108, flexDirection: 'row', alignItems: 'center', backgroundColor: theme.pages.assistant.composer.fieldBackground, borderWidth: 1, borderColor: theme.pages.assistant.composer.border, borderRadius: 24, overflow: 'hidden' }, attach: { width: 44, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }, input: { flex: 1, minHeight: 46, maxHeight: 106, paddingLeft: 0, paddingRight: 14, paddingVertical: 12, color: theme.colors.text, fontSize: 16, textAlignVertical: 'top' }, send: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary }, sendDisabled: { backgroundColor: theme.pages.assistant.composer.fieldBackground },
 });
