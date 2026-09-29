@@ -106,6 +106,7 @@ const ESTILOS = `
   .cartao-topo { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: #f2c879; }
   .cartao-corpo { position: relative; display: flex; align-items: center; gap: 20px; margin: 22px 0 26px; }
   .avatar { width: 84px; height: 84px; border-radius: 50%; background: #f2c879; color: #0e3326; font-size: 38px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
+  .avatar-foto { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid #f2c879; flex: none; background: #f2c879; }
   .pet-nome { font-size: 30px; font-weight: 800; margin: 0; word-break: break-word; }
   .pet-meta { font-size: 14px; margin: 4px 0 0; color: #d6e6dc; }
   .cartao-rodape { font-size: 10px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #d6e6dc; }
@@ -141,6 +142,8 @@ export interface DadosCarteiraPdf {
   carteira: CarteiraVacinacao;
   geradoEm?: Date;
   logos?: LogosPdf;
+  /** Foto do pet como data URI (jpeg/png/webp em base64). Sem ela, usa a inicial do nome. */
+  fotoDataUri?: string | null;
 }
 
 const LEMA = 'Cuidado contínuo para o seu pet';
@@ -148,6 +151,10 @@ const LEMA = 'Cuidado contínuo para o seu pet';
 function imagem(src: string | null | undefined, classe: string): string {
   // data URI gerado pelo app; só aceita imagem PNG em base64 para nunca injetar HTML.
   return src && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(src) ? `<img class="${classe}" src="${src}" alt="" />` : '';
+}
+
+function fotoPet(src: string | null | undefined): string {
+  return src && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(src) ? `<img class="avatar-foto" src="${src}" alt="" />` : '';
 }
 
 function cabecalho(logos: LogosPdf, selo: string): string {
@@ -171,7 +178,7 @@ function rodape(logos: LogosPdf, emissao: string, extra: string): string {
  * Monta o HTML do PDF: página 1 = carteirinha (identificação do pet),
  * página 2 em diante = carteira de vacinação. Todo texto vindo da API é escapado.
  */
-export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date(), logos = {} }: DadosCarteiraPdf): string {
+export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date(), logos = {}, fotoDataUri }: DadosCarteiraPdf): string {
   const especie = ESPECIES.find(item => item.valor === pet.especie)?.label ?? 'Espécie não informada';
   const raca = pet.raca?.trim() ? ` · ${escaparHtml(pet.raca.trim())}` : '';
   const inicial = escaparHtml((pet.nome.trim()[0] ?? '?').toLocaleUpperCase('pt-BR'));
@@ -204,7 +211,7 @@ export function montarHtmlCarteiraPdf({ pet, carteira, geradoEm = new Date(), lo
       </div>
       <div class="cartao-faixa"></div>
       <div class="cartao-corpo">
-        <div class="avatar">${inicial}</div>
+        ${fotoPet(fotoDataUri) || `<div class="avatar">${inicial}</div>`}
         <div>
           <p class="pet-nome">${escaparHtml(pet.nome)}</p>
           <p class="pet-meta">${escaparHtml(especie)}${raca}</p>

@@ -84,6 +84,21 @@ describe('carteiraPdf', () => {
     expect(malicioso).not.toContain('<img');
   });
 
+  it('usa a foto do pet quando informada e cai na inicial quando ausente ou inválida', () => {
+    const foto = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+    const comFoto = montarHtmlCarteiraPdf({ pet, carteira, fotoDataUri: foto });
+    expect(comFoto).toContain('class="avatar-foto"');
+    expect(comFoto).not.toContain('<div class="avatar">');
+
+    const semFoto = montarHtmlCarteiraPdf({ pet, carteira });
+    expect(semFoto).not.toContain('class="avatar-foto"');
+    expect(semFoto).toContain('<div class="avatar">L</div>');
+
+    const invalida = montarHtmlCarteiraPdf({ pet, carteira, fotoDataUri: 'https://x.com/a.jpg" onerror="x' });
+    expect(invalida).not.toContain('avatar-foto"');
+    expect(invalida).not.toContain('onerror');
+  });
+
   it('gera nome de arquivo seguro', () => {
     expect(nomeArquivoCarteiraPdf({ nome: 'Luna da Silva' })).toBe('carteira-luna-da-silva.pdf');
     expect(nomeArquivoCarteiraPdf({ nome: 'Thór/Ção' })).toBe('carteira-thor-cao.pdf');
