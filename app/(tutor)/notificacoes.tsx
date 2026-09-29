@@ -40,7 +40,8 @@ export default function NotificacoesScreen() {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [atualizando, setAtualizando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
+  const [erroCarga, setErroCarga] = useState<string | null>(null);
+  const [erroAcao, setErroAcao] = useState<string | null>(null);
 
   const carregar = useCallback(async (refresh = false) => {
     if (refresh) {
@@ -49,13 +50,14 @@ export default function NotificacoesScreen() {
       setCarregando(true);
     }
 
-    setErro(null);
+    setErroCarga(null);
+    setErroAcao(null);
 
     try {
       const resultado = await listarNotificacoes();
       setNotificacoes(resultado);
     } catch {
-      setErro('Não foi possível carregar suas notificações.');
+      setErroCarga('Não foi possível carregar suas notificações. Verifique sua conexão e tente novamente.');
     } finally {
       setCarregando(false);
       setAtualizando(false);
@@ -72,6 +74,8 @@ export default function NotificacoesScreen() {
       return;
     }
 
+    setErroAcao(null);
+
     try {
       await marcarNotificacaoComoLida(notificacao.id);
 
@@ -83,7 +87,7 @@ export default function NotificacoesScreen() {
         )
       );
     } catch {
-      setErro('Não foi possível marcar a notificação como lida.');
+      setErroAcao('Não foi possível marcar a notificação como lida. Tente novamente.');
     }
   };
 
@@ -91,6 +95,8 @@ export default function NotificacoesScreen() {
     if (!notificacoes.some(item => !item.lida)) {
       return;
     }
+
+    setErroAcao(null);
 
     try {
       await marcarTodasNotificacoesComoLidas();
@@ -102,7 +108,7 @@ export default function NotificacoesScreen() {
         }))
       );
     } catch {
-      setErro('Não foi possível marcar as notificações como lidas.');
+      setErroAcao('Não foi possível marcar as notificações como lidas. Tente novamente.');
     }
   };
 
@@ -134,7 +140,7 @@ export default function NotificacoesScreen() {
             </Text>
           </View>
 
-          {notificacoes.some(item => !item.lida) && (
+          {!erroCarga && notificacoes.some(item => !item.lida) && (
             <Pressable
               onPress={() => void marcarTodasComoLidas()}
               accessibilityRole="button"
@@ -145,17 +151,9 @@ export default function NotificacoesScreen() {
           )}
         </View>
 
-        {erro && (
+        {erroAcao && (
           <View style={s.error} accessibilityRole="alert">
-            <Text style={s.errorText}>{erro}</Text>
-
-            <Pressable
-              onPress={() => void carregar()}
-              accessibilityRole="button"
-              accessibilityLabel="Tentar carregar as notificações novamente"
-            >
-              <Text style={s.retry}>Tentar novamente</Text>
-            </Pressable>
+            <Text style={s.errorText}>{erroAcao}</Text>
           </View>
         )}
 
@@ -163,7 +161,21 @@ export default function NotificacoesScreen() {
           <ActivityIndicator
             color={theme.colors.primary}
             style={s.loader}
+            accessibilityLabel="Carregando notificações"
           />
+        ) : erroCarga ? (
+          <View style={s.error} accessibilityRole="alert">
+            <Text style={s.errorText}>{erroCarga}</Text>
+
+            <Pressable
+              onPress={() => void carregar()}
+              style={s.retryButton}
+              accessibilityRole="button"
+              accessibilityLabel="Tentar carregar as notificações novamente"
+            >
+              <Text style={s.retry}>Tentar novamente</Text>
+            </Pressable>
+          </View>
         ) : notificacoes.length === 0 ? (
           <EmptyState
             icon="notifications-off-outline"
@@ -179,7 +191,9 @@ export default function NotificacoesScreen() {
               onPress={() => void marcarComoLida(notificacao)}
               style={[s.card, !notificacao.lida && s.unread]}
               accessibilityRole="button"
-              accessibilityLabel={`${notificacao.titulo}. ${notificacao.mensagem}`}
+              accessibilityLabel={`${notificacao.lida ? 'Lida' : 'Não lida'}. ${notificacao.titulo}. ${notificacao.mensagem}`}
+              accessibilityHint={notificacao.lida ? undefined : 'Toque para marcar como lida'}
+              accessibilityState={{ selected: !notificacao.lida }}
             >
               <View
                 style={[
@@ -204,12 +218,14 @@ export default function NotificacoesScreen() {
 
               <View style={s.copy}>
                 <View style={s.row}>
-                  <Text style={s.cardTitle}>
+                  <Text
+                    style={[s.cardTitle, notificacao.lida && s.cardTitleRead]}
+                  >
                     {notificacao.titulo}
                   </Text>
 
                   <Text style={s.date}>
-                    {formatarData(notificacao.criadaEm)}
+                    {formatarData(notificacao.enviadaEm ?? notificacao.criadaEm)}
                   </Text>
                 </View>
 
@@ -255,6 +271,7 @@ function createStyles(theme: AppTheme) {
     },
 
     markAll: {
+      paddingVertical: 8,
       color: theme.colors.info,
       fontSize: 12,
       fontWeight: '700',
@@ -305,6 +322,10 @@ function createStyles(theme: AppTheme) {
       fontWeight: '800',
     },
 
+    cardTitleRead: {
+      fontWeight: '600',
+    },
+
     date: {
       color: theme.colors.textMuted,
       fontSize: 11,
@@ -329,10 +350,16 @@ function createStyles(theme: AppTheme) {
       fontSize: 13,
     },
 
+    retryButton: {
+      alignSelf: 'flex-start',
+      minHeight: 44,
+      justifyContent: 'center',
+      marginTop: 4,
+    },
+
     retry: {
       color: theme.colors.danger,
       fontWeight: '800',
-      marginTop: 8,
     },
   });
 }
