@@ -151,7 +151,9 @@ function PushNotificationRegistration() {
   const { sessao } = useAuth();
 
   useEffect(() => {
-    if (!sessao) return;
+    if (!sessao || sessao.perfil !== 'TUTOR') {
+      return;
+    }
 
     let ativo = true;
     configurarNotificacoesPush().catch((erro) => {
@@ -163,8 +165,8 @@ function PushNotificationRegistration() {
     return () => {
       ativo = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- efeito deve rodar só quando o token mudar, não a cada atualização de `sessao`
-  }, [sessao?.token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- efeito deve rodar só quando o token ou o perfil mudarem, não a cada atualização de `sessao`
+  }, [sessao?.token, sessao?.perfil]);
 
   return null;
 }
