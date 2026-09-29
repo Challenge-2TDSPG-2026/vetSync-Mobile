@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Pet } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useAuth } from '../../context/AuthContext';
 import { petHealthService } from '../../services/petHealthService';
 import { carteiraPdfService } from '../../services/carteiraPdfService';
 import { mostrarToast } from '../ui/Toast';
@@ -25,6 +26,7 @@ type Props = {
 export function BotaoCarteiraPdf({ pet, variante = 'contorno', style }: Props) {
   const { theme } = useTheme();
   const { modoSimples } = useAccessibility();
+  const { sessao } = useAuth();
   const queryClient = useQueryClient();
   const s = useMemo(() => createStyles(theme), [theme]);
   const [gerando, setGerando] = useState(false);
@@ -40,7 +42,7 @@ export function BotaoCarteiraPdf({ pet, variante = 'contorno', style }: Props) {
         queryFn: () => petHealthService.buscarCarteiraVacinacao(pet.id),
         staleTime: 0,
       });
-      await carteiraPdfService.exportar(pet, carteira);
+      await carteiraPdfService.exportar(pet, carteira, sessao?.token);
     } catch (erro) {
       mostrarToast('erro', 'Não foi possível gerar o PDF', erro instanceof Error ? erro.message : undefined);
     } finally {
