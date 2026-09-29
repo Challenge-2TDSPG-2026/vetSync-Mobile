@@ -10,6 +10,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { WalletStack } from '../../components/carteira/WalletStack';
 import { CarteiraModal } from '../../components/carteira/CarteiraModal';
+import { BotaoCarteiraPdf } from '../../components/carteira/BotaoCarteiraPdf';
 import { AppIcon } from '../../components/AppIcon';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { formatarDataEvento, parseDataEvento, statusExibicao } from '../../utils/eventoStatus';
@@ -141,6 +142,8 @@ export default function CarteirinhasScreen() {
             <Ionicons name="arrow-forward" size={modoSimples ? 22 : 16} color={theme.pages.vaccinationWallet.nextVaccineCard.actionIcon} />
           </Pressable>
         </View>
+
+        <BotaoCarteiraPdf pet={petAtivo ?? null} variante="preenchido" style={s.btnPdf} />
       </ScrollView>
 
       <CarteiraModal
@@ -196,6 +199,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   btnCompartilhar: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, backgroundColor: theme.pages.vaccinationWallet.qrCard.actionBackground, paddingHorizontal: 14, paddingVertical: 10, marginTop: 16 },
   btnCompartilharTexto: { color: theme.colors.primary, fontSize: 13, fontWeight: '800' },
   btnDesativado: { opacity: 0.5 },
+  btnPdf: { marginTop: 14 },
 });
 
 const sSimples = StyleSheet.create({
