@@ -6,6 +6,7 @@ import type { Pet } from '../types';
 import type { CarteiraVacinacao } from './petHealthService';
 import { montarHtmlCarteiraPdf, nomeArquivoCarteiraPdf } from '../utils/carteiraPdf';
 import { carregarLogosPdf } from '../utils/carteiraPdfLogos';
+import { carregarFotoPetPdf } from '../utils/carteiraPdfFoto';
 
 /** Folha A4 em pontos (72 dpi), usada pelo expo-print no celular. */
 const A4_LARGURA = 595;
@@ -59,9 +60,9 @@ export const carteiraPdfService = {
    * Celular: gera o PDF em arquivo e abre a folha de compartilhamento do sistema
    * (salvar em Arquivos, WhatsApp, e-mail, imprimir...).
    */
-  async exportar(pet: Pet, carteira: CarteiraVacinacao): Promise<void> {
-    const logos = await carregarLogosPdf();
-    const html = montarHtmlCarteiraPdf({ pet, carteira, logos });
+  async exportar(pet: Pet, carteira: CarteiraVacinacao, token?: string | null): Promise<void> {
+    const [logos, fotoDataUri] = await Promise.all([carregarLogosPdf(), carregarFotoPetPdf(pet.fotoUrl, token)]);
+    const html = montarHtmlCarteiraPdf({ pet, carteira, logos, fotoDataUri });
 
     if (Platform.OS === 'web') {
       await imprimirHtmlNaWeb(html);
