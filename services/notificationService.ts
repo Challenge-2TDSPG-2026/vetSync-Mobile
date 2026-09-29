@@ -8,6 +8,7 @@ export interface Notificacao {
   referenciaTipo?: string | null;
   referenciaId?: string | null;
   lida: boolean;
+  enviadaEm?: string | null;
   criadaEm: string;
 }
 
