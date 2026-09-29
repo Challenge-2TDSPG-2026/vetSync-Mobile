@@ -55,4 +55,31 @@ describe('iaService', () => {
       'A SIA respondeu sem uma mensagem para exibição.'
     );
   });
+
+  it('envia a escolha de um bloco para a rota determinística da SIA', async () => {
+    (apiRequest as jest.Mock).mockResolvedValue({
+      mensagem: 'Agora escolha o pet que será atendido.',
+      bloco: {
+        tipo: 'SELECIONAR_PET',
+        sessaoId: 'sessao-1',
+        titulo: 'Qual pet será atendido?',
+        opcoes: [],
+      },
+    });
+
+    const resposta = await iaService.selecionarBloco('sessao com espaço', 'opcao-12');
+
+    expect(apiRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/api/v1/ia/orquestrador/agendamentos/sessoes/sessao%20com%20espa%C3%A7o/selecoes',
+      body: { opcaoId: 'opcao-12' },
+      baseUrl: 'https://vetsync-ia.onrender.com',
+      timeoutMs: 60_000,
+    });
+    expect(resposta).toEqual({
+      texto: 'Agora escolha o pet que será atendido.',
+      bloco: expect.objectContaining({ tipo: 'SELECIONAR_PET' }),
+      acao: undefined,
+    });
+  });
 });
