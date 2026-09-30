@@ -14,7 +14,8 @@ import { PetProvider, usePet } from '../context/PetContext';
 import { VetProvider } from '../context/VetContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
-import { ToastHost } from '../components/ui/Toast';
+import { mostrarToast, ToastHost } from '../components/ui/Toast';
+import { AtivarBiometriaModal } from '../components/auth/AtivarBiometriaModal';
 import { OfflineBanner } from '../components/ui/OfflineBanner';
 import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
@@ -214,6 +215,51 @@ function RootNavigator() {
   );
 }
 
+function BiometricEnrollmentPrompt() {
+  const {
+    sessao,
+    biometria,
+    ativarLoginBiometrico,
+    dispensarConviteBiometria,
+  } = useAuth();
+  const [ativando, setAtivando] = React.useState(false);
+  const visivel = sessao?.perfil === 'TUTOR' && biometria.convitePendente;
+
+  async function ativar() {
+    setAtivando(true);
+    try {
+      await ativarLoginBiometrico();
+      mostrarToast('sucesso', `Login com ${biometria.nome} ativado`);
+    } catch (erro) {
+      mostrarToast(
+        'erro',
+        'Não foi possível ativar a biometria',
+        erro instanceof Error ? erro.message : 'Tente novamente.',
+      );
+    } finally {
+      setAtivando(false);
+    }
+  }
+
+  async function adiar() {
+    try {
+      await dispensarConviteBiometria();
+    } catch {
+      mostrarToast('erro', 'Não foi possível salvar sua escolha', 'Tente novamente.');
+    }
+  }
+
+  return (
+    <AtivarBiometriaModal
+      visivel={visivel}
+      nomeBiometria={biometria.nome}
+      carregando={ativando}
+      onAtivar={() => void ativar()}
+      onAgoraNao={() => void adiar()}
+    />
+  );
+}
+
 function PushNotificationRegistration() {
   const { sessao } = useAuth();
 
@@ -291,6 +337,7 @@ function ThemedRootLayout() {
                 <OfflineBanner />
                 <RootNavigator />
                 <PushNotificationRegistration />
+                <BiometricEnrollmentPrompt />
                 <ToastHost />
               </VetProvider>
             </PetProvider>

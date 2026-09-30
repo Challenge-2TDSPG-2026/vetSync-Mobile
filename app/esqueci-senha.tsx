@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { ApiError } from '../services/api/httpClient';
 import { authService } from '../services/authService';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -13,9 +13,10 @@ import type { AppTheme } from '../constants/theme';
 
 export default function EsqueciSenhaScreen() {
   const router = useRouter();
+  const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState((emailParam ?? '').trim().toLowerCase());
   const [erro, setErro] = useState<string>();
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
@@ -49,7 +50,7 @@ export default function EsqueciSenhaScreen() {
   return (
     <AuthLayout
       title="Recupere sua senha."
-      subtitle="Enviaremos um link para você criar uma nova senha com segurança."
+      subtitle="Enviaremos um código para você criar uma nova senha com segurança."
     >
           {enviado ? (
             <View style={s.confirmacao}>
@@ -87,10 +88,10 @@ export default function EsqueciSenhaScreen() {
                 onPress={handleSolicitar}
                 disabled={enviando}
                 accessibilityRole="button"
-                accessibilityLabel={enviando ? 'Enviando' : 'Enviar link de recuperação'}
+                accessibilityLabel={enviando ? 'Enviando' : 'Enviar código de recuperação'}
                 accessibilityState={{ disabled: enviando, busy: enviando }}
               >
-                <Text style={s.btnAuthText}>{enviando ? 'Enviando...' : 'Enviar link de recuperação'}</Text>
+                <Text style={s.btnAuthText}>{enviando ? 'Enviando...' : 'Enviar código de recuperação'}</Text>
                 {!enviando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.colors.onPrimary} />}
               </Pressable>
             </>

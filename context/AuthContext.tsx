@@ -1,18 +1,23 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
-import { STORAGE_KEYS } from '../constants';
 import { ApiError } from '../services/api/httpClient';
 import { authService } from '../services/authService';
 import { assinarExpiracaoSessao } from '../services/api/sessionEvents';
+import {
+  ativarBiometria,
+  desativarBiometria,
+  EstadoBiometria,
+  limparSessaoPersistida,
+  marcarConviteBiometriaComoVisto,
+  obterEstadoBiometria,
+  restaurarSessaoPersistida,
+  salvarSessaoAposLogin,
+  SessaoProtegida,
+} from '../services/biometriaService';
 
 export type Perfil = 'TUTOR' | 'VETERINARIO' | 'ADMIN';
 
-export interface Sessao {
-  token: string;
-  idUsuario: number;
-  email: string;
-  nome: string;
+export interface Sessao extends SessaoProtegida {
   perfil: Perfil;
 }
 
@@ -31,12 +36,25 @@ export interface RegistrarPayload {
   uf: string;
 }
 
+const ESTADO_BIOMETRIA_INICIAL: EstadoBiometria = {
+  ativada: false,
+  disponivel: false,
+  nome: 'biometria',
+  convitePendente: false,
+};
+
 type AuthContextValue = {
   sessao: Sessao | null;
   autenticado: boolean;
   carregando: boolean;
   erro: string | null;
+  biometria: EstadoBiometria;
   login: (email: string, senha: string) => Promise<void>;
+  entrarComBiometria: () => Promise<void>;
+  ativarLoginBiometrico: () => Promise<void>;
+  desativarLoginBiometrico: () => Promise<void>;
+  dispensarConviteBiometria: () => Promise<void>;
+  atualizarBiometria: () => Promise<void>;
   registrar: (dados: RegistrarPayload) => Promise<void>;
   logout: () => Promise<void>;
   limparErro: () => void;
@@ -63,63 +81,52 @@ export function validarSessao(valor: unknown): valor is Sessao {
   );
 }
 
-async function salvarSessao(sessao: Sessao): Promise<void> {
-  await AsyncStorage.setItem(STORAGE_KEYS.SESSAO, JSON.stringify(sessao));
-}
-
-async function carregarSessaoSalva(): Promise<Sessao | null> {
-  const raw = await AsyncStorage.getItem(STORAGE_KEYS.SESSAO);
-  if (!raw) return null;
-  let sessao: unknown;
-  try {
-    sessao = JSON.parse(raw) as unknown;
-  } catch {
-    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
-    return null;
-  }
-  if (!validarSessao(sessao)) {
-    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
-    return null;
-  }
-  return sessao;
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [sessao, setSessao] = useState<Sessao | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [biometria, setBiometria] = useState<EstadoBiometria>(ESTADO_BIOMETRIA_INICIAL);
   const encerrandoSessao = React.useRef<Promise<void> | null>(null);
+
+  const atualizarEstadoBiometria = useCallback(async (idUsuario?: number) => {
+    const estado = await obterEstadoBiometria(idUsuario);
+    setBiometria(estado);
+    return estado;
+  }, []);
 
   useEffect(() => {
     async function restaurarSessao() {
       try {
-        const salva = await carregarSessaoSalva();
+        const salva = await restaurarSessaoPersistida();
         setSessao(salva);
+        await atualizarEstadoBiometria(salva?.idUsuario);
       } catch {
         setSessao(null);
         setErro('Não foi possível restaurar sua sessão. Entre novamente.');
+        await atualizarEstadoBiometria();
       } finally {
         setCarregando(false);
       }
     }
     void restaurarSessao();
-  }, []);
+  }, [atualizarEstadoBiometria]);
 
   const encerrarSessaoLocal = useCallback(async () => {
     if (encerrandoSessao.current) return encerrandoSessao.current;
     const encerramento = (async () => {
       try {
-        await AsyncStorage.multiRemove([STORAGE_KEYS.SESSAO, STORAGE_KEYS.PUSH_TOKEN]);
+        await limparSessaoPersistida();
         setSessao(null);
         queryClient.clear();
+        await atualizarEstadoBiometria();
       } finally {
         encerrandoSessao.current = null;
       }
     })();
     encerrandoSessao.current = encerramento;
     return encerramento;
-  }, [queryClient]);
+  }, [atualizarEstadoBiometria, queryClient]);
 
   useEffect(() => {
     return assinarExpiracaoSessao(() => {
@@ -133,36 +140,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setErro(null);
     try {
       const resposta = await authService.login(email, senha);
-      await salvarSessao(resposta);
+      await salvarSessaoAposLogin(resposta);
       setSessao(resposta);
+      await atualizarEstadoBiometria(resposta.idUsuario);
     } catch (e) {
       const mensagem =
         e instanceof ApiError ? e.message : 'Não foi possível entrar. Tente novamente.';
       setErro(mensagem);
       throw e;
     }
-  }, []);
+  }, [atualizarEstadoBiometria]);
+
+  const entrarComBiometria = useCallback(async () => {
+    setErro(null);
+    const salva = await restaurarSessaoPersistida();
+    if (!salva) {
+      throw new Error('Não foi possível confirmar sua biometria. Entre com e-mail e senha.');
+    }
+    setSessao(salva);
+    await atualizarEstadoBiometria(salva.idUsuario);
+  }, [atualizarEstadoBiometria]);
+
+  const ativarLoginBiometrico = useCallback(async () => {
+    if (!sessao) throw new Error('Entre na sua conta para ativar a biometria.');
+    await ativarBiometria(sessao);
+    await atualizarEstadoBiometria(sessao.idUsuario);
+  }, [atualizarEstadoBiometria, sessao]);
+
+  const desativarLoginBiometrico = useCallback(async () => {
+    if (!sessao) throw new Error('Entre na sua conta para desativar a biometria.');
+    await desativarBiometria(sessao);
+    await atualizarEstadoBiometria(sessao.idUsuario);
+  }, [atualizarEstadoBiometria, sessao]);
+
+  const dispensarConviteBiometria = useCallback(async () => {
+    if (!sessao) return;
+    await marcarConviteBiometriaComoVisto(sessao.idUsuario);
+    await atualizarEstadoBiometria(sessao.idUsuario);
+  }, [atualizarEstadoBiometria, sessao]);
 
   const registrar = useCallback(async (dados: RegistrarPayload) => {
     setErro(null);
     try {
       const resposta = await authService.registrar(dados);
-      await salvarSessao(resposta);
+      await salvarSessaoAposLogin(resposta);
       setSessao(resposta);
+      await atualizarEstadoBiometria();
     } catch (e) {
       const mensagem =
         e instanceof ApiError ? e.message : 'Não foi possível criar sua conta. Tente novamente.';
       setErro(mensagem);
       throw e;
     }
-  }, []);
+  }, [atualizarEstadoBiometria]);
 
   const logout = useCallback(async () => {
-    await encerrarSessaoLocal();
     try {
       await authService.logout();
-    } catch (erro) {
-      console.warn('Não foi possível invalidar a sessão no servidor.', erro);
+    } catch (erroLogout) {
+      console.warn('Não foi possível invalidar a sessão no servidor.', erroLogout);
+    } finally {
+      await encerrarSessaoLocal();
     }
   }, [encerrarSessaoLocal]);
 
@@ -175,7 +213,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         autenticado: sessao !== null,
         carregando,
         erro,
+        biometria,
         login,
+        entrarComBiometria,
+        ativarLoginBiometrico,
+        desativarLoginBiometrico,
+        dispensarConviteBiometria,
+        atualizarBiometria: async () => {
+          await atualizarEstadoBiometria(sessao?.idUsuario);
+        },
         registrar,
         logout,
         limparErro,

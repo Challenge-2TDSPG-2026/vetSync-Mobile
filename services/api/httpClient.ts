@@ -1,7 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { API_BASE_URL } from '../../constants/api';
-import { STORAGE_KEYS } from '../../constants';
+import { obterTokenDaSessaoEmMemoria } from '../biometriaService';
 import { notificarExpiracaoSessao } from './sessionEvents';
 
 export type TipoErroApi = 'sem-internet' | 'servidor-indisponivel' | 'timeout' | 'http';
@@ -38,14 +37,7 @@ export interface ArquivoUpload {
 }
 
 async function obterToken(): Promise<string | null> {
-  const raw = await AsyncStorage.getItem(STORAGE_KEYS.SESSAO);
-  if (!raw) return null;
-  try {
-    const sessao = JSON.parse(raw);
-    return sessao?.token ?? null;
-  } catch {
-    return null;
-  }
+  return obterTokenDaSessaoEmMemoria();
 }
 
 /** Mensagens padrão por status HTTP, usadas só quando o corpo da resposta não traz uma mensagem própria. */

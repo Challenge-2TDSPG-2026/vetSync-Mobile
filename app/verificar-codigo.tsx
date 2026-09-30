@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Text, Pressable, StyleSheet } from 'react-native';
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ApiError } from '../services/api/httpClient';
 import { authService } from '../services/authService';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -78,12 +78,15 @@ export default function VerificarCodigoScreen() {
         {!verificando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.colors.onPrimary} />}
       </Pressable>
 
-      <Link href="/esqueci-senha" asChild>
-        <Pressable style={s.linkVoltar} accessibilityRole="link" accessibilityLabel="Reenviar código">
-          <AppIcon name="refresh-outline" set="Ionicons" size={16} color={theme.colors.primary} />
-          <Text style={s.linkVoltarTexto}>Não recebeu? Reenviar código</Text>
-        </Pressable>
-      </Link>
+      <Pressable
+        style={s.linkVoltar}
+        onPress={() => router.replace({ pathname: '/esqueci-senha', params: { email } })}
+        accessibilityRole="link"
+        accessibilityLabel="Reenviar código"
+      >
+        <AppIcon name="refresh-outline" set="Ionicons" size={16} color={theme.colors.primary} />
+        <Text style={s.linkVoltarTexto}>Não recebeu? Reenviar código</Text>
+      </Pressable>
     </AuthLayout>
   );
 }

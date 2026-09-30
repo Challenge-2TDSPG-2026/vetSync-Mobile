@@ -101,8 +101,9 @@ export default function PerfilScreen() {
             theme={theme}
             icon="shield-checkmark-outline"
             title="Segurança"
-            description="Em breve"
+            description="Biometria e senha"
             color={theme.colors.info}
+            onPress={() => router.push('/(tutor)/seguranca')}
             simples={modoSimples}
           />
           <QuickAccessCard

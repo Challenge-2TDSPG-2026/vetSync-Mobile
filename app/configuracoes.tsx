@@ -100,7 +100,8 @@ export default function ConfiguracoesScreen() {
             simples={modoSimples}
             icon="shield-checkmark-outline"
             title="Segurança"
-            description="Em breve"
+            description="Biometria e senha"
+            onPress={() => router.push('/(tutor)/seguranca')}
           />
         </View>
 

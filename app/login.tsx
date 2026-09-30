@@ -12,7 +12,7 @@ import { useTheme } from '../context/ThemeContext';
 import type { AppTheme } from '../constants/theme';
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { biometria, entrarComBiometria, login } = useAuth();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
 
@@ -28,6 +28,18 @@ export default function LoginScreen() {
     if (!senha.trim()) e.senha = 'Informe sua senha';
     setErrosConta(e);
     return Object.keys(e).length === 0;
+  }
+
+  async function handleEntrarComBiometria() {
+    setAutenticando(true);
+    try {
+      await entrarComBiometria();
+      mostrarToast('sucesso', 'Login realizado');
+    } catch (e) {
+      mostrarToast('erro', 'Não foi possível entrar com biometria', mensagemDeErro(e, 'Use seu e-mail e senha.'));
+    } finally {
+      setAutenticando(false);
+    }
   }
 
   async function handleEntrar() {
@@ -92,6 +104,20 @@ export default function LoginScreen() {
             {!autenticando && <AppIcon name="arrow-forward" set="Ionicons" size={18} color={theme.colors.onPrimary} />}
           </Pressable>
 
+          {biometria.ativada ? (
+            <Pressable
+              style={({ pressed }) => [s.btnBiometria, pressed && s.btnAuthPressed, autenticando && { opacity: 0.65 }]}
+              onPress={handleEntrarComBiometria}
+              disabled={autenticando}
+              accessibilityRole="button"
+              accessibilityLabel={`Entrar com ${biometria.nome}`}
+              accessibilityState={{ disabled: autenticando, busy: autenticando }}
+            >
+              <AppIcon name="finger-print-outline" set="Ionicons" size={19} color={theme.colors.primary} />
+              <Text style={s.btnBiometriaText}>Entrar com {biometria.nome}</Text>
+            </Pressable>
+          ) : null}
+
           <Link href="/esqueci-senha" asChild>
             <Pressable
               style={s.linkRecuperacao}
@@ -138,6 +164,18 @@ function createStyles(theme: AppTheme) {
   },
   btnAuthPressed: { opacity: 0.86 },
   btnAuthText: { color: theme.colors.onPrimary, fontSize: 16, fontWeight: '700' },
+  btnBiometria: {
+    flexDirection: 'row',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    paddingVertical: 15,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  btnBiometriaText: { color: theme.colors.primary, fontSize: 15, fontWeight: '700' },
 
   linkSecundario: { marginTop: 'auto', paddingTop: 22, alignItems: 'center', paddingBottom: 4 },
   linkSecundarioTexto: { fontSize: 13, color: theme.colors.textSecondary },

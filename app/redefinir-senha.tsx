@@ -9,6 +9,7 @@ import { AppIcon } from '../components/AppIcon';
 import { AuthField } from '../components/ui/AuthField';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import type { AppTheme } from '../constants/theme';
 
 export default function RedefinirSenhaScreen() {
@@ -17,6 +18,7 @@ export default function RedefinirSenhaScreen() {
   const email = (emailParam ?? '').trim().toLowerCase();
   const codigo = (codigoParam ?? '').trim();
   const { theme } = useTheme();
+  const { sessao, logout } = useAuth();
   const s = useMemo(() => createStyles(theme), [theme]);
 
   const [novaSenha, setNovaSenha] = useState('');
@@ -45,7 +47,10 @@ export default function RedefinirSenhaScreen() {
     setSalvando(true);
     try {
       await authService.redefinirSenha(email, codigo, novaSenha, confirmarSenha);
-      mostrarToast('sucesso', 'Senha redefinida', 'Use sua nova senha para entrar.');
+      if (sessao?.email.trim().toLowerCase() === email) {
+        await logout();
+      }
+      mostrarToast('sucesso', 'Senha redefinida', 'Entre novamente com sua nova senha.');
       router.replace('/login');
     } catch (e) {
       if (e instanceof ApiError && e.campos) {
