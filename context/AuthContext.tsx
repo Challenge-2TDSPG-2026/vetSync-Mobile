@@ -16,12 +16,19 @@ export interface Sessao {
   perfil: Perfil;
 }
 
-interface RegistrarPayload {
+export interface RegistrarPayload {
   nome: string;
   email: string;
   senha: string;
   cpf: string;
   telefone?: string;
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
 }
 
 type AuthContextValue = {
@@ -50,7 +57,9 @@ export function validarSessao(valor: unknown): valor is Sessao {
     candidata.email.trim().length > 0 &&
     typeof candidata.nome === 'string' &&
     candidata.nome.trim().length > 0 &&
-    (candidata.perfil === 'TUTOR' || candidata.perfil === 'VETERINARIO' || candidata.perfil === 'ADMIN')
+    (candidata.perfil === 'TUTOR' ||
+      candidata.perfil === 'VETERINARIO' ||
+      candidata.perfil === 'ADMIN')
   );
 }
 
@@ -127,7 +136,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await salvarSessao(resposta);
       setSessao(resposta);
     } catch (e) {
-      const mensagem = e instanceof ApiError ? e.message : 'Não foi possível entrar. Tente novamente.';
+      const mensagem =
+        e instanceof ApiError ? e.message : 'Não foi possível entrar. Tente novamente.';
       setErro(mensagem);
       throw e;
     }
@@ -140,7 +150,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await salvarSessao(resposta);
       setSessao(resposta);
     } catch (e) {
-      const mensagem = e instanceof ApiError ? e.message : 'Não foi possível criar sua conta. Tente novamente.';
+      const mensagem =
+        e instanceof ApiError ? e.message : 'Não foi possível criar sua conta. Tente novamente.';
       setErro(mensagem);
       throw e;
     }

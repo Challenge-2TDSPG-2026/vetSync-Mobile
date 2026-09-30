@@ -1,6 +1,12 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, StatusBar } from 'react-native';
-import { Stack, ThemeProvider as NavigationThemeProvider, useRouter, useSegments, usePathname } from 'expo-router';
+import {
+  Stack,
+  ThemeProvider as NavigationThemeProvider,
+  useRouter,
+  useSegments,
+  usePathname,
+} from 'expo-router';
 import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
 import NetInfo from '@react-native-community/netinfo';
 import { AuthProvider, useAuth } from '../context/AuthContext';
@@ -27,11 +33,27 @@ const queryClient = new QueryClient({
   },
 });
 
-onlineManager.setEventListener(setOnline => NetInfo.addEventListener(state => {
-  setOnline(state.isConnected !== false && state.isInternetReachable !== false);
-}));
+onlineManager.setEventListener((setOnline) =>
+  NetInfo.addEventListener((state) => {
+    setOnline(state.isConnected !== false && state.isInternetReachable !== false);
+  }),
+);
 
-const ROTAS_FORA_DO_GRUPO = ['add-evento', 'add-pet', 'evento', 'paciente', 'assistente', 'cadastro', 'esqueci-senha', 'verificar-codigo', 'redefinir-senha', 'modo-simples', 'gerenciar-acessos', 'notificacoes'];
+const ROTAS_FORA_DO_GRUPO = [
+  'add-evento',
+  'add-pet',
+  'evento',
+  'paciente',
+  'assistente',
+  'cadastro',
+  'esqueci-senha',
+  'verificar-codigo',
+  'redefinir-senha',
+  'modo-simples',
+  'gerenciar-acessos',
+  'gerenciar-conta',
+  'notificacoes',
+];
 
 function RootNavigator() {
   const { theme } = useTheme();
@@ -47,16 +69,25 @@ function RootNavigator() {
   useEffect(() => {
     if (carregando) return;
 
-    const inLogin = segments.includes('login') || pathname === '/login' || pathname.startsWith('/login');
-    const inCadastro = segments.includes('cadastro') || pathname === '/cadastro' || pathname.startsWith('/cadastro');
-    const inEsqueciSenha = segments.includes('esqueci-senha') || pathname === '/esqueci-senha' || pathname.startsWith('/esqueci-senha');
-    const inVerificarCodigo = segments.includes('verificar-codigo') || pathname.startsWith('/verificar-codigo');
-    const inRedefinirSenha = segments.includes('redefinir-senha') || pathname.startsWith('/redefinir-senha');
+    const inLogin =
+      segments.includes('login') || pathname === '/login' || pathname.startsWith('/login');
+    const inCadastro =
+      segments.includes('cadastro') || pathname === '/cadastro' || pathname.startsWith('/cadastro');
+    const inEsqueciSenha =
+      segments.includes('esqueci-senha') ||
+      pathname === '/esqueci-senha' ||
+      pathname.startsWith('/esqueci-senha');
+    const inVerificarCodigo =
+      segments.includes('verificar-codigo') || pathname.startsWith('/verificar-codigo');
+    const inRedefinirSenha =
+      segments.includes('redefinir-senha') || pathname.startsWith('/redefinir-senha');
     const inRecuperacaoSenha = inEsqueciSenha || inVerificarCodigo || inRedefinirSenha;
     const inTutor = segments.includes('(tutor)') || pathname.startsWith('/(tutor)');
     const inVet = segments.includes('(vet)') || pathname.startsWith('/(vet)');
     const inAddPet = segments.includes('add-pet') || pathname === '/add-pet';
-    const inRotaLivre = ROTAS_FORA_DO_GRUPO.some(r => segments.includes(r) || pathname.includes(r));
+    const inRotaLivre = ROTAS_FORA_DO_GRUPO.some(
+      (r) => segments.includes(r) || pathname.includes(r),
+    );
 
     if (!autenticado) {
       if (!inLogin && !inCadastro && !inRecuperacaoSenha) router.replace('/login');
@@ -80,14 +111,37 @@ function RootNavigator() {
     }
 
     if (!inLogin && !inCadastro) router.replace('/login');
-  }, [autenticado, ehTutor, ehVeterinario, onboardingConcluido, carregando, segments, pathname, router]);
+  }, [
+    autenticado,
+    ehTutor,
+    ehVeterinario,
+    onboardingConcluido,
+    carregando,
+    segments,
+    pathname,
+    router,
+  ]);
 
   return (
     <>
       {ehTutor && !carregando && erroPets && (
-        <View style={[s.erroOverlay, { backgroundColor: theme.colors.dangerBackground, borderBottomColor: theme.colors.danger }]} accessibilityRole="alert" accessibilityLiveRegion="polite">
-          <Text style={[s.erroTitulo, { color: theme.colors.danger }]}>Não foi possível carregar seus pets</Text>
-          <Text style={[s.erroSub, { color: theme.colors.textSecondary }]}>Verifique sua conexão e tente novamente.</Text>
+        <View
+          style={[
+            s.erroOverlay,
+            {
+              backgroundColor: theme.colors.dangerBackground,
+              borderBottomColor: theme.colors.danger,
+            },
+          ]}
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+        >
+          <Text style={[s.erroTitulo, { color: theme.colors.danger }]}>
+            Não foi possível carregar seus pets
+          </Text>
+          <Text style={[s.erroSub, { color: theme.colors.textSecondary }]}>
+            Verifique sua conexão e tente novamente.
+          </Text>
           <Pressable
             style={[s.erroBtn, { backgroundColor: theme.colors.danger }]}
             onPress={() => recarregarPets()}
@@ -125,6 +179,7 @@ function RootNavigator() {
         />
         <Stack.Screen name="modo-simples" options={{ animation: 'fade_from_bottom' }} />
         <Stack.Screen name="gerenciar-acessos" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="gerenciar-conta" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen
           name="paciente/[id]"
           options={{ headerShown: true, animation: 'slide_from_right' }}
@@ -175,7 +230,9 @@ const s = StyleSheet.create({
   themeBootstrap: { flex: 1 },
   erroOverlay: {
     position: 'absolute',
-    top: 0, left: 0, right: 0,
+    top: 0,
+    left: 0,
+    right: 0,
     zIndex: 50,
     borderBottomWidth: 1,
     padding: 16,
@@ -200,14 +257,20 @@ function ThemedRootLayout() {
   if (carregando) {
     return (
       <View style={[s.themeBootstrap, { backgroundColor: theme.colors.background }]}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.colors.background} />
+        <StatusBar
+          barStyle={isDark ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.colors.background}
+        />
       </View>
     );
   }
 
   return (
     <NavigationThemeProvider value={createNavigationTheme(theme)}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.colors.background} />
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.background}
+      />
       <QueryClientProvider client={queryClient}>
         <AccessibilityProvider>
           <AuthProvider>

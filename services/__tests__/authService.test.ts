@@ -13,7 +13,13 @@ describe('authService', () => {
   });
 
   it('normaliza o e-mail (trim + minúsculas) e envia a senha sem alterações no login', async () => {
-    const sessao = { token: 't', idUsuario: 1, email: 'tutor@vetsync.test', nome: 'Tutor', perfil: 'TUTOR' };
+    const sessao = {
+      token: 't',
+      idUsuario: 1,
+      email: 'tutor@vetsync.test',
+      nome: 'Tutor',
+      perfil: 'TUTOR',
+    };
     apiPost.mockResolvedValue(sessao);
 
     const resultado = await authService.login('  Tutor@VetSync.test  ', 'SenhaSegura1');
@@ -21,7 +27,7 @@ describe('authService', () => {
     expect(apiPost).toHaveBeenCalledWith(
       '/auth/login',
       { email: 'tutor@vetsync.test', senha: 'SenhaSegura1' },
-      false
+      false,
     );
     expect(resultado).toBe(sessao);
   });
@@ -34,7 +40,7 @@ describe('authService', () => {
     expect(apiPost).toHaveBeenCalledWith(
       '/auth/esqueci-senha',
       { email: 'tutor@vetsync.test' },
-      false
+      false,
     );
   });
 
@@ -46,7 +52,7 @@ describe('authService', () => {
     expect(apiPost).toHaveBeenCalledWith(
       '/auth/validar-codigo',
       { email: 'tutor@vetsync.test', codigo: '123456' },
-      false
+      false,
     );
     expect(resultado).toEqual({ valido: true });
   });
@@ -54,17 +60,33 @@ describe('authService', () => {
   it('passo 3: redefine a senha enviando e-mail normalizado, código sem espaços e as duas senhas', async () => {
     apiPost.mockResolvedValue({ mensagem: 'Senha redefinida.' });
 
-    await authService.redefinirSenha(' Tutor@VetSync.test ', ' 654321 ', 'NovaSenha1', 'NovaSenha1');
+    await authService.redefinirSenha(
+      ' Tutor@VetSync.test ',
+      ' 654321 ',
+      'NovaSenha1',
+      'NovaSenha1',
+    );
 
     expect(apiPost).toHaveBeenCalledWith(
       '/auth/redefinir-senha',
-      { email: 'tutor@vetsync.test', codigo: '654321', novaSenha: 'NovaSenha1', confirmarSenha: 'NovaSenha1' },
-      false
+      {
+        email: 'tutor@vetsync.test',
+        codigo: '654321',
+        novaSenha: 'NovaSenha1',
+        confirmarSenha: 'NovaSenha1',
+      },
+      false,
     );
   });
 
   it('registra um novo tutor normalizando o e-mail e preservando os demais campos', async () => {
-    const sessao = { token: 't2', idUsuario: 2, email: 'novo@vetsync.test', nome: 'Novo Tutor', perfil: 'TUTOR' };
+    const sessao = {
+      token: 't2',
+      idUsuario: 2,
+      email: 'novo@vetsync.test',
+      nome: 'Novo Tutor',
+      perfil: 'TUTOR',
+    };
     apiPost.mockResolvedValue(sessao);
 
     const resultado = await authService.registrar({
@@ -73,6 +95,13 @@ describe('authService', () => {
       senha: 'SenhaForte1',
       cpf: '12345678900',
       telefone: '11999998888',
+      cep: '01310100',
+      logradouro: 'Avenida Paulista',
+      numero: '1000',
+      complemento: 'Apto 10',
+      bairro: 'Bela Vista',
+      cidade: 'São Paulo',
+      uf: 'SP',
     });
 
     expect(apiPost).toHaveBeenCalledWith(
@@ -83,8 +112,15 @@ describe('authService', () => {
         senha: 'SenhaForte1',
         cpf: '12345678900',
         telefone: '11999998888',
+        cep: '01310100',
+        logradouro: 'Avenida Paulista',
+        numero: '1000',
+        complemento: 'Apto 10',
+        bairro: 'Bela Vista',
+        cidade: 'São Paulo',
+        uf: 'SP',
       },
-      false
+      false,
     );
     expect(resultado).toBe(sessao);
   });

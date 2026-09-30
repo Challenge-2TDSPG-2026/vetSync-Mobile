@@ -1,12 +1,30 @@
 import React, { useMemo, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type TextInputProps,
+} from 'react-native';
 import { AppIcon } from '../AppIcon';
 import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
 
 type AuthFieldProps = Pick<
   TextInputProps,
-  'autoCapitalize' | 'autoComplete' | 'keyboardType' | 'maxLength' | 'onChangeText' | 'placeholder' | 'secureTextEntry' | 'textContentType' | 'value'
+  | 'autoCapitalize'
+  | 'autoComplete'
+  | 'editable'
+  | 'keyboardType'
+  | 'maxLength'
+  | 'onBlur'
+  | 'onChangeText'
+  | 'placeholder'
+  | 'secureTextEntry'
+  | 'textContentType'
+  | 'value'
 > & {
   label: string;
   icon: string;
@@ -33,8 +51,20 @@ export function AuthField({
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
-      <View style={[styles.inputWrap, focused && styles.inputWrapFocused, error && styles.inputWrapError]}>
-        <AppIcon name={icon} set="Ionicons" size={21} color={focused ? theme.colors.primary : theme.colors.textSecondary} style={styles.leadingIcon} />
+      <View
+        style={[
+          styles.inputWrap,
+          focused && styles.inputWrapFocused,
+          error && styles.inputWrapError,
+        ]}
+      >
+        <AppIcon
+          name={icon}
+          set="Ionicons"
+          size={21}
+          color={focused ? theme.colors.primary : theme.colors.textSecondary}
+          style={styles.leadingIcon}
+        />
         <TextInput
           {...inputProps}
           style={styles.input}
@@ -42,7 +72,10 @@ export function AuthField({
           secureTextEntry={isPassword ? !showPassword : inputProps.secureTextEntry}
           autoCapitalize={inputProps.autoCapitalize ?? (isPassword ? 'none' : undefined)}
           onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onBlur={(event) => {
+            setFocused(false);
+            inputProps.onBlur?.(event);
+          }}
         />
         {isPassword ? (
           <Pressable
@@ -52,7 +85,12 @@ export function AuthField({
             accessibilityLabel={showPassword ? 'Ocultar senha' : 'Exibir senha'}
             accessibilityRole="button"
           >
-            <AppIcon name={showPassword ? 'eye-outline' : 'eye-off-outline'} set="Ionicons" size={22} color={theme.colors.textSecondary} />
+            <AppIcon
+              name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+              set="Ionicons"
+              size={22}
+              color={theme.colors.textSecondary}
+            />
           </Pressable>
         ) : null}
       </View>
@@ -74,7 +112,10 @@ function createStyles(theme: AppTheme) {
       borderRadius: 16,
       paddingHorizontal: 18,
     },
-    inputWrapFocused: { borderColor: theme.colors.primary, backgroundColor: theme.pages.authentication.cardElevated },
+    inputWrapFocused: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.pages.authentication.cardElevated,
+    },
     inputWrapError: { borderColor: theme.colors.danger },
     leadingIcon: { marginRight: 12 },
     input: {
@@ -85,7 +126,12 @@ function createStyles(theme: AppTheme) {
       backgroundColor: 'transparent',
       ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
     },
-    togglePassword: { paddingLeft: 6, paddingVertical: 6, justifyContent: 'center', alignItems: 'center' },
+    togglePassword: {
+      paddingLeft: 6,
+      paddingVertical: 6,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     error: { color: theme.colors.danger, fontSize: 12, marginTop: 6 },
   });
 }
