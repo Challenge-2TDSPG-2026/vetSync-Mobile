@@ -29,7 +29,7 @@ function TabItem({ label, icon, active, onPress, onLongPress, simples, colors }:
 
 function AssistantItem({ simples, color }: { simples?: boolean; color: string }) {
   const router = useRouter();
-  return <Pressable accessibilityRole="button" accessibilityLabel="Abrir a SIA" onPress={() => router.push('/assistente')} style={s.item}>
+  return <Pressable accessibilityRole="button" accessibilityLabel="Abrir a SIA" onPress={() => router.push('/(tutor)/assistente')} style={s.item}>
     <View style={[s.iconWrap, simples && sSimples.iconWrap]}><Ionicons name="sparkles-outline" size={simples ? 34 : 26} color={color} /></View>
     <Text style={[s.label, simples && sSimples.label, { color }]}>IA</Text>
   </Pressable>;

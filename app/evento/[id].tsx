@@ -100,7 +100,7 @@ export default function EventoDetalhesScreen() {
         </View>
       ) : null}
 
-      <Pressable style={s.secondaryButton} onPress={() => router.push('/(tutor)/agenda')}>
+      <Pressable style={s.secondaryButton} onPress={() => router.push('/(tutor)/(tabs)/agenda')}>
         <Ionicons name="calendar-outline" size={18} color={theme.colors.primary} />
         <Text style={s.secondaryButtonText}>Ver na agenda</Text>
       </Pressable>

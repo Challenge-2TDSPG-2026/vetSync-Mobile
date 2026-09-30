@@ -10,7 +10,7 @@ export function NotificationHeaderAction() {
 
   return (
     <Pressable
-      onPress={() => router.push('/notificacoes')}
+      onPress={() => router.push('/(tutor)/(tabs)/notificacoes')}
       style={s.button}
       accessibilityRole="button"
       accessibilityLabel="Abrir notificações"

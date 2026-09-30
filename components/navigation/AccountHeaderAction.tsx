@@ -12,7 +12,7 @@ import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
 
 type Props = {
-  href: '/(tutor)/perfil' | '/(vet)/perfil';
+  href: '/(tutor)/(tabs)/perfil' | '/(vet)/perfil';
 };
 
 export function AccountHeaderAction({ href }: Props) {
