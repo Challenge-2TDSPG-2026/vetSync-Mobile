@@ -62,6 +62,8 @@ const ROTAS_EXCLUSIVAS_TUTOR = [
   'pets-cadastrados',
   'gerenciar-conta',
 ];
+const TRANSICAO_PAGINA = { animation: 'fade' } as const;
+
 function RootNavigator() {
   const { theme } = useTheme();
   const { sessao, autenticado, carregando: carregandoAuth } = useAuth();
@@ -170,19 +172,19 @@ function RootNavigator() {
       <Stack
         screenOptions={{
           headerShown: false,
-          animation: 'fade_from_bottom',
+          animation: 'fade',
           animationDuration: 320,
           gestureEnabled: true,
           contentStyle: { backgroundColor: 'transparent' },
         }}
       >
-        <Stack.Screen name="login" options={{ animation: 'fade' }} />
-        <Stack.Screen name="cadastro" options={{ animation: 'fade_from_bottom' }} />
-        <Stack.Screen name="esqueci-senha" options={{ animation: 'fade_from_bottom' }} />
-        <Stack.Screen name="verificar-codigo" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="redefinir-senha" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="(tutor)" options={{ animation: 'fade' }} />
-        <Stack.Screen name="(vet)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="login" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="cadastro" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="esqueci-senha" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="verificar-codigo" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="redefinir-senha" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="(tutor)" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="(vet)" options={TRANSICAO_PAGINA} />
         <Stack.Screen
           name="add-evento"
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
@@ -191,19 +193,13 @@ function RootNavigator() {
           name="add-pet"
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
-        <Stack.Screen name="modo-simples" options={{ animation: 'fade_from_bottom' }} />
-        <Stack.Screen name="configuracoes" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="responsaveis" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="pets-cadastrados" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="gerenciar-conta" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen
-          name="paciente/[id]"
-          options={{ headerShown: true, animation: 'slide_from_right' }}
-        />
-        <Stack.Screen
-          name="evento/[id]"
-          options={{ headerShown: false, animation: 'slide_from_right' }}
-        />
+        <Stack.Screen name="modo-simples" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="configuracoes" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="responsaveis" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="pets-cadastrados" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="gerenciar-conta" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="paciente/[id]" options={{ headerShown: true, ...TRANSICAO_PAGINA }} />
+        <Stack.Screen name="evento/[id]" options={{ headerShown: false, ...TRANSICAO_PAGINA }} />
         <Stack.Screen
           name="assistente"
           options={{
