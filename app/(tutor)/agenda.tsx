@@ -233,13 +233,13 @@ export default function AgendaScreen() {
             const removendoEste = removerMutation.isPending && removerMutation.variables === item.id;
 
             return (
-              <Pressable
-                key={item.id}
-                style={s.card}
-                onPress={() => router.push({ pathname: '/evento/[id]', params: { id: item.id } })}
-                accessibilityRole="button"
-                accessibilityLabel={`Ver detalhes de ${item.nomeTipoEvento}`}
-              >
+              <View key={item.id} style={s.card}>
+                <Pressable
+                  style={s.cardConteudo}
+                  onPress={() => router.push({ pathname: '/evento/[id]', params: { id: item.id } })}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ver detalhes de ${item.nomeTipoEvento}`}
+                >
                 <View style={[s.cardRow, modoSimples && sSimples.cardRow]}>
                   <View style={[s.eventoIcone, modoSimples && sSimples.eventoIcone, { backgroundColor: visual.cor }]}>
                     <AppIcon name={visual.icon} set={visual.iconSet} size={modoSimples ? 26 : 20} color={theme.colors.onPrimary} />
@@ -263,6 +263,7 @@ export default function AgendaScreen() {
                     ) : null}
                   </View>
                 </View>
+                </Pressable>
 
                 <View style={[s.cardFooter, modoSimples && sSimples.cardFooter]}>
                   <View style={s.badges}>
@@ -311,7 +312,7 @@ export default function AgendaScreen() {
                     )}
                   </View>
                 </View>
-              </Pressable>
+              </View>
             );
           })
         )}
@@ -426,6 +427,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     elevation: 2,
   },
+  cardConteudo: { borderTopLeftRadius: 22, borderTopRightRadius: 22 },
   cardRow: {
     flexDirection: 'row',
     alignItems: 'center',
