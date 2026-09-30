@@ -1,4 +1,5 @@
 import { api } from './api/httpClient';
+import { normalizarFotoUrl } from './petMapper';
 import type { Recompensa, Resgate } from '../types';
 
 interface RecompensaResponseApi {
@@ -8,6 +9,7 @@ interface RecompensaResponseApi {
   custoPontos: number;
   tipo: Recompensa['tipo'];
   ativa: boolean;
+  imagemUrl?: string | null;
 }
 
 interface ResgateResponseApi {
@@ -27,6 +29,7 @@ function paraRecompensaApp(dto: RecompensaResponseApi): Recompensa {
     custoPontos: dto.custoPontos,
     tipo: dto.tipo,
     ativa: dto.ativa,
+    imagemUrl: normalizarFotoUrl(dto.imagemUrl) ?? undefined,
   };
 }
 

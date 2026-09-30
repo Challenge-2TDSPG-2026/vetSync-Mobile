@@ -57,6 +57,7 @@ export interface Recompensa {
   custoPontos: number;
   tipo: 'PRODUTO' | 'CUPOM_DESCONTO';
   ativa: boolean;
+  imagemUrl?: string;
 }
 
 export interface Resgate {

@@ -16,6 +16,7 @@ import {
 import { useConquistas } from '../../hooks/useConquistas';
 import { AppIcon } from '../../components/AppIcon';
 import { PetSwitcher } from '../../components/PetSwitcher';
+import { RecompensaImagem } from '../../components/recompensa/RecompensaImagem';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { mostrarToast } from '../../components/ui/Toast';
@@ -200,9 +201,12 @@ export default function RecompensasScreen() {
 
           return (
             <View key={r.id} style={[s.cupomCard, modoSimples && sSimples.cupomCard]}>
-              <View style={[s.cupomIconWrap, modoSimples && sSimples.cupomIconWrap]}>
-                <AppIcon name="gift" set="Ionicons" size={modoSimples ? 30 : 24} color={theme.domain.reward.gold} />
-              </View>
+              <RecompensaImagem
+                imagemUrl={r.imagemUrl}
+                size={modoSimples ? 65 : 48}
+                borderRadius={modoSimples ? 33 : 16}
+                accessibilityLabel={`Imagem de ${r.nome}`}
+              />
               <View style={s.cupomInfo}>
                 <Text style={[s.cupomTitulo, modoSimples && sSimples.cupomTitulo]}>{r.nome}</Text>
                 <Text style={[s.cupomSub, modoSimples && sSimples.cupomSub]}>
