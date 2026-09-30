@@ -16,6 +16,7 @@ import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModa
 import { AppearancePreferences } from '../../components/AppearancePreferences';
 import { PetFoto } from '../../components/pet-foto/PetFoto';
 import { EditarFotoModal } from '../../components/pet-foto/EditarFotoModal';
+import { useTutor } from '../../hooks/useTutor';
 import { withAlpha, type AppTheme } from '../../constants/theme';
 import type { Pet } from '../../types';
 
@@ -23,7 +24,13 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 function obterIniciais(nome: string | undefined): string {
   const partes = nome?.trim().split(/\s+/).filter(Boolean) ?? [];
-  return partes.slice(0, 2).map(parte => parte[0]).join('').toUpperCase() || '?';
+  return (
+    partes
+      .slice(0, 2)
+      .map((parte) => parte[0])
+      .join('')
+      .toUpperCase() || '?'
+  );
 }
 
 export default function PerfilScreen() {
@@ -33,15 +40,28 @@ export default function PerfilScreen() {
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
   const [petFotoEditandoId, setPetFotoEditandoId] = useState<string | null>(null);
   const { sessao, logout } = useAuth();
+  const tutor = useTutor(sessao?.idUsuario);
   const { modoSimples } = useAccessibility();
   const { pets, removerPet } = usePet();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-perfil');
 
   const nome = sessao?.nome?.trim() || 'Conta VetSync';
   const email = sessao?.email?.trim() || 'E-mail não disponível';
-  const perfil = sessao?.perfil === 'TUTOR' ? 'Tutor responsável' : sessao?.perfil || 'Perfil não informado';
+  const perfil =
+    sessao?.perfil === 'TUTOR' ? 'Tutor responsável' : sessao?.perfil || 'Perfil não informado';
   const iniciais = obterIniciais(sessao?.nome);
-  const petFotoEditando: Pet | null = pets.find(pet => pet.id === petFotoEditandoId) ?? null;
+  const petFotoEditando: Pet | null = pets.find((pet) => pet.id === petFotoEditandoId) ?? null;
+  const endereco = tutor.data
+    ? [
+        tutor.data.logradouro &&
+          `${tutor.data.logradouro}${tutor.data.numero ? `, ${tutor.data.numero}` : ''}`,
+        tutor.data.complemento,
+        tutor.data.bairro,
+        tutor.data.cidade && `${tutor.data.cidade}${tutor.data.uf ? ` - ${tutor.data.uf}` : ''}`,
+      ]
+        .filter(Boolean)
+        .join(' • ') || 'Endereço não informado'
+    : 'Carregando endereço...';
 
   function handleSair() {
     setModalSairVisivel(true);
@@ -55,23 +75,32 @@ export default function PerfilScreen() {
 
   function handleRemoverPet(id: string, nomePet: string) {
     if (pets.length <= 1) {
-      mostrarToast('erro', 'Não é possível remover', 'Você precisa ter pelo menos 1 pet cadastrado.');
+      mostrarToast(
+        'erro',
+        'Não é possível remover',
+        'Você precisa ter pelo menos 1 pet cadastrado.',
+      );
       return;
     }
-    confirmar(
-      `Remover ${nomePet}?`,
-      'Os eventos de saúde desse pet também serão removidos.',
-      [
-        { texto: 'Cancelar', estilo: 'cancel' },
-        { texto: 'Remover', estilo: 'destructive', aoConfirmar: () => removerPet(id) },
-      ]
-    );
+    confirmar(`Remover ${nomePet}?`, 'Os eventos de saúde desse pet também serão removidos.', [
+      { texto: 'Cancelar', estilo: 'cancel' },
+      { texto: 'Remover', estilo: 'destructive', aoConfirmar: () => removerPet(id) },
+    ]);
   }
 
   return (
     <>
-      <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={[theme.pages.tutorProfile.heroBackground, theme.pages.tutorProfile.heroAccent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
+      <ScrollView
+        style={s.container}
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <LinearGradient
+          colors={[theme.pages.tutorProfile.heroBackground, theme.pages.tutorProfile.heroAccent]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={s.hero}
+        >
           <View style={s.heroGlowOne} />
           <View style={s.heroGlowTwo} />
 
@@ -81,95 +110,181 @@ export default function PerfilScreen() {
             </View>
             <View style={s.heroInfo}>
               <Text style={[s.overline, modoSimples && sSimples.overline]}>MINHA CONTA</Text>
-              <Text style={[s.heroNome, modoSimples && sSimples.heroNome]} numberOfLines={2}>{nome}</Text>
-              <Text style={[s.heroEmail, modoSimples && sSimples.heroEmail]} numberOfLines={1}>{email}</Text>
+              <Text style={[s.heroNome, modoSimples && sSimples.heroNome]} numberOfLines={2}>
+                {nome}
+              </Text>
+              <Text style={[s.heroEmail, modoSimples && sSimples.heroEmail]} numberOfLines={1}>
+                {email}
+              </Text>
             </View>
           </View>
 
           <View style={s.heroFooter}>
             <View style={s.rolePill}>
-              <Ionicons name="shield-checkmark-outline" size={14} color={theme.pages.tutorProfile.heroText} />
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={14}
+                color={theme.pages.tutorProfile.heroText}
+              />
               <Text style={s.rolePillText}>{perfil}</Text>
             </View>
-            <Text style={s.petCount}>{pets.length} {pets.length === 1 ? 'pet vinculado' : 'pets vinculados'}</Text>
+            <Text style={s.petCount}>
+              {pets.length} {pets.length === 1 ? 'pet vinculado' : 'pets vinculados'}
+            </Text>
           </View>
         </LinearGradient>
 
         {dicaVisivel && (
           <DicaTela
             titulo="Sua conta"
-            texto="Aqui você vê seus dados, gerencia seus pets cadastrados e ativa o modo simples, com textos e botões maiores."
+            texto="Aqui você acessa seus avisos, compartilha os cuidados do pet com a família e ajusta sua experiência no aplicativo."
             accentColor={theme.colors.primary}
             onFechar={fecharDica}
             simples={modoSimples}
           />
         )}
 
-        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Dados da conta</Text>
-        <View style={s.card}>
-          <InfoRow styles={s} theme={theme} icon="person-outline" label="Nome completo" value={nome} simples={modoSimples} />
-          <View style={s.divider} />
-          <InfoRow styles={s} theme={theme} icon="mail-outline" label="E-mail" value={email} simples={modoSimples} />
-          <View style={s.divider} />
-          <InfoRow styles={s} theme={theme} icon="shield-checkmark-outline" label="Tipo de conta" value={perfil} simples={modoSimples} />
-        </View>
-
-        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Sua conta</Text>
-        <View style={s.card}>
-          <AccountAction
+        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Acesso rápido</Text>
+        <View style={s.acessosRapidos}>
+          <QuickAccessCard
             styles={s}
             theme={theme}
-            icon="time-outline"
-            title="Histórico clínico"
-            description="Consulte os eventos de saúde registrados"
-            onPress={() => router.push('/(tutor)/historico')}
+            icon="shield-checkmark-outline"
+            title="Segurança"
+            description="Em breve"
+            color={theme.colors.info}
+            simples={modoSimples}
+          />
+          <QuickAccessCard
+            styles={s}
+            theme={theme}
+            icon="mail-outline"
+            title="Mensagens"
+            description="Avisos e lembretes"
+            color={theme.colors.primary}
+            onPress={() => router.push('/(tutor)/notificacoes')}
+            simples={modoSimples}
+          />
+          <QuickAccessCard
+            styles={s}
+            theme={theme}
+            icon="help-buoy-outline"
+            title="Ajuda"
+            description="Em breve"
+            color={theme.colors.warning}
+            simples={modoSimples}
+          />
+          <QuickAccessCard
+            styles={s}
+            theme={theme}
+            icon="settings-outline"
+            title="Configurações"
+            description="Em breve"
+            color={theme.colors.textSecondary}
+            simples={modoSimples}
+          />
+        </View>
+
+        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>
+          Conta e preferências
+        </Text>
+        <View style={s.card}>
+          <AccountShortcut
+            styles={s}
+            theme={theme}
+            icon="people-outline"
+            title="Família"
+            description="Compartilhe o cuidado dos seus pets"
+            onPress={() => router.push('/gerenciar-acessos')}
             simples={modoSimples}
           />
           <View style={s.divider} />
-          <AccountAction
+          <AccountShortcut
             styles={s}
             theme={theme}
-            icon="notifications-outline"
-            title="Notificações e preferências"
-            description="Gerencie seus lembretes e avisos"
-            onPress={() => router.push('/(tutor)/notificacoes')}
+            icon="accessibility-outline"
+            title="Modo simples"
+            description={
+              modoSimples
+                ? 'Ativado. Revise esta configuração.'
+                : 'Textos e botões maiores para uma navegação mais confortável.'
+            }
+            onPress={() => router.push('/modo-simples')}
+            simples={modoSimples}
+          />
+          <View style={s.divider} />
+          <AccountShortcut
+            styles={s}
+            theme={theme}
+            icon="person-circle-outline"
+            title="Gerenciar conta"
+            description="Dados de contato e endereço"
+            onPress={() => router.push('/gerenciar-conta')}
+            simples={modoSimples}
+          />
+          <View style={s.divider} />
+          <AccountShortcut
+            styles={s}
+            theme={theme}
+            icon="information-circle-outline"
+            title="Informações do aplicativo"
+            description="Em breve"
+            simples={modoSimples}
+          />
+        </View>
+
+        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Dados da conta</Text>
+        <View style={s.card}>
+          <InfoRow
+            styles={s}
+            theme={theme}
+            icon="person-outline"
+            label="Nome completo"
+            value={nome}
+            simples={modoSimples}
+          />
+          <View style={s.divider} />
+          <InfoRow
+            styles={s}
+            theme={theme}
+            icon="mail-outline"
+            label="E-mail"
+            value={email}
+            simples={modoSimples}
+          />
+          <View style={s.divider} />
+          <InfoRow
+            styles={s}
+            theme={theme}
+            icon="location-outline"
+            label="Endereço"
+            value={endereco}
+            simples={modoSimples}
+          />
+          <View style={s.divider} />
+          <InfoRow
+            styles={s}
+            theme={theme}
+            icon="shield-checkmark-outline"
+            label="Tipo de conta"
+            value={perfil}
             simples={modoSimples}
           />
         </View>
 
         <AppearancePreferences />
 
-        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Acessibilidade</Text>
-        <View style={s.card}>
-          <Pressable
-            style={[s.accessibilityAction, modoSimples && sSimples.accessibilityAction]}
-            onPress={() => router.push('/modo-simples')}
-            accessibilityRole="button"
-            accessibilityLabel="Abrir configurações do modo simples"
-          >
-            <View style={[s.accessibilityIcon, modoSimples && sSimples.accessibilityIcon]}>
-              <Ionicons name="accessibility-outline" size={modoSimples ? 28 : 20} color={theme.colors.primary} />
-            </View>
-            <View style={s.accessibilityCopy}>
-              <Text style={[s.accessibilityTitle, modoSimples && sSimples.accessibilityTitle]}>Modo simples</Text>
-              <Text style={[s.accessibilityDescription, modoSimples && sSimples.accessibilityDescription]}>
-                {modoSimples ? 'Ativado. Toque para revisar esta configuração.' : 'Textos e botões maiores para uma navegação mais confortável.'}
-              </Text>
-            </View>
-            <View style={[s.modeStatus, modoSimples && s.modeStatusActive]}>
-              <Text style={[s.modeStatusText, modoSimples && s.modeStatusTextActive]}>{modoSimples ? 'Ativo' : 'Ver'}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={modoSimples ? 27 : 20} color={theme.colors.textMuted} />
-          </Pressable>
-        </View>
-
         <View style={s.sectionTitleRow}>
-          <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Pets vinculados</Text>
-          <View style={s.countBadge}><Text style={s.countBadgeText}>{pets.length}</Text></View>
+          <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>
+            Pets vinculados
+          </Text>
+          <View style={s.countBadge}>
+            <Text style={s.countBadgeText}>{pets.length}</Text>
+          </View>
         </View>
         <View style={s.card}>
           {pets.map((pet, index) => {
-            const especie = ESPECIES.find(item => item.valor === pet.especie);
+            const especie = ESPECIES.find((item) => item.valor === pet.especie);
             return (
               <View key={pet.id}>
                 <View style={[s.petRow, modoSimples && sSimples.petRow]}>
@@ -177,16 +292,40 @@ export default function PerfilScreen() {
                     style={[s.petFoto, modoSimples && sSimples.petFoto]}
                     onPress={() => setPetFotoEditandoId(pet.id)}
                     accessibilityRole="button"
-                    accessibilityLabel={pet.fotoUrl ? `Alterar foto de ${pet.nome}` : `Adicionar foto de ${pet.nome}`}
+                    accessibilityLabel={
+                      pet.fotoUrl ? `Alterar foto de ${pet.nome}` : `Adicionar foto de ${pet.nome}`
+                    }
                   >
-                    <PetFoto pet={pet} size={modoSimples ? 58 : 42} color={theme.colors.primary} backgroundColor={theme.pages.tutorProfile.cardSecondary} accessibilityLabel={`Foto de ${pet.nome}`} />
-                    <View style={[s.addFotoBadge, modoSimples && sSimples.addFotoBadge, { backgroundColor: theme.colors.primary, borderColor: theme.pages.tutorProfile.card }]}>
-                      <Ionicons name="camera" size={modoSimples ? 15 : 12} color={theme.colors.onPrimary} />
+                    <PetFoto
+                      pet={pet}
+                      size={modoSimples ? 58 : 42}
+                      color={theme.colors.primary}
+                      backgroundColor={theme.pages.tutorProfile.cardSecondary}
+                      accessibilityLabel={`Foto de ${pet.nome}`}
+                    />
+                    <View
+                      style={[
+                        s.addFotoBadge,
+                        modoSimples && sSimples.addFotoBadge,
+                        {
+                          backgroundColor: theme.colors.primary,
+                          borderColor: theme.pages.tutorProfile.card,
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name="camera"
+                        size={modoSimples ? 15 : 12}
+                        color={theme.colors.onPrimary}
+                      />
                     </View>
                   </Pressable>
                   <View style={s.petCopy}>
                     <Text style={[s.petName, modoSimples && sSimples.petName]}>{pet.nome}</Text>
-                    <Text style={[s.petDetail, modoSimples && sSimples.petDetail]}>{especie?.label ?? 'Espécie não informada'}{pet.raca ? ` • ${pet.raca}` : ''}</Text>
+                    <Text style={[s.petDetail, modoSimples && sSimples.petDetail]}>
+                      {especie?.label ?? 'Espécie não informada'}
+                      {pet.raca ? ` • ${pet.raca}` : ''}
+                    </Text>
                   </View>
                   <Pressable
                     style={s.removePet}
@@ -195,7 +334,11 @@ export default function PerfilScreen() {
                     accessibilityRole="button"
                     accessibilityLabel={`Remover ${pet.nome}`}
                   >
-                    <Ionicons name="trash-outline" size={modoSimples ? 25 : 19} color={theme.colors.danger} />
+                    <Ionicons
+                      name="trash-outline"
+                      size={modoSimples ? 25 : 19}
+                      color={theme.colors.danger}
+                    />
                   </Pressable>
                 </View>
                 {index < pets.length - 1 && <View style={s.divider} />}
@@ -203,14 +346,30 @@ export default function PerfilScreen() {
             );
           })}
           {pets.length > 0 && <View style={s.divider} />}
-          <Pressable style={[s.addPet, modoSimples && sSimples.addPet]} onPress={() => router.push('/add-pet')} accessibilityRole="button">
-            <Ionicons name="add-circle-outline" size={modoSimples ? 27 : 21} color={theme.colors.primary} />
+          <Pressable
+            style={[s.addPet, modoSimples && sSimples.addPet]}
+            onPress={() => router.push('/add-pet')}
+            accessibilityRole="button"
+          >
+            <Ionicons
+              name="add-circle-outline"
+              size={modoSimples ? 27 : 21}
+              color={theme.colors.primary}
+            />
             <Text style={[s.addPetText, modoSimples && sSimples.addPetText]}>Adicionar pet</Text>
           </Pressable>
         </View>
 
-        <Pressable style={[s.logout, modoSimples && sSimples.logout]} onPress={handleSair} accessibilityRole="button">
-          <Ionicons name="log-out-outline" size={modoSimples ? 26 : 20} color={theme.colors.primary} />
+        <Pressable
+          style={[s.logout, modoSimples && sSimples.logout]}
+          onPress={handleSair}
+          accessibilityRole="button"
+        >
+          <Ionicons
+            name="log-out-outline"
+            size={modoSimples ? 26 : 20}
+            color={theme.colors.primary}
+          />
           <Text style={[s.logoutText, modoSimples && sSimples.logoutText]}>Sair da conta</Text>
         </Pressable>
       </ScrollView>
@@ -224,92 +383,416 @@ export default function PerfilScreen() {
   );
 }
 
-function InfoRow({ styles, theme, icon, label, value, simples }: { styles: ReturnType<typeof createStyles>; theme: AppTheme; icon: IconName; label: string; value: string; simples: boolean }) {
+function InfoRow({
+  styles,
+  theme,
+  icon,
+  label,
+  value,
+  simples,
+}: {
+  styles: ReturnType<typeof createStyles>;
+  theme: AppTheme;
+  icon: IconName;
+  label: string;
+  value: string;
+  simples: boolean;
+}) {
   return (
     <View style={[styles.infoRow, simples && sSimples.infoRow]}>
-      <View style={[styles.infoIcon, simples && sSimples.infoIcon]}><Ionicons name={icon} size={simples ? 24 : 18} color={theme.colors.primary} /></View>
+      <View style={[styles.infoIcon, simples && sSimples.infoIcon]}>
+        <Ionicons name={icon} size={simples ? 24 : 18} color={theme.colors.primary} />
+      </View>
       <View style={styles.infoCopy}>
         <Text style={[styles.infoLabel, simples && sSimples.infoLabel]}>{label}</Text>
-        <Text style={[styles.infoValue, simples && sSimples.infoValue]} numberOfLines={2}>{value}</Text>
+        <Text style={[styles.infoValue, simples && sSimples.infoValue]} numberOfLines={2}>
+          {value}
+        </Text>
       </View>
     </View>
   );
 }
 
-function AccountAction({ styles, theme, icon, title, description, onPress, simples }: { styles: ReturnType<typeof createStyles>; theme: AppTheme; icon: IconName; title: string; description: string; onPress: () => void; simples: boolean }) {
+function QuickAccessCard({
+  styles,
+  theme,
+  icon,
+  title,
+  description,
+  color,
+  onPress,
+  simples,
+}: {
+  styles: ReturnType<typeof createStyles>;
+  theme: AppTheme;
+  icon: IconName;
+  title: string;
+  description: string;
+  color: string;
+  onPress?: () => void;
+  simples: boolean;
+}) {
   return (
-    <Pressable style={[styles.accountAction, simples && sSimples.accountAction]} onPress={onPress} accessibilityRole="button">
-      <View style={[styles.actionIcon, simples && sSimples.actionIcon]}><Ionicons name={icon} size={simples ? 28 : 20} color={theme.colors.primary} /></View>
-      <View style={styles.actionCopy}>
-        <Text style={[styles.actionTitle, simples && sSimples.actionTitle]}>{title}</Text>
-        <Text style={[styles.actionDescription, simples && sSimples.actionDescription]}>{description}</Text>
+    <Pressable
+      disabled={!onPress}
+      style={({ pressed }) => [
+        styles.quickAccessCard,
+        simples && sSimples.quickAccessCard,
+        !onPress && styles.actionDisabled,
+        pressed && styles.cardPressed,
+      ]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityHint={
+        onPress ? `Abre ${title.toLocaleLowerCase('pt-BR')}` : 'Indisponível no momento'
+      }
+      accessibilityState={{ disabled: !onPress }}
+    >
+      <View
+        style={[
+          styles.quickAccessIcon,
+          simples && sSimples.quickAccessIcon,
+          { backgroundColor: withAlpha(color, theme.mode === 'dark' ? 0.25 : 0.12) },
+        ]}
+      >
+        <Ionicons name={icon} size={simples ? 29 : 22} color={color} />
       </View>
-      <Ionicons name="chevron-forward" size={simples ? 27 : 20} color={theme.colors.textMuted} />
+      <View style={styles.quickAccessCopy}>
+        <Text
+          numberOfLines={1}
+          style={[styles.quickAccessTitle, simples && sSimples.quickAccessTitle]}
+        >
+          {title}
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={[styles.quickAccessDescription, simples && sSimples.quickAccessDescription]}
+        >
+          {description}
+        </Text>
+      </View>
     </Pressable>
   );
 }
 
-const createStyles = (theme: AppTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: 16, paddingBottom: 38 },
-  hero: { borderRadius: 24, padding: 20, marginBottom: 24, overflow: 'hidden' },
-  heroGlowOne: { position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(168,230,199,0.10)', right: -52, top: -70 },
-  heroGlowTwo: { position: 'absolute', width: 84, height: 84, borderRadius: 42, backgroundColor: withAlpha(theme.colors.brandAccent, 0.10), right: 30, bottom: -48 },
-  heroTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  avatar: { width: 62, height: 62, borderRadius: 22, backgroundColor: theme.pages.tutorProfile.cardElevated, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: theme.colors.primary, fontSize: 21, fontWeight: '800', letterSpacing: -0.5 },
-  heroInfo: { flex: 1, minWidth: 0 },
-  overline: { color: theme.pages.tutorProfile.heroText, opacity: 0.62, fontSize: 10, fontWeight: '800', letterSpacing: 1.1 },
-  heroNome: { color: theme.pages.tutorProfile.heroText, fontSize: 22, fontWeight: '800', letterSpacing: -0.55, marginTop: 4 },
-  heroEmail: { color: theme.pages.tutorProfile.heroText, opacity: 0.77, fontSize: 13, marginTop: 3 },
-  heroFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, gap: 10 },
-  rolePill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.pages.tutorProfile.heroAccent, borderWidth: 1, borderColor: theme.pages.tutorProfile.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
-  rolePillText: { color: theme.pages.tutorProfile.heroText, fontSize: 11, fontWeight: '800' },
-  petCount: { color: theme.pages.tutorProfile.heroText, opacity: 0.7, fontSize: 11, fontWeight: '700', textAlign: 'right' },
+function AccountShortcut({
+  styles,
+  theme,
+  icon,
+  title,
+  description,
+  onPress,
+  simples,
+}: {
+  styles: ReturnType<typeof createStyles>;
+  theme: AppTheme;
+  icon: IconName;
+  title: string;
+  description: string;
+  onPress?: () => void;
+  simples: boolean;
+}) {
+  return (
+    <Pressable
+      disabled={!onPress}
+      style={[
+        styles.accountShortcut,
+        simples && sSimples.accountShortcut,
+        !onPress && styles.actionDisabled,
+      ]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityHint={
+        onPress ? `Abre ${title.toLocaleLowerCase('pt-BR')}` : 'Indisponível no momento'
+      }
+      accessibilityState={{ disabled: !onPress }}
+    >
+      <View style={[styles.shortcutIcon, simples && sSimples.shortcutIcon]}>
+        <Ionicons name={icon} size={simples ? 28 : 20} color={theme.colors.primary} />
+      </View>
+      <View style={styles.shortcutCopy}>
+        <Text style={[styles.shortcutTitle, simples && sSimples.shortcutTitle]}>{title}</Text>
+        <Text style={[styles.shortcutDescription, simples && sSimples.shortcutDescription]}>
+          {description}
+        </Text>
+      </View>
+      {onPress ? (
+        <Ionicons name="chevron-forward" size={simples ? 27 : 20} color={theme.colors.textMuted} />
+      ) : (
+        <Text style={[styles.comingSoon, simples && sSimples.comingSoon]}>Em breve</Text>
+      )}
+    </Pressable>
+  );
+}
 
-  sectionTitle: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '800', letterSpacing: 0.85, textTransform: 'uppercase', marginBottom: 10, paddingLeft: 2 },
-  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 2 },
-  countBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary, marginBottom: 10 },
-  countBadgeText: { color: theme.colors.primary, fontSize: 11, fontWeight: '800' },
-  card: { backgroundColor: theme.pages.tutorProfile.card, borderRadius: 18, borderWidth: 1, borderColor: theme.pages.tutorProfile.border, overflow: 'hidden', marginBottom: 22 },
-  divider: { height: 1, backgroundColor: theme.pages.tutorProfile.border },
+const createStyles = (theme: AppTheme) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    content: { padding: 16, paddingBottom: 38 },
+    hero: { borderRadius: 24, padding: 20, marginBottom: 24, overflow: 'hidden' },
+    heroGlowOne: {
+      position: 'absolute',
+      width: 150,
+      height: 150,
+      borderRadius: 75,
+      backgroundColor: 'rgba(168,230,199,0.10)',
+      right: -52,
+      top: -70,
+    },
+    heroGlowTwo: {
+      position: 'absolute',
+      width: 84,
+      height: 84,
+      borderRadius: 42,
+      backgroundColor: withAlpha(theme.colors.brandAccent, 0.1),
+      right: 30,
+      bottom: -48,
+    },
+    heroTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    avatar: {
+      width: 62,
+      height: 62,
+      borderRadius: 22,
+      backgroundColor: theme.pages.tutorProfile.cardElevated,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarText: {
+      color: theme.colors.primary,
+      fontSize: 21,
+      fontWeight: '800',
+      letterSpacing: -0.5,
+    },
+    heroInfo: { flex: 1, minWidth: 0 },
+    overline: {
+      color: theme.pages.tutorProfile.heroText,
+      opacity: 0.62,
+      fontSize: 10,
+      fontWeight: '800',
+      letterSpacing: 1.1,
+    },
+    heroNome: {
+      color: theme.pages.tutorProfile.heroText,
+      fontSize: 22,
+      fontWeight: '800',
+      letterSpacing: -0.55,
+      marginTop: 4,
+    },
+    heroEmail: {
+      color: theme.pages.tutorProfile.heroText,
+      opacity: 0.77,
+      fontSize: 13,
+      marginTop: 3,
+    },
+    heroFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: 20,
+      gap: 10,
+    },
+    rolePill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: theme.pages.tutorProfile.heroAccent,
+      borderWidth: 1,
+      borderColor: theme.pages.tutorProfile.border,
+      borderRadius: 999,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+    },
+    rolePillText: { color: theme.pages.tutorProfile.heroText, fontSize: 11, fontWeight: '800' },
+    petCount: {
+      color: theme.pages.tutorProfile.heroText,
+      opacity: 0.7,
+      fontSize: 11,
+      fontWeight: '700',
+      textAlign: 'right',
+    },
 
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 14 },
-  infoIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary },
-  infoCopy: { flex: 1, minWidth: 0 },
-  infoLabel: { color: theme.colors.textSecondary, fontSize: 11, fontWeight: '700', marginBottom: 2 },
-  infoValue: { color: theme.colors.text, fontSize: 15, fontWeight: '700' },
+    sectionTitle: {
+      color: theme.colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.85,
+      textTransform: 'uppercase',
+      marginBottom: 10,
+      paddingLeft: 2,
+    },
+    sectionTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingRight: 2,
+    },
+    countBadge: {
+      minWidth: 22,
+      height: 22,
+      borderRadius: 11,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.pages.tutorProfile.cardSecondary,
+      marginBottom: 10,
+    },
+    countBadgeText: { color: theme.colors.primary, fontSize: 11, fontWeight: '800' },
+    card: {
+      backgroundColor: theme.pages.tutorProfile.card,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: theme.pages.tutorProfile.border,
+      overflow: 'hidden',
+      marginBottom: 22,
+    },
+    divider: { height: 1, backgroundColor: theme.pages.tutorProfile.border },
 
-  accountAction: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
-  actionIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary },
-  actionCopy: { flex: 1, minWidth: 0 },
-  actionTitle: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
-  actionDescription: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3, lineHeight: 17 },
+    acessosRapidos: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 22 },
+    quickAccessCard: {
+      flexBasis: '47.5%',
+      minHeight: 104,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      backgroundColor: theme.pages.tutorProfile.card,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.pages.tutorProfile.border,
+      padding: 12,
+    },
+    quickAccessIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: 13,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    quickAccessCopy: { flex: 1, minWidth: 0 },
+    quickAccessTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '800' },
+    quickAccessDescription: {
+      color: theme.colors.textSecondary,
+      fontSize: 10,
+      lineHeight: 13,
+      marginTop: 3,
+    },
+    actionDisabled: { opacity: 0.55 },
+    cardPressed: { opacity: 0.78, transform: [{ scale: 0.98 }] },
 
-  accessibilityAction: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
-  accessibilityIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary },
-  accessibilityCopy: { flex: 1, minWidth: 0 },
-  accessibilityTitle: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
-  accessibilityDescription: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3, lineHeight: 17 },
-  modeStatus: { borderRadius: 999, backgroundColor: theme.pages.tutorProfile.cardSecondary, paddingHorizontal: 8, paddingVertical: 4 },
-  modeStatusActive: { backgroundColor: theme.colors.successBackground },
-  modeStatusText: { color: theme.colors.textSecondary, fontSize: 10, fontWeight: '800' },
-  modeStatusTextActive: { color: theme.colors.success, fontSize: 10, fontWeight: '800' },
+    accountShortcut: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
+    shortcutIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.pages.tutorProfile.cardSecondary,
+    },
+    shortcutCopy: { flex: 1, minWidth: 0 },
+    shortcutTitle: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
+    shortcutDescription: {
+      color: theme.colors.textSecondary,
+      fontSize: 12,
+      marginTop: 3,
+      lineHeight: 17,
+    },
+    comingSoon: {
+      color: theme.colors.textMuted,
+      fontSize: 10,
+      fontWeight: '800',
+      textTransform: 'uppercase',
+    },
 
-  petRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, paddingVertical: 13 },
-  petIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.tutorProfile.cardSecondary },
-  petFoto: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  addFotoBadge: { position: 'absolute', bottom: -2, right: -2, width: 20, height: 20, borderRadius: 10, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  petCopy: { flex: 1, minWidth: 0 },
-  petName: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
-  petDetail: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3 },
-  removePet: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.dangerBackground },
-  addPet: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 15 },
-  addPetText: { color: theme.colors.primary, fontSize: 14, fontWeight: '800' },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 15,
+      paddingVertical: 14,
+    },
+    infoIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: 13,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.pages.tutorProfile.cardSecondary,
+    },
+    infoCopy: { flex: 1, minWidth: 0 },
+    infoLabel: {
+      color: theme.colors.textSecondary,
+      fontSize: 11,
+      fontWeight: '700',
+      marginBottom: 2,
+    },
+    infoValue: { color: theme.colors.text, fontSize: 15, fontWeight: '700' },
 
-  logout: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16, borderRadius: 16, borderWidth: 1, borderColor: theme.pages.tutorProfile.border, backgroundColor: theme.pages.tutorProfile.card },
-  logoutText: { color: theme.colors.primary, fontSize: 15, fontWeight: '800' },
-});
+    petRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 15,
+      paddingVertical: 13,
+    },
+    petIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.pages.tutorProfile.cardSecondary,
+    },
+    petFoto: {
+      width: 42,
+      height: 42,
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+    },
+    addFotoBadge: {
+      position: 'absolute',
+      bottom: -2,
+      right: -2,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    petCopy: { flex: 1, minWidth: 0 },
+    petName: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
+    petDetail: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3 },
+    removePet: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.dangerBackground,
+    },
+    addPet: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 7,
+      paddingVertical: 15,
+    },
+    addPetText: { color: theme.colors.primary, fontSize: 14, fontWeight: '800' },
+
+    logout: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 16,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.pages.tutorProfile.border,
+      backgroundColor: theme.pages.tutorProfile.card,
+    },
+    logoutText: { color: theme.colors.primary, fontSize: 15, fontWeight: '800' },
+  });
 
 const sSimples = StyleSheet.create({
   avatar: { width: 76, height: 76, borderRadius: 26 },
@@ -322,14 +805,15 @@ const sSimples = StyleSheet.create({
   infoIcon: { width: 52, height: 52, borderRadius: 17 },
   infoLabel: { fontSize: 16 },
   infoValue: { fontSize: 20, lineHeight: 26 },
-  accountAction: { paddingVertical: 20, gap: 16 },
-  actionIcon: { width: 58, height: 58, borderRadius: 18 },
-  actionTitle: { fontSize: 22 },
-  actionDescription: { fontSize: 17, lineHeight: 23 },
-  accessibilityAction: { paddingVertical: 20, gap: 16 },
-  accessibilityIcon: { width: 58, height: 58, borderRadius: 18 },
-  accessibilityTitle: { fontSize: 22 },
-  accessibilityDescription: { fontSize: 17, lineHeight: 23 },
+  quickAccessCard: { flexBasis: '100%', minHeight: 104, padding: 20, gap: 16 },
+  quickAccessIcon: { width: 58, height: 58, borderRadius: 18 },
+  quickAccessTitle: { fontSize: 22 },
+  quickAccessDescription: { fontSize: 17, lineHeight: 23, marginTop: 5 },
+  accountShortcut: { paddingVertical: 20, gap: 16 },
+  shortcutIcon: { width: 58, height: 58, borderRadius: 18 },
+  shortcutTitle: { fontSize: 22 },
+  shortcutDescription: { fontSize: 17, lineHeight: 23 },
+  comingSoon: { fontSize: 13 },
   petRow: { paddingVertical: 19, gap: 16 },
   petIcon: { width: 58, height: 58, borderRadius: 18 },
   petFoto: { width: 58, height: 58 },
