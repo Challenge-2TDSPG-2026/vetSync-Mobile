@@ -1,23 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
-import { ESPECIES } from '../../constants';
 import { useAuth } from '../../context/AuthContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { confirmar } from '../../utils/alert';
-import { mostrarToast } from '../../components/ui/Toast';
 import { DicaTela } from '../../components/ui/DicaTela';
-import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
-import { AppearancePreferences } from '../../components/AppearancePreferences';
-import { PetFoto } from '../../components/pet-foto/PetFoto';
-import { EditarFotoModal } from '../../components/pet-foto/EditarFotoModal';
 import { withAlpha, type AppTheme } from '../../constants/theme';
-import type { Pet } from '../../types';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -36,11 +28,9 @@ export default function PerfilScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
-  const [modalSairVisivel, setModalSairVisivel] = useState(false);
-  const [petFotoEditandoId, setPetFotoEditandoId] = useState<string | null>(null);
-  const { sessao, logout } = useAuth();
+  const { sessao } = useAuth();
   const { modoSimples } = useAccessibility();
-  const { pets, removerPet } = usePet();
+  const { pets } = usePet();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-perfil');
 
   const nome = sessao?.nome?.trim() || 'Conta VetSync';
@@ -48,32 +38,6 @@ export default function PerfilScreen() {
   const perfil =
     sessao?.perfil === 'TUTOR' ? 'Tutor responsável' : sessao?.perfil || 'Perfil não informado';
   const iniciais = obterIniciais(sessao?.nome);
-  const petFotoEditando: Pet | null = pets.find((pet) => pet.id === petFotoEditandoId) ?? null;
-  function handleSair() {
-    setModalSairVisivel(true);
-  }
-
-  async function confirmarLogout() {
-    setModalSairVisivel(false);
-    await logout();
-    router.replace('/login');
-  }
-
-  function handleRemoverPet(id: string, nomePet: string) {
-    if (pets.length <= 1) {
-      mostrarToast(
-        'erro',
-        'Não é possível remover',
-        'Você precisa ter pelo menos 1 pet cadastrado.',
-      );
-      return;
-    }
-    confirmar(`Remover ${nomePet}?`, 'Os eventos de saúde desse pet também serão removidos.', [
-      { texto: 'Cancelar', estilo: 'cancel' },
-      { texto: 'Remover', estilo: 'destructive', aoConfirmar: () => removerPet(id) },
-    ]);
-  }
-
   return (
     <>
       <ScrollView
@@ -165,8 +129,9 @@ export default function PerfilScreen() {
             theme={theme}
             icon="settings-outline"
             title="Configurações"
-            description="Em breve"
+            description="Conta e preferências"
             color={theme.colors.textSecondary}
+            onPress={() => router.push('/configuracoes')}
             simples={modoSimples}
           />
         </View>
@@ -175,16 +140,6 @@ export default function PerfilScreen() {
           Conta e preferências
         </Text>
         <View style={s.card}>
-          <AccountShortcut
-            styles={s}
-            theme={theme}
-            icon="people-outline"
-            title="Responsáveis"
-            description="Compartilhe o cuidado de todos os seus pets"
-            onPress={() => router.push('/responsaveis')}
-            simples={modoSimples}
-          />
-          <View style={s.divider} />
           <AccountShortcut
             styles={s}
             theme={theme}
@@ -198,134 +153,8 @@ export default function PerfilScreen() {
             onPress={() => router.push('/modo-simples')}
             simples={modoSimples}
           />
-          <View style={s.divider} />
-          <AccountShortcut
-            styles={s}
-            theme={theme}
-            icon="person-circle-outline"
-            title="Gerenciar conta"
-            description="Dados de contato e endereço"
-            onPress={() => router.push('/gerenciar-conta')}
-            simples={modoSimples}
-          />
-          <View style={s.divider} />
-          <AccountShortcut
-            styles={s}
-            theme={theme}
-            icon="information-circle-outline"
-            title="Informações do aplicativo"
-            description="Em breve"
-            simples={modoSimples}
-          />
         </View>
-
-        <AppearancePreferences />
-
-        <View style={s.sectionTitleRow}>
-          <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>
-            Pets vinculados
-          </Text>
-          <View style={s.countBadge}>
-            <Text style={s.countBadgeText}>{pets.length}</Text>
-          </View>
-        </View>
-        <View style={s.card}>
-          {pets.map((pet, index) => {
-            const especie = ESPECIES.find((item) => item.valor === pet.especie);
-            return (
-              <View key={pet.id}>
-                <View style={[s.petRow, modoSimples && sSimples.petRow]}>
-                  <Pressable
-                    style={[s.petFoto, modoSimples && sSimples.petFoto]}
-                    onPress={() => setPetFotoEditandoId(pet.id)}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      pet.fotoUrl ? `Alterar foto de ${pet.nome}` : `Adicionar foto de ${pet.nome}`
-                    }
-                  >
-                    <PetFoto
-                      pet={pet}
-                      size={modoSimples ? 58 : 42}
-                      color={theme.colors.primary}
-                      backgroundColor={theme.pages.tutorProfile.cardSecondary}
-                      accessibilityLabel={`Foto de ${pet.nome}`}
-                    />
-                    <View
-                      style={[
-                        s.addFotoBadge,
-                        modoSimples && sSimples.addFotoBadge,
-                        {
-                          backgroundColor: theme.colors.primary,
-                          borderColor: theme.pages.tutorProfile.card,
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name="camera"
-                        size={modoSimples ? 15 : 12}
-                        color={theme.colors.onPrimary}
-                      />
-                    </View>
-                  </Pressable>
-                  <View style={s.petCopy}>
-                    <Text style={[s.petName, modoSimples && sSimples.petName]}>{pet.nome}</Text>
-                    <Text style={[s.petDetail, modoSimples && sSimples.petDetail]}>
-                      {especie?.label ?? 'Espécie não informada'}
-                      {pet.raca ? ` • ${pet.raca}` : ''}
-                    </Text>
-                  </View>
-                  <Pressable
-                    style={s.removePet}
-                    onPress={() => handleRemoverPet(pet.id, pet.nome)}
-                    hitSlop={8}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Remover ${pet.nome}`}
-                  >
-                    <Ionicons
-                      name="trash-outline"
-                      size={modoSimples ? 25 : 19}
-                      color={theme.colors.danger}
-                    />
-                  </Pressable>
-                </View>
-                {index < pets.length - 1 && <View style={s.divider} />}
-              </View>
-            );
-          })}
-          {pets.length > 0 && <View style={s.divider} />}
-          <Pressable
-            style={[s.addPet, modoSimples && sSimples.addPet]}
-            onPress={() => router.push('/add-pet')}
-            accessibilityRole="button"
-          >
-            <Ionicons
-              name="add-circle-outline"
-              size={modoSimples ? 27 : 21}
-              color={theme.colors.primary}
-            />
-            <Text style={[s.addPetText, modoSimples && sSimples.addPetText]}>Adicionar pet</Text>
-          </Pressable>
-        </View>
-
-        <Pressable
-          style={[s.logout, modoSimples && sSimples.logout]}
-          onPress={handleSair}
-          accessibilityRole="button"
-        >
-          <Ionicons
-            name="log-out-outline"
-            size={modoSimples ? 26 : 20}
-            color={theme.colors.primary}
-          />
-          <Text style={[s.logoutText, modoSimples && sSimples.logoutText]}>Sair da conta</Text>
-        </Pressable>
       </ScrollView>
-      <EditarFotoModal pet={petFotoEditando} onFechar={() => setPetFotoEditandoId(null)} />
-      <LogoutConfirmationModal
-        visivel={modalSairVisivel}
-        onFechar={() => setModalSairVisivel(false)}
-        onConfirmarSair={confirmarLogout}
-      />
     </>
   );
 }
@@ -539,22 +368,6 @@ const createStyles = (theme: AppTheme) =>
       marginBottom: 10,
       paddingLeft: 2,
     },
-    sectionTitleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingRight: 2,
-    },
-    countBadge: {
-      minWidth: 22,
-      height: 22,
-      borderRadius: 11,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.pages.tutorProfile.cardSecondary,
-      marginBottom: 10,
-    },
-    countBadgeText: { color: theme.colors.primary, fontSize: 11, fontWeight: '800' },
     card: {
       backgroundColor: theme.pages.tutorProfile.card,
       borderRadius: 18,
@@ -619,72 +432,6 @@ const createStyles = (theme: AppTheme) =>
       fontWeight: '800',
       textTransform: 'uppercase',
     },
-
-    petRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      paddingHorizontal: 15,
-      paddingVertical: 13,
-    },
-    petIcon: {
-      width: 42,
-      height: 42,
-      borderRadius: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.pages.tutorProfile.cardSecondary,
-    },
-    petFoto: {
-      width: 42,
-      height: 42,
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative',
-    },
-    addFotoBadge: {
-      position: 'absolute',
-      bottom: -2,
-      right: -2,
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      borderWidth: 2,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    petCopy: { flex: 1, minWidth: 0 },
-    petName: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
-    petDetail: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3 },
-    removePet: {
-      width: 36,
-      height: 36,
-      borderRadius: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.colors.dangerBackground,
-    },
-    addPet: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 7,
-      paddingVertical: 15,
-    },
-    addPetText: { color: theme.colors.primary, fontSize: 14, fontWeight: '800' },
-
-    logout: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      paddingVertical: 16,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: theme.pages.tutorProfile.border,
-      backgroundColor: theme.pages.tutorProfile.card,
-    },
-    logoutText: { color: theme.colors.primary, fontSize: 15, fontWeight: '800' },
   });
 
 const sSimples = StyleSheet.create({
@@ -703,14 +450,4 @@ const sSimples = StyleSheet.create({
   shortcutTitle: { fontSize: 22 },
   shortcutDescription: { fontSize: 17, lineHeight: 23 },
   comingSoon: { fontSize: 13 },
-  petRow: { paddingVertical: 19, gap: 16 },
-  petIcon: { width: 58, height: 58, borderRadius: 18 },
-  petFoto: { width: 58, height: 58 },
-  addFotoBadge: { width: 26, height: 26, borderRadius: 13 },
-  petName: { fontSize: 22 },
-  petDetail: { fontSize: 17 },
-  addPet: { paddingVertical: 21 },
-  addPetText: { fontSize: 21 },
-  logout: { paddingVertical: 22 },
-  logoutText: { fontSize: 22 },
 });

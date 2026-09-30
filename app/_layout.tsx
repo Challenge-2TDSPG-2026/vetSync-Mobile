@@ -51,11 +51,17 @@ const ROTAS_FORA_DO_GRUPO = [
   'redefinir-senha',
   'modo-simples',
   'responsaveis',
+  'configuracoes',
+  'pets-cadastrados',
   'gerenciar-conta',
   'notificacoes',
 ];
-const ROTAS_EXCLUSIVAS_TUTOR = ['responsaveis'];
-
+const ROTAS_EXCLUSIVAS_TUTOR = [
+  'responsaveis',
+  'configuracoes',
+  'pets-cadastrados',
+  'gerenciar-conta',
+];
 function RootNavigator() {
   const { theme } = useTheme();
   const { sessao, autenticado, carregando: carregandoAuth } = useAuth();
@@ -186,7 +192,9 @@ function RootNavigator() {
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
         <Stack.Screen name="modo-simples" options={{ animation: 'fade_from_bottom' }} />
+        <Stack.Screen name="configuracoes" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="responsaveis" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="pets-cadastrados" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="gerenciar-conta" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen
           name="paciente/[id]"
