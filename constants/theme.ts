@@ -238,7 +238,7 @@ function makeTheme(mode: ResolvedTheme): AppTheme {
   const home: HomeThemeColors = {
     background: colors.background,
     petSelector: { background: mode === 'dark' ? '#292929' : '#f5f5f5', selectedBackground: mode === 'dark' ? '#3a3a3a' : '#e6e6e6', border: basePage.border, text: colors.textSecondary, selectedText: colors.text, icon: mode === 'dark' ? '#252525' : '#333333' },
-    heroCard: { background: homeHeroBackground, backgroundAccent: homeHeroAccent, title: '#ffffff', subtitle: '#ffffff', iconBackground: colors.primary, icon: colors.onPrimary, actionBackground: mode === 'dark' ? '#2c2c2c' : '#155c3f', actionText: '#ffffff', decoration: mode === 'dark' ? 'rgba(101,217,154,0.12)' : 'rgba(21,92,63,0.12)' },
+    heroCard: { background: homeHeroBackground, backgroundAccent: homeHeroAccent, title: '#ffffff', subtitle: '#ffffff', iconBackground: colors.primary, icon: colors.onPrimary, actionBackground: mode === 'dark' ? '#2c2c2c' : '#155c3f', actionText: '#ffffff', decoration: mode === 'dark' ? 'rgba(101,217,154,0.12)' : 'rgba(21,92,63,0.18)' },
     statsCard: { background: basePage.card, border: basePage.border, label: colors.textSecondary, valueSuccess: colors.success, valueWarning: colors.warning, valueDanger: colors.danger, divider: basePage.border },
     nextActionsCard: { background: basePage.card, title: colors.text, text: colors.textSecondary, iconBackground: basePage.cardSecondary, icon: colors.primary, divider: basePage.border },
     petCard: { background: mode === 'dark' ? '#292929' : '#f0ece5', title: colors.text, text: colors.primary, border: basePage.border, secondaryBackground: mode === 'dark' ? '#303030' : '#ffffff', icon: colors.primary },
