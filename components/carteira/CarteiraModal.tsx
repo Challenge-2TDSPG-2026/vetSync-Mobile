@@ -28,12 +28,17 @@ function statusDoEvento(evento: Evento, theme: AppTheme) {
 }
 
 export function CarteiraModal({ pet, eventos, onFechar }: Props) {
+  if (!pet) return null;
+  return <CarteiraModalConteudo key={pet.id} pet={pet} eventos={eventos} onFechar={onFechar} />;
+}
+
+function CarteiraModalConteudo({ pet, eventos, onFechar }: { pet: Pet; eventos: Evento[]; onFechar: () => void }) {
   const { modoSimples } = useAccessibility();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const [carteiraCompartilhada, setCarteiraCompartilhada] = useState<CarteiraCompartilhadaAtiva | null>(null);
   const [urlPublica, setUrlPublica] = useState<string | null>(null);
-  const [carregandoCompartilhamento, setCarregandoCompartilhamento] = useState(false);
+  const [carregandoCompartilhamento, setCarregandoCompartilhamento] = useState(true);
   const [gerandoQr, setGerandoQr] = useState(false);
   const [revogandoQr, setRevogandoQr] = useState(false);
   const vacinas = useMemo(() => eventos.filter(ehVacina), [eventos]);
@@ -49,13 +54,9 @@ export function CarteiraModal({ pet, eventos, onFechar }: Props) {
 
   useEffect(() => {
     let ativo = true;
-    setCarteiraCompartilhada(null);
-    setUrlPublica(null);
-    const idPet: string = pet?.id ?? '';
-    if (!idPet) return () => { ativo = false; };
+    const idPet = pet.id;
 
     async function carregarCarteiraCompartilhada() {
-      setCarregandoCompartilhamento(true);
       try {
         const carteira = await carteiraCompartilhadaService.buscarAtiva(idPet);
         if (ativo) setCarteiraCompartilhada(carteira);
@@ -124,7 +125,6 @@ export function CarteiraModal({ pet, eventos, onFechar }: Props) {
       mostrarToast('erro', 'Não foi possível abrir a página pública');
     }
   }
-  if (!pet) return null;
   return <Modal visible transparent animationType="slide" onRequestClose={onFechar} statusBarTranslucent>
     <View style={s.backdrop}>
       <Pressable style={StyleSheet.absoluteFill} onPress={onFechar} accessibilityLabel="Fechar carteira" />

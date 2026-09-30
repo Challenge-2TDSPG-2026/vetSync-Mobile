@@ -25,38 +25,43 @@ interface PetFotoProps {
 export function PetFoto({ pet, size = 48, color, backgroundColor, accessibilityLabel, style }: PetFotoProps) {
   const { theme } = useTheme();
   const { sessao } = useAuth();
-  const [falhouAoCarregar, setFalhouAoCarregar] = useState(false);
-  const [fotoWebUrl, setFotoWebUrl] = useState<string | null>(null);
+  const [estadoImagem, setEstadoImagem] = useState<{
+    fotoUrl: string | null;
+    token: string | null;
+    webUrl: string | null;
+    falhou: boolean;
+  } | null>(null);
+  const fotoUrl = pet.fotoUrl ?? null;
+  const token = sessao?.token ?? null;
 
   useEffect(() => {
-    setFalhouAoCarregar(false);
-    setFotoWebUrl(null);
-    if (Platform.OS !== 'web' || !pet.fotoUrl || !sessao?.token) return;
+    if (Platform.OS !== 'web' || !fotoUrl || !token) return;
 
     let ativo = true;
     let objectUrl: string | null = null;
-    void fetch(pet.fotoUrl, { headers: { Authorization: `Bearer ${sessao.token}` } })
+    void fetch(fotoUrl, { headers: { Authorization: `Bearer ${token}` } })
       .then(async resposta => {
         if (!resposta.ok) throw new Error('Não foi possível carregar a foto do pet.');
         return resposta.blob();
       })
       .then(blob => {
         objectUrl = URL.createObjectURL(blob);
-        if (ativo) setFotoWebUrl(objectUrl);
+        if (ativo) setEstadoImagem({ fotoUrl, token, webUrl: objectUrl, falhou: false });
       })
       .catch(() => {
-        if (ativo) setFalhouAoCarregar(true);
+        if (ativo) setEstadoImagem({ fotoUrl, token, webUrl: null, falhou: true });
       });
 
     return () => {
       ativo = false;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [pet.fotoUrl, sessao?.token]);
+  }, [fotoUrl, token]);
 
+  const imagemAtual = estadoImagem?.fotoUrl === fotoUrl && estadoImagem.token === token ? estadoImagem : null;
   const especieInfo = ESPECIES.find(item => item.valor === pet.especie);
-  const uriImagem = Platform.OS === 'web' ? fotoWebUrl : pet.fotoUrl;
-  const temFoto = Boolean(uriImagem) && Boolean(sessao?.token) && !falhouAoCarregar;
+  const uriImagem = Platform.OS === 'web' ? imagemAtual?.webUrl ?? null : fotoUrl;
+  const temFoto = Boolean(uriImagem) && Boolean(token) && !imagemAtual?.falhou;
   const corIcone = color ?? theme.colors.primary;
   const corFundo = backgroundColor ?? theme.pages.shared.card;
   const rotulo = accessibilityLabel ?? `Foto de ${especieInfo?.label ?? 'pet'}`;
@@ -75,10 +80,10 @@ export function PetFoto({ pet, size = 48, color, backgroundColor, accessibilityL
         <Image
           source={Platform.OS === 'web'
             ? { uri: uriImagem as string }
-            : { uri: uriImagem as string, headers: { Authorization: `Bearer ${sessao?.token}` } }}
+            : { uri: uriImagem as string, headers: { Authorization: `Bearer ${token}` } }}
           style={{ width: size, height: size, borderRadius: size / 2 }}
           resizeMode="cover"
-          onError={() => setFalhouAoCarregar(true)}
+          onError={() => setEstadoImagem({ fotoUrl, token, webUrl: uriImagem, falhou: true })}
         />
       ) : (
         <AppIcon

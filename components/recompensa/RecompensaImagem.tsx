@@ -34,37 +34,42 @@ export function RecompensaImagem({
 }: RecompensaImagemProps) {
   const { theme } = useTheme();
   const { sessao } = useAuth();
-  const [falhouAoCarregar, setFalhouAoCarregar] = useState(false);
-  const [imagemWebUrl, setImagemWebUrl] = useState<string | null>(null);
+  const [estadoImagem, setEstadoImagem] = useState<{
+    imagemUrl: string | null;
+    token: string | null;
+    webUrl: string | null;
+    falhou: boolean;
+  } | null>(null);
+  const token = sessao?.token ?? null;
+  const urlOriginal = imagemUrl ?? null;
 
   useEffect(() => {
-    setFalhouAoCarregar(false);
-    setImagemWebUrl(null);
-    if (Platform.OS !== 'web' || !imagemUrl || !sessao?.token) return;
+    if (Platform.OS !== 'web' || !urlOriginal || !token) return;
 
     let ativo = true;
     let objectUrl: string | null = null;
-    void fetch(imagemUrl, { headers: { Authorization: `Bearer ${sessao.token}` } })
+    void fetch(urlOriginal, { headers: { Authorization: `Bearer ${token}` } })
       .then(async resposta => {
         if (!resposta.ok) throw new Error('Não foi possível carregar a imagem da recompensa.');
         return resposta.blob();
       })
       .then(blob => {
         objectUrl = URL.createObjectURL(blob);
-        if (ativo) setImagemWebUrl(objectUrl);
+        if (ativo) setEstadoImagem({ imagemUrl: urlOriginal, token, webUrl: objectUrl, falhou: false });
       })
       .catch(() => {
-        if (ativo) setFalhouAoCarregar(true);
+        if (ativo) setEstadoImagem({ imagemUrl: urlOriginal, token, webUrl: null, falhou: true });
       });
 
     return () => {
       ativo = false;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [imagemUrl, sessao?.token]);
+  }, [urlOriginal, token]);
 
-  const uri = Platform.OS === 'web' ? imagemWebUrl : imagemUrl;
-  const temImagem = Boolean(uri) && Boolean(sessao?.token) && !falhouAoCarregar;
+  const imagemAtual = estadoImagem?.imagemUrl === urlOriginal && estadoImagem.token === token ? estadoImagem : null;
+  const uri = Platform.OS === 'web' ? imagemAtual?.webUrl ?? null : urlOriginal;
+  const temImagem = Boolean(uri) && Boolean(token) && !imagemAtual?.falhou;
   const raio = borderRadius ?? Math.round(size / 3);
 
   return (
@@ -86,10 +91,10 @@ export function RecompensaImagem({
         <Image
           source={Platform.OS === 'web'
             ? { uri: uri as string }
-            : { uri: uri as string, headers: { Authorization: `Bearer ${sessao?.token}` } }}
+            : { uri: uri as string, headers: { Authorization: `Bearer ${token}` } }}
           style={{ width: size, height: size }}
           resizeMode="cover"
-          onError={() => setFalhouAoCarregar(true)}
+          onError={() => setEstadoImagem({ imagemUrl: urlOriginal, token, webUrl: uri, falhou: true })}
         />
       ) : (
         <AppIcon

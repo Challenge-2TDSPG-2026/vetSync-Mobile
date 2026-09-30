@@ -73,7 +73,6 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
     if (carregandoPets) return;
     const novoAtivo = resolverPetAtivoId(pets, petAtivoId);
     if (novoAtivo === petAtivoId) return;
-    setPetAtivoIdState(novoAtivo);
     if (novoAtivo) {
       void salvarPetAtivoId(novoAtivo);
     } else {
@@ -81,7 +80,8 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pets, carregandoPets, petAtivoId]);
 
-  const petAtivo = useMemo(() => pets.find(p => p.id === petAtivoId) ?? null, [pets, petAtivoId]);
+  const petAtivoIdResolvido = carregandoPets ? petAtivoId : resolverPetAtivoId(pets, petAtivoId);
+  const petAtivo = useMemo(() => pets.find(p => p.id === petAtivoIdResolvido) ?? null, [pets, petAtivoIdResolvido]);
 
   const selecionarPet = useCallback((id: string) => {
     setPetAtivoIdState(id);
@@ -99,8 +99,8 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
   }, [removerPetMutation]);
 
   const eventos = useMemo(
-    () => eventosTodos.filter(e => e.petId === petAtivoId),
-    [eventosTodos, petAtivoId]
+    () => eventosTodos.filter(e => e.petId === petAtivoIdResolvido),
+    [eventosTodos, petAtivoIdResolvido]
   );
 
   const resetarPreferencias = useCallback(async () => {
@@ -149,7 +149,7 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
       value={{
         pets,
         petAtivo,
-        petAtivoId,
+        petAtivoId: petAtivoIdResolvido,
         selecionarPet,
         adicionarPet,
         removerPet,

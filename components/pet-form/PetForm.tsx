@@ -53,28 +53,27 @@ function isoParaData(iso: string): string {
   return ano && mes && dia ? `${dia}/${mes}/${ano}` : '';
 }
 
-export function PetForm({ petInicial, editando, salvando, onSalvar, onCancelar, onEspecieChange }: Props) {
+export function PetForm(props: Props) {
+  const chave = props.petInicial ? JSON.stringify(props.petInicial) : 'novo';
+  return <PetFormFields key={chave} {...props} />;
+}
+
+function PetFormFields({ petInicial, editando, salvando, onSalvar, onCancelar, onEspecieChange }: Props) {
   const { theme } = useTheme();
   const estilos = useMemo(() => createStyles(theme), [theme]);
-  const [nome, setNome] = useState('');
-  const [especie, setEspecie] = useState<Especie | null>(null);
-  const [sexo, setSexo] = useState<Sexo>('macho');
-  const [raca, setRaca] = useState('');
-  const [dataNascimento, setDataNascimento] = useState('');
-  const [peso, setPeso] = useState('');
+  const [nome, setNome] = useState(petInicial?.nome ?? '');
+  const [especie, setEspecie] = useState<Especie | null>(petInicial?.especie ?? null);
+  const [sexo, setSexo] = useState<Sexo>(petInicial?.sexo ?? 'macho');
+  const [raca, setRaca] = useState(petInicial?.raca ?? '');
+  const [dataNascimento, setDataNascimento] = useState(petInicial ? isoParaData(petInicial.dataNascimento) : '');
+  const [peso, setPeso] = useState(petInicial?.peso ?? '');
   const [erros, setErros] = useState<Record<string, string>>({});
-  const [mostrarMaisEspecies, setMostrarMaisEspecies] = useState(false);
+  const [mostrarMaisEspecies, setMostrarMaisEspecies] = useState(
+    () => Boolean(petInicial && !ESPECIES_PRINCIPAIS.includes(petInicial.especie))
+  );
 
   useEffect(() => {
-    if (!petInicial) return;
-    setNome(petInicial.nome);
-    setEspecie(petInicial.especie);
-    onEspecieChange(petInicial.especie);
-    setSexo(petInicial.sexo);
-    setRaca(petInicial.raca);
-    setDataNascimento(isoParaData(petInicial.dataNascimento));
-    setPeso(petInicial.peso);
-    setMostrarMaisEspecies(!ESPECIES_PRINCIPAIS.includes(petInicial.especie));
+    if (petInicial) onEspecieChange(petInicial.especie);
   }, [petInicial, onEspecieChange]);
 
   const especiesPrincipais = useMemo(

@@ -34,8 +34,8 @@ export function ToastHost() {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const [toast, setToast] = useState<ToastData | null>(null);
-  const opacidade = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(-16)).current;
+  const [opacidade] = useState(() => new Animated.Value(0));
+  const [translateY] = useState(() => new Animated.Value(-16));
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {

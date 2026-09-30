@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { LayoutAnimation, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Pet } from '../../types';
@@ -45,17 +45,17 @@ function CartaoCarteira({ pet, indice, ativo, simples, ampliado = false, onPress
   </Pressable>;
 }
 
-export function WalletStack({ pets, petAtivoId, onSelecionar, onTrocarPetAtivo }: Props) {
+export function WalletStack(props: Props) {
+  const chave = JSON.stringify([props.petAtivoId ?? null, props.pets.map(pet => pet.id)]);
+  return <WalletStackConteudo key={chave} {...props} />;
+}
+
+function WalletStackConteudo({ pets, petAtivoId, onSelecionar, onTrocarPetAtivo }: Props) {
   const { modoSimples } = useAccessibility();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const [indiceFrontal, setIndiceFrontal] = useState(() => Math.max(0, pets.findIndex(pet => pet.id === petAtivoId)));
   const [seletorAberto, setSeletorAberto] = useState(false);
-
-  useEffect(() => {
-    const indiceAtivo = pets.findIndex(pet => pet.id === petAtivoId);
-    if (indiceAtivo >= 0) setIndiceFrontal(indiceAtivo);
-  }, [petAtivoId, pets]);
 
   const carteirasOrdenadas = useMemo(
     () => pets.map((_, indice) => pets[(indiceFrontal + indice) % pets.length]),

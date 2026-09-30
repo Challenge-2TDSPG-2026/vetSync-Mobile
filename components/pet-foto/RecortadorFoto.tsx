@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, PanResponder, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { GestureResponderEvent, PanResponderGestureState, ViewStyle } from 'react-native';
 import Svg, { ClipPath, Defs, G, Line, Path } from 'react-native-svg';
@@ -41,17 +41,15 @@ function limitar(valor: number, max: number): number {
 // Na web, evita que o navegador use o arrasto/pinch para rolar a página ou dar zoom na tela.
 const webGesto = Platform.OS === 'web' ? ({ touchAction: 'none', cursor: 'grab', userSelect: 'none' } as unknown as ViewStyle) : undefined;
 
-type Handlers = {
-  grant: (evt: GestureResponderEvent) => void;
-  move: (evt: GestureResponderEvent, g: PanResponderGestureState) => void;
-  fim: () => void;
-};
-
 /**
  * Recorte no estilo Instagram: a foto ocupa toda a área, a moldura fica fixa no centro, o que está fora dela
  * aparece escurecido e o usuário arrasta / dá zoom na foto por baixo. A moldura sempre fica 100% coberta pela foto.
  */
 export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar, formato = 'circulo' }: Props) {
+  return <RecortadorFotoConteudo key={uriOriginal} uriOriginal={uriOriginal} onConcluir={onConcluir} onCancelar={onCancelar} formato={formato} />;
+}
+
+function RecortadorFotoConteudo({ uriOriginal, onConcluir, onCancelar, formato = 'circulo' }: Props) {
   const { theme } = useTheme();
   const { width: larguraTela } = useWindowDimensions();
   const STAGE = Math.min(STAGE_MAX, Math.max(240, larguraTela - 40));
@@ -65,21 +63,15 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar, formato = 
   const [tx, setTx] = useState(0);
   const [ty, setTy] = useState(0);
   const [userScale, setUserScale] = useState(1);
-
-  const gesto = useRef({ startTx: 0, startTy: 0, startScale: 1, startDist: 0 });
+  const [gesto, setGesto] = useState({ startTx: 0, startTy: 0, startScale: 1, startDist: 0 });
 
   useEffect(() => {
-    setErro(null);
-    setProcessando(false);
-    setCarregando(true);
-    setTx(0);
-    setTy(0);
-    setUserScale(1);
-    setDimensoesImagem(null);
+    let ativo = true;
     obterDimensoes(uriOriginal)
-      .then(setDimensoesImagem)
-      .catch(() => setErro('Não foi possível carregar esta foto. Escolha outra e tente novamente.'))
-      .finally(() => setCarregando(false));
+      .then(dimensoes => { if (ativo) setDimensoesImagem(dimensoes); })
+      .catch(() => { if (ativo) setErro('Não foi possível carregar esta foto. Escolha outra e tente novamente.'); })
+      .finally(() => { if (ativo) setCarregando(false); });
+    return () => { ativo = false; };
   }, [uriOriginal]);
 
   // Escala mínima: a foto cobre exatamente a moldura (como no Instagram). O zoom do usuário multiplica isso.
@@ -102,57 +94,53 @@ export function RecortadorFoto({ uriOriginal, onConcluir, onCancelar, formato = 
     setTy(v => limitar(v, maxTy));
   }
 
-  // O PanResponder é criado uma única vez, então seus callbacks enxergariam o estado da 1ª renderização.
-  // Guardamos os handlers mais recentes num ref e o PanResponder sempre chama a versão atual.
-  const handlers = useRef<Handlers>({ grant: () => {}, move: () => {}, fim: () => {} });
+  function iniciarGesto(evt: GestureResponderEvent) {
+    const toques = evt.nativeEvent.touches;
+    setGesto({
+      startTx: tx,
+      startTy: ty,
+      startScale: userScale,
+      startDist: toques && toques.length >= 2 ? distanciaEntreToques(toques) : 0,
+    });
+    setArrastando(true);
+  }
 
-  handlers.current = {
-    grant: evt => {
-      const toques = evt.nativeEvent.touches;
-      gesto.current.startTx = tx;
-      gesto.current.startTy = ty;
-      gesto.current.startScale = userScale;
-      gesto.current.startDist = toques && toques.length >= 2 ? distanciaEntreToques(toques) : 0;
-      setArrastando(true);
-    },
-    // No navegador (mouse), "touches" nem sempre vem preenchido — o arrasto usa gestureState.dx/dy.
-    move: (evt, gestureState) => {
-      const toques = evt.nativeEvent.touches;
-      if (toques && toques.length >= 2) {
-        const dist = distanciaEntreToques(toques);
-        if (gesto.current.startDist === 0) {
-          gesto.current.startDist = dist;
-          gesto.current.startScale = userScale;
-        }
-        aplicarZoom(gesto.current.startScale * (dist / gesto.current.startDist));
-        return;
-      }
-      if (gesto.current.startDist !== 0) {
-        // voltou a 1 dedo depois do pinch: re-ancora o arrasto na posição atual
-        gesto.current.startDist = 0;
-        gesto.current.startTx = tx - gestureState.dx;
-        gesto.current.startTy = ty - gestureState.dy;
-      }
-      const { maxTx, maxTy } = limites(userScale);
-      setTx(limitar(gesto.current.startTx + gestureState.dx, maxTx));
-      setTy(limitar(gesto.current.startTy + gestureState.dy, maxTy));
-    },
-    fim: () => setArrastando(false),
-  };
+  // No navegador (mouse), "touches" nem sempre vem preenchido — o arrasto usa gestureState.dx/dy.
+  function moverGesto(evt: GestureResponderEvent, gestureState: PanResponderGestureState) {
+    const toques = evt.nativeEvent.touches;
+    if (toques && toques.length >= 2) {
+      const dist = distanciaEntreToques(toques);
+      const startDist = gesto.startDist || dist;
+      const startScale = gesto.startDist === 0 ? userScale : gesto.startScale;
+      if (gesto.startDist === 0) setGesto(atual => ({ ...atual, startDist: dist, startScale: userScale }));
+      aplicarZoom(startScale * (dist / startDist));
+      return;
+    }
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponderCapture: () => true,
-      onPanResponderTerminationRequest: () => false, // o ScrollView do modal não rouba o gesto
-      onPanResponderGrant: evt => handlers.current.grant(evt),
-      onPanResponderMove: (evt, g) => handlers.current.move(evt, g),
-      onPanResponderRelease: () => handlers.current.fim(),
-      onPanResponderTerminate: () => handlers.current.fim(),
-    })
-  ).current;
+    let startTx = gesto.startTx;
+    let startTy = gesto.startTy;
+    if (gesto.startDist !== 0) {
+      // voltou a 1 dedo depois do pinch: re-ancora o arrasto na posição atual
+      startTx = tx - gestureState.dx;
+      startTy = ty - gestureState.dy;
+      setGesto(atual => ({ ...atual, startDist: 0, startTx, startTy }));
+    }
+    const { maxTx, maxTy } = limites(userScale);
+    setTx(limitar(startTx + gestureState.dx, maxTx));
+    setTy(limitar(startTy + gestureState.dy, maxTy));
+  }
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponderCapture: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponderCapture: () => true,
+    onPanResponderTerminationRequest: () => false, // o ScrollView do modal não rouba o gesto
+    onPanResponderGrant: iniciarGesto,
+    onPanResponderMove: moverGesto,
+    onPanResponderRelease: () => setArrastando(false),
+    onPanResponderTerminate: () => setArrastando(false),
+  });
 
   async function concluir() {
     if (!dimensoesImagem) return;

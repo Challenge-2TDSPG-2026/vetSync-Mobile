@@ -18,6 +18,11 @@ type Props = { pet: Pet | null; onFechar: () => void };
 const OVERRIDE_PERMISSAO_FOTO = { 403: 'Você não tem permissão para alterar a foto deste pet.' };
 
 export function EditarFotoModal({ pet, onFechar }: Props) {
+  if (!pet) return null;
+  return <EditarFotoModalAberto key={pet.id} pet={pet} onFechar={onFechar} />;
+}
+
+function EditarFotoModalAberto({ pet, onFechar }: { pet: Pet; onFechar: () => void }) {
   const { theme } = useTheme();
   const { modoSimples } = useAccessibility();
   const enviar = useEnviarFotoPet();
@@ -27,18 +32,12 @@ export function EditarFotoModal({ pet, onFechar }: Props) {
   const ocupado = enviar.isPending || remover.isPending;
 
   useEffect(() => {
-    setUriOriginal(null);
-    setErro(null);
-  }, [pet?.id]);
-
-  useEffect(() => {
     if (Platform.OS !== 'web' || !pet) return;
     const fecharComEscape = (event: KeyboardEvent) => event.key === 'Escape' && !ocupado && onFechar();
     window.addEventListener('keydown', fecharComEscape);
     return () => window.removeEventListener('keydown', fecharComEscape);
   }, [ocupado, onFechar, pet]);
 
-  if (!pet) return null;
   const petAtual = pet;
 
   async function escolherDaGaleria() {

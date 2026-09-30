@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Animated, StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 
 /** Anima uma opacidade pulsando entre 0.35 e 0.85, em loop — o "pulso" clássico de skeleton. */
 function usePulso() {
-  const valor = useRef(new Animated.Value(0.35)).current;
+  const [valor] = useState(() => new Animated.Value(0.35));
 
   useEffect(() => {
     const loop = Animated.loop(

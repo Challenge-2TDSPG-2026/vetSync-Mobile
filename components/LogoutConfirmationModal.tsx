@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAccessibility } from '../context/AccessibilityContext';
@@ -15,13 +15,12 @@ export function LogoutConfirmationModal({ visivel, onFechar, onConfirmarSair }: 
   const { modoSimples } = useAccessibility();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
-  const escala = useRef(new Animated.Value(0.92)).current;
-  const opacidade = useRef(new Animated.Value(0)).current;
+  const [escala] = useState(() => new Animated.Value(0.92));
+  const [opacidade] = useState(() => new Animated.Value(0));
   const [saindo, setSaindo] = useState(false);
 
   useEffect(() => {
     if (!visivel) {
-      setSaindo(false);
       return;
     }
     escala.setValue(0.92);
