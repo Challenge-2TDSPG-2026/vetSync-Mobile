@@ -17,14 +17,14 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
-import { usePet } from '../context/PetContext';
-import { useTheme } from '../context/ThemeContext';
-import { AppIcon } from '../components/AppIcon';
-import { ApiError } from '../services/api/httpClient';
-import { iaService, type SiaBlock, type SiaBlockOption } from '../services/iaService';
-import { mostrarToast } from '../components/ui/Toast';
-import type { AppTheme } from '../constants/theme';
+import { useAuth } from '../../context/AuthContext';
+import { usePet } from '../../context/PetContext';
+import { useTheme } from '../../context/ThemeContext';
+import { AppIcon } from '../../components/AppIcon';
+import { ApiError } from '../../services/api/httpClient';
+import { iaService, type SiaBlock, type SiaBlockOption } from '../../services/iaService';
+import { mostrarToast } from '../../components/ui/Toast';
+import type { AppTheme } from '../../constants/theme';
 const DURACAO_TRANSICAO_TECLADO = 250;
 
 type Mensagem = {

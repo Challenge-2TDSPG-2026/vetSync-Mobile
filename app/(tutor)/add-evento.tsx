@@ -1,5 +1,5 @@
-import { useTheme } from '../context/ThemeContext';
-import { withAlpha, type AppTheme } from '../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { withAlpha, type AppTheme } from '../../constants/theme';
 import React, { useMemo, useState } from 'react';
 import {
   View, Text, TextInput, ScrollView, Pressable,
@@ -7,18 +7,18 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { usePet } from '../context/PetContext';
-import { useTiposEvento, useVeterinarios, useAgendarEvento } from '../hooks/useEventos';
-import { obterVisualTipoEvento } from '../constants';
-import { ESPECIALIDADES_VET } from '../constants/vet';
-import { AppIcon } from '../components/AppIcon';
-import { mensagemDeErro } from '../services/api/errorMessages';
-import { mostrarToast } from '../components/ui/Toast';
-import { DicaTela } from '../components/ui/DicaTela';
-import { useDicaPrimeiraVisita } from '../hooks/useDicaPrimeiraVisita';
-import { agendarLembretes } from '../services/calendarService';
-import { salvarLembretesEvento } from '../storage/petStorage';
-import type { TipoEvento, Veterinario } from '../types';
+import { usePet } from '../../context/PetContext';
+import { useTiposEvento, useVeterinarios, useAgendarEvento } from '../../hooks/useEventos';
+import { obterVisualTipoEvento } from '../../constants';
+import { ESPECIALIDADES_VET } from '../../constants/vet';
+import { AppIcon } from '../../components/AppIcon';
+import { mensagemDeErro } from '../../services/api/errorMessages';
+import { mostrarToast } from '../../components/ui/Toast';
+import { DicaTela } from '../../components/ui/DicaTela';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
+import { agendarLembretes } from '../../services/calendarService';
+import { salvarLembretesEvento } from '../../storage/petStorage';
+import type { TipoEvento, Veterinario } from '../../types';
 
 function formatarData(text: string): string {
   const n = text.replace(/\D/g, '');
@@ -123,7 +123,7 @@ export default function AddEventoScreen() {
         'Evento agendado',
         `${tipoSelecionado.nome} com ${vetSelecionado.nome} em ${data} às ${hora}.`
       );
-      router.replace('/(tutor)');
+      router.replace('/(tutor)/(tabs)');
     } catch (e) {
       mostrarToast('erro', 'Não foi possível agendar o evento', mensagemDeErro(e, 'Tente novamente em instantes.'));
     }
@@ -146,7 +146,7 @@ export default function AddEventoScreen() {
           <AppIcon name="paw" set="MaterialCommunityIcons" size={190} color={withAlpha(theme.pages.addEvent.white, 0.05)} style={s.pawMarca} />
 
           <Pressable
-            onPress={() => router.replace('/(tutor)')}
+            onPress={() => router.replace('/(tutor)/(tabs)')}
             style={s.btnFechar}
             hitSlop={10}
             accessibilityRole="button"
@@ -402,7 +402,7 @@ export default function AddEventoScreen() {
             )}
           </Pressable>
 
-          <Pressable style={s.btnCancelar} onPress={() => router.replace('/(tutor)')}>
+          <Pressable style={s.btnCancelar} onPress={() => router.replace('/(tutor)/(tabs)')}>
             <Text style={s.btnCancelarText}>Cancelar</Text>
           </Pressable>
 

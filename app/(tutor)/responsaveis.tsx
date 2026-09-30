@@ -14,18 +14,18 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAccessibility } from '../context/AccessibilityContext';
-import { useTheme } from '../context/ThemeContext';
-import { mensagemDeErro } from '../services/api/errorMessages';
-import { type PermissaoResponsavel } from '../services/responsavelService';
+import { useAccessibility } from '../../context/AccessibilityContext';
+import { useTheme } from '../../context/ThemeContext';
+import { mensagemDeErro } from '../../services/api/errorMessages';
+import { type PermissaoResponsavel } from '../../services/responsavelService';
 import {
   useCriarConviteResponsavel,
   useResponsaveis,
   useRevogarResponsavel,
-} from '../hooks/useResponsaveis';
-import { confirmar } from '../utils/alert';
-import { mostrarToast } from '../components/ui/Toast';
-import type { AppTheme } from '../constants/theme';
+} from '../../hooks/useResponsaveis';
+import { confirmar } from '../../utils/alert';
+import { mostrarToast } from '../../components/ui/Toast';
+import type { AppTheme } from '../../constants/theme';
 
 export default function ResponsaveisScreen() {
   const router = useRouter();
@@ -101,7 +101,7 @@ export default function ResponsaveisScreen() {
       >
         <View style={s.hero}>
           <Image
-            source={require('../assets/images/responsibles.png')}
+            source={require('../../assets/images/responsibles.png')}
             style={s.heroImage}
             resizeMode="cover"
             accessibilityLabel="Pessoas responsáveis compartilhando os cuidados dos pets"

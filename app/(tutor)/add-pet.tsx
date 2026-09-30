@@ -1,18 +1,18 @@
-import { useTheme } from '../context/ThemeContext';
-import { withAlpha, type AppTheme } from '../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { withAlpha, type AppTheme } from '../../constants/theme';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { ESPECIES } from '../constants';
-import { PetForm } from '../components/pet-form/PetForm';
-import { useAtualizarPet, usePetPorId } from '../hooks/usePets';
-import { usePet } from '../context/PetContext';
-import { useDicaPrimeiraVisita } from '../hooks/useDicaPrimeiraVisita';
-import { DicaTela } from '../components/ui/DicaTela';
-import type { Pet } from '../types';
+import { ESPECIES } from '../../constants';
+import { PetForm } from '../../components/pet-form/PetForm';
+import { useAtualizarPet, usePetPorId } from '../../hooks/usePets';
+import { usePet } from '../../context/PetContext';
+import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
+import { DicaTela } from '../../components/ui/DicaTela';
+import type { Pet } from '../../types';
 
 function Icone({ nome, conjunto, color }: { nome: string; conjunto: 'Ionicons' | 'MaterialCommunityIcons'; color: string }) {
   if (conjunto === 'Ionicons') return <Ionicons name={nome as never} size={28} color={color} />;

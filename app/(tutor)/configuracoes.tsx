@@ -3,12 +3,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
-import { useAccessibility } from '../context/AccessibilityContext';
-import { useTheme } from '../context/ThemeContext';
-import { AppearanceModal } from '../components/AppearanceModal';
-import { LogoutConfirmationModal } from '../components/LogoutConfirmationModal';
-import type { AppTheme } from '../constants/theme';
+import { useAuth } from '../../context/AuthContext';
+import { useAccessibility } from '../../context/AccessibilityContext';
+import { useTheme } from '../../context/ThemeContext';
+import { AppearanceModal } from '../../components/AppearanceModal';
+import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
+import type { AppTheme } from '../../constants/theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -101,7 +101,7 @@ export default function ConfiguracoesScreen() {
             icon="shield-checkmark-outline"
             title="Segurança"
             description="Biometria e senha"
-            onPress={() => router.push('/(tutor)/seguranca')}
+            onPress={() => router.push('/(tutor)/(tabs)/seguranca')}
           />
         </View>
 
@@ -124,7 +124,7 @@ export default function ConfiguracoesScreen() {
             icon="people-outline"
             title="Responsáveis"
             description="Compartilhe os cuidados dos seus pets"
-            onPress={() => router.push('/responsaveis')}
+            onPress={() => router.push('/(tutor)/responsaveis')}
           />
           <View style={s.divider} />
           <ConfigItem
@@ -219,14 +219,7 @@ const createStyles = (theme: AppTheme) =>
       borderBottomWidth: 1,
       borderBottomColor: theme.components.header.border,
     },
-    backButton: {
-      width: 44,
-      height: 44,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: 14,
-      backgroundColor: theme.components.header.accountIconBackground,
-    },
+    backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
     title: {
       flex: 1,
       color: theme.components.header.title,
