@@ -41,29 +41,27 @@ onlineManager.setEventListener((setOnline) =>
 );
 
 const ROTAS_FORA_DO_GRUPO = [
-  'add-evento',
-  'add-pet',
   'evento',
   'paciente',
-  'assistente',
   'cadastro',
   'esqueci-senha',
   'verificar-codigo',
   'redefinir-senha',
   'modo-simples',
-  'responsaveis',
-  'configuracoes',
   'pets-cadastrados',
   'gerenciar-conta',
   'notificacoes',
 ];
 const ROTAS_EXCLUSIVAS_TUTOR = [
+  'add-evento',
+  'add-pet',
+  'assistente',
   'responsaveis',
   'configuracoes',
   'pets-cadastrados',
   'gerenciar-conta',
 ];
-const TRANSICAO_PAGINA = { animation: 'fade' } as const;
+const TRANSICAO_PAGINA = { animation: 'fade', animationDuration: 320 } as const;
 
 function RootNavigator() {
   const { theme } = useTheme();
@@ -119,11 +117,11 @@ function RootNavigator() {
 
     if (ehTutor) {
       if (!onboardingConcluido) {
-        if (!inAddPet) router.replace('/add-pet');
+        if (!inAddPet) router.replace('/(tutor)/add-pet');
         return;
       }
       if (inRotaLivre) return;
-      if (!inTutor) router.replace('/(tutor)');
+      if (!inTutor) router.replace('/(tutor)/(tabs)');
       return;
     }
 
@@ -173,8 +171,7 @@ function RootNavigator() {
       <Stack
         screenOptions={{
           headerShown: false,
-          animation: 'fade',
-          animationDuration: 320,
+          ...TRANSICAO_PAGINA,
           gestureEnabled: true,
           contentStyle: { backgroundColor: 'transparent' },
         }}
@@ -186,30 +183,11 @@ function RootNavigator() {
         <Stack.Screen name="redefinir-senha" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="(tutor)" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="(vet)" options={TRANSICAO_PAGINA} />
-        <Stack.Screen
-          name="add-evento"
-          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-        />
-        <Stack.Screen
-          name="add-pet"
-          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-        />
         <Stack.Screen name="modo-simples" options={TRANSICAO_PAGINA} />
-        <Stack.Screen name="configuracoes" options={TRANSICAO_PAGINA} />
-        <Stack.Screen name="responsaveis" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="pets-cadastrados" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="gerenciar-conta" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="paciente/[id]" options={{ headerShown: true, ...TRANSICAO_PAGINA }} />
         <Stack.Screen name="evento/[id]" options={{ headerShown: false, ...TRANSICAO_PAGINA }} />
-        <Stack.Screen
-          name="assistente"
-          options={{
-            presentation: 'transparentModal',
-            animation: 'none',
-            headerShown: false,
-            contentStyle: { backgroundColor: 'transparent' },
-          }}
-        />
       </Stack>
     </>
   );

@@ -3,23 +3,23 @@ import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Refre
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { usePet } from '../../context/PetContext';
-import { useAuth } from '../../context/AuthContext';
-import { useProximasAcoes } from '../../hooks/usePetHealth';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useTheme } from '../../context/ThemeContext';
-import { useRecarregarDados } from '../../hooks/useRecarregarDados';
-import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { ESPECIES, obterVisualTipoEvento } from '../../constants';
-import { AppIcon } from '../../components/AppIcon';
-import { PetFoto } from '../../components/pet-foto/PetFoto';
-import { EditarFotoModal } from '../../components/pet-foto/EditarFotoModal';
-import { PetSwitcher } from '../../components/PetSwitcher';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { SkeletonList } from '../../components/ui/Skeleton';
-import { DicaTela } from '../../components/ui/DicaTela';
-import { statusExibicao, STATUS_EXIBICAO_BADGE, formatarDataEvento } from '../../utils/eventoStatus';
-import { withAlpha, type AppTheme } from '../../constants/theme';
+import { usePet } from '../../../context/PetContext';
+import { useAuth } from '../../../context/AuthContext';
+import { useProximasAcoes } from '../../../hooks/usePetHealth';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../../hooks/useDicaPrimeiraVisita';
+import { ESPECIES, obterVisualTipoEvento } from '../../../constants';
+import { AppIcon } from '../../../components/AppIcon';
+import { PetFoto } from '../../../components/pet-foto/PetFoto';
+import { EditarFotoModal } from '../../../components/pet-foto/EditarFotoModal';
+import { PetSwitcher } from '../../../components/PetSwitcher';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { SkeletonList } from '../../../components/ui/Skeleton';
+import { DicaTela } from '../../../components/ui/DicaTela';
+import { statusExibicao, STATUS_EXIBICAO_BADGE, formatarDataEvento } from '../../../utils/eventoStatus';
+import { withAlpha, type AppTheme } from '../../../constants/theme';
 
 function calcularIdade(d: string): string {
   const nasc = new Date(d), hoje = new Date();
@@ -55,13 +55,13 @@ export default function DashboardScreen() {
     .slice(0, limiteProximos);
   const proximasAcoesLocais = [
     atrasados.length > 0
-      ? { id: 'atrasados', icon: 'alert-circle-outline', title: `${atrasados.length} evento${atrasados.length === 1 ? '' : 's'} atrasado${atrasados.length === 1 ? '' : 's'}`, subtitle: 'Veja o que precisa de atenção', color: theme.colors.danger, onPress: () => router.push('/(tutor)/agenda') }
+      ? { id: 'atrasados', icon: 'alert-circle-outline', title: `${atrasados.length} evento${atrasados.length === 1 ? '' : 's'} atrasado${atrasados.length === 1 ? '' : 's'}`, subtitle: 'Veja o que precisa de atenção', color: theme.colors.danger, onPress: () => router.push('/(tutor)/(tabs)/agenda') }
       : null,
     pendentes.length > 0
-      ? { id: 'agenda', icon: 'calendar-outline', title: `${pendentes.length} evento${pendentes.length === 1 ? '' : 's'} na agenda`, subtitle: 'Acompanhe seus próximos cuidados', color: theme.colors.primary, onPress: () => router.push('/(tutor)/agenda') }
+      ? { id: 'agenda', icon: 'calendar-outline', title: `${pendentes.length} evento${pendentes.length === 1 ? '' : 's'} na agenda`, subtitle: 'Acompanhe seus próximos cuidados', color: theme.colors.primary, onPress: () => router.push('/(tutor)/(tabs)/agenda') }
       : null,
     !petAtivo?.peso
-      ? { id: 'perfil', icon: 'scale-outline', title: 'Atualize o peso do pet', subtitle: 'Mantenha o perfil de saúde completo', color: theme.colors.info, onPress: () => router.push('/(tutor)/perfil') }
+      ? { id: 'perfil', icon: 'scale-outline', title: 'Atualize o peso do pet', subtitle: 'Mantenha o perfil de saúde completo', color: theme.colors.info, onPress: () => router.push('/(tutor)/(tabs)/perfil') }
       : null,
   ].filter((acao): acao is NonNullable<typeof acao> => acao !== null).slice(0, 3);
   const proximasAcoes = acoesBackend.data?.length
@@ -73,7 +73,7 @@ export default function DashboardScreen() {
       color: acao.prioridade === 'ALTA' ? theme.colors.danger : theme.colors.primary,
       onPress: () => acao.eventoReferenciaId
         ? router.push(`/evento/${acao.eventoReferenciaId}`)
-        : router.push('/(tutor)/agenda'),
+        : router.push('/(tutor)/(tabs)/agenda'),
     }))
     : proximasAcoesLocais;
   const especieInfo = ESPECIES.find(e => e.valor === petAtivo?.especie);
@@ -169,7 +169,7 @@ export default function DashboardScreen() {
           </View>
           <Pressable
             style={[s.welcomeBtn, modoSimples && sSimples.welcomeBtn]}
-            onPress={() => router.push('/add-evento')}
+            onPress={() => router.push('/(tutor)/add-evento')}
             accessibilityRole="button"
             accessibilityLabel="Adicionar evento de saúde"
           >
@@ -240,7 +240,7 @@ export default function DashboardScreen() {
           {!modoSimples && (
             <Pressable
               style={s.btnProntuario}
-              onPress={() => router.push('/(tutor)/agenda')}
+              onPress={() => router.push('/(tutor)/(tabs)/agenda')}
               accessibilityRole="button"
               accessibilityLabel="Abrir agenda de saúde"
             >
@@ -302,7 +302,7 @@ export default function DashboardScreen() {
             </View>
             <Text style={[s.cardTitle, modoSimples && sSimples.cardTitle]}>Próximos eventos</Text>
           </View>
-          <Pressable onPress={() => router.push('/(tutor)/agenda')}>
+          <Pressable onPress={() => router.push('/(tutor)/(tabs)/agenda')}>
             <Text style={[s.linkVer, modoSimples && sSimples.linkVer]}>Ver todos</Text>
           </Pressable>
         </View>
@@ -318,7 +318,7 @@ export default function DashboardScreen() {
             subtitle="Adicione eventos de saúde para o seu pet"
             accentColor={theme.colors.primary}
             actionLabel="Adicionar evento"
-            onAction={() => router.push('/add-evento')}
+            onAction={() => router.push('/(tutor)/add-evento')}
             style={[s.emptyEventos, modoSimples && sSimples.emptyEventos]}
           />
         ) : (
@@ -345,7 +345,7 @@ export default function DashboardScreen() {
       </View>
 
       {/* CTA button */}
-      <Pressable style={[s.btnAdd, modoSimples && sSimples.btnAdd]} onPress={() => router.push('/add-evento')}>
+      <Pressable style={[s.btnAdd, modoSimples && sSimples.btnAdd]} onPress={() => router.push('/(tutor)/add-evento')}>
         <Ionicons name="add-circle-outline" size={modoSimples ? 26 : 20} color={theme.colors.onPrimary} />
         <Text style={[s.btnAddText, modoSimples && sSimples.btnAddText]}>Adicionar evento de saúde</Text>
       </Pressable>

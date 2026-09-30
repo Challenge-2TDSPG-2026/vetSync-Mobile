@@ -2,25 +2,25 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Modal, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { usePet } from '../../context/PetContext';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useTheme } from '../../context/ThemeContext';
-import { useCancelarEvento, useRemoverEvento } from '../../hooks/useEventos';
-import { useRecarregarDados } from '../../hooks/useRecarregarDados';
-import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { obterVisualTipoEvento } from '../../constants';
-import { AppIcon } from '../../components/AppIcon';
-import { PetSwitcher } from '../../components/PetSwitcher';
-import { Calendario, dateKey } from '../../components/Calendario';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { SkeletonList } from '../../components/ui/Skeleton';
-import { mostrarToast } from '../../components/ui/Toast';
-import { DicaTela } from '../../components/ui/DicaTela';
-import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento, formatarDataEvento } from '../../utils/eventoStatus';
-import { cancelarLembretes } from '../../services/calendarService';
-import { obterERemoverLembretesEvento } from '../../storage/petStorage';
-import type { Evento } from '../../types';
-import type { AppTheme } from '../../constants/theme';
+import { usePet } from '../../../context/PetContext';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { useCancelarEvento, useRemoverEvento } from '../../../hooks/useEventos';
+import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../../hooks/useDicaPrimeiraVisita';
+import { obterVisualTipoEvento } from '../../../constants';
+import { AppIcon } from '../../../components/AppIcon';
+import { PetSwitcher } from '../../../components/PetSwitcher';
+import { Calendario, dateKey } from '../../../components/Calendario';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { SkeletonList } from '../../../components/ui/Skeleton';
+import { mostrarToast } from '../../../components/ui/Toast';
+import { DicaTela } from '../../../components/ui/DicaTela';
+import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento, formatarDataEvento } from '../../../utils/eventoStatus';
+import { cancelarLembretes } from '../../../services/calendarService';
+import { obterERemoverLembretesEvento } from '../../../storage/petStorage';
+import type { Evento } from '../../../types';
+import type { AppTheme } from '../../../constants/theme';
 
 type Filtro = 'todos' | 'atrasado' | 'PREVENTIVO' | 'TERAPEUTICO' | 'BEM_ESTAR' | 'EMERGENCIA';
 
@@ -220,7 +220,7 @@ export default function AgendaScreen() {
             subtitle="Toque em outra data ou adicione um novo evento"
             accentColor={theme.colors.primary}
             actionLabel="Adicionar evento"
-            onAction={() => router.push('/add-evento')}
+            onAction={() => router.push('/(tutor)/add-evento')}
             style={modoSimples ? sSimples.empty : undefined}
           />
         ) : (
@@ -320,7 +320,7 @@ export default function AgendaScreen() {
 
       <Pressable
         style={[s.fab, modoSimples && sSimples.fab]}
-        onPress={() => router.push('/add-evento')}
+        onPress={() => router.push('/(tutor)/add-evento')}
         accessibilityRole="button"
         accessibilityLabel="Novo evento"
         accessibilityHint="Abre o formulário de agendamento"

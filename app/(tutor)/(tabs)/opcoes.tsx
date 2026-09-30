@@ -3,38 +3,38 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { AppIcon } from '../../components/AppIcon';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useTheme } from '../../context/ThemeContext';
-import { withAlpha, type AppTheme } from '../../constants/theme';
+import { AppIcon } from '../../../components/AppIcon';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { withAlpha, type AppTheme } from '../../../constants/theme';
 
 const ATALHOS = [
   {
     titulo: 'Agenda',
     descricao: 'Próximos cuidados',
     icone: 'calendar-outline' as const,
-    rota: '/(tutor)/agenda' as const,
+    rota: '/(tutor)/(tabs)/agenda' as const,
     cor: 'primary' as const,
   },
   {
     titulo: 'Carteirinhas',
     descricao: 'Vacinas e documentos',
     icone: 'wallet-outline' as const,
-    rota: '/(tutor)/carteirinhas' as const,
+    rota: '/(tutor)/(tabs)/carteirinhas' as const,
     cor: 'info' as const,
   },
   {
     titulo: 'Histórico',
     descricao: 'Cuidados realizados',
     icone: 'time-outline' as const,
-    rota: '/(tutor)/historico' as const,
+    rota: '/(tutor)/(tabs)/historico' as const,
     cor: 'success' as const,
   },
   {
     titulo: 'Fidelidade',
     descricao: 'Pontos e benefícios',
     icone: 'gift-outline' as const,
-    rota: '/(tutor)/recompensas' as const,
+    rota: '/(tutor)/(tabs)/recompensas' as const,
     cor: 'warning' as const,
   },
 ];

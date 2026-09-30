@@ -1,30 +1,30 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { usePet } from '../../context/PetContext';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useTheme } from '../../context/ThemeContext';
-import { useAuth } from '../../context/AuthContext';
-import { useRecarregarDados } from '../../hooks/useRecarregarDados';
-import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
+import { usePet } from '../../../context/PetContext';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { useAuth } from '../../../context/AuthContext';
+import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../../hooks/useDicaPrimeiraVisita';
 import {
   useCatalogoRecompensas,
   useSaldoRecompensas,
   useMeusResgates,
   useResgatar,
-} from '../../hooks/useRecompensas';
-import { useConquistas } from '../../hooks/useConquistas';
-import { AppIcon } from '../../components/AppIcon';
-import { PetSwitcher } from '../../components/PetSwitcher';
-import { RecompensaImagem } from '../../components/recompensa/RecompensaImagem';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { SkeletonList } from '../../components/ui/Skeleton';
-import { mostrarToast } from '../../components/ui/Toast';
-import { DicaTela } from '../../components/ui/DicaTela';
-import { confirmar } from '../../utils/alert';
-import { META_CONSULTAS_RECOMPENSA } from '../../constants/gamification';
-import type { Recompensa } from '../../types';
-import type { AppTheme } from '../../constants/theme';
+} from '../../../hooks/useRecompensas';
+import { useConquistas } from '../../../hooks/useConquistas';
+import { AppIcon } from '../../../components/AppIcon';
+import { PetSwitcher } from '../../../components/PetSwitcher';
+import { RecompensaImagem } from '../../../components/recompensa/RecompensaImagem';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { SkeletonList } from '../../../components/ui/Skeleton';
+import { mostrarToast } from '../../../components/ui/Toast';
+import { DicaTela } from '../../../components/ui/DicaTela';
+import { confirmar } from '../../../utils/alert';
+import { META_CONSULTAS_RECOMPENSA } from '../../../constants/gamification';
+import type { Recompensa } from '../../../types';
+import type { AppTheme } from '../../../constants/theme';
 
 function formatarData(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });

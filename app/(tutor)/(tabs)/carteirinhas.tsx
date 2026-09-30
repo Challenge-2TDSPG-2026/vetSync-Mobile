@@ -2,20 +2,20 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { usePet } from '../../context/PetContext';
-import { useAuth } from '../../context/AuthContext';
-import { useCarteiraVacinacao } from '../../hooks/usePetHealth';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useTheme } from '../../context/ThemeContext';
-import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { WalletStack } from '../../components/carteira/WalletStack';
-import { CarteiraModal } from '../../components/carteira/CarteiraModal';
-import { BotaoCarteiraPdf } from '../../components/carteira/BotaoCarteiraPdf';
-import { AppIcon } from '../../components/AppIcon';
-import { DicaTela } from '../../components/ui/DicaTela';
-import { formatarDataEvento, parseDataEvento, statusExibicao } from '../../utils/eventoStatus';
-import type { Pet } from '../../types';
-import type { AppTheme } from '../../constants/theme';
+import { usePet } from '../../../context/PetContext';
+import { useAuth } from '../../../context/AuthContext';
+import { useCarteiraVacinacao } from '../../../hooks/usePetHealth';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { useDicaPrimeiraVisita } from '../../../hooks/useDicaPrimeiraVisita';
+import { WalletStack } from '../../../components/carteira/WalletStack';
+import { CarteiraModal } from '../../../components/carteira/CarteiraModal';
+import { BotaoCarteiraPdf } from '../../../components/carteira/BotaoCarteiraPdf';
+import { AppIcon } from '../../../components/AppIcon';
+import { DicaTela } from '../../../components/ui/DicaTela';
+import { formatarDataEvento, parseDataEvento, statusExibicao } from '../../../utils/eventoStatus';
+import type { Pet } from '../../../types';
+import type { AppTheme } from '../../../constants/theme';
 
 export default function CarteirinhasScreen() {
   const router = useRouter();
@@ -112,7 +112,7 @@ export default function CarteirinhasScreen() {
             )}
           </View>
           <Pressable
-            onPress={() => router.push('/(tutor)/agenda')}
+            onPress={() => router.push('/(tutor)/(tabs)/agenda')}
             style={[s.btnAgenda, modoSimples && sSimples.btnAgenda]}
             accessibilityRole="button"
             accessibilityLabel="Abrir agenda de saúde"

@@ -3,13 +3,13 @@ import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { usePet } from '../../context/PetContext';
-import { useAuth } from '../../context/AuthContext';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useTheme } from '../../context/ThemeContext';
-import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { DicaTela } from '../../components/ui/DicaTela';
-import { withAlpha, type AppTheme } from '../../constants/theme';
+import { usePet } from '../../../context/PetContext';
+import { useAuth } from '../../../context/AuthContext';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { useDicaPrimeiraVisita } from '../../../hooks/useDicaPrimeiraVisita';
+import { DicaTela } from '../../../components/ui/DicaTela';
+import { withAlpha, type AppTheme } from '../../../constants/theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -103,7 +103,7 @@ export default function PerfilScreen() {
             title="Segurança"
             description="Biometria e senha"
             color={theme.colors.info}
-            onPress={() => router.push('/(tutor)/seguranca')}
+            onPress={() => router.push('/(tutor)/(tabs)/seguranca')}
             simples={modoSimples}
           />
           <QuickAccessCard
@@ -113,7 +113,7 @@ export default function PerfilScreen() {
             title="Mensagens"
             description="Avisos e lembretes"
             color={theme.colors.primary}
-            onPress={() => router.push('/(tutor)/notificacoes')}
+            onPress={() => router.push('/(tutor)/(tabs)/notificacoes')}
             simples={modoSimples}
           />
           <QuickAccessCard
@@ -132,7 +132,7 @@ export default function PerfilScreen() {
             title="Configurações"
             description="Conta e preferências"
             color={theme.colors.textSecondary}
-            onPress={() => router.push('/configuracoes')}
+            onPress={() => router.push('/(tutor)/configuracoes')}
             simples={modoSimples}
           />
         </View>

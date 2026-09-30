@@ -3,13 +3,13 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, Vie
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../../context/AuthContext';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useTheme } from '../../context/ThemeContext';
-import { authService } from '../../services/authService';
-import { mensagemDeErro } from '../../services/api/errorMessages';
-import { mostrarToast } from '../../components/ui/Toast';
-import type { AppTheme } from '../../constants/theme';
+import { useAuth } from '../../../context/AuthContext';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { authService } from '../../../services/authService';
+import { mensagemDeErro } from '../../../services/api/errorMessages';
+import { mostrarToast } from '../../../components/ui/Toast';
+import type { AppTheme } from '../../../constants/theme';
 
 export default function SegurancaScreen() {
   const router = useRouter();
@@ -79,7 +79,7 @@ export default function SegurancaScreen() {
       <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
         <Pressable
           style={s.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.replace('/(tutor)/(tabs)/perfil')}
           accessibilityRole="button"
           accessibilityLabel="Voltar para conta"
         >

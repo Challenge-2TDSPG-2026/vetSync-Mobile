@@ -1,18 +1,18 @@
-import { useTheme } from '../../context/ThemeContext';
-import type { AppTheme } from '../../constants/theme';
+import { useTheme } from '../../../context/ThemeContext';
+import type { AppTheme } from '../../../constants/theme';
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
-import { usePet } from '../../context/PetContext';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useRecarregarDados } from '../../hooks/useRecarregarDados';
-import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { obterVisualTipoEvento } from '../../constants';
-import { AppIcon } from '../../components/AppIcon';
-import { PetSwitcher } from '../../components/PetSwitcher';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { SkeletonList } from '../../components/ui/Skeleton';
-import { DicaTela } from '../../components/ui/DicaTela';
-import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento } from '../../utils/eventoStatus';
+import { usePet } from '../../../context/PetContext';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
+import { useDicaPrimeiraVisita } from '../../../hooks/useDicaPrimeiraVisita';
+import { obterVisualTipoEvento } from '../../../constants';
+import { AppIcon } from '../../../components/AppIcon';
+import { PetSwitcher } from '../../../components/PetSwitcher';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { SkeletonList } from '../../../components/ui/Skeleton';
+import { DicaTela } from '../../../components/ui/DicaTela';
+import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento } from '../../../utils/eventoStatus';
 
 function mesAno(iso: string): string {
   return parseDataEvento(iso).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
