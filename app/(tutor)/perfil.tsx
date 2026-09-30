@@ -16,7 +16,6 @@ import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModa
 import { AppearancePreferences } from '../../components/AppearancePreferences';
 import { PetFoto } from '../../components/pet-foto/PetFoto';
 import { EditarFotoModal } from '../../components/pet-foto/EditarFotoModal';
-import { useTutor } from '../../hooks/useTutor';
 import { withAlpha, type AppTheme } from '../../constants/theme';
 import type { Pet } from '../../types';
 
@@ -40,7 +39,6 @@ export default function PerfilScreen() {
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
   const [petFotoEditandoId, setPetFotoEditandoId] = useState<string | null>(null);
   const { sessao, logout } = useAuth();
-  const tutor = useTutor(sessao?.idUsuario);
   const { modoSimples } = useAccessibility();
   const { pets, removerPet } = usePet();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-perfil');
@@ -51,18 +49,6 @@ export default function PerfilScreen() {
     sessao?.perfil === 'TUTOR' ? 'Tutor responsável' : sessao?.perfil || 'Perfil não informado';
   const iniciais = obterIniciais(sessao?.nome);
   const petFotoEditando: Pet | null = pets.find((pet) => pet.id === petFotoEditandoId) ?? null;
-  const endereco = tutor.data
-    ? [
-        tutor.data.logradouro &&
-          `${tutor.data.logradouro}${tutor.data.numero ? `, ${tutor.data.numero}` : ''}`,
-        tutor.data.complemento,
-        tutor.data.bairro,
-        tutor.data.cidade && `${tutor.data.cidade}${tutor.data.uf ? ` - ${tutor.data.uf}` : ''}`,
-      ]
-        .filter(Boolean)
-        .join(' • ') || 'Endereço não informado'
-    : 'Carregando endereço...';
-
   function handleSair() {
     setModalSairVisivel(true);
   }
@@ -233,45 +219,6 @@ export default function PerfilScreen() {
           />
         </View>
 
-        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Dados da conta</Text>
-        <View style={s.card}>
-          <InfoRow
-            styles={s}
-            theme={theme}
-            icon="person-outline"
-            label="Nome completo"
-            value={nome}
-            simples={modoSimples}
-          />
-          <View style={s.divider} />
-          <InfoRow
-            styles={s}
-            theme={theme}
-            icon="mail-outline"
-            label="E-mail"
-            value={email}
-            simples={modoSimples}
-          />
-          <View style={s.divider} />
-          <InfoRow
-            styles={s}
-            theme={theme}
-            icon="location-outline"
-            label="Endereço"
-            value={endereco}
-            simples={modoSimples}
-          />
-          <View style={s.divider} />
-          <InfoRow
-            styles={s}
-            theme={theme}
-            icon="shield-checkmark-outline"
-            label="Tipo de conta"
-            value={perfil}
-            simples={modoSimples}
-          />
-        </View>
-
         <AppearancePreferences />
 
         <View style={s.sectionTitleRow}>
@@ -380,36 +327,6 @@ export default function PerfilScreen() {
         onConfirmarSair={confirmarLogout}
       />
     </>
-  );
-}
-
-function InfoRow({
-  styles,
-  theme,
-  icon,
-  label,
-  value,
-  simples,
-}: {
-  styles: ReturnType<typeof createStyles>;
-  theme: AppTheme;
-  icon: IconName;
-  label: string;
-  value: string;
-  simples: boolean;
-}) {
-  return (
-    <View style={[styles.infoRow, simples && sSimples.infoRow]}>
-      <View style={[styles.infoIcon, simples && sSimples.infoIcon]}>
-        <Ionicons name={icon} size={simples ? 24 : 18} color={theme.colors.primary} />
-      </View>
-      <View style={styles.infoCopy}>
-        <Text style={[styles.infoLabel, simples && sSimples.infoLabel]}>{label}</Text>
-        <Text style={[styles.infoValue, simples && sSimples.infoValue]} numberOfLines={2}>
-          {value}
-        </Text>
-      </View>
-    </View>
   );
 }
 
@@ -703,30 +620,6 @@ const createStyles = (theme: AppTheme) =>
       textTransform: 'uppercase',
     },
 
-    infoRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      paddingHorizontal: 15,
-      paddingVertical: 14,
-    },
-    infoIcon: {
-      width: 38,
-      height: 38,
-      borderRadius: 13,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.pages.tutorProfile.cardSecondary,
-    },
-    infoCopy: { flex: 1, minWidth: 0 },
-    infoLabel: {
-      color: theme.colors.textSecondary,
-      fontSize: 11,
-      fontWeight: '700',
-      marginBottom: 2,
-    },
-    infoValue: { color: theme.colors.text, fontSize: 15, fontWeight: '700' },
-
     petRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -801,10 +694,6 @@ const sSimples = StyleSheet.create({
   heroNome: { fontSize: 27, lineHeight: 32 },
   heroEmail: { fontSize: 17 },
   sectionTitle: { fontSize: 18 },
-  infoRow: { paddingVertical: 19, gap: 16 },
-  infoIcon: { width: 52, height: 52, borderRadius: 17 },
-  infoLabel: { fontSize: 16 },
-  infoValue: { fontSize: 20, lineHeight: 26 },
   quickAccessCard: { flexBasis: '100%', minHeight: 104, padding: 20, gap: 16 },
   quickAccessIcon: { width: 58, height: 58, borderRadius: 18 },
   quickAccessTitle: { fontSize: 22 },
