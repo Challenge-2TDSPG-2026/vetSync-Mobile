@@ -153,7 +153,7 @@ export default function CadastroScreen() {
         `Bem-vindo(a), ${nome.trim().split(' ')[0]}! Agora cadastre seu primeiro pet.`,
       );
       // Usuário autenticado como TUTOR com 0 pets. Redireciona para cadastrar o primeiro pet.
-      router.replace('/add-pet');
+      router.replace('/(tutor)/add-pet');
     } catch (e) {
       if (e instanceof ApiError && e.campos) {
         setErros((prev) => ({ ...prev, ...e.campos }));

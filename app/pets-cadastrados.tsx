@@ -161,7 +161,7 @@ export default function PetsCadastradosScreen() {
 
         <Pressable
           style={[s.addPet, modoSimples && sSimples.addPet]}
-          onPress={() => router.push('/add-pet')}
+          onPress={() => router.push('/(tutor)/add-pet')}
           accessibilityRole="button"
         >
           <Ionicons

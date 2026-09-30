@@ -51,7 +51,7 @@ export function PetSwitcher() {
       })}
       <Pressable
         style={[s.addBtn, modoSimples && sSimples.chip]}
-        onPress={() => router.push('/add-pet')}
+        onPress={() => router.push('/(tutor)/add-pet')}
         accessibilityRole="button"
         accessibilityLabel="Novo pet"
         accessibilityHint="Abre o formulário de cadastro de pet"
