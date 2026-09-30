@@ -1,15 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Animated, Platform, Pressable, StyleSheet, Text, View, type ColorValue } from 'react-native';
 import { Tabs, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
-import { useAuth } from '../../context/AuthContext';
-import { usePet } from '../../context/PetContext';
-import { useVet } from '../../context/VetContext';
-import { useMeusResgates } from '../../hooks/useRecompensas';
-import { statusExibicao } from '../../utils/eventoStatus';
 import type { NavigationThemeColors } from '../../constants/theme';
 
 // Tipo derivado diretamente do que o <Tabs tabBar={...}> do expo-router realmente entrega,
@@ -17,17 +12,16 @@ import type { NavigationThemeColors } from '../../constants/theme';
 type TabBarRenderer = NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>;
 type VetSyncTabBarProps = Parameters<TabBarRenderer>[0];
 
-function TabItem({ label, icon, active, onPress, onLongPress, simples, colors, badge }: { label: string; icon: React.ReactNode; active: boolean; onPress: () => void; onLongPress: () => void; simples?: boolean; colors: NavigationThemeColors; badge?: number }) {
-  const progress = useRef(new Animated.Value(active ? 1 : 0)).current;
+function TabItem({ label, icon, active, onPress, onLongPress, simples, colors }: { label: string; icon: React.ReactNode; active: boolean; onPress: () => void; onLongPress: () => void; simples?: boolean; colors: NavigationThemeColors }) {
+  const [progress] = useState(() => new Animated.Value(active ? 1 : 0));
   useEffect(() => {
-    Animated.spring(progress, { toValue: active ? 1 : 0, useNativeDriver: true, friction: 7, tension: 120 }).start();
+    Animated.spring(progress, { toValue: active ? 1 : 0, useNativeDriver: Platform.OS !== 'web', friction: 7, tension: 120 }).start();
   }, [active, progress]);
   const translateY = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -13] });
   const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
-  return <Pressable accessibilityRole="button" accessibilityState={{ selected: active }} accessibilityLabel={badge ? `${label}, ${badge} pendência${badge === 1 ? '' : 's'}` : label} onPress={onPress} onLongPress={onLongPress} style={s.item}>
+  return <Pressable accessibilityRole="button" accessibilityState={{ selected: active }} accessibilityLabel={label} onPress={onPress} onLongPress={onLongPress} style={s.item}>
     <Animated.View style={[s.iconWrap, simples && sSimples.iconWrap, active && [s.iconWrapActive, { backgroundColor: colors.activeBackground, shadowColor: colors.activeBackground }], { transform: [{ translateY }, { scale }] }]}>
       {icon}
-      {badge ? <View style={[s.badge, { backgroundColor: colors.badgeBackground, borderColor: colors.badgeBorder }]}><Text style={[s.badgeText, { color: colors.badgeText }]}>{badge > 9 ? '9+' : badge}</Text></View> : null}
     </Animated.View>
     <Text numberOfLines={2} style={[s.label, simples && sSimples.label, { color: active ? colors.activeText : colors.inactiveText }]}>{label}</Text>
   </Pressable>;
@@ -41,28 +35,28 @@ function AssistantItem({ simples, color }: { simples?: boolean; color: string })
   </Pressable>;
 }
 
-/** Tab bar única para tutor e veterinário, com a IA como ação modal central. */
+export function OptionsGridIcon({ color, size }: { color: ColorValue; size: number }) {
+  return <MaterialCommunityIcons name="apps" size={size} color={color} />;
+}
+
+function OptionsItem({ simples, color }: { simples?: boolean; color: string }) {
+  return <Pressable disabled accessibilityRole="button" accessibilityState={{ disabled: true }} accessibilityLabel="Opções, indisponível" style={s.item}>
+    <View style={[s.iconWrap, simples && sSimples.iconWrap]}>
+      <OptionsGridIcon color={color} size={simples ? 34 : 26} />
+    </View>
+    <Text style={[s.label, simples && sSimples.label, { color }]}>Opções</Text>
+  </Pressable>;
+}
+
+/** Tab bar única para tutor e veterinário: Início, IA, Opções e Conta. */
 export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarProps) {
   const insets = useSafeAreaInsets();
   const { modoSimples } = useAccessibility();
   const { theme } = useTheme();
-  const { sessao } = useAuth();
-  const { eventos } = usePet();
-  const { eventosDeHoje } = useVet();
-  const ehTutor = sessao?.perfil === 'TUTOR';
-  const ehVet = sessao?.perfil === 'VETERINARIO';
-  const { data: resgates = [] } = useMeusResgates(ehVet);
-  const pendenciasAgenda = eventos.filter(evento => statusExibicao(evento) === 'ATRASADO').length;
-  const pendenciasConsultas = eventosDeHoje.length;
-  const pendenciasResgates = resgates.filter(resgate => resgate.status === 'PENDENTE').length;
+  const possuiRotaOpcoes = state.routes.some(route => route.name === 'opcoes');
   const routesVisiveis = state.routes.filter(
-    route =>
-      route.name !== 'perfil' &&
-      route.name !== 'historico' &&
-      route.name !== 'notificacoes'
+    route => route.name === 'index' || route.name === 'opcoes' || route.name === 'perfil'
   );
-  // A IA ocupa o centro da barra; Carteiras segue imediatamente à direita.
-  const indiceDaIa = Math.min(2, routesVisiveis.length);
   const altura = (modoSimples ? 116 : 94) + Math.max(insets.bottom, 6);
   return <View style={[s.shell, { backgroundColor: theme.components.navigation.background, borderTopColor: theme.components.navigation.border, paddingBottom: Math.max(insets.bottom, 6), height: altura }]}>
     <View style={s.bar}>
@@ -78,7 +72,6 @@ export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarP
         };
         const handleLongPress = () => navigation.emit({ type: 'tabLongPress', target: route.key });
         return <React.Fragment key={route.key}>
-          {index === indiceDaIa && <AssistantItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} />}
           <TabItem
             label={label}
             icon={icon}
@@ -87,11 +80,12 @@ export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarP
             onLongPress={handleLongPress}
             simples={modoSimples}
             colors={theme.components.navigation}
-            badge={ehTutor && route.name === 'agenda' ? pendenciasAgenda : ehVet && route.name === 'consultas' ? pendenciasConsultas : ehVet && route.name === 'resgates' ? pendenciasResgates : undefined}
           />
+          {route.name === 'opcoes' && <AssistantItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} />}
+          {!possuiRotaOpcoes && index === 0 && <OptionsItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} />}
+          {!possuiRotaOpcoes && index === 0 && <AssistantItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} />}
         </React.Fragment>;
       })}
-      {indiceDaIa === routesVisiveis.length && <AssistantItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} />}
     </View>
   </View>;
 }
@@ -102,8 +96,6 @@ const s = StyleSheet.create({
   item: { flex: 1, minWidth: 0, alignItems: 'center', justifyContent: 'flex-start' },
   iconWrap: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 24 },
   iconWrapActive: { shadowOpacity: 0.22, shadowRadius: 7, shadowOffset: { width: 0, height: 4 }, elevation: 5 },
-  badge: { position: 'absolute', top: -2, right: -2, minWidth: 19, height: 19, paddingHorizontal: 4, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
-  badgeText: { fontSize: 10, fontWeight: '800' },
   label: { fontSize: 11, lineHeight: 13, fontWeight: '700', marginTop: 2, maxWidth: '100%', paddingHorizontal: 2, textAlign: 'center' },
 });
 

@@ -1,7 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { VetSyncTabBar } from '../../components/navigation/VetSyncTabBar';
-import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAction';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function VetTabsLayout() {
@@ -22,15 +21,12 @@ export default function VetTabsLayout() {
         headerTitleStyle: {
           fontWeight: '700',
         },
-        headerRight: () => (
-          <AccountHeaderAction href="/(vet)/perfil" />
-        ),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Painel',
+          title: 'Início',
           headerTitle: 'Painel do Veterinário',
           tabBarIcon: ({ color, size }) => (
             <Ionicons
@@ -105,9 +101,8 @@ export default function VetTabsLayout() {
       <Tabs.Screen
         name="perfil"
         options={{
-          title: 'Perfil',
-          headerTitle: 'Perfil',
-          href: null,
+          title: 'Conta',
+          headerTitle: 'Minha conta',
           tabBarIcon: ({ color, size }) => (
             <Ionicons
               name="person"

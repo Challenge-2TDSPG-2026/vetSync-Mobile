@@ -2,8 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
-import { VetSyncTabBar } from '../../components/navigation/VetSyncTabBar';
-import { AccountHeaderAction } from '../../components/navigation/AccountHeaderAction';
+import { OptionsGridIcon, VetSyncTabBar } from '../../components/navigation/VetSyncTabBar';
 import { NotificationHeaderAction } from '../../components/navigation/NotificationHeaderAction';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -59,12 +58,7 @@ export default function TabsLayout() {
           fontSize: modoSimples ? 27 : 20,
           letterSpacing: -0.35,
         },
-        headerRight: () => (
-          <>
-            <NotificationHeaderAction />
-            <AccountHeaderAction href="/(tutor)/perfil" />
-          </>
-        ),
+        headerRight: () => <NotificationHeaderAction />,
       }}
     >
       <Tabs.Screen
@@ -144,11 +138,21 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
+        name="opcoes"
+        options={{
+          title: 'Opções',
+          headerTitle: 'Opções',
+          tabBarIcon: ({ color, size }) => (
+            <OptionsGridIcon color={color} size={size} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="perfil"
         options={{
-          title: 'Perfil',
-          headerTitle: 'Perfil',
-          href: null,
+          title: 'Conta',
+          headerTitle: 'Minha conta',
           tabBarIcon: ({ color, size }) => (
             <Ionicons
               name="person"
