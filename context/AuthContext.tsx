@@ -19,6 +19,7 @@ export type Perfil = 'TUTOR' | 'VETERINARIO' | 'ADMIN';
 
 export interface Sessao extends SessaoProtegida {
   perfil: Perfil;
+  temVinculoAtivo: boolean;
 }
 
 export interface RegistrarPayload {
@@ -34,6 +35,7 @@ export interface RegistrarPayload {
   bairro: string;
   cidade: string;
   uf: string;
+  sessaoVinculo?: string;
 }
 
 const ESTADO_BIOMETRIA_INICIAL: EstadoBiometria = {
@@ -56,6 +58,7 @@ type AuthContextValue = {
   dispensarConviteBiometria: () => Promise<void>;
   atualizarBiometria: () => Promise<void>;
   registrar: (dados: RegistrarPayload) => Promise<void>;
+  atualizarVinculoClinica: (temVinculoAtivo: boolean) => Promise<void>;
   logout: () => Promise<void>;
   limparErro: () => void;
 };
@@ -77,7 +80,8 @@ export function validarSessao(valor: unknown): valor is Sessao {
     candidata.nome.trim().length > 0 &&
     (candidata.perfil === 'TUTOR' ||
       candidata.perfil === 'VETERINARIO' ||
-      candidata.perfil === 'ADMIN')
+      candidata.perfil === 'ADMIN') &&
+    typeof candidata.temVinculoAtivo === 'boolean'
   );
 }
 
@@ -99,8 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function restaurarSessao() {
       try {
         const salva = await restaurarSessaoPersistida();
-        setSessao(salva);
-        await atualizarEstadoBiometria(salva?.idUsuario);
+        const sessaoRestaurada = validarSessao(salva) ? salva : null;
+        setSessao(sessaoRestaurada);
+        await atualizarEstadoBiometria(sessaoRestaurada?.idUsuario);
       } catch {
         setSessao(null);
         setErro('Não foi possível restaurar sua sessão. Entre novamente.');
@@ -154,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const entrarComBiometria = useCallback(async () => {
     setErro(null);
     const salva = await restaurarSessaoPersistida();
-    if (!salva) {
+    if (!validarSessao(salva)) {
       throw new Error('Não foi possível confirmar sua biometria. Entre com e-mail e senha.');
     }
     setSessao(salva);
@@ -194,6 +199,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [atualizarEstadoBiometria]);
 
+  const atualizarVinculoClinica = useCallback(async (temVinculoAtivo: boolean) => { if (!sessao) return; const atualizada = { ...sessao, temVinculoAtivo }; await salvarSessaoAposLogin(atualizada); setSessao(atualizada); }, [sessao]);
+
   const logout = useCallback(async () => {
     try {
       await authService.logout();
@@ -223,6 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await atualizarEstadoBiometria(sessao?.idUsuario);
         },
         registrar,
+        atualizarVinculoClinica,
         logout,
         limparErro,
       }}

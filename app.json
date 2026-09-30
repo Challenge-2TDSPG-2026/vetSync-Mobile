@@ -67,6 +67,12 @@
       "expo-sharing",
       "expo-secure-store",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Usamos a câmera para ler o QR code da clínica."
+        }
+      ],
+      [
         "expo-local-authentication",
         {
           "faceIDPermission": "Usamos o Face ID para proteger o acesso à sua conta VetSync neste aparelho."

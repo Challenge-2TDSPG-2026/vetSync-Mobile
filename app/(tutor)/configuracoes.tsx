@@ -98,6 +98,15 @@ export default function ConfiguracoesScreen() {
           <ConfigItem
             styles={s}
             simples={modoSimples}
+            icon="business-outline"
+            title="Clínica"
+            description="Troque a clínica vinculada"
+            onPress={() => router.push("/vinculo-clinica?troca=1")}
+          />
+          <View style={s.divider} />
+          <ConfigItem
+            styles={s}
+            simples={modoSimples}
             icon="shield-checkmark-outline"
             title="Segurança"
             description="Biometria e senha"

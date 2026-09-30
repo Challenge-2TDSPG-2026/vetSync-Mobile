@@ -51,6 +51,7 @@ const ROTAS_FORA_DO_GRUPO = [
   'pets-cadastrados',
   'gerenciar-conta',
   'notificacoes',
+  'vinculo-clinica',
 ];
 const ROTAS_EXCLUSIVAS_TUTOR = [
   'add-evento',
@@ -90,6 +91,7 @@ function RootNavigator() {
     const inRedefinirSenha =
       segments.includes('redefinir-senha') || pathname.startsWith('/redefinir-senha');
     const inRecuperacaoSenha = inEsqueciSenha || inVerificarCodigo || inRedefinirSenha;
+    const inVinculoClinica = segments.includes('vinculo-clinica') || pathname.startsWith('/vinculo-clinica');
     const inTutor = segments.includes('(tutor)') || pathname.startsWith('/(tutor)');
     const inVet = segments.includes('(vet)') || pathname.startsWith('/(vet)');
     const inAddPet = segments.includes('add-pet') || pathname === '/add-pet';
@@ -101,7 +103,7 @@ function RootNavigator() {
     );
 
     if (!autenticado) {
-      if (!inLogin && !inCadastro && !inRecuperacaoSenha) router.replace('/login');
+      if (!inLogin && !inCadastro && !inRecuperacaoSenha && !inVinculoClinica) router.replace('/login');
       return;
     }
 
@@ -116,6 +118,10 @@ function RootNavigator() {
     }
 
     if (ehTutor) {
+      if (!sessao?.temVinculoAtivo) {
+        if (!inVinculoClinica) router.replace('/vinculo-clinica');
+        return;
+      }
       if (!onboardingConcluido) {
         if (!inAddPet) router.replace('/(tutor)/add-pet');
         return;
@@ -178,6 +184,7 @@ function RootNavigator() {
       >
         <Stack.Screen name="login" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="cadastro" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="vinculo-clinica" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="esqueci-senha" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="verificar-codigo" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="redefinir-senha" options={TRANSICAO_PAGINA} />

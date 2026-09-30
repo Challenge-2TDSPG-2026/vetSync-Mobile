@@ -47,7 +47,7 @@ type PetContextValue = {
 const PetContext = createContext<PetContextValue | undefined>(undefined);
 
 export function PetProvider({ children }: { children: React.ReactNode }) {
-  const { autenticado, carregando: carregandoAuth } = useAuth();
+  const { autenticado, carregando: carregandoAuth, sessao } = useAuth();
 
   const [petAtivoId, setPetAtivoIdState] = useState<string | null>(null);
   const [carregandoLocal, setCarregandoLocal] = useState(true);
@@ -61,7 +61,7 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
     carregarLocal();
   }, []);
 
-  const habilitado = autenticado && !carregandoAuth;
+  const habilitado = autenticado && !carregandoAuth && sessao?.temVinculoAtivo === true;
 
   const { data: pets = [], isLoading: carregandoPets, isError: erroPets, refetch: recarregarPets } = usePets(habilitado);
   const { data: eventosTodos = [], isLoading: carregandoEventos } = useEventos(habilitado);

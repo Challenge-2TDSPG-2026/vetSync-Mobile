@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Text, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { useLocalSearchParams, useRouter, Link } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -30,11 +30,16 @@ function formatarTelefone(text: string): string {
 
 export default function CadastroScreen() {
   const router = useRouter();
+  const { sessaoVinculo, clinica } = useLocalSearchParams<{ sessaoVinculo?: string; clinica?: string }>();
   const { registrar } = useAuth();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
 
   const [nome, setNome] = useState('');
+
+  useEffect(() => {
+    if (typeof sessaoVinculo !== 'string' || !sessaoVinculo) router.replace('/vinculo-clinica');
+  }, [router, sessaoVinculo]);
   const [email, setEmail] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -139,6 +144,7 @@ export default function CadastroScreen() {
         bairro: bairro.trim(),
         cidade: cidade.trim(),
         uf: uf.trim().toUpperCase(),
+        sessaoVinculo: typeof sessaoVinculo === 'string' ? sessaoVinculo : '',
       });
 
       mostrarToast(
@@ -167,6 +173,7 @@ export default function CadastroScreen() {
       title="Crie sua conta."
       subtitle="Acompanhe vacinas, consultas e o bem-estar do seu pet em um só lugar."
     >
+      {clinica ? <Text style={{ color: theme.colors.primary, fontWeight: "700", marginBottom: 18 }}>Clínica confirmada: {clinica}</Text> : null}
       <AuthField
         label="Nome completo"
         icon="person-outline"
