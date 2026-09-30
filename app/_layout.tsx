@@ -50,10 +50,11 @@ const ROTAS_FORA_DO_GRUPO = [
   'verificar-codigo',
   'redefinir-senha',
   'modo-simples',
-  'gerenciar-acessos',
+  'responsaveis',
   'gerenciar-conta',
   'notificacoes',
 ];
+const ROTAS_EXCLUSIVAS_TUTOR = ['responsaveis'];
 
 function RootNavigator() {
   const { theme } = useTheme();
@@ -88,6 +89,9 @@ function RootNavigator() {
     const inRotaLivre = ROTAS_FORA_DO_GRUPO.some(
       (r) => segments.includes(r) || pathname.includes(r),
     );
+    const inRotaExclusivaTutor = ROTAS_EXCLUSIVAS_TUTOR.some(
+      (r) => segments.includes(r) || pathname.includes(r),
+    );
 
     if (!autenticado) {
       if (!inLogin && !inCadastro && !inRecuperacaoSenha) router.replace('/login');
@@ -95,6 +99,10 @@ function RootNavigator() {
     }
 
     if (ehVeterinario) {
+      if (inRotaExclusivaTutor) {
+        router.replace('/(vet)');
+        return;
+      }
       if (inRotaLivre) return;
       if (!inVet) router.replace('/(vet)');
       return;
@@ -178,7 +186,7 @@ function RootNavigator() {
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
         <Stack.Screen name="modo-simples" options={{ animation: 'fade_from_bottom' }} />
-        <Stack.Screen name="gerenciar-acessos" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="responsaveis" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="gerenciar-conta" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen
           name="paciente/[id]"

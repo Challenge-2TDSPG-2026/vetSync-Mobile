@@ -193,9 +193,9 @@ export default function PerfilScreen() {
             styles={s}
             theme={theme}
             icon="people-outline"
-            title="Família"
-            description="Compartilhe o cuidado dos seus pets"
-            onPress={() => router.push('/gerenciar-acessos')}
+            title="Responsáveis"
+            description="Compartilhe o cuidado de todos os seus pets"
+            onPress={() => router.push('/responsaveis')}
             simples={modoSimples}
           />
           <View style={s.divider} />
