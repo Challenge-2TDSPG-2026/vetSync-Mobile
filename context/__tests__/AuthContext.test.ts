@@ -6,6 +6,7 @@ const sessaoValida = {
   email: 'tutor@vetsync.test',
   nome: 'Tutor',
   perfil: 'TUTOR' as const,
+  temVinculoAtivo: true,
 };
 
 describe('AuthContext', () => {
@@ -14,6 +15,7 @@ describe('AuthContext', () => {
     expect(validarSessao({ ...sessaoValida, token: ' ' })).toBe(false);
     expect(validarSessao({ ...sessaoValida, idUsuario: 0 })).toBe(false);
     expect(validarSessao({ ...sessaoValida, perfil: 'DESCONHECIDO' })).toBe(false);
+    expect(validarSessao({ ...sessaoValida, temVinculoAtivo: undefined })).toBe(false);
     expect(validarSessao(null)).toBe(false);
   });
 });
