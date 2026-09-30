@@ -1,11 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api, apiRequest } from '../httpClient';
 import { assinarExpiracaoSessao } from '../sessionEvents';
-
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn(),
-  removeItem: jest.fn(),
-}));
+import { definirSessaoEmMemoria } from '../../biometriaService';
 
 const mockNetInfoFetch = jest.fn();
 jest.mock('@react-native-community/netinfo', () => ({
@@ -16,8 +11,18 @@ jest.mock('@react-native-community/netinfo', () => ({
 describe('apiRequest', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify({ token: 'token-valido' }));
+    definirSessaoEmMemoria({
+      token: 'token-valido',
+      idUsuario: 12,
+      email: 'tutor@vetsync.test',
+      nome: 'Tutor de teste',
+      perfil: 'TUTOR',
+    });
     mockNetInfoFetch.mockResolvedValue({ isConnected: true, isInternetReachable: true });
+  });
+
+  afterEach(() => {
+    definirSessaoEmMemoria(null);
   });
 
   it('notifica a aplicação e devolve ApiError quando a sessão expira', async () => {
