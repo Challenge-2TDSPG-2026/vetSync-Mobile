@@ -61,7 +61,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <AuthLayout
+    <AuthLayout permitirCapturaDeTela
       title="Bem-vindo de volta."
       subtitle="Consultas, vacinas e lembretes do seu pet, sempre à mão."
     >

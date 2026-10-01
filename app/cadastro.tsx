@@ -169,7 +169,7 @@ export default function CadastroScreen() {
   }
 
   return (
-    <AuthLayout
+    <AuthLayout permitirCapturaDeTela
       title="Crie sua conta."
       subtitle="Acompanhe vacinas, consultas e o bem-estar do seu pet em um só lugar."
     >

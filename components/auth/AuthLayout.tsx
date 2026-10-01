@@ -1,4 +1,4 @@
-import React, { type ReactNode, useMemo } from 'react';
+import React, { type ReactNode, useEffect, useMemo } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ScreenCapture from 'expo-screen-capture';
 import { AppIcon } from '../AppIcon';
 import { useTheme } from '../../context/ThemeContext';
 import { withAlpha, type AppTheme } from '../../constants/theme';
@@ -17,11 +18,17 @@ type AuthLayoutProps = {
   title: string;
   subtitle: string;
   children: ReactNode;
+  permitirCapturaDeTela?: boolean;
 };
 
-export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
+export function AuthLayout({ title, subtitle, children, permitirCapturaDeTela = false }: AuthLayoutProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  useEffect(() => {
+    if (!permitirCapturaDeTela) return;
+    void ScreenCapture.allowScreenCaptureAsync().catch(() => undefined);
+  }, [permitirCapturaDeTela]);
 
   return (
     <KeyboardAvoidingView
