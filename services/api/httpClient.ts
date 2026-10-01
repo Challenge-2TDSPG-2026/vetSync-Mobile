@@ -1,4 +1,5 @@
 import NetInfo from '@react-native-community/netinfo';
+import { Platform } from 'react-native';
 import { API_BASE_URL } from '../../constants/api';
 import { obterTokenDaSessaoEmMemoria } from '../biometriaService';
 import { notificarExpiracaoSessao } from './sessionEvents';
@@ -166,7 +167,8 @@ async function uploadMultipart<T>(path: string, arquivo: ArquivoUpload, autentic
   const timeout = setTimeout(() => controller.abort(), 60_000);
   try {
     const formData = new FormData();
-    if (typeof window !== 'undefined') {
+    // `window` existe também no React Native, então não serve para detectar a web.
+    if (Platform.OS === 'web') {
       const arquivoResposta = await fetch(arquivo.uri);
       const blob = await arquivoResposta.blob();
       formData.append('foto', blob, arquivo.nome);
