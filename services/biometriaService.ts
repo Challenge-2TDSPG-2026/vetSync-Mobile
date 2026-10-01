@@ -4,7 +4,11 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { STORAGE_KEYS } from '../constants';
 
+// Sessão protegida por biometria (exige autenticação a cada leitura).
 const CHAVE_SESSAO_PROTEGIDA = 'vetsync.sessao_protegida';
+// Sessão "comum": também fica no armazenamento seguro do aparelho (Keychain/Keystore), só que
+// sem exigir biometria. Chaves separadas evitam regravar um item protegido com opções diferentes.
+const CHAVE_SESSAO_SEGURA = 'vetsync.sessao';
 
 export interface SessaoProtegida {
   token: string;
@@ -118,8 +122,74 @@ export async function obterEstadoBiometria(idUsuario?: number): Promise<EstadoBi
   }
 }
 
+const ehWeb = () => Platform.OS === 'web';
+
+/**
+ * Apaga uma chave do SecureStore sem nunca lançar. Na web o módulo não existe (o logout não pode
+ * quebrar por isso) e, no nativo, apagar uma chave inexistente também não deve travar a limpeza.
+ */
+async function excluirDoSecureStore(chave: string): Promise<void> {
+  if (ehWeb()) return;
+  try {
+    await SecureStore.deleteItemAsync(chave);
+  } catch {
+    // Nada a fazer: o objetivo é só garantir que a chave não exista mais.
+  }
+}
+
+/** Remove a sessão "comum" de qualquer lugar onde ela possa estar (seguro e legado). */
+async function removerSessaoSimples(): Promise<void> {
+  await Promise.all([
+    excluirDoSecureStore(CHAVE_SESSAO_SEGURA),
+    AsyncStorage.removeItem(STORAGE_KEYS.SESSAO),
+  ]);
+}
+
+/**
+ * Versões antigas guardavam o token em texto puro no AsyncStorage. Ao encontrar essa sessão no
+ * nativo, move para o SecureStore e apaga a cópia antiga. Se não der para migrar agora, mantém a
+ * cópia antiga (e a sessão do usuário) até a próxima abertura do app.
+ */
+async function migrarSessaoLegada(): Promise<string | null> {
+  const legado = await AsyncStorage.getItem(STORAGE_KEYS.SESSAO);
+  if (!legado) return null;
+  try {
+    await SecureStore.setItemAsync(CHAVE_SESSAO_SEGURA, legado);
+    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+  } catch {
+    // Migra na próxima vez.
+  }
+  return legado;
+}
+
+async function lerSessaoSimples(): Promise<string | null> {
+  if (ehWeb()) return AsyncStorage.getItem(STORAGE_KEYS.SESSAO);
+  try {
+    const valor = await SecureStore.getItemAsync(CHAVE_SESSAO_SEGURA);
+    if (valor) return valor;
+  } catch {
+    // Segue para a migração: pode haver uma sessão antiga no AsyncStorage.
+  }
+  return migrarSessaoLegada();
+}
+
+async function gravarSessaoSimples(sessao: SessaoProtegida): Promise<void> {
+  const json = JSON.stringify(sessao);
+  if (ehWeb()) {
+    // Web não tem armazenamento seguro; o AsyncStorage (localStorage) é o que existe.
+    await AsyncStorage.setItem(STORAGE_KEYS.SESSAO, json);
+    return;
+  }
+  try {
+    await SecureStore.setItemAsync(CHAVE_SESSAO_SEGURA, json);
+  } catch {
+    // Sem armazenamento seguro não caímos para texto puro: a sessão vale só até fechar o app.
+  }
+  await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+}
+
 async function salvarSessaoComSenha(sessao: SessaoProtegida): Promise<void> {
-  await AsyncStorage.setItem(STORAGE_KEYS.SESSAO, JSON.stringify(sessao));
+  await gravarSessaoSimples(sessao);
   definirSessaoEmMemoria(sessao);
 }
 
@@ -139,7 +209,7 @@ export async function salvarSessaoAposLogin(sessao: SessaoProtegida): Promise<vo
     await SecureStore.setItemAsync(CHAVE_SESSAO_PROTEGIDA, JSON.stringify(sessao), {
       requireAuthentication: true,
     });
-    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+    await removerSessaoSimples();
     definirSessaoEmMemoria(sessao);
   } catch {
     await limparBiometria();
@@ -166,18 +236,18 @@ export async function restaurarSessaoPersistida(): Promise<SessaoProtegida | nul
     }
   }
 
-  const valor = await AsyncStorage.getItem(STORAGE_KEYS.SESSAO);
+  const valor = await lerSessaoSimples();
   if (!valor) return null;
   try {
     const sessao: unknown = JSON.parse(valor);
     if (!validarSessaoProtegida(sessao)) {
-      await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+      await removerSessaoSimples();
       return null;
     }
     definirSessaoEmMemoria(sessao);
     return sessao;
   } catch {
-    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+    await removerSessaoSimples();
     return null;
   }
 }
@@ -208,7 +278,7 @@ export async function ativarBiometria(sessao: SessaoProtegida): Promise<void> {
       [STORAGE_KEYS.BIOMETRIA_USUARIO, String(sessao.idUsuario)],
       [STORAGE_KEYS.BIOMETRIA_CONVITE_USUARIO, String(sessao.idUsuario)],
     ]);
-    await AsyncStorage.removeItem(STORAGE_KEYS.SESSAO);
+    await removerSessaoSimples();
     definirSessaoEmMemoria(sessao);
   } catch (erro) {
     await SecureStore.deleteItemAsync(CHAVE_SESSAO_PROTEGIDA);
@@ -242,6 +312,7 @@ export async function limparSessaoPersistida(): Promise<void> {
       STORAGE_KEYS.BIOMETRIA_ATIVADA,
       STORAGE_KEYS.BIOMETRIA_USUARIO,
     ]),
-    SecureStore.deleteItemAsync(CHAVE_SESSAO_PROTEGIDA),
+    excluirDoSecureStore(CHAVE_SESSAO_PROTEGIDA),
+    excluirDoSecureStore(CHAVE_SESSAO_SEGURA),
   ]);
 }
