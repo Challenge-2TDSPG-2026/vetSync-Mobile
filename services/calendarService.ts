@@ -10,10 +10,6 @@ function obterNotificacoes(): typeof NotificationsModule | null {
   if (notifications !== undefined) return notifications;
 
   try {
-    // Expo Go no Android não inclui o suporte completo a push remoto. Carregar o
-    // módulo apenas quando ele for necessário evita que essa limitação interrompa
-    // a avaliação das rotas que usam calendário.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports -- carregamento sob demanda intencional (ver comentário acima)
     notifications = require('expo-notifications') as typeof NotificationsModule;
     notifications.setNotificationHandler({
       handleNotification: async () => ({
