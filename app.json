@@ -61,7 +61,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Precisamos acessar suas fotos para definir a foto do pet."
+          "photosPermission": "Precisamos acessar suas fotos para definir a foto do pet.",
+          "cameraPermission": "Usamos a câmera para ler o QR code da clínica e tirar a foto do seu pet."
         }
       ],
       "expo-sharing",
@@ -69,7 +70,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Usamos a câmera para ler o QR code da clínica."
+          "cameraPermission": "Usamos a câmera para ler o QR code da clínica e tirar a foto do seu pet."
         }
       ],
       [
