@@ -14,12 +14,13 @@ import type { AppTheme } from '../constants/theme';
 
 export default function VinculoClinicaScreen() {
   const router = useRouter();
-  const { sessao, atualizarVinculoClinica } = useAuth();
+  const { sessao, atualizarVinculoClinica, logout } = useAuth();
   const { theme } = useTheme();
   const styles = useMemo(() => criarEstilos(theme), [theme]);
   const { troca } = useLocalSearchParams<{ troca?: string }>();
   const [codigo, setCodigo] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [saindo, setSaindo] = useState(false);
   const [scannerAberto, setScannerAberto] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -60,6 +61,16 @@ export default function VinculoClinicaScreen() {
     setScannerAberto(true);
   }
 
+  async function sairParaOutraConta() {
+    setSaindo(true);
+    try {
+      await logout();
+      router.replace('/login');
+    } finally {
+      setSaindo(false);
+    }
+  }
+
   return (
     <AuthLayout
       title={sessao || troca ? 'Troque sua clínica.' : 'Informe sua clínica.'}
@@ -86,6 +97,46 @@ export default function VinculoClinicaScreen() {
         <AppIcon name="scan-outline" set="Ionicons" size={20} color={theme.colors.primary} />
         <Text style={styles.botaoSecundarioTexto}>Ler QR code</Text>
       </Pressable>
+      {sessao && troca ? (
+        <Pressable
+          style={styles.voltarCadastro}
+          onPress={() => router.replace('/gerenciar-conta')}
+          disabled={enviando || saindo}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar para gerenciar conta"
+        >
+          <AppIcon name="arrow-back" set="Ionicons" size={18} color={theme.colors.primary} />
+          <Text style={styles.voltarCadastroTexto}>Voltar para gerenciar conta</Text>
+        </Pressable>
+      ) : null}
+      {sessao ? (
+        <Pressable
+          style={styles.voltarCadastro}
+          onPress={() => void sairParaOutraConta()}
+          disabled={enviando || saindo}
+          accessibilityRole="button"
+          accessibilityLabel="Sair e entrar em outra conta"
+          accessibilityState={{ disabled: enviando || saindo, busy: saindo }}
+        >
+          {saindo ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          ) : (
+            <AppIcon name="log-out-outline" set="Ionicons" size={18} color={theme.colors.primary} />
+          )}
+          <Text style={styles.voltarCadastroTexto}>{saindo ? 'Saindo...' : 'Sair e entrar em outra conta'}</Text>
+        </Pressable>
+      ) : (
+        <Pressable
+          style={styles.voltarCadastro}
+          onPress={() => router.back()}
+          disabled={enviando}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar ao cadastro"
+        >
+          <AppIcon name="arrow-back" set="Ionicons" size={18} color={theme.colors.primary} />
+          <Text style={styles.voltarCadastroTexto}>Voltar ao cadastro</Text>
+        </Pressable>
+      )}
 
       <Modal visible={scannerAberto} animationType="slide" onRequestClose={() => setScannerAberto(false)}>
         <View style={styles.scannerTela}>
@@ -119,6 +170,8 @@ function criarEstilos(theme: AppTheme) {
     botaoTexto: { color: theme.colors.onPrimary, fontSize: 16, fontWeight: '800' },
     botaoSecundario: { minHeight: 52, borderWidth: 1, borderColor: theme.colors.primary, borderRadius: 999, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, marginTop: 13 },
     botaoSecundarioTexto: { color: theme.colors.primary, fontSize: 15, fontWeight: '800' },
+    voltarCadastro: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 16 },
+    voltarCadastroTexto: { color: theme.colors.primary, fontSize: 14, fontWeight: '700' },
     scannerTela: { flex: 1, backgroundColor: '#000' },
     scannerTopo: { paddingTop: 72, paddingHorizontal: 24, alignItems: 'center', gap: 18 },
     scannerTitulo: { color: '#fff', fontSize: 17, fontWeight: '700', textAlign: 'center' },
