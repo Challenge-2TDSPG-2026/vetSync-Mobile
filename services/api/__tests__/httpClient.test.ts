@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { api, apiRequest } from '../httpClient';
 import { assinarExpiracaoSessao } from '../sessionEvents';
 import { definirSessaoEmMemoria } from '../../biometriaService';
@@ -67,6 +68,54 @@ describe('apiRequest', () => {
       'https://vetsync-java.onrender.com/pets/12/foto',
       expect.objectContaining({ method: 'PUT', headers: { Authorization: 'Bearer token-valido' } })
     );
+  });
+
+  it('no nativo anexa o arquivo por uri, sem baixar o blob antes', async () => {
+    const append = jest.fn();
+    globalThis.FormData = jest.fn(() => ({ append })) as unknown as typeof FormData;
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      ok: true,
+      text: jest.fn().mockResolvedValue('{}'),
+    } as Partial<Response>) as typeof fetch;
+
+    await api.uploadMultipart('/pets/12/foto', {
+      uri: 'file:///foto.jpg',
+      nome: 'foto-pet.jpg',
+      tipoMime: 'image/jpeg',
+    });
+
+    expect(append).toHaveBeenCalledWith('foto', {
+      uri: 'file:///foto.jpg',
+      name: 'foto-pet.jpg',
+      type: 'image/jpeg',
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('na web converte a uri em blob antes de anexar', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    const blob = { tipo: 'blob' };
+    const append = jest.fn();
+    globalThis.FormData = jest.fn(() => ({ append })) as unknown as typeof FormData;
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ blob: jest.fn().mockResolvedValue(blob) })
+      .mockResolvedValueOnce({
+        status: 200,
+        ok: true,
+        text: jest.fn().mockResolvedValue('{}'),
+      }) as unknown as typeof fetch;
+
+    await api.uploadMultipart('/pets/12/foto', {
+      uri: 'blob:http://localhost/abc',
+      nome: 'foto-pet.jpg',
+      tipoMime: 'image/jpeg',
+    });
+
+    expect(append).toHaveBeenCalledWith('foto', blob, 'foto-pet.jpg');
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    jest.restoreAllMocks();
   });
 
   it('devolve ApiError "sem-internet" quando o fetch falha e o aparelho está sem conexão', async () => {
