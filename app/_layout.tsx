@@ -9,6 +9,7 @@ import {
 } from 'expo-router';
 import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
 import NetInfo from '@react-native-community/netinfo';
+import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PetProvider, usePet } from '../context/PetContext';
 import { VetProvider } from '../context/VetContext';
@@ -17,11 +18,15 @@ import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { mostrarToast, ToastHost } from '../components/ui/Toast';
 import { AtivarBiometriaModal } from '../components/auth/AtivarBiometriaModal';
 import { OfflineBanner } from '../components/ui/OfflineBanner';
+import { AppSplashGate } from '../components/animated-splash';
 import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
 import { configurarNotificacoesPush } from '../services/pushNotificationService';
 
 lockFontScaling();
+
+// Mantém a splash nativa até a abertura animada desenhar o primeiro frame.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -324,6 +329,7 @@ function ThemedRootLayout() {
                 <PushNotificationRegistration />
                 <BiometricEnrollmentPrompt />
                 <ToastHost />
+                <AppSplashGate />
               </VetProvider>
             </PetProvider>
           </AuthProvider>
