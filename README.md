@@ -141,6 +141,18 @@ O projeto usa o `package-lock.json`; em ambientes de CI ou para uma instalação
 reprodutível, prefira `npm ci`. Não é necessário instalar o Expo CLI
 globalmente: os comandos usam a versão declarada no projeto.
 
+Para builds de distribuição, configure também o hash do commit que será
+publicado. Esse valor aparece na tela **Sobre o App** e deve corresponder
+exatamente ao código entregue:
+
+```bash
+EXPO_PUBLIC_COMMIT_HASH=<hash-do-commit-publicado>
+```
+
+A tela pode ser acessada pelo perfil do tutor em **Configurações > Sobre o App**
+ou pelo perfil do veterinário. Ela exibe o nome, a versão, o build e o commit de
+referência da instalação.
+
 Execução direta por plataforma:
 
 ```bash

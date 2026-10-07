@@ -71,6 +71,15 @@ export default function VetPerfilScreen() {
           <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
         </Pressable>
 
+        <Pressable style={s.reportButton} onPress={() => router.push('/sobre-app')} accessibilityRole="button">
+          <Ionicons name="information-circle-outline" size={19} color={theme.colors.primary} />
+          <View style={s.reportCopy}>
+            <Text style={s.reportTitle}>Sobre o App</Text>
+            <Text style={s.reportDescription}>Versão e commit de referência.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+
         <Text style={s.secLabel}>Dados profissionais</Text>
         <View style={s.card}>
           {[

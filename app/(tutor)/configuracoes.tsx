@@ -144,6 +144,15 @@ export default function ConfiguracoesScreen() {
             description="Veja as identificações e dados dos seus pets"
             onPress={() => router.push('/pets-cadastrados')}
           />
+          <View style={s.divider} />
+          <ConfigItem
+            styles={s}
+            simples={modoSimples}
+            icon="information-circle-outline"
+            title="Sobre o App"
+            description="Versão e commit de referência"
+            onPress={() => router.push('/sobre-app')}
+          />
         </View>
 
         <Pressable
