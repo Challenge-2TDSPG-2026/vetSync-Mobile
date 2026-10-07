@@ -26,7 +26,9 @@ export default function SobreAppScreen() {
         >
           <Ionicons name="arrow-back" size={23} color={theme.components.header.icon} />
         </Pressable>
-        <Text style={[styles.headerTitle, modoSimples && styles.largeHeaderTitle]}>Sobre o App</Text>
+        <Text style={[styles.headerTitle, modoSimples && styles.largeHeaderTitle]}>
+          Sobre o projeto
+        </Text>
       </View>
 
       <ScrollView
