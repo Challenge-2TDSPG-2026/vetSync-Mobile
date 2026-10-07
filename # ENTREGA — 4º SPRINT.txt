@@ -1,0 +1,257 @@
+# ENTREGA — 4º SPRINT
+
+## MOBILE APPLICATION DEVELOPMENT
+
+Esta é a entrega final do projeto e representa o fechamento do trabalho integrado da disciplina. O aplicativo mobile desenvolvido em React Native/Expo deve ser apresentado em sua versão completa, funcional e finalizada, refletindo todo o processo evolutivo construído ao longo das sprints anteriores e os feedbacks recebidos.
+
+Espera-se um produto pronto para uso, no qual todas as funcionalidades planejadas estejam implementadas, integradas e funcionando de forma consistente. A aplicação deve demonstrar maturidade técnica, estabilidade, atenção aos detalhes e domínio das tecnologias utilizadas.
+
+Nesta etapa, o foco não é mais prototipação ou experimentação, mas sim a entrega de uma solução real, capaz de ser utilizada por usuários finais. Esta sprint avalia a capacidade do grupo de concluir, consolidar e entregar um produto mobile de qualidade, compatível com o nível esperado de conclusão da graduação.
+
+---
+
+# Requisitos Avaliativos
+
+• Implementação funcional de todas as telas do aplicativo (20 pontos)
+
+• Publicação do aplicativo (20 pontos)
+
+• Notificações (Push ou Local) (20 pontos)
+
+• Arquitetura e Organização do Código (20 pontos)
+
+• Vídeo de Apresentação e Demonstração do Aplicativo (20 pontos)
+
+**Total: 100 pontos**
+
+---
+
+# Implementação Funcional de Todas as Telas do Aplicativo (20 pontos)
+
+Este requisito avalia se o aplicativo entregue na Sprint 4 representa a conclusão funcional do trabalho desenvolvido ao longo das três sprints anteriores, resultando em uma solução utilizável e coerente para o problema proposto.
+
+## Critérios de Avaliação
+
+### • Funcionalidade real de todas as telas (6 pontos)
+
+• Todas as telas implementadas devem possuir comportamento funcional
+
+• Telas apenas visuais, demonstrativas ou sem efeito prático implicam perda proporcional ou total desta pontuação
+
+### • Fluxo completo e contínuo de uso (6 pontos)
+
+• O aplicativo deve permitir que o usuário execute o fluxo principal da solução do início ao fim
+
+• Fluxos interrompidos, etapas inoperantes ou telas sem ação resultam em perda desta pontuação
+
+### • Conclusão das funcionalidades das sprints anteriores (4 pontos)
+
+• Funcionalidades apresentadas nas Sprints 1, 2 e 3 devem estar finalizadas e integradas
+
+• Funcionalidades parciais, simuladas ou abandonadas implicam perda desta pontuação
+
+### • Utilidade prática da solução (4 pontos)
+
+• A aplicação deve entregar valor prático mínimo ao usuário final
+
+• Aplicativos que cumpram requisitos técnicos, mas sejam inutilizáveis na prática, poderão perder esta pontuação
+
+---
+
+# Publicação do Aplicativo (20 pontos)
+
+Este requisito avalia se o aplicativo foi efetivamente publicado e se a versão disponibilizada corresponde exatamente ao código-fonte entregue para avaliação.
+
+## Critérios de Avaliação
+
+### • Publicação no Firebase App Distribution (10 pontos)
+
+o O aplicativo deve estar publicado no Firebase App Distribution
+
+o A versão deve estar disponível para instalação e execução
+
+o Acesso do professor como tester
+
+o O e-mail institucional do professor deve estar cadastrado como tester
+
+o O acesso deve estar funcional no momento da avaliação
+
+### • Correspondência entre aplicativo publicado e código entregue (5 pontos)
+
+o A versão publicada deve corresponder exatamente ao código-fonte enviado no repositório
+
+o Diferenças entre a versão publicada e o código avaliado implicam perda desta pontuação
+
+### • Tela “Sobre o App” com identificação da versão (5 pontos)
+
+o O aplicativo deve possuir uma tela “Sobre o App”
+
+o Esta tela deve exibir claramente o hash do commit de referência da versão publicada
+
+---
+
+# Notificações (Push ou Local) (20 pontos)
+
+Este requisito avalia a implementação de notificações reais, podendo ser do tipo push ou local, integradas ao contexto da aplicação e relevantes para a solução proposta.
+
+## Critérios de Avaliação
+
+### • Cenário realista de notificação (6 pontos)
+
+o O aplicativo deve implementar ao menos um cenário realista de notificação
+
+o A notificação deve estar diretamente relacionada ao contexto e às funcionalidades do aplicativo
+
+o Notificações genéricas ou desconectadas da proposta da solução implicam perda desta pontuação
+
+### • Disparo e recepção funcionais (6 pontos)
+
+o A notificação deve ser disparada a partir de um evento real do sistema (ex: ação do usuário, processamento no backend ou serviço externo)
+
+o No caso de push, deve ser recebida corretamente com o app em foreground ou background
+
+o No caso de local, deve ser exibida automaticamente durante o uso do aplicativo
+
+### • Integração com o fluxo do aplicativo (4 pontos)
+
+o A notificação deve conduzir o usuário a uma tela, ação ou informação relevante
+
+o A interação com a notificação deve ter impacto real no uso do app
+
+### • Demonstração no vídeo de apresentação (4 pontos)
+
+o O funcionamento da notificação deve ser claramente demonstrado no vídeo
+
+o Deve ser possível identificar o evento gerador e o comportamento do aplicativo
+
+### Observação
+
+A escolha entre notificação push ou local é livre, desde que a notificação seja funcional, relevante para o contexto da aplicação e represente um uso realista em um produto mobile. Alertas simulados, mensagens fixas, notificações disparadas manualmente apenas para demonstração ou que não tenham impacto real no fluxo de uso do aplicativo não serão consideradas válidas para fins de avaliação.
+
+---
+
+# Arquitetura e Organização do Código (20 pontos)
+
+O projeto deve apresentar uma arquitetura clara, organizada e coerente.
+
+## Critérios de Avaliação
+
+### • Separação de responsabilidades (6 pontos)
+
+o O código deve estar organizado separando claramente:
+
+▪ Interface (telas/componentes)
+
+▪ Lógica de negócio
+
+▪ Camada de acesso a dados / APIs
+
+o Não será aceito código de regra de negócio ou chamadas HTTP diretamente em componentes de tela
+
+### • Estrutura de pastas consistente (5 pontos)
+
+o O projeto deve possuir uma estrutura de pastas clara e padronizada
+
+o Arquivos não devem estar todos concentrados em uma única pasta
+
+o A organização deve permitir identificar facilmente onde estão telas, serviços, hooks e componentes reutilizáveis
+
+### • Uso adequado de hooks e abstrações (5 pontos)
+
+o Lógica reutilizável deve estar abstraída em hooks ou serviços
+
+o Não será aceito código duplicado em múltiplas telas sem justificativa
+
+o Hooks como os do TanStack Query devem estar isolados da camada de UI
+
+### • Legibilidade e manutenibilidade do código (4 pontos)
+
+o Nomes de arquivos, funções e variáveis devem ser coerentes e autoexplicativos
+
+o Código excessivamente acoplado, confuso ou difícil de entender implicará perda de pontuação
+
+o O projeto deve permitir evolução sem necessidade de reescrita completa
+
+---
+
+# Vídeo de Apresentação e Demonstração do Aplicativo (20 pontos)
+
+O vídeo deve apresentar de forma clara, objetiva e contínua o resultado final do aplicativo, demonstrando todas as funcionalidades propostas ao longo do projeto. Este item representa a conclusão do trabalho desenvolvido nas três sprints anteriores e deve evidenciar que o aplicativo está funcional, integrado e pronto para uso.
+
+### • Demonstração completa das funcionalidades propostas (8 pontos)
+
+o Todas as funcionalidades principais definidas para o projeto devem ser demonstradas em funcionamento.
+
+o Cada funcionalidade deve ser apresentada do início ao fim do fluxo (entrada → processamento → resultado).
+
+o Funcionalidades não demonstradas no vídeo serão consideradas não implementadas, mesmo que existam no código.
+
+o Perda total dos pontos deste subitem caso o vídeo não cubra as funcionalidades essenciais do aplicativo.
+
+### • Demonstração do fluxo real de uso do aplicativo (6 pontos)
+
+o O vídeo deve mostrar o uso do aplicativo do ponto de vista do usuário final.
+
+o O fluxo deve ser contínuo, sem cortes que ocultem erros, falhas ou comportamentos inconsistentes.
+
+o O aplicativo deve permitir concluir ao menos um cenário completo de uso real, sem bloqueios.
+
+o Aplicativos que “funcionam por telas isoladas”, mas não permitem um uso real e contínuo, perdem a pontuação deste subitem.
+
+### • Coerência entre vídeo, código e versão publicada (4 pontos)
+
+o O aplicativo demonstrado no vídeo deve corresponder exatamente ao código entregue no repositório.
+
+o A versão exibida no vídeo deve ser a mesma publicada e disponibilizada ao professor.
+
+o Divergências entre vídeo, código e versão publicada implicam perda total da pontuação deste subitem.
+
+### • Clareza técnica da demonstração (2 pontos)
+
+o O vídeo deve permitir identificar claramente o que está sendo testado e demonstrado.
+
+o Não é necessário edição ou narrativa elaborada, mas a demonstração deve ser compreensível.
+
+o Vídeos confusos, acelerados ou que não permitam validar o funcionamento das funcionalidades perderão pontuação.
+
+---
+
+# Penalidades
+
+### I. Não entregar via GitHub Classroom (-20 pontos)
+
+### II. Não entregar vídeo de apresentação (-20 pontos)
+
+### III. Aplicativo não funcional (-100 pontos)
+
+### IV. Ausência do arquivo README.md (-10 pontos)
+
+### V. Não publicar o app (-40 pontos)
+
+### VI. Não utilizar tema (modo claro/escuro) (-20 pontos)
+
+### VII. Aplicativo fora do escopo das aulas (-60 pontos)
+
+### VIII. Remoção de telas entregue na Sprint anterior (-100 pontos)
+
+### IX. Aplicativo publicado inacessível ou inconsistente (-40 pontos)
+
+### X. Ausência de implementação real de Push Notification ou Local Notification (-40 pontos)
+
+### XI. Integrações simuladas ou incompletas (-40 pontos)
+
+### XII. Arquitetura inadequada ou código não manutenível (-30 pontos)
+
+### XIV. Remoção ou descaracterização de funcionalidades entregues em sprints anteriores (-100 pontos)
+
+### XV. Histórico do Git incoerente ou confuso (-50 pontos)
+
+É esperado que o repositório tenha uma árvore de commits sequencial e evolutiva, com mensagens claras e representando a construção real do app. Repositórios que não demonstrem envolvimento prático ou com uso superficial do Git poderão ser penalizados.
+
+## Observações Gerais
+
+• As penalidades são cumulativas
+
+• A aplicação de uma penalidade não exige a ocorrência de todos os itens listados
+
+• Um único caso representativo é suficiente para aplicação
