@@ -7,6 +7,7 @@ import { AuthLayout } from '../components/auth/AuthLayout';
 import { AppIcon } from '../components/AppIcon';
 import { mostrarToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
+import { useAccessibility } from '../context/AccessibilityContext';
 import { useTheme } from '../context/ThemeContext';
 import { vinculoClinicaService } from '../services/vinculoClinicaService';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -15,6 +16,7 @@ import type { AppTheme } from '../constants/theme';
 export default function VinculoClinicaScreen() {
   const router = useRouter();
   const { sessao, atualizarVinculoClinica, logout } = useAuth();
+  const { modoSimples } = useAccessibility();
   const { theme } = useTheme();
   const styles = useMemo(() => criarEstilos(theme), [theme]);
   const { troca } = useLocalSearchParams<{ troca?: string }>();
@@ -78,7 +80,7 @@ export default function VinculoClinicaScreen() {
     >
       <View style={styles.aviso}>
         <AppIcon name="business-outline" set="Ionicons" size={22} color={theme.colors.primary} />
-        <Text style={styles.avisoTexto}>
+        <Text style={[styles.avisoTexto, modoSimples && stylesSimples.avisoTexto]}>
           Seus pets e o histórico médico continuam com você. A troca só é liberada sem atendimentos agendados.
         </Text>
       </View>
@@ -90,12 +92,22 @@ export default function VinculoClinicaScreen() {
         placeholder="Ex: A1B2C3D4"
         autoCapitalize="characters"
       />
-      <Pressable style={[styles.botao, enviando && styles.botaoDesabilitado]} onPress={() => void confirmar()} disabled={enviando}>
+      <Pressable
+        style={[styles.botao, modoSimples && stylesSimples.botao, enviando && styles.botaoDesabilitado]}
+        onPress={() => void confirmar()}
+        disabled={enviando}
+      >
         {enviando ? <ActivityIndicator color={theme.colors.onPrimary} /> : <Text style={styles.botaoTexto}>Confirmar clínica</Text>}
       </Pressable>
-      <Pressable style={styles.botaoSecundario} onPress={() => void abrirScanner()} disabled={enviando}>
+      <Pressable
+        style={[styles.botaoSecundario, modoSimples && stylesSimples.botaoSecundario]}
+        onPress={() => void abrirScanner()}
+        disabled={enviando}
+      >
         <AppIcon name="scan-outline" set="Ionicons" size={20} color={theme.colors.primary} />
-        <Text style={styles.botaoSecundarioTexto}>Ler QR code</Text>
+        <Text style={[styles.botaoSecundarioTexto, modoSimples && stylesSimples.botaoSecundarioTexto]}>
+          Ler QR code
+        </Text>
       </Pressable>
       {sessao && troca ? (
         <Pressable
@@ -106,7 +118,9 @@ export default function VinculoClinicaScreen() {
           accessibilityLabel="Voltar para gerenciar conta"
         >
           <AppIcon name="arrow-back" set="Ionicons" size={18} color={theme.colors.primary} />
-          <Text style={styles.voltarCadastroTexto}>Voltar para gerenciar conta</Text>
+          <Text style={[styles.voltarCadastroTexto, modoSimples && stylesSimples.linkTexto]}>
+            Voltar para gerenciar conta
+          </Text>
         </Pressable>
       ) : null}
       {sessao ? (
@@ -123,7 +137,9 @@ export default function VinculoClinicaScreen() {
           ) : (
             <AppIcon name="log-out-outline" set="Ionicons" size={18} color={theme.colors.primary} />
           )}
-          <Text style={styles.voltarCadastroTexto}>{saindo ? 'Saindo...' : 'Sair e entrar em outra conta'}</Text>
+          <Text style={[styles.voltarCadastroTexto, modoSimples && stylesSimples.linkTexto]}>
+            {saindo ? 'Saindo...' : 'Sair e entrar em outra conta'}
+          </Text>
         </Pressable>
       ) : (
         <Pressable
@@ -134,7 +150,9 @@ export default function VinculoClinicaScreen() {
           accessibilityLabel="Voltar ao cadastro"
         >
           <AppIcon name="arrow-back" set="Ionicons" size={18} color={theme.colors.primary} />
-          <Text style={styles.voltarCadastroTexto}>Voltar ao cadastro</Text>
+          <Text style={[styles.voltarCadastroTexto, modoSimples && stylesSimples.linkTexto]}>
+            Voltar ao cadastro
+          </Text>
         </Pressable>
       )}
 
@@ -161,14 +179,38 @@ export default function VinculoClinicaScreen() {
   );
 }
 
+const stylesSimples = StyleSheet.create({
+  avisoTexto: { fontSize: 17, lineHeight: 24 },
+  botao: { minHeight: 68 },
+  botaoSecundario: { minHeight: 66 },
+  botaoSecundarioTexto: { fontSize: 18 },
+  linkTexto: { fontSize: 17 },
+});
+
 function criarEstilos(theme: AppTheme) {
   return StyleSheet.create({
-    aviso: { flexDirection: 'row', gap: 10, padding: 14, borderRadius: 14, backgroundColor: theme.colors.successBackground, marginBottom: 22 },
+    aviso: {
+      flexDirection: 'row',
+      gap: 11,
+      padding: 16,
+      borderRadius: 20,
+      backgroundColor: theme.colors.successBackground,
+      borderWidth: 1,
+      borderColor: theme.pages.shared.border,
+      marginBottom: 24,
+    },
     avisoTexto: { flex: 1, color: theme.colors.textSecondary, fontSize: 13, lineHeight: 19 },
-    botao: { alignItems: 'center', justifyContent: 'center', minHeight: 54, borderRadius: 999, backgroundColor: theme.colors.primary, marginTop: 10 },
+    botao: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 58,
+      borderRadius: 18,
+      backgroundColor: theme.colors.primary,
+      marginTop: 12,
+    },
     botaoDesabilitado: { opacity: 0.7 },
     botaoTexto: { color: theme.colors.onPrimary, fontSize: 16, fontWeight: '800' },
-    botaoSecundario: { minHeight: 52, borderWidth: 1, borderColor: theme.colors.primary, borderRadius: 999, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, marginTop: 13 },
+    botaoSecundario: { minHeight: 56, borderWidth: 1, borderColor: theme.colors.primary, borderRadius: 18, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, marginTop: 12, backgroundColor: theme.pages.shared.card },
     botaoSecundarioTexto: { color: theme.colors.primary, fontSize: 15, fontWeight: '800' },
     voltarCadastro: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 16 },
     voltarCadastroTexto: { color: theme.colors.primary, fontSize: 14, fontWeight: '700' },
