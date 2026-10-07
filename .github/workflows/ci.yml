@@ -42,8 +42,15 @@ jobs:
       - name: Format check
         run: npm run format:check
 
+      - name: Validate publication commit hash
+        run: npm run validate:commit-hash
+        env:
+          EXPO_PUBLIC_COMMIT_HASH: ${{ github.sha }}
+
       - name: Tests
         run: npm test
 
       - name: Build web
         run: npm run build
+        env:
+          EXPO_PUBLIC_COMMIT_HASH: ${{ github.sha }}

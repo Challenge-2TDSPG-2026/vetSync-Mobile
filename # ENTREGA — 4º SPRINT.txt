@@ -10,7 +10,7 @@
 - [x] Exibir o hash do commit, ou informar explicitamente quando ele não foi configurado.
 - [x] Definir a variável de build utilizada para injetar o hash: `EXPO_PUBLIC_COMMIT_HASH`.
 - [x] Adicionar a tela ao fluxo de configurações do tutor e ao perfil do veterinário.
-- [ ] Validar que o hash exibido corresponde exatamente ao commit usado na publicação.
+- [x] Validar que o hash exibido corresponde exatamente ao commit usado na publicação.
 
 ### Publicação no Firebase App Distribution
 

@@ -141,13 +141,21 @@ O projeto usa o `package-lock.json`; em ambientes de CI ou para uma instalação
 reprodutível, prefira `npm ci`. Não é necessário instalar o Expo CLI
 globalmente: os comandos usam a versão declarada no projeto.
 
-Para builds de distribuição, configure também o hash do commit que será
-publicado. Esse valor aparece na tela **Sobre o App** e deve corresponder
-exatamente ao código entregue:
+Para builds de distribuição, configure também o SHA completo (40 caracteres)
+do commit que será publicado. Esse valor aparece na tela **Sobre o App** e deve
+corresponder exatamente ao commit identificado pelo ambiente de publicação:
 
 ```bash
 EXPO_PUBLIC_COMMIT_HASH=<hash-do-commit-publicado>
+npm run validate:commit-hash
 ```
+
+A validação compara `EXPO_PUBLIC_COMMIT_HASH` com o commit fornecido
+automaticamente por EAS (`EAS_BUILD_GIT_COMMIT_HASH`), Vercel
+(`VERCEL_GIT_COMMIT_SHA`) ou CI (`GITHUB_SHA`/`CI_COMMIT_SHA`) e interrompe o
+build se os valores forem diferentes, abreviados ou ausentes. No Firebase App
+Distribution, execute o comando no mesmo checkout/ambiente usado para gerar o
+APK e publique somente após a validação passar.
 
 A tela pode ser acessada pelo perfil do tutor em **Configurações > Sobre o App**
 ou pelo perfil do veterinário. Ela exibe o nome, a versão, o build e o commit de
