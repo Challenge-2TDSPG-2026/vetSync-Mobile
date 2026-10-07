@@ -26,7 +26,7 @@ export default function SobreAppScreen() {
         >
           <Ionicons name="arrow-back" size={23} color={theme.components.header.icon} />
         </Pressable>
-        <Text style={[styles.headerTitle, modoSimples && styles.largeText]}>Sobre o App</Text>
+        <Text style={[styles.headerTitle, modoSimples && styles.largeHeaderTitle]}>Sobre o App</Text>
       </View>
 
       <ScrollView
@@ -43,7 +43,9 @@ export default function SobreAppScreen() {
           </Text>
         </View>
 
-        <Text style={[styles.sectionTitle, modoSimples && styles.largeText]}>Versão instalada</Text>
+        <Text style={[styles.sectionTitle, modoSimples && styles.largeSectionTitle]}>
+          Versão instalada
+        </Text>
         <View style={styles.infoCard}>
           <InfoRow styles={styles} label="Versão" value={APP_INFO.version} simples={modoSimples} />
           <View style={styles.divider} />
@@ -117,14 +119,19 @@ const createStyles = (theme: AppTheme) =>
       borderBottomColor: theme.components.header.border,
     },
     backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-    headerTitle: { flex: 1, color: theme.components.header.title, fontSize: 20, fontWeight: '800' },
-    content: { padding: 20 },
+    headerTitle: { flex: 1, color: theme.components.header.title, fontSize: 25, fontWeight: '800', letterSpacing: -0.55 },
+    content: { paddingHorizontal: 18, paddingTop: 22 },
     brandCard: {
       alignItems: 'center',
       backgroundColor: theme.pages.shared.heroBackground,
-      borderRadius: 24,
-      padding: 28,
-      marginBottom: 28,
+      borderRadius: 26,
+      padding: 30,
+      marginBottom: 30,
+      shadowColor: theme.colors.text,
+      shadowOpacity: 0.08,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 7 },
+      elevation: 3,
     },
     logo: {
       width: 76,
@@ -137,13 +144,22 @@ const createStyles = (theme: AppTheme) =>
     },
     appName: { color: theme.pages.shared.heroText, fontSize: 28, fontWeight: '800' },
     tagline: { color: theme.pages.shared.textSecondary, fontSize: 14, marginTop: 6, textAlign: 'center' },
-    sectionTitle: { color: theme.colors.text, fontSize: 19, fontWeight: '800', marginBottom: 12 },
+    sectionTitle: {
+      color: theme.colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.85,
+      textTransform: 'uppercase',
+      marginBottom: 10,
+      paddingLeft: 2,
+    },
     infoCard: {
       backgroundColor: theme.pages.shared.card,
       borderWidth: 1,
       borderColor: theme.pages.shared.border,
-      borderRadius: 18,
+      borderRadius: 21,
       paddingHorizontal: 16,
+      paddingVertical: 4,
     },
     infoRow: { minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
     label: { color: theme.colors.textSecondary, fontSize: 14, flex: 1 },
@@ -160,7 +176,9 @@ const createStyles = (theme: AppTheme) =>
       marginTop: 16,
     },
     warningText: { flex: 1, color: theme.colors.textSecondary, fontSize: 13, lineHeight: 19 },
-    description: { color: theme.colors.textSecondary, fontSize: 13, lineHeight: 19, marginTop: 20, textAlign: 'center' },
+    description: { color: theme.colors.textSecondary, fontSize: 13, lineHeight: 20, marginTop: 22, textAlign: 'center', paddingHorizontal: 8 },
+    largeHeaderTitle: { fontSize: 31 },
     largeText: { fontSize: 24 },
+    largeSectionTitle: { fontSize: 18 },
     largeSecondaryText: { fontSize: 18, lineHeight: 25 },
   });
