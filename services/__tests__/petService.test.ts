@@ -11,7 +11,8 @@ jest.mock('../api/httpClient', () => ({
 
 const dtoLuna = {
   idPet: 12, numero: '0012', nmPet: 'Luna', especie: 'CÃO', sexo: 'F', raca: 'Vira-lata',
-  dtNascimento: '2020-12-25T00:00:00', idadeAnos: 5, peso: 12.5, idTutor: 7, fotoUrl: null,
+  dtNascimento: '2020-12-25T00:00:00', idadeAnos: 5, peso: 12.5, idTutor: 7,
+  nmTutor: 'Ana Souza', emailTutor: 'ana@example.com', telefoneTutor: '11999990000', fotoUrl: null,
 };
 
 const petLuna: Pet = {
@@ -33,6 +34,7 @@ describe('petService', () => {
     expect(pets[0].id).toBe('12');
     expect(pets[0].nome).toBe('Luna');
     expect(pets[0].especie).toBe('cachorro');
+    expect(pets[0].tutor).toEqual({ id: '7', nome: 'Ana Souza', email: 'ana@example.com', telefone: '11999990000' });
   });
 
   it('busca um pet pelo id', async () => {

@@ -27,7 +27,7 @@ type PetContextValue = {
   petAtivo: Pet | null;
   petAtivoId: string | null;
   selecionarPet: (id: string) => void;
-  adicionarPet: (pet: Pet) => Promise<void>;
+  adicionarPet: (pet: Pet) => Promise<Pet>;
   removerPet: (id: string) => Promise<void>;
   salvandoPet: boolean;
 
@@ -92,6 +92,7 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
     const criado = await criarPetMutation.mutateAsync(pet);
     setPetAtivoIdState(criado.id);
     await salvarPetAtivoId(criado.id);
+    return criado;
   }, [criarPetMutation]);
 
   const removerPet = useCallback(async (id: string) => {

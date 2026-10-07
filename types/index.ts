@@ -83,8 +83,8 @@ export interface BloqueioAgenda {
 }
 
 export interface PerfilSaudePet {
-  petId: string;
-  pesoAtual: string | null;
+  petId?: string;
+  pesoAtual: number | null;
   pesoAtualizadoEm: string | null;
   alergias: string | null;
   medicamentosContinuos: string | null;
@@ -92,8 +92,10 @@ export interface PerfilSaudePet {
   condicoesPreExistentes: string | null;
   observacoesImportantes: string | null;
   contatoEmergencia: string | null;
-  veterinarioPreferencialId: string | null;
+  veterinarioPreferencialId: number | null;
 }
+
+export type PerfilSaudePetAtualizacao = Omit<PerfilSaudePet, 'petId' | 'pesoAtualizadoEm'>;
 
 export interface RelatorioClinica {
   consultasAgendadas: number;

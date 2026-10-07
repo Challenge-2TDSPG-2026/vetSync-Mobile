@@ -1,5 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { veterinarioService } from '../services/veterinarioService';
+import { petHealthService } from '../services/petHealthService';
+import { petKeys } from './queryKeys';
+import type { PerfilSaudePetAtualizacao } from '../types';
 
 export function useRelatorioClinica(inicio: string, fim: string, habilitado: boolean) {
   return useQuery({
@@ -12,9 +15,22 @@ export function useRelatorioClinica(inicio: string, fim: string, habilitado: boo
 
 export function usePerfilSaudePet(idPet: string | null, habilitado: boolean) {
   return useQuery({
-    queryKey: ['pet', idPet, 'perfil-saude'],
-    queryFn: () => veterinarioService.buscarPerfilSaude(idPet as string),
+    queryKey: petKeys.perfilSaude(idPet ?? ''),
+    queryFn: () => petHealthService.buscarPerfilSaude(idPet as string),
     enabled: habilitado && idPet !== null,
+  });
+}
+
+export function useAtualizarPerfilSaudePet() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ idPet, perfil }: { idPet: string; perfil: PerfilSaudePetAtualizacao }) =>
+      petHealthService.atualizarPerfilSaude(idPet, perfil),
+    onSuccess: (perfil, variaveis) => {
+      queryClient.setQueryData(petKeys.perfilSaude(variaveis.idPet), perfil);
+      queryClient.invalidateQueries({ queryKey: petKeys.detalhe(variaveis.idPet) });
+      queryClient.invalidateQueries({ queryKey: petKeys.all });
+    },
   });
 }
 

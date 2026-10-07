@@ -13,6 +13,9 @@ describe('petMapper', () => {
       idadeAnos: 5,
       peso: 12.5,
       idTutor: 7,
+      nmTutor: 'Ana Souza',
+      emailTutor: 'ana@example.com',
+      telefoneTutor: '11999990000',
       fotoUrl: 'https://cdn.vetsync.com/pets/12/foto.jpg',
     };
 
@@ -25,6 +28,7 @@ describe('petMapper', () => {
       raca: '',
       dataNascimento: '2020-12-25T00:00:00',
       peso: '12.5',
+      tutor: { id: '7', nome: 'Ana Souza', email: 'ana@example.com', telefone: '11999990000' },
       fotoUrl: 'https://cdn.vetsync.com/pets/12/foto.jpg',
     });
   });

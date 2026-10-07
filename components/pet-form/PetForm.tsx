@@ -11,7 +11,7 @@ import {
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { ESPECIES, GRUPOS_ESPECIE } from '../../constants';
-import type { Pet } from '../../types';
+import type { PerfilSaudePet, PerfilSaudePetAtualizacao, Pet } from '../../types';
 import { RacaSelector } from './RacaSelector';
 import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
@@ -19,11 +19,17 @@ import type { AppTheme } from '../../constants/theme';
 type Especie = Pet['especie'];
 type Sexo = Pet['sexo'];
 
+export type DadosFormularioPet = {
+  pet: Pet;
+  perfilSaude: PerfilSaudePetAtualizacao;
+};
+
 type Props = {
   petInicial?: Pet;
+  perfilSaudeInicial?: PerfilSaudePet;
   editando: boolean;
   salvando: boolean;
-  onSalvar: (pet: Pet) => void;
+  onSalvar: (dados: DadosFormularioPet) => void;
   onCancelar: () => void;
   onEspecieChange: (especie: Especie | null) => void;
 };
@@ -58,7 +64,7 @@ export function PetForm(props: Props) {
   return <PetFormFields key={chave} {...props} />;
 }
 
-function PetFormFields({ petInicial, editando, salvando, onSalvar, onCancelar, onEspecieChange }: Props) {
+function PetFormFields({ petInicial, perfilSaudeInicial, editando, salvando, onSalvar, onCancelar, onEspecieChange }: Props) {
   const { theme } = useTheme();
   const estilos = useMemo(() => createStyles(theme), [theme]);
   const [nome, setNome] = useState(petInicial?.nome ?? '');
@@ -67,6 +73,12 @@ function PetFormFields({ petInicial, editando, salvando, onSalvar, onCancelar, o
   const [raca, setRaca] = useState(petInicial?.raca ?? '');
   const [dataNascimento, setDataNascimento] = useState(petInicial ? isoParaData(petInicial.dataNascimento) : '');
   const [peso, setPeso] = useState(petInicial?.peso ?? '');
+  const [alergias, setAlergias] = useState(perfilSaudeInicial?.alergias ?? '');
+  const [medicamentosContinuos, setMedicamentosContinuos] = useState(perfilSaudeInicial?.medicamentosContinuos ?? '');
+  const [restricoesAlimentares, setRestricoesAlimentares] = useState(perfilSaudeInicial?.restricoesAlimentares ?? '');
+  const [condicoesPreExistentes, setCondicoesPreExistentes] = useState(perfilSaudeInicial?.condicoesPreExistentes ?? '');
+  const [observacoesImportantes, setObservacoesImportantes] = useState(perfilSaudeInicial?.observacoesImportantes ?? '');
+  const [contatoEmergencia, setContatoEmergencia] = useState(perfilSaudeInicial?.contatoEmergencia ?? '');
   const [erros, setErros] = useState<Record<string, string>>({});
   const [mostrarMaisEspecies, setMostrarMaisEspecies] = useState(
     () => Boolean(petInicial && !ESPECIES_PRINCIPAIS.includes(petInicial.especie))
@@ -117,9 +129,23 @@ function PetFormFields({ petInicial, editando, salvando, onSalvar, onCancelar, o
   function aoSalvar() {
     const nascimentoIso = validar();
     if (!nascimentoIso || !especie) return;
+    const pesoNormalizado = peso.trim() ? Number(peso.replace(',', '.')) : null;
+    const textoOpcional = (valor: string) => valor.trim() || null;
     onSalvar({
-      id: petInicial?.id ?? '', nome: nome.trim(), especie, sexo, raca: raca.trim(),
-      dataNascimento: nascimentoIso, peso: peso.trim(),
+      pet: {
+        id: petInicial?.id ?? '', nome: nome.trim(), especie, sexo, raca: raca.trim(),
+        dataNascimento: nascimentoIso, peso: peso.trim(),
+      },
+      perfilSaude: {
+        pesoAtual: pesoNormalizado,
+        alergias: textoOpcional(alergias),
+        medicamentosContinuos: textoOpcional(medicamentosContinuos),
+        restricoesAlimentares: textoOpcional(restricoesAlimentares),
+        condicoesPreExistentes: textoOpcional(condicoesPreExistentes),
+        observacoesImportantes: textoOpcional(observacoesImportantes),
+        contatoEmergencia: textoOpcional(contatoEmergencia),
+        veterinarioPreferencialId: perfilSaudeInicial?.veterinarioPreferencialId ?? null,
+      },
     });
   }
 
@@ -185,10 +211,68 @@ function PetFormFields({ petInicial, editando, salvando, onSalvar, onCancelar, o
       {!!erros.dataNascimento && <Text style={estilos.erro}>{erros.dataNascimento}</Text>}
       {!!erros.peso && <Text style={estilos.erro}>{erros.peso}</Text>}
 
+      <View style={estilos.secaoSaude}>
+        <View style={estilos.secaoSaudeCabecalho}>
+          <View style={estilos.secaoSaudeIcone}>
+            <Ionicons name="medical-outline" size={20} color={theme.colors.primary} />
+          </View>
+          <View style={estilos.secaoSaudeTexto}>
+            <Text style={estilos.secaoSaudeTitulo}>Informações para emergência</Text>
+            <Text style={estilos.secaoSaudeDescricao}>
+              Estes dados formam a ficha rápida do pet. Preencha somente informações registradas e mantenha-as atualizadas.
+            </Text>
+          </View>
+        </View>
+
+        <CampoSaude styles={estilos} placeholderColor={theme.colors.placeholder} rotulo="Alergias" valor={alergias} aoMudar={setAlergias} placeholder="Ex.: reação registrada a um medicamento" />
+        <CampoSaude styles={estilos} placeholderColor={theme.colors.placeholder} rotulo="Medicamentos contínuos" valor={medicamentosContinuos} aoMudar={setMedicamentosContinuos} placeholder="Nome, dose e frequência registrados" />
+        <CampoSaude styles={estilos} placeholderColor={theme.colors.placeholder} rotulo="Restrições alimentares" valor={restricoesAlimentares} aoMudar={setRestricoesAlimentares} placeholder="Restrições conhecidas do pet" />
+        <CampoSaude styles={estilos} placeholderColor={theme.colors.placeholder} rotulo="Condições preexistentes" valor={condicoesPreExistentes} aoMudar={setCondicoesPreExistentes} placeholder="Condições de saúde já registradas" />
+        <CampoSaude styles={estilos} placeholderColor={theme.colors.placeholder} rotulo="Observações importantes" valor={observacoesImportantes} aoMudar={setObservacoesImportantes} placeholder="Outras informações relevantes em uma emergência" />
+        <CampoSaude styles={estilos} placeholderColor={theme.colors.placeholder} rotulo="Contato de emergência" valor={contatoEmergencia} aoMudar={setContatoEmergencia} placeholder="Nome, vínculo e telefone" maxLength={300} />
+        <Text style={estilos.origemSaude}>Origem: perfil de saúde deste pet.</Text>
+      </View>
+
       <Pressable style={({ pressed }) => [estilos.botaoSalvar, pressed && estilos.botaoSalvarPressionado, salvando && estilos.botaoSalvando]} onPress={aoSalvar} disabled={salvando} accessibilityRole="button">
         {salvando ? <ActivityIndicator color={theme.colors.onPrimary} /> : <><Text style={estilos.textoSalvar}>{editando ? 'Salvar alterações' : 'Cadastrar pet'}</Text><Ionicons name="arrow-forward" size={18} color={theme.colors.onPrimary} /></>}
       </Pressable>
       <Pressable style={estilos.botaoCancelar} onPress={onCancelar}><Text style={estilos.textoCancelar}>Cancelar</Text></Pressable>
+    </View>
+  );
+}
+
+function CampoSaude({
+  styles,
+  placeholderColor,
+  rotulo,
+  valor,
+  aoMudar,
+  placeholder,
+  maxLength = 2000,
+}: {
+  styles: ReturnType<typeof createStyles>;
+  placeholderColor: string;
+  rotulo: string;
+  valor: string;
+  aoMudar: (texto: string) => void;
+  placeholder: string;
+  maxLength?: number;
+}) {
+  const expandido = valor.includes('\n') || valor.length > 70;
+  return (
+    <View style={styles.campoSaudeGrupo}>
+      <Text style={styles.rotulo}>{rotulo}</Text>
+      <TextInput
+        style={[styles.campoSaude, expandido && styles.campoSaudeExpandido]}
+        value={valor}
+        onChangeText={aoMudar}
+        placeholder={placeholder}
+        placeholderTextColor={placeholderColor}
+        multiline
+        textAlignVertical="top"
+        maxLength={maxLength}
+        accessibilityLabel={rotulo}
+      />
     </View>
   );
 }
@@ -201,6 +285,16 @@ function createStyles(theme: AppTheme) {
     botaoMaisEspecies: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', marginTop: 12, paddingVertical: 4 }, textoMaisEspecies: { fontSize: 13, fontWeight: '700', color: theme.colors.primary }, grupo: { marginTop: 18, marginBottom: 2 }, tituloGrupo: { fontSize: 12, fontWeight: '700', color: theme.colors.textSecondary, marginBottom: 8 }, gradeEspecies: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     chipEspecie: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 13, paddingVertical: 11, borderRadius: 13, backgroundColor: theme.colors.input }, chipEspecieAtivo: { backgroundColor: theme.colors.primary, shadowColor: theme.colors.primary, shadowOpacity: theme.mode === 'dark' ? 0 : 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 }, textoChip: { fontSize: 13, fontWeight: '600', color: theme.colors.text }, textoChipAtivo: { color: theme.colors.onPrimary },
     linhaSexo: { flexDirection: 'row', gap: 8 }, botaoSexo: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 13, borderRadius: 13, backgroundColor: theme.colors.input }, botaoSexoAtivo: { backgroundColor: theme.colors.primary }, linhaDupla: { flexDirection: 'row', gap: 12, marginTop: 22 }, coluna: { flex: 1 },
+    secaoSaude: { marginTop: 28, paddingTop: 24, borderTopWidth: 1, borderTopColor: theme.pages.addPet.border },
+    secaoSaudeCabecalho: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 20 },
+    secaoSaudeIcone: { width: 42, height: 42, borderRadius: 14, backgroundColor: theme.pages.addPet.cardSecondary, alignItems: 'center', justifyContent: 'center' },
+    secaoSaudeTexto: { flex: 1 },
+    secaoSaudeTitulo: { fontSize: 18, fontWeight: '800', color: theme.colors.text },
+    secaoSaudeDescricao: { fontSize: 13, lineHeight: 19, color: theme.colors.textSecondary, marginTop: 4 },
+    campoSaudeGrupo: { marginBottom: 16 },
+    campoSaude: { minHeight: 76, borderWidth: 1.5, borderColor: theme.pages.addPet.border, borderRadius: 14, backgroundColor: theme.colors.input, color: theme.colors.text, fontSize: 14, lineHeight: 20, paddingHorizontal: 15, paddingVertical: 12 },
+    campoSaudeExpandido: { minHeight: 96 },
+    origemSaude: { fontSize: 12, lineHeight: 17, color: theme.colors.textSecondary },
     botaoSalvar: { flexDirection: 'row', gap: 8, marginTop: 30, backgroundColor: theme.colors.primary, borderRadius: 999, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', shadowColor: theme.colors.primary, shadowOpacity: theme.mode === 'dark' ? 0 : 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 6 }, botaoSalvarPressionado: { opacity: 0.86 }, botaoSalvando: { opacity: 0.7 }, textoSalvar: { color: theme.colors.onPrimary, fontSize: 15, fontWeight: '700' }, botaoCancelar: { marginTop: 14, paddingVertical: 10, alignItems: 'center' }, textoCancelar: { color: theme.colors.textSecondary, fontSize: 13, fontWeight: '600' },
   });
 }

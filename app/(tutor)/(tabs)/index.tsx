@@ -291,6 +291,21 @@ export default function DashboardScreen() {
             </View>
           )}
         </View>
+        <Pressable
+          style={[s.emergencyButton, modoSimples && sSimples.emergencyButton]}
+          onPress={() => router.push('/(tutor)/resumo-emergencia')}
+          accessibilityRole="button"
+          accessibilityLabel={`Abrir ficha de emergência de ${petAtivo.nome}`}
+        >
+          <View style={s.emergencyIcon}>
+            <Ionicons name="medical" size={modoSimples ? 24 : 19} color={theme.colors.danger} />
+          </View>
+          <View style={s.emergencyCopy}>
+            <Text style={[s.emergencyTitle, modoSimples && sSimples.emergencyTitle]}>Ficha de emergência</Text>
+            <Text style={[s.emergencySubtitle, modoSimples && sSimples.emergencySubtitle]}>Contatos e informações de saúde</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={modoSimples ? 24 : 19} color={theme.colors.danger} />
+        </Pressable>
       </View>
 
       {/* Próximos eventos */}
@@ -515,6 +530,11 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   petMetaDivider: { width: StyleSheet.hairlineWidth, backgroundColor: theme.pages.home.statsCard.border },
   petMetaLabel: { fontSize: 9, fontWeight: '800', letterSpacing: 0.7, color: theme.colors.primary },
   petMetaValue: { fontSize: 13, fontWeight: '700', color: theme.colors.text, marginTop: 3 },
+  emergencyButton: { flexDirection: 'row', alignItems: 'center', gap: 11, marginHorizontal: 16, marginBottom: 16, padding: 13, borderRadius: 16, backgroundColor: theme.colors.dangerBackground },
+  emergencyIcon: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.home.eventCard.background },
+  emergencyCopy: { flex: 1, minWidth: 0 },
+  emergencyTitle: { color: theme.colors.danger, fontSize: 14, fontWeight: '800' },
+  emergencySubtitle: { color: theme.colors.textSecondary, fontSize: 11, lineHeight: 16, marginTop: 2 },
 
   eventoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 15, gap: 12 },
   eventoRowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.pages.home.statsCard.border },
@@ -573,6 +593,9 @@ const sSimples = StyleSheet.create({
   petAvatar: { width: 108, height: 108, borderRadius: 54 },
   petNome: { fontSize: 24 },
   petDetalhe: { fontSize: 19 },
+  emergencyButton: { padding: 18 },
+  emergencyTitle: { fontSize: 20 },
+  emergencySubtitle: { fontSize: 16, lineHeight: 22 },
 
   eventoRow: { paddingVertical: 22 },
   eventoIcone: { width: 62, height: 62, borderRadius: 31 },

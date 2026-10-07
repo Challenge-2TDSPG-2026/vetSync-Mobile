@@ -7,12 +7,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ESPECIES } from '../../constants';
-import { PetForm } from '../../components/pet-form/PetForm';
+import { PetForm, type DadosFormularioPet } from '../../components/pet-form/PetForm';
 import { useAtualizarPet, usePetPorId } from '../../hooks/usePets';
+import { useAtualizarPerfilSaudePet, usePerfilSaudePet } from '../../hooks/useRelatorios';
 import { usePet } from '../../context/PetContext';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { DicaTela } from '../../components/ui/DicaTela';
 import type { Pet } from '../../types';
+import { PerfilSaudePendenteError, salvarPetComPerfil } from '../../utils/salvarPetComPerfil';
 
 function Icone({ nome, conjunto, color }: { nome: string; conjunto: 'Ionicons' | 'MaterialCommunityIcons'; color: string }) {
   if (conjunto === 'Ionicons') return <Ionicons name={nome as never} size={28} color={color} />;
@@ -27,8 +29,11 @@ export default function AddPetScreen() {
   const editando = !!id;
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('add-pet');
   const { data: petInicial, isLoading: carregandoPet } = usePetPorId(editando ? String(id) : null, editando);
+  const perfilSaude = usePerfilSaudePet(editando ? String(id) : null, editando);
   const atualizarPet = useAtualizarPet();
+  const atualizarPerfilSaude = useAtualizarPerfilSaudePet();
   const { adicionarPet, salvandoPet } = usePet();
+  const [petPersistido, setPetPersistido] = useState<Pet | null>(null);
   const [especieSelo, setEspecieSelo] = useState<Pet['especie'] | null>(null);
   const itemEspecie = ESPECIES.find(item => item.valor === (especieSelo ?? petInicial?.especie));
   const iconeSelo = itemEspecie
@@ -39,20 +44,52 @@ export default function AddPetScreen() {
     router.back();
   }
 
-  function exibirErro() {
+  function exibirErroCadastro() {
     Alert.alert('Não deu pra salvar', 'Confira sua conexão e tente de novo. Os dados que você digitou continuam aqui.');
   }
 
-  function salvar(pet: Pet) {
-    if (editando) {
-      atualizarPet.mutate(pet, { onSuccess: aoSalvarComSucesso, onError: exibirErro });
-      return;
+  async function salvar({ pet, perfilSaude: dadosPerfil }: DadosFormularioPet) {
+    try {
+      await salvarPetComPerfil({
+        pet,
+        perfilSaude: dadosPerfil,
+        petPersistido,
+        persistirPet: editando ? atualizarPet.mutateAsync : adicionarPet,
+        persistirPerfil: (idPet, perfil) => atualizarPerfilSaude.mutateAsync({ idPet, perfil }),
+        aoPersistirPet: setPetPersistido,
+      });
+      setPetPersistido(null);
+      aoSalvarComSucesso();
+    } catch (erro) {
+      if (!(erro instanceof PerfilSaudePendenteError)) {
+        exibirErroCadastro();
+        return;
+      }
+      Alert.alert(
+        'Pet salvo, ficha pendente',
+        `O cadastro de ${erro.pet.nome} foi salvo, mas as informações de emergência não. Toque em “Salvar alterações” novamente para tentar concluir sem cadastrar outro pet.`,
+      );
     }
-    adicionarPet(pet).then(aoSalvarComSucesso).catch(exibirErro);
   }
 
-  if (editando && carregandoPet) {
+  if (editando && (carregandoPet || perfilSaude.isLoading)) {
     return <View style={estilos.centralizado}><ActivityIndicator size="large" color={theme.pages.addPet.primary} /></View>;
+  }
+
+  if (editando && perfilSaude.isError) {
+    return (
+      <View style={estilos.centralizado}>
+        <Ionicons name="cloud-offline-outline" size={42} color={theme.colors.danger} />
+        <Text style={estilos.erroCarregamentoTitulo}>Não foi possível carregar a ficha de saúde</Text>
+        <Text style={estilos.erroCarregamentoTexto}>Tente novamente antes de editar para não substituir informações já registradas.</Text>
+        <Pressable style={estilos.botaoTentarNovamente} onPress={() => perfilSaude.refetch()}>
+          <Text style={estilos.botaoTentarNovamenteTexto}>Tentar novamente</Text>
+        </Pressable>
+        <Pressable style={estilos.botaoVoltar} onPress={() => router.back()}>
+          <Text style={estilos.botaoVoltarTexto}>Voltar</Text>
+        </Pressable>
+      </View>
+    );
   }
 
   return (
@@ -78,8 +115,9 @@ export default function AddPetScreen() {
         )}
         <PetForm
           petInicial={petInicial}
+          perfilSaudeInicial={perfilSaude.data}
           editando={editando}
-          salvando={salvandoPet || atualizarPet.isPending}
+          salvando={salvandoPet || atualizarPet.isPending || atualizarPerfilSaude.isPending}
           onSalvar={salvar}
           onCancelar={() => router.back()}
           onEspecieChange={setEspecieSelo}
@@ -94,6 +132,12 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   flex: { flex: 1 },
   scroll: { flexGrow: 1 },
   centralizado: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.pages.addPet.background },
+  erroCarregamentoTitulo: { marginTop: 14, color: theme.colors.text, fontSize: 18, fontWeight: '800', textAlign: 'center' },
+  erroCarregamentoTexto: { marginTop: 7, paddingHorizontal: 32, color: theme.colors.textSecondary, fontSize: 13, lineHeight: 19, textAlign: 'center' },
+  botaoTentarNovamente: { marginTop: 20, backgroundColor: theme.colors.primary, borderRadius: 999, paddingHorizontal: 22, paddingVertical: 13 },
+  botaoTentarNovamenteTexto: { color: theme.colors.onPrimary, fontSize: 14, fontWeight: '700' },
+  botaoVoltar: { marginTop: 10, paddingHorizontal: 20, paddingVertical: 10 },
+  botaoVoltarTexto: { color: theme.colors.textSecondary, fontSize: 13, fontWeight: '600' },
   hero: { paddingTop: 56, paddingHorizontal: 28, paddingBottom: 46, overflow: 'hidden' },
   pawMarca: { position: 'absolute', top: -18, right: -26, transform: [{ rotate: '-16deg' }] },
   btnFechar: { position: 'absolute', top: 16, right: 20, width: 34, height: 34, borderRadius: 17, backgroundColor: withAlpha(theme.pages.addPet.heroText, 0.14), alignItems: 'center', justifyContent: 'center' },

@@ -1,4 +1,5 @@
 import { api } from './api/httpClient';
+import type { PerfilSaudePet, PerfilSaudePetAtualizacao } from '../types';
 
 export interface ProximaAcao {
   id: string;
@@ -32,4 +33,8 @@ export const petHealthService = {
   listarProximasAcoes: (petId: string) => api.get<ProximaAcao[]>(`/pets/${petId}/proximas-acoes`),
   buscarCarteiraVacinacao: (petId: string) =>
     api.get<CarteiraVacinacao>(`/pets/${petId}/carteira-vacinacao`),
+  buscarPerfilSaude: (petId: string) =>
+    api.get<PerfilSaudePet>(`/pets/${petId}/perfil-saude`),
+  atualizarPerfilSaude: (petId: string, perfil: PerfilSaudePetAtualizacao) =>
+    api.put<PerfilSaudePet>(`/pets/${petId}/perfil-saude`, perfil),
 };

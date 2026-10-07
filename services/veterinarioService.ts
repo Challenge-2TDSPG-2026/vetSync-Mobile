@@ -3,7 +3,6 @@ import type {
   Veterinario,
   FaixaDisponibilidade,
   BloqueioAgenda,
-  PerfilSaudePet,
   RelatorioClinica,
   RegistroAuditoria,
 } from '../types';
@@ -128,14 +127,6 @@ export const veterinarioService = {
       `/veterinarios/me/relatorios/resumo?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`
     );
     return resposta;
-  },
-
-  async buscarPerfilSaude(idPet: string): Promise<PerfilSaudePet> {
-    return api.get<PerfilSaudePet>(`/pets/${idPet}/perfil-saude`);
-  },
-
-  async atualizarPerfilSaude(idPet: string, perfil: Omit<PerfilSaudePet, 'petId'>): Promise<PerfilSaudePet> {
-    return api.put<PerfilSaudePet>(`/pets/${idPet}/perfil-saude`, perfil);
   },
 
   async listarAuditoria(entidade: string, entidadeId: string): Promise<RegistroAuditoria[]> {
