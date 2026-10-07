@@ -1,14 +1,15 @@
 # Checklist da Entrega — 4º Sprint
 
+
 ## Prioridade 1 — Itens críticos da avaliação
 
 ### Tela “Sobre o App” e versionamento
 
-- [ ] Criar a tela “Sobre o App”.
-- [ ] Exibir o nome e a versão do aplicativo.
-- [ ] Exibir claramente o hash do commit publicado.
-- [ ] Definir a variável de build utilizada para injetar o hash, por exemplo `EXPO_PUBLIC_COMMIT_HASH`.
-- [ ] Adicionar a tela ao fluxo de configurações/perfil.
+- [x] Criar a tela “Sobre o App”.
+- [x] Exibir o nome, a versão e o build do aplicativo.
+- [x] Exibir o hash do commit, ou informar explicitamente quando ele não foi configurado.
+- [x] Definir a variável de build utilizada para injetar o hash: `EXPO_PUBLIC_COMMIT_HASH`.
+- [x] Adicionar a tela ao fluxo de configurações do tutor e ao perfil do veterinário.
 - [ ] Validar que o hash exibido corresponde exatamente ao commit usado na publicação.
 
 ### Publicação no Firebase App Distribution
