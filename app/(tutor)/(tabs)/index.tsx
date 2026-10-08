@@ -169,7 +169,7 @@ export default function DashboardScreen() {
           </View>
           <Pressable
             style={[s.welcomeBtn, modoSimples && sSimples.welcomeBtn]}
-            onPress={() => router.push('/(tutor)/add-evento')}
+            onPress={() => router.push('/(tutor)/agendar-servico')}
             accessibilityRole="button"
             accessibilityLabel="Adicionar evento de saúde"
           >
@@ -333,7 +333,7 @@ export default function DashboardScreen() {
             subtitle="Adicione eventos de saúde para o seu pet"
             accentColor={theme.colors.primary}
             actionLabel="Adicionar evento"
-            onAction={() => router.push('/(tutor)/add-evento')}
+            onAction={() => router.push('/(tutor)/agendar-servico')}
             style={[s.emptyEventos, modoSimples && sSimples.emptyEventos]}
           />
         ) : (
@@ -360,7 +360,7 @@ export default function DashboardScreen() {
       </View>
 
       {/* CTA button */}
-      <Pressable style={[s.btnAdd, modoSimples && sSimples.btnAdd]} onPress={() => router.push('/(tutor)/add-evento')}>
+      <Pressable style={[s.btnAdd, modoSimples && sSimples.btnAdd]} onPress={() => router.push('/(tutor)/agendar-servico')}>
         <Ionicons name="add-circle-outline" size={modoSimples ? 26 : 20} color={theme.colors.onPrimary} />
         <Text style={[s.btnAddText, modoSimples && sSimples.btnAddText]}>Adicionar evento de saúde</Text>
       </Pressable>

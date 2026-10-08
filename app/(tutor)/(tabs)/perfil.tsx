@@ -173,6 +173,26 @@ export default function PerfilScreen() {
           <QuickAccessCard
             styles={s}
             theme={theme}
+            icon="chatbubbles-outline"
+            title="Conversar com a clínica"
+            description="Envie e acompanhe mensagens"
+            color={theme.colors.primary}
+            onPress={() => router.push('/(tutor)/mensagens-clinica')}
+            simples={modoSimples}
+          />
+          <QuickAccessCard
+            styles={s}
+            theme={theme}
+            icon="business-outline"
+            title="Minha clínica"
+            description="Endereço, horários e serviços"
+            color={theme.colors.primary}
+            onPress={() => router.push('/(tutor)/minha-clinica')}
+            simples={modoSimples}
+          />
+          <QuickAccessCard
+            styles={s}
+            theme={theme}
             icon="help-buoy-outline"
             title="Ajuda"
             description="Guias para usar o app"

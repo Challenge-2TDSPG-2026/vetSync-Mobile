@@ -220,7 +220,7 @@ export default function AgendaScreen() {
             subtitle="Toque em outra data ou adicione um novo evento"
             accentColor={theme.colors.primary}
             actionLabel="Adicionar evento"
-            onAction={() => router.push('/(tutor)/add-evento')}
+            onAction={() => router.push('/(tutor)/agendar-servico')}
             style={modoSimples ? sSimples.empty : undefined}
           />
         ) : (
@@ -320,7 +320,7 @@ export default function AgendaScreen() {
 
       <Pressable
         style={[s.fab, modoSimples && sSimples.fab]}
-        onPress={() => router.push('/(tutor)/add-evento')}
+        onPress={() => router.push('/(tutor)/agendar-servico')}
         accessibilityRole="button"
         accessibilityLabel="Novo evento"
         accessibilityHint="Abre o formulário de agendamento"

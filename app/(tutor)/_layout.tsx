@@ -23,6 +23,9 @@ export default function TutorLayout() {
         name="add-evento"
         options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
       />
+      <Stack.Screen name="agendar-servico" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="mensagens-clinica" options={TRANSICAO_TUTOR} />
+      <Stack.Screen name="minha-clinica" options={TRANSICAO_TUTOR} />
       <Stack.Screen
         name="assistente"
         options={{
