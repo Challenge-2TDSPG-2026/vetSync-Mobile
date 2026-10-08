@@ -35,11 +35,19 @@ function resolveCommitHash(env = process.env) {
   return hash && FULL_SHA.test(hash) ? hash.toLowerCase() : undefined;
 }
 
+/** Data e hora (UTC) da geração do build, no formato AAAAMMDD.HHmm. */
+function formatBuildTimestamp(date = new Date()) {
+  const pad = (value) => String(value).padStart(2, '0');
+  const day = `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}`;
+  return `${day}.${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}`;
+}
+
 /**
  * Build usado quando não existe número nativo (web e Expo Go).
  * Em apps instalados (EAS/APK/IPA) a tela usa o número nativo real do binário.
+ * Ordem: número informado/CI -> data e hora do build (Vercel e outros builds remotos) -> "local".
  */
-function resolveBuildNumber(env = process.env) {
+function resolveBuildNumber(env = process.env, now = new Date()) {
   const fromCi = [env.EXPO_PUBLIC_BUILD_NUMBER, env.GITHUB_RUN_NUMBER, env.CI_PIPELINE_IID]
     .map((value) => value?.trim())
     .find(Boolean);
@@ -47,7 +55,7 @@ function resolveBuildNumber(env = process.env) {
   if (fromCi) return fromCi;
 
   const isRemoteBuild = Boolean(env.CI || env.VERCEL || env.EAS_BUILD);
-  return isRemoteBuild ? undefined : 'local';
+  return isRemoteBuild ? formatBuildTimestamp(now) : 'local';
 }
 
 module.exports = ({ config }) => ({
