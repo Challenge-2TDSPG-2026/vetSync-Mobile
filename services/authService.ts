@@ -1,8 +1,19 @@
-import { api } from './api/httpClient';
+import { ApiError, api } from './api/httpClient';
 import type { RegistrarPayload, Sessao } from '../context/AuthContext';
 export const authService = {
   async login(email: string, senha: string): Promise<Sessao> {
-    return api.post<Sessao>('/auth/login', { email: email.trim().toLowerCase(), senha }, false);
+    try {
+      return await api.post<Sessao>(
+        '/auth/login',
+        { email: email.trim().toLowerCase(), senha },
+        false,
+      );
+    } catch (erro) {
+      if (erro instanceof ApiError && erro.status === 404) {
+        throw new ApiError(404, 'Usuário não encontrado.', erro.tipo, erro.campos);
+      }
+      throw erro;
+    }
   },
 
   // ---- Fluxo "Esqueci minha senha" ----

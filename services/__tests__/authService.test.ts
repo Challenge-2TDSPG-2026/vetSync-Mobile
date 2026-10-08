@@ -1,8 +1,20 @@
-import { api } from '../api/httpClient';
+import { ApiError, api } from '../api/httpClient';
 import { authService } from '../authService';
 
 jest.mock('../api/httpClient', () => ({
   api: { get: jest.fn(), post: jest.fn(), put: jest.fn(), patch: jest.fn(), delete: jest.fn() },
+  ApiError: class MockApiError extends Error {
+    status: number;
+    tipo = 'http';
+    campos?: Record<string, string>;
+
+    constructor(status: number, mensagem: string, tipo = 'http', campos?: Record<string, string>) {
+      super(mensagem);
+      this.status = status;
+      this.tipo = tipo;
+      this.campos = campos;
+    }
+  },
 }));
 
 const apiPost = api.post as jest.Mock;
@@ -30,6 +42,24 @@ describe('authService', () => {
       false,
     );
     expect(resultado).toBe(sessao);
+  });
+
+  it('informa quando o usuário não existe', async () => {
+    apiPost.mockRejectedValue(new ApiError(404, 'Não encontramos o que você está procurando.'));
+
+    await expect(authService.login('inexistente@vetsync.test', 'SenhaSegura1')).rejects.toMatchObject({
+      status: 404,
+      message: 'Usuário não encontrado.',
+    });
+  });
+
+  it('mantém a mensagem da API para senha inválida', async () => {
+    apiPost.mockRejectedValue(new ApiError(401, 'E-mail ou senha inválidos.'));
+
+    await expect(authService.login('tutor@vetsync.test', 'SenhaInvalida')).rejects.toMatchObject({
+      status: 401,
+      message: 'E-mail ou senha inválidos.',
+    });
   });
 
   it('passo 1: solicita o código de recuperação para o e-mail normalizado', async () => {
