@@ -32,7 +32,10 @@ export default function SobreAppScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: Math.max(insets.bottom, 18) + 28 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.brandCard}>
@@ -56,21 +59,29 @@ export default function SobreAppScreen() {
           <InfoRow
             styles={styles}
             label="Commit de referência"
-            value={APP_INFO.commitHash}
+            value={APP_INFO.commitShort}
             simples={modoSimples}
             monospace
           />
         </View>
 
-        {APP_INFO.commitHash === 'Não definido' ? (
+        {APP_INFO.hasCommitHash ? (
+          <Text
+            style={[styles.fullHash, modoSimples && styles.largeSecondaryText]}
+            selectable
+            accessibilityLabel={`Hash completo do commit: ${APP_INFO.commitHash}`}
+          >
+            {APP_INFO.commitHash}
+          </Text>
+        ) : (
           <View style={styles.warning} accessibilityRole="alert">
             <Ionicons name="warning-outline" size={20} color={theme.colors.warning} />
             <Text style={[styles.warningText, modoSimples && styles.largeSecondaryText]}>
-              O hash do commit não foi informado neste build. Configure EXPO_PUBLIC_COMMIT_HASH
-              antes de publicar a versão final.
+              Não foi possível identificar o commit deste build. Gere o app a partir de um
+              repositório git ou configure EXPO_PUBLIC_COMMIT_HASH antes de publicar a versão final.
             </Text>
           </View>
-        ) : null}
+        )}
 
         <Text style={[styles.description, modoSimples && styles.largeSecondaryText]}>
           O commit de referência identifica exatamente o código-fonte utilizado para gerar esta
@@ -121,7 +132,13 @@ const createStyles = (theme: AppTheme) =>
       borderBottomColor: theme.components.header.border,
     },
     backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-    headerTitle: { flex: 1, color: theme.components.header.title, fontSize: 25, fontWeight: '800', letterSpacing: -0.55 },
+    headerTitle: {
+      flex: 1,
+      color: theme.components.header.title,
+      fontSize: 25,
+      fontWeight: '800',
+      letterSpacing: -0.55,
+    },
     content: { paddingHorizontal: 18, paddingTop: 22 },
     brandCard: {
       alignItems: 'center',
@@ -145,7 +162,12 @@ const createStyles = (theme: AppTheme) =>
       marginBottom: 14,
     },
     appName: { color: theme.pages.shared.heroText, fontSize: 28, fontWeight: '800' },
-    tagline: { color: theme.pages.shared.textSecondary, fontSize: 14, marginTop: 6, textAlign: 'center' },
+    tagline: {
+      color: theme.pages.shared.textSecondary,
+      fontSize: 14,
+      marginTop: 6,
+      textAlign: 'center',
+    },
     sectionTitle: {
       color: theme.colors.textSecondary,
       fontSize: 12,
@@ -163,11 +185,30 @@ const createStyles = (theme: AppTheme) =>
       paddingHorizontal: 16,
       paddingVertical: 4,
     },
-    infoRow: { minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
+    infoRow: {
+      minHeight: 58,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 16,
+    },
     label: { color: theme.colors.textSecondary, fontSize: 14, flex: 1 },
-    value: { color: theme.colors.text, fontSize: 15, fontWeight: '700', textAlign: 'right', flexShrink: 1 },
+    value: {
+      color: theme.colors.text,
+      fontSize: 15,
+      fontWeight: '700',
+      textAlign: 'right',
+      flexShrink: 1,
+    },
     monospace: { fontFamily: 'monospace' },
     divider: { height: 1, backgroundColor: theme.pages.shared.border },
+    fullHash: {
+      color: theme.colors.textSecondary,
+      fontFamily: 'monospace',
+      fontSize: 11,
+      marginTop: 10,
+      textAlign: 'center',
+    },
     warning: {
       flexDirection: 'row',
       gap: 10,
@@ -178,7 +219,14 @@ const createStyles = (theme: AppTheme) =>
       marginTop: 16,
     },
     warningText: { flex: 1, color: theme.colors.textSecondary, fontSize: 13, lineHeight: 19 },
-    description: { color: theme.colors.textSecondary, fontSize: 13, lineHeight: 20, marginTop: 22, textAlign: 'center', paddingHorizontal: 8 },
+    description: {
+      color: theme.colors.textSecondary,
+      fontSize: 13,
+      lineHeight: 20,
+      marginTop: 22,
+      textAlign: 'center',
+      paddingHorizontal: 8,
+    },
     largeHeaderTitle: { fontSize: 31 },
     largeText: { fontSize: 24 },
     largeSectionTitle: { fontSize: 18 },

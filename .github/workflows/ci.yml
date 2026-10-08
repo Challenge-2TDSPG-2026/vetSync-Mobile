@@ -54,3 +54,5 @@ jobs:
         run: npm run build
         env:
           EXPO_PUBLIC_COMMIT_HASH: ${{ github.sha }}
+          EXPO_PUBLIC_BUILD_NUMBER: ${{ github.run_number }}
+          
