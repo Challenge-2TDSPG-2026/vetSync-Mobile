@@ -62,6 +62,7 @@ const ROTAS_FORA_DO_GRUPO = [
 const ROTAS_EXCLUSIVAS_TUTOR = [
   'add-evento',
   'agendar-servico',
+  'plano-preventivo',
   'mensagens-clinica',
   'minha-clinica',
   'add-pet',

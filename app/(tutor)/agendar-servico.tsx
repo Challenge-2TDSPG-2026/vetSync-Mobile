@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePet } from '../../context/PetContext';
 import { useTheme } from '../../context/ThemeContext';
 import { clinicaService, type ServicoClinica, type SlotClinica } from '../../services/clinicaService';
 import { mostrarToast } from '../../components/ui/Toast';
 import { mensagemDeErro } from '../../services/api/errorMessages';
+import { encontrarServicoPorNome } from '../../utils/planoNavegacao';
 
 export default function AgendarServicoScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const params = useLocalSearchParams<{ petId?: string; servico?: string }>();
   const queryClient = useQueryClient();
   const { pets, petAtivo } = usePet();
   const [servicos, setServicos] = useState<ServicoClinica[]>([]);
   const [servico, setServico] = useState<ServicoClinica | null>(null);
-  const [idPet, setIdPet] = useState<string | null>(petAtivo?.id ?? null);
+  const [idPet, setIdPet] = useState<string | null>(params.petId ?? petAtivo?.id ?? null);
   const [data, setData] = useState(new Date().toLocaleDateString('sv-SE'));
   const [slots, setSlots] = useState<SlotClinica[]>([]);
   const [slot, setSlot] = useState<SlotClinica | null>(null);
@@ -25,7 +27,7 @@ export default function AgendarServicoScreen() {
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    clinicaService.listarServicos().then(lista => { setServicos(lista); setServico(lista[0] ?? null); })
+    clinicaService.listarServicos().then(lista => { setServicos(lista); setServico(encontrarServicoPorNome(lista, params.servico) ?? lista[0] ?? null); })
       .catch(e => mostrarToast('erro', 'Serviços indisponíveis', mensagemDeErro(e, 'Tente novamente.')))
       .finally(() => setCarregando(false));
   }, []);

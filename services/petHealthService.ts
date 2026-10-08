@@ -21,6 +21,10 @@ export interface Vacina {
   eventoId?: string | null;
   veterinario?: string | null;
   comprovanteUrl?: string | null;
+  /** Identifica o tipo de vacina (backend atualizado). Ausente em versões antigas da API. */
+  tipoVacinaId?: number | null;
+  /** Dose já reaplicada por outra mais recente: é só histórico (backend atualizado). */
+  substituida?: boolean;
 }
 
 export interface CarteiraVacinacao {

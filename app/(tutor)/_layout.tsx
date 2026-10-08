@@ -15,6 +15,7 @@ export default function TutorLayout() {
       <Stack.Screen name="configuracoes" options={TRANSICAO_TUTOR} />
       <Stack.Screen name="responsaveis" options={TRANSICAO_TUTOR} />
       <Stack.Screen name="resumo-emergencia" options={TRANSICAO_TUTOR} />
+      <Stack.Screen name="plano-preventivo" options={TRANSICAO_TUTOR} />
       <Stack.Screen
         name="add-pet"
         options={{ presentation: 'modal', animation: 'slide_from_bottom' }}

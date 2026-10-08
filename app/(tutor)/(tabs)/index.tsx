@@ -18,6 +18,7 @@ import { PetSwitcher } from '../../../components/PetSwitcher';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import { DicaTela } from '../../../components/ui/DicaTela';
+import { PlanoPreventivoCard } from '../../../components/plano/PlanoPreventivoCard';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, formatarDataEvento } from '../../../utils/eventoStatus';
 import { withAlpha, type AppTheme } from '../../../constants/theme';
 
@@ -227,6 +228,8 @@ export default function DashboardScreen() {
           ))
         )}
       </View>
+
+      <PlanoPreventivoCard />
 
       {/* Pet card — no modo simples, só nome e espécie */}
       <View style={s.card}>
