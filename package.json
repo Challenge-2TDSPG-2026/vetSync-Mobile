@@ -76,8 +76,8 @@
       "<rootDir>/jest.setup.ts"
     ],
     "moduleNameMapper": {
-      "^expo-modules-core$": "<rootDir>/node_modules/expo/node_modules/expo-modules-core",
-      "^expo-modules-core/(.*)$": "<rootDir>/node_modules/expo/node_modules/expo-modules-core/$1"
+      "^expo-modules-core$": "<rootDir>/node_modules/expo-modules-core",
+      "^expo-modules-core/(.*)$": "<rootDir>/node_modules/expo-modules-core/$1"
     },
     "testPathIgnorePatterns": [
       "/node_modules/",
