@@ -50,6 +50,32 @@ export default function DashboardScreen() {
   const pendentes = eventosComStatus.filter(e => e.statusExibicao === 'AGENDADO');
   const concluidos = eventosComStatus.filter(e => e.statusExibicao === 'CONCLUIDO');
   const atrasados = eventosComStatus.filter(e => e.statusExibicao === 'ATRASADO');
+  const resumoSemana = useMemo(() => {
+    const agora = new Date();
+    const inicioSemana = new Date(agora);
+    const diaSemana = agora.getDay();
+    inicioSemana.setDate(agora.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+    inicioSemana.setHours(0, 0, 0, 0);
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(inicioSemana.getDate() + 7);
+
+    const eventosDaSemana = eventosComStatus.filter(evento => {
+      const data = new Date(evento.data);
+      return data >= inicioSemana && data < fimSemana;
+    });
+    const realizados = eventosDaSemana.filter(evento => evento.statusExibicao === 'CONCLUIDO').length;
+    const pendentesSemana = eventosDaSemana.filter(evento => evento.statusExibicao === 'AGENDADO').length;
+    const atrasadosSemana = eventosDaSemana.filter(evento => evento.statusExibicao === 'ATRASADO').length;
+    const total = eventosDaSemana.length;
+
+    return {
+      realizados,
+      pendentes: pendentesSemana,
+      atrasados: atrasadosSemana,
+      total,
+      progresso: total > 0 ? realizados / total : 0,
+    };
+  }, [eventosComStatus]);
   const limiteProximos = modoSimples ? 3 : 5;
   const proximos = [...pendentes, ...atrasados]
     .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
@@ -198,6 +224,45 @@ export default function DashboardScreen() {
         <View style={s.statDivider} />
         <StatCard styles={s} valor={atrasados.length} label="Atrasados" accentColor={theme.pages.home.statsCard.valueDanger} simples={modoSimples} />
       </View>
+
+      {!modoSimples && (
+        <View style={s.weeklyCard}>
+          <View style={s.weeklyHeader}>
+            <View style={s.cardTitleWrap}>
+              <View style={[s.cardTitleIcon, { backgroundColor: theme.colors.successBackground }]}>
+                <AppIcon name="trending-up-outline" set="Ionicons" size={16} color={theme.colors.success} />
+              </View>
+              <View>
+                <Text style={s.cardTitle}>Resumo da semana</Text>
+                <Text style={s.weeklySubtitle}>Acompanhe a rotina de cuidados</Text>
+              </View>
+            </View>
+            <Text style={[s.weeklyPercent, { color: resumoSemana.atrasados > 0 ? theme.colors.warning : theme.colors.success }]}>
+              {Math.round(resumoSemana.progresso * 100)}%
+            </Text>
+          </View>
+
+          <View style={s.progressTrack}>
+            <View
+              style={[
+                s.progressFill,
+                {
+                  width: `${Math.max(resumoSemana.progresso * 100, resumoSemana.total > 0 ? 4 : 0)}%`,
+                  backgroundColor: resumoSemana.atrasados > 0 ? theme.colors.warning : theme.colors.success,
+                },
+              ]}
+            />
+          </View>
+
+          <View style={s.weeklyStats}>
+            <WeeklyMetric icon="checkmark-circle-outline" value={resumoSemana.realizados} label="Concluídos" color={theme.colors.success} styles={s} />
+            <View style={s.weeklyDivider} />
+            <WeeklyMetric icon="time-outline" value={resumoSemana.pendentes} label="Pendentes" color={theme.colors.warning} styles={s} />
+            <View style={s.weeklyDivider} />
+            <WeeklyMetric icon="alert-circle-outline" value={resumoSemana.atrasados} label="Atrasados" color={theme.colors.danger} styles={s} />
+          </View>
+        </View>
+      )}
 
       <View style={s.acoesCard}>
         <View style={s.cardHead}>
@@ -386,6 +451,16 @@ function StatCard({ styles, valor, label, accentColor, simples }: { styles: Retu
   );
 }
 
+function WeeklyMetric({ icon, value, label, color, styles }: { icon: string; value: number; label: string; color: string; styles: ReturnType<typeof createStyles> }) {
+  return (
+    <View style={styles.weeklyMetric}>
+      <AppIcon name={icon} set="Ionicons" size={16} color={color} />
+      <Text style={[styles.weeklyMetricValue, { color }]}>{value}</Text>
+      <Text style={styles.weeklyMetricLabel}>{label}</Text>
+    </View>
+  );
+}
+
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
@@ -455,6 +530,28 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   statAccent: { width: 6, height: 6, borderRadius: 3 },
   statLabel: { flexShrink: 1, fontSize: 10, fontWeight: '700', letterSpacing: 0.15, color: theme.pages.home.statsCard.label },
   statVal: { fontSize: 28, fontWeight: '800', lineHeight: 33, marginTop: 5, letterSpacing: -0.5 },
+
+  weeklyCard: {
+    backgroundColor: theme.pages.home.statsCard.background,
+    borderRadius: 22,
+    marginBottom: 20,
+    padding: 18,
+    shadowColor: theme.colors.text,
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
+  weeklyHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  weeklySubtitle: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 2 },
+  weeklyPercent: { fontSize: 24, fontWeight: '800' },
+  progressTrack: { height: 8, borderRadius: 4, backgroundColor: theme.pages.home.petCard.secondaryBackground, overflow: 'hidden', marginTop: 18 },
+  progressFill: { height: '100%', borderRadius: 4 },
+  weeklyStats: { flexDirection: 'row', alignItems: 'center', marginTop: 18 },
+  weeklyMetric: { flex: 1, alignItems: 'center', gap: 3 },
+  weeklyMetricValue: { fontSize: 20, fontWeight: '800' },
+  weeklyMetricLabel: { fontSize: 10, color: theme.colors.textSecondary, fontWeight: '700' },
+  weeklyDivider: { width: StyleSheet.hairlineWidth, height: 32, backgroundColor: theme.pages.home.statsCard.border },
 
   card: {
     backgroundColor: theme.pages.home.eventCard.background,
