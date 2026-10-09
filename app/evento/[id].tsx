@@ -1,16 +1,20 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../context/PetContext';
 import { useAuth } from '../../context/AuthContext';
-import { useEventoDetalhes } from '../../hooks/useEventos';
+import { useEventoDetalhes, useHistoricoEvento } from '../../hooks/useEventos';
 import { useTheme } from '../../context/ThemeContext';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 import { useAuditoria } from '../../hooks/useRelatorios';
 import { withAlpha, type AppTheme } from '../../constants/theme';
+import { ReagendarModal } from '../../components/agenda/ReagendarModal';
+import { EntrarListaEsperaModal, type AlvoListaEspera } from '../../components/espera/EntrarListaEsperaModal';
+import { LinhaDoTempoEvento } from '../../components/agenda/LinhaDoTempoEvento';
+import { ETAPA_VISUAL, etapaSolicitacao, formatarDataEHora, podeBuscarNovoHorario, podeReagendar } from '../../utils/solicitacao';
 
 export default function EventoDetalhesScreen() {
   const router = useRouter();
@@ -22,6 +26,9 @@ export default function EventoDetalhesScreen() {
   const evento = eventos.find(item => item.id === id);
   const detalhes = useEventoDetalhes(id ?? null, autenticado);
   const auditoria = useAuditoria('EVENTO', id ?? null, autenticado);
+  const historico = useHistoricoEvento(id ?? null, autenticado && !!evento);
+  const [reagendando, setReagendando] = useState(false);
+  const [alvoEspera, setAlvoEspera] = useState<AlvoListaEspera | null>(null);
 
   if (carregandoEventos || (detalhes.isLoading && !evento)) {
     return <View style={s.loading}><ActivityIndicator size="large" color={theme.colors.primary} /></View>;
@@ -44,6 +51,10 @@ export default function EventoDetalhesScreen() {
   const status = statusExibicao(evento);
   const badge = STATUS_EXIBICAO_BADGE[status];
   const clinico = detalhes.data;
+  const etapa = etapaSolicitacao(evento);
+  const etapaVisual = ETAPA_VISUAL[etapa];
+  const reagendavel = podeReagendar(evento);
+  const novoHorario = podeBuscarNovoHorario(evento) && evento.idServicoClinica != null;
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
@@ -65,8 +76,41 @@ export default function EventoDetalhesScreen() {
         </View>
       </View>
 
+      <View style={[s.card, { backgroundColor: etapaVisual.bg, borderColor: etapaVisual.bg }]} accessibilityRole="summary">
+        <View style={s.etapaTopo}>
+          <Ionicons name={etapaVisual.icone} size={22} color={etapaVisual.color} />
+          <Text style={[s.etapaTitulo, { color: etapaVisual.color }]}>{etapaVisual.label}</Text>
+        </View>
+        <Text style={[s.etapaTexto, { color: etapaVisual.color }]}>{etapaVisual.descricao}</Text>
+        {etapa === 'RECUSADO' && evento.motivoCancelamento ? (
+          <Text style={[s.etapaTexto, { color: etapaVisual.color, fontWeight: '700' }]}>Motivo: {evento.motivoCancelamento}</Text>
+        ) : null}
+      </View>
+
+      {(reagendavel || novoHorario) && (
+        <View style={s.acoesLinha}>
+          {reagendavel && (
+            <Pressable style={s.primaryButtonBlock} onPress={() => setReagendando(true)} accessibilityRole="button" accessibilityLabel="Escolher outro horário">
+              <Ionicons name="swap-horizontal-outline" size={18} color={theme.colors.onPrimary} />
+              <Text style={s.primaryButtonText}>Escolher outro horário</Text>
+            </Pressable>
+          )}
+          {novoHorario && (
+            <Pressable
+              style={s.primaryButtonBlock}
+              onPress={() => router.push({ pathname: '/(tutor)/agendar-servico', params: { petId: evento.petId, servicoId: String(evento.idServicoClinica) } })}
+              accessibilityRole="button"
+              accessibilityLabel="Agendar em outro horário"
+            >
+              <Ionicons name="calendar-outline" size={18} color={theme.colors.onPrimary} />
+              <Text style={s.primaryButtonText}>Agendar em outro horário</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+
       <View style={s.card}>
-        <InfoRow icon="calendar-outline" label="Data e horário" value={formatarDataHoraEvento(evento.data)} colors={theme.colors} />
+        <InfoRow icon="calendar-outline" label="Data e horário" value={evento.hora ? formatarDataEHora(evento.data, evento.hora) : formatarDataHoraEvento(evento.data)} colors={theme.colors} />
         <InfoRow icon="medical-outline" label="Veterinário" value={evento.nomeVeterinario || 'Não informado'} colors={theme.colors} />
         <InfoRow icon="pricetag-outline" label="Categoria" value={evento.categoriaTipoEvento?.replace('_', ' ') ?? 'Não informada'} colors={theme.colors} />
         {evento.custo > 0 && <InfoRow icon="cash-outline" label="Custo" value={`R$ ${evento.custo.toFixed(2).replace('.', ',')}`} colors={theme.colors} />}
@@ -88,6 +132,13 @@ export default function EventoDetalhesScreen() {
         </View>
       )}
 
+      {historico.data?.length ? (
+        <View style={s.card}>
+          <Text style={s.sectionTitle}>Acompanhamento da solicitação</Text>
+          <LinhaDoTempoEvento itens={historico.data} carregando={historico.isLoading} />
+        </View>
+      ) : null}
+
       {auditoria.data?.length ? (
         <View style={s.card}>
           <Text style={s.sectionTitle}>Histórico de alterações</Text>
@@ -104,6 +155,23 @@ export default function EventoDetalhesScreen() {
         <Ionicons name="calendar-outline" size={18} color={theme.colors.primary} />
         <Text style={s.secondaryButtonText}>Ver na agenda</Text>
       </Pressable>
+
+      <ReagendarModal
+        evento={reagendando ? evento : null}
+        onFechar={() => setReagendando(false)}
+        onAvisarVaga={(ev, idServico, nomeServico) => {
+          setReagendando(false);
+          setAlvoEspera({
+            idPet: ev.petId,
+            nomePet: petAtivo?.nome,
+            idServico,
+            nomeServico,
+            idVeterinario: ev.idVeterinario ? Number(ev.idVeterinario) : null,
+            idProfissionalEstetica: ev.idProfissionalEstetica ?? null,
+          });
+        }}
+      />
+      <EntrarListaEsperaModal alvo={alvoEspera} onFechar={() => setAlvoEspera(null)} onEntrou={() => router.push('/(tutor)/lista-espera')} />
     </ScrollView>
   );
 }
@@ -150,6 +218,11 @@ function createStyles(theme: AppTheme) {
     auditAction: { color: theme.colors.text, fontSize: 13, fontWeight: '700' },
     auditMeta: { color: theme.colors.textMuted, fontSize: 11, marginTop: 3 },
     primaryButton: { marginTop: 20, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 13, backgroundColor: theme.colors.primary },
+    etapaTopo: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+    etapaTitulo: { fontSize: 16, fontWeight: '800' },
+    etapaTexto: { lineHeight: 20, fontSize: 14, marginTop: 2 },
+    acoesLinha: { marginHorizontal: 16, marginBottom: 14, gap: 10 },
+    primaryButtonBlock: { minHeight: 50, borderRadius: 14, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, paddingHorizontal: 16 },
     primaryButtonText: { color: theme.colors.onPrimary, fontWeight: '800' },
     secondaryButton: { margin: 16, marginTop: 2, minHeight: 50, borderRadius: 14, borderWidth: 1, borderColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
     secondaryButtonText: { color: theme.colors.primary, fontWeight: '800' },

@@ -61,9 +61,42 @@ export function useConcluirEvento() {
 export function useCancelarEvento() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, motivo, reagendarPara }: { id: string; motivo: string; reagendarPara?: string }) =>
-      eventoService.cancelarEvento(id, motivo, reagendarPara),
+    mutationFn: ({ id, motivo, reagendarPara, horaReagendarPara }: { id: string; motivo: string; reagendarPara?: string; horaReagendarPara?: string }) =>
+      eventoService.cancelarEvento(id, motivo, reagendarPara, horaReagendarPara),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
+  });
+}
+
+export function useReagendarEvento() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data, hora }: { id: string; data: string; hora: string }) =>
+      eventoService.reagendarEvento(id, data, hora),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
+  });
+}
+
+export function useConfirmarEvento() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => eventoService.confirmarEvento(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
+  });
+}
+
+export function useRecusarEvento() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, motivo }: { id: string; motivo: string }) => eventoService.recusarEvento(id, motivo),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: CHAVE_EVENTOS }),
+  });
+}
+
+export function useHistoricoEvento(id: string | null, habilitado: boolean) {
+  return useQuery({
+    queryKey: [...CHAVE_EVENTOS, 'historico', id] as const,
+    queryFn: () => eventoService.buscarHistorico(id as string),
+    enabled: habilitado && !!id,
   });
 }
 

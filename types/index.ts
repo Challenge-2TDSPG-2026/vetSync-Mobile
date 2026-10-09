@@ -20,6 +20,7 @@ export interface Tutor {
 
 export type StatusEvento = 'AGENDADO' | 'CONCLUIDO' | 'CANCELADO';
 export type StatusEventoExibicao = StatusEvento | 'ATRASADO';
+export type StatusConfirmacao = 'PENDENTE' | 'CONFIRMADO' | 'RECUSADO';
 export interface TipoEvento {
   id: string;
   nome: string;
@@ -45,9 +46,15 @@ export interface Evento {
   idVeterinario: string;
   nomeVeterinario: string;
   data: string; 
+  hora?: string;
   observacao?: string;
   motivoCancelamento?: string;
   custo: number;
+  /** Etapa de confirmação da clínica (ausente em backends antigos = confirmado). */
+  statusConfirmacao?: StatusConfirmacao;
+  idServicoClinica?: number;
+  idProfissionalEstetica?: number;
+  criadoEm?: string;
 }
 
 export interface Recompensa {

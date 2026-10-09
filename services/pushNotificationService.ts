@@ -103,3 +103,43 @@ export async function configurarNotificacoesPush(): Promise<boolean> {
   await registrarTokenPushUmaVez(resposta.data);
   return true;
 }
+
+export interface ToqueEmNotificacao {
+  /** Identificador estável do toque; evita tratar o mesmo toque duas vezes. */
+  chave: string;
+  dados: Record<string, unknown> | null;
+}
+
+function paraToque(resposta: NotificationsModule.NotificationResponse | null | undefined): ToqueEmNotificacao | null {
+  if (!resposta) return null;
+  const dados = resposta.notification.request.content.data;
+  return {
+    chave: `${resposta.notification.request.identifier}:${resposta.notification.date}`,
+    dados: dados && typeof dados === 'object' ? (dados as Record<string, unknown>) : null,
+  };
+}
+
+/**
+ * Notificação que abriu o app a partir do estado encerrado (cold start). Retorna null quando
+ * não houve toque ou quando push não é suportado na plataforma.
+ */
+export async function obterToqueQueAbriuOApp(): Promise<ToqueEmNotificacao | null> {
+  const notificacoes = obterNotificacoes();
+  if (!notificacoes) return null;
+  try {
+    return paraToque(await notificacoes.getLastNotificationResponseAsync());
+  } catch {
+    return null;
+  }
+}
+
+/** Escuta toques em notificações com o app aberto ou em segundo plano. Retorna a função que cancela a escuta. */
+export function observarToquesEmNotificacao(aoTocar: (toque: ToqueEmNotificacao) => void): () => void {
+  const notificacoes = obterNotificacoes();
+  if (!notificacoes) return () => {};
+  const assinatura = notificacoes.addNotificationResponseReceivedListener(resposta => {
+    const toque = paraToque(resposta);
+    if (toque) aoTocar(toque);
+  });
+  return () => assinatura.remove();
+}

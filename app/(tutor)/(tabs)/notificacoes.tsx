@@ -19,6 +19,7 @@ import {
   marcarTodasNotificacoesComoLidas,
   type Notificacao,
 } from '../../../services/notificationService';
+import { rotaDaNotificacao } from '../../../utils/notificacaoRota';
 import type { AppTheme } from '../../../constants/theme';
 
 function formatarData(data: string): string {
@@ -92,6 +93,16 @@ export default function NotificacoesScreen() {
     } catch {
       setErroAcao('Não foi possível marcar a notificação como lida. Tente novamente.');
     }
+  };
+
+  const abrirNotificacao = (notificacao: Notificacao) => {
+    void marcarComoLida(notificacao);
+    const rota = rotaDaNotificacao({
+      tipo: notificacao.tipo,
+      referenciaTipo: notificacao.referenciaTipo,
+      referenciaId: notificacao.referenciaId,
+    });
+    if (rota) router.push(rota as Parameters<typeof router.push>[0]);
   };
 
   const marcarTodasComoLidas = async () => {
@@ -193,11 +204,11 @@ export default function NotificacoesScreen() {
             notificacoes.map(notificacao => (
               <Pressable
                 key={notificacao.id}
-                onPress={() => void marcarComoLida(notificacao)}
+                onPress={() => abrirNotificacao(notificacao)}
                 style={[s.card, !notificacao.lida && s.unread]}
                 accessibilityRole="button"
                 accessibilityLabel={`${notificacao.lida ? 'Lida' : 'Não lida'}. ${notificacao.titulo}. ${notificacao.mensagem}`}
-                accessibilityHint={notificacao.lida ? undefined : 'Toque para marcar como lida'}
+                accessibilityHint={notificacao.lida ? undefined : 'Toque para abrir e marcar como lida'}
                 accessibilityState={{ selected: !notificacao.lida }}
               >
                 <View

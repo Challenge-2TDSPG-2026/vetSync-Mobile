@@ -1,5 +1,5 @@
 import { api } from './api/httpClient';
-import type { Evento, StatusEvento } from '../types';
+import type { Evento, StatusConfirmacao, StatusEvento } from '../types';
 
 interface EventoResponseApi {
   idEvento: number;
@@ -13,6 +13,39 @@ interface EventoResponseApi {
   motivoCancelamento: string | null;
   vlCusto: number | null;
   idPet: number | null;
+  idVeterinario?: number | null;
+  criadoEm?: string | null;
+  statusConfirmacao?: StatusConfirmacao | null;
+  idServicoClinica?: number | null;
+  idProfissionalEstetica?: number | null;
+}
+
+export interface EventoHistoricoItem {
+  id: string;
+  acao: string;
+  statusAnterior: string | null;
+  statusNovo: string | null;
+  dataAnterior: string | null;
+  dataNova: string | null;
+  horaAnterior: string | null;
+  horaNova: string | null;
+  observacaoNova: string | null;
+  ator: string | null;
+  ocorridoEm: string;
+}
+
+interface EventoHistoricoApi {
+  id: number;
+  acao: string;
+  statusAnterior: string | null;
+  statusNovo: string | null;
+  dataAnterior: string | null;
+  dataNova: string | null;
+  horaAnterior: string | null;
+  horaNova: string | null;
+  observacaoNova: string | null;
+  ator: string | null;
+  ocorridoEm: string;
 }
 
 interface EventoCancelarResponseApi {
@@ -34,6 +67,7 @@ export interface EventoDetalhes {
   custo?: number | null;
   veterinario?: { id: string; nome: string; crmv?: string | null } | null;
   cancelamento?: { motivo?: string | null; criadoEm?: string | null } | null;
+  statusConfirmacao?: StatusConfirmacao;
 }
 
 interface EventoDetalhesApi extends EventoResponseApi {
@@ -59,6 +93,7 @@ function paraDetalhesApp(dto: EventoDetalhesApi): EventoDetalhes {
     custo: dto.vlCusto ?? null,
     veterinario: dto.nmVeterinario ? { id: '', nome: dto.nmVeterinario } : null,
     cancelamento: dto.motivoCancelamento ? { motivo: dto.motivoCancelamento } : null,
+    statusConfirmacao: dto.statusConfirmacao ?? undefined,
   };
 }
 
@@ -70,12 +105,17 @@ function paraEventoApp(dto: EventoResponseApi, idTipoEvento: string, idVeterinar
     idTipoEvento,
     nomeTipoEvento: dto.nmTipoEvento ?? 'Evento',
     categoriaTipoEvento: dto.dsCategoria ?? null,
-    idVeterinario,
+    idVeterinario: dto.idVeterinario != null ? String(dto.idVeterinario) : idVeterinario,
     nomeVeterinario: dto.nmVeterinario ?? '—',
     data: dto.dtEvento,
+    hora: dto.hrEvento ?? undefined,
     observacao: dto.dsObservacao ?? undefined,
     motivoCancelamento: dto.motivoCancelamento ?? undefined,
     custo: dto.vlCusto ?? 0,
+    statusConfirmacao: dto.statusConfirmacao ?? undefined,
+    idServicoClinica: dto.idServicoClinica ?? undefined,
+    idProfissionalEstetica: dto.idProfissionalEstetica ?? undefined,
+    criadoEm: dto.criadoEm ?? undefined,
   };
 }
 
@@ -120,15 +160,42 @@ export const eventoService = {
     return paraEventoApp(dto, '', '');
   },
 
-  async cancelarEvento(id: string, motivo: string, reagendarPara?: string): Promise<{ eventoCancelado: Evento; novoEvento: Evento | null }> {
+  async cancelarEvento(
+    id: string,
+    motivo: string,
+    reagendarPara?: string,
+    horaReagendarPara?: string,
+  ): Promise<{ eventoCancelado: Evento; novoEvento: Evento | null }> {
     const dto = await api.patch<EventoCancelarResponseApi>(`/eventos/${id}/cancelar`, {
       motivo,
       reagendarPara: reagendarPara ?? null,
+      ...(horaReagendarPara ? { horaReagendarPara } : {}),
     });
     return {
       eventoCancelado: paraEventoApp(dto.eventoCancelado, '', ''),
       novoEvento: dto.novoEvento ? paraEventoApp(dto.novoEvento, '', '') : null,
     };
+  },
+
+  /** Troca data/hora mantendo o mesmo profissional e serviço. */
+  async reagendarEvento(id: string, data: string, hora: string): Promise<Evento> {
+    const dto = await api.patch<EventoResponseApi>(`/eventos/${id}/reagendar`, { data, hora });
+    return paraEventoApp(dto, '', '');
+  },
+
+  async buscarHistorico(id: string): Promise<EventoHistoricoItem[]> {
+    const dtos = await api.get<EventoHistoricoApi[]>(`/eventos/${id}/historico`);
+    return dtos.map(dto => ({ ...dto, id: String(dto.id) }));
+  },
+
+  /** Ação da clínica (veterinário/estética): confirma uma solicitação pendente. */
+  async confirmarEvento(id: string): Promise<void> {
+    await api.patch(`/eventos/${id}/confirmar`, {});
+  },
+
+  /** Ação da clínica: recusa a solicitação com motivo (o horário volta para a agenda). */
+  async recusarEvento(id: string, motivo: string): Promise<void> {
+    await api.patch(`/eventos/${id}/recusar`, { motivo });
   },
 
   async removerEvento(id: string): Promise<void> {

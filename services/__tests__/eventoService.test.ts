@@ -40,6 +40,7 @@ describe('eventoService', () => {
       idVeterinario: '',
       nomeVeterinario: 'Dra. Ana',
       data: '2026-10-05T09:00:00',
+      hora: '09:00',
       observacao: 'Trazer carteirinha',
       motivoCancelamento: undefined,
       custo: 150.5,
@@ -142,5 +143,44 @@ describe('eventoService', () => {
     await eventoService.removerEvento('42');
 
     expect(api.delete).toHaveBeenCalledWith('/eventos/42');
+  });
+  it('reagenda enviando data e hora e devolve o evento convertido', async () => {
+    (api.patch as jest.Mock).mockResolvedValue({ ...dtoBase, dtEvento: '2026-10-12', hrEvento: '14:30', statusConfirmacao: 'PENDENTE', idServicoClinica: 5, idVeterinario: 9 });
+
+    const evento = await eventoService.reagendarEvento('42', '2026-10-12', '14:30');
+
+    expect(api.patch).toHaveBeenCalledWith('/eventos/42/reagendar', { data: '2026-10-12', hora: '14:30' });
+    expect(evento).toMatchObject({ data: '2026-10-12', hora: '14:30', statusConfirmacao: 'PENDENTE', idServicoClinica: 5, idVeterinario: '9' });
+  });
+
+  it('envia a hora do reagendamento no cancelamento apenas quando informada', async () => {
+    (api.patch as jest.Mock).mockResolvedValue({ eventoCancelado: dtoBase, novoEvento: dtoBase });
+
+    await eventoService.cancelarEvento('42', 'Mudança de planos', '2026-10-12', '14:30');
+
+    expect(api.patch).toHaveBeenCalledWith('/eventos/42/cancelar', {
+      motivo: 'Mudança de planos',
+      reagendarPara: '2026-10-12',
+      horaReagendarPara: '14:30',
+    });
+  });
+
+  it('busca o histórico da solicitação convertendo o id para texto', async () => {
+    (api.get as jest.Mock).mockResolvedValue([{ id: 1, acao: 'CRIACAO', statusAnterior: null, statusNovo: 'AGENDADO', dataAnterior: null, dataNova: '2026-10-12', horaAnterior: null, horaNova: '14:30', observacaoNova: null, ator: 'Ana', ocorridoEm: '2026-10-09T10:00:00' }]);
+
+    const historico = await eventoService.buscarHistorico('42');
+
+    expect(api.get).toHaveBeenCalledWith('/eventos/42/historico');
+    expect(historico[0]).toMatchObject({ id: '1', acao: 'CRIACAO', ator: 'Ana' });
+  });
+
+  it('confirma e recusa solicitações pelos endpoints da clínica', async () => {
+    (api.patch as jest.Mock).mockResolvedValue(undefined);
+
+    await eventoService.confirmarEvento('42');
+    await eventoService.recusarEvento('42', 'Sem veterinário nesse dia');
+
+    expect(api.patch).toHaveBeenNthCalledWith(1, '/eventos/42/confirmar', {});
+    expect(api.patch).toHaveBeenNthCalledWith(2, '/eventos/42/recusar', { motivo: 'Sem veterinário nesse dia' });
   });
 });

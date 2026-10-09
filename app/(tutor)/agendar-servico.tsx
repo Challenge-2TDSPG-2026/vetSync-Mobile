@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -8,26 +8,30 @@ import { clinicaService, type ServicoClinica, type SlotClinica } from '../../ser
 import { mostrarToast } from '../../components/ui/Toast';
 import { mensagemDeErro } from '../../services/api/errorMessages';
 import { encontrarServicoPorNome } from '../../utils/planoNavegacao';
+import { EntrarListaEsperaModal, type AlvoListaEspera } from '../../components/espera/EntrarListaEsperaModal';
 
 export default function AgendarServicoScreen() {
   const { theme } = useTheme();
   const router = useRouter();
-  const params = useLocalSearchParams<{ petId?: string; servico?: string }>();
+  const params = useLocalSearchParams<{ petId?: string; servico?: string; servicoId?: string; data?: string; hora?: string }>();
   const queryClient = useQueryClient();
   const { pets, petAtivo } = usePet();
   const [servicos, setServicos] = useState<ServicoClinica[]>([]);
   const [servico, setServico] = useState<ServicoClinica | null>(null);
   const [idPet, setIdPet] = useState<string | null>(params.petId ?? petAtivo?.id ?? null);
-  const [data, setData] = useState(new Date().toLocaleDateString('sv-SE'));
+  const [data, setData] = useState(/^\d{4}-\d{2}-\d{2}$/.test(params.data ?? '') ? (params.data as string) : new Date().toLocaleDateString('sv-SE'));
   const [slots, setSlots] = useState<SlotClinica[]>([]);
   const [slot, setSlot] = useState<SlotClinica | null>(null);
   const [observacao, setObservacao] = useState('');
   const [carregando, setCarregando] = useState(true);
   const [carregandoSlots, setCarregandoSlots] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [alvoEspera, setAlvoEspera] = useState<AlvoListaEspera | null>(null);
+  // Hora sugerida pela notificação de vaga; selecionada uma única vez quando os horários chegam.
+  const horaSugerida = useRef<string | undefined>(params.hora);
 
   useEffect(() => {
-    clinicaService.listarServicos().then(lista => { setServicos(lista); setServico(encontrarServicoPorNome(lista, params.servico) ?? lista[0] ?? null); })
+    clinicaService.listarServicos().then(lista => { setServicos(lista); setServico(lista.find(item => String(item.id) === params.servicoId) ?? encontrarServicoPorNome(lista, params.servico) ?? lista[0] ?? null); })
       .catch(e => mostrarToast('erro', 'Serviços indisponíveis', mensagemDeErro(e, 'Tente novamente.')))
       .finally(() => setCarregando(false));
   }, []);
@@ -38,7 +42,17 @@ export default function AgendarServicoScreen() {
     setSlot(null); setSlots([]);
     if (!servico || !/^\d{4}-\d{2}-\d{2}$/.test(data)) return;
     let valido = true; setCarregandoSlots(true);
-    clinicaService.listarSlots(servico.id, data).then(lista => { if (valido) setSlots(lista); })
+    clinicaService.listarSlots(servico.id, data).then(lista => {
+      if (!valido) return;
+      setSlots(lista);
+      const sugerida = horaSugerida.current;
+      if (sugerida) {
+        horaSugerida.current = undefined;
+        const achado = lista.find(item => item.hora === sugerida);
+        if (achado) setSlot(achado);
+        else mostrarToast('info', 'Essa vaga já foi preenchida', 'Escolha outro horário ou continue na lista de espera.');
+      }
+    })
       .catch(e => { if (valido) mostrarToast('erro', 'Não foi possível consultar os horários', mensagemDeErro(e, 'Tente novamente.')); })
       .finally(() => { if (valido) setCarregandoSlots(false); });
     return () => { valido = false; };
@@ -88,6 +102,9 @@ export default function AgendarServicoScreen() {
             <Text style={{ color: slot === item ? theme.colors.onPrimary : theme.colors.text }}>{item.hora}</Text>
             <Text style={{ color: slot === item ? theme.colors.onPrimary : theme.colors.textSecondary, fontSize: 12 }}>{item.nomeProfissional}</Text>
           </Pressable>)}</View> : <Text style={{ color: theme.colors.textSecondary }}>Sem horários disponíveis nesta data.</Text>}
+        {servico && idPet && !carregandoSlots && !slots.length && <Pressable accessibilityRole="button" accessibilityLabel="Avisar quando surgir uma vaga"
+          onPress={() => setAlvoEspera({ idPet, nomePet: pets.find(p => p.id === idPet)?.nome, idServico: servico.id, nomeServico: servico.nome })}
+          style={{ marginTop: 12 }}><Text style={{ color: theme.colors.primary, fontWeight: '700', textDecorationLine: 'underline' }}>Sem horário bom? Avise-me quando surgir uma vaga</Text></Pressable>}
 
         <Text style={[s.heading, { color: theme.colors.text }]}>Observação (opcional)</Text>
         <TextInput multiline value={observacao} onChangeText={setObservacao} maxLength={500}
@@ -99,6 +116,7 @@ export default function AgendarServicoScreen() {
         </Pressable>
       </>}
     </ScrollView>
+    <EntrarListaEsperaModal alvo={alvoEspera} onFechar={() => setAlvoEspera(null)} onEntrou={() => router.replace('/(tutor)/lista-espera')} />
   </KeyboardAvoidingView>;
 }
 

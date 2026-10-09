@@ -17,6 +17,9 @@ import { SkeletonList } from '../../../components/ui/Skeleton';
 import { mostrarToast } from '../../../components/ui/Toast';
 import { DicaTela } from '../../../components/ui/DicaTela';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento, formatarDataEvento } from '../../../utils/eventoStatus';
+import { ReagendarModal } from '../../../components/agenda/ReagendarModal';
+import { EntrarListaEsperaModal, type AlvoListaEspera } from '../../../components/espera/EntrarListaEsperaModal';
+import { ETAPA_VISUAL, etapaSolicitacao, formatarDataEHora, podeBuscarNovoHorario, podeReagendar } from '../../../utils/solicitacao';
 import { cancelarLembretes } from '../../../services/calendarService';
 import { obterERemoverLembretesEvento } from '../../../storage/petStorage';
 import type { Evento } from '../../../types';
@@ -56,6 +59,8 @@ export default function AgendaScreen() {
   const [selecionado, setSelecionado] = useState(() => new Date());
   const [eventoParaCancelar, setEventoParaCancelar] = useState<Evento | null>(null);
   const [motivoCancelamento, setMotivoCancelamento] = useState('');
+  const [eventoParaReagendar, setEventoParaReagendar] = useState<Evento | null>(null);
+  const [alvoEspera, setAlvoEspera] = useState<AlvoListaEspera | null>(null);
 
   const filtrosVisiveis = useMemo(
     () => (modoSimples ? FILTROS.filter(f => FILTROS_SIMPLES.includes(f.valor)) : FILTROS),
@@ -190,6 +195,16 @@ export default function AgendaScreen() {
           />
         )}
 
+        <Pressable
+          style={s.linkEspera}
+          onPress={() => router.push('/(tutor)/lista-espera')}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir minha lista de espera"
+        >
+          <Ionicons name="hourglass-outline" size={modoSimples ? 20 : 16} color={theme.colors.primary} />
+          <Text style={[s.linkEsperaTexto, modoSimples && { fontSize: 17 }]}>Minha lista de espera</Text>
+        </Pressable>
+
         <Calendario
           mesRef={mesRef}
           selecionado={selecionado}
@@ -228,16 +243,56 @@ export default function AgendaScreen() {
           {eventosDoDia.map((item, index) => {
             const visual = obterVisualTipoEvento(item.nomeTipoEvento);
             const sb = STATUS_EXIBICAO_BADGE[item.statusExibicao];
+            const etapa = etapaSolicitacao(item);
+            const etapaVisual = ETAPA_VISUAL[etapa];
+            // Etapas mais informativas que o status simples: pendente, recusado, confirmado.
+            const badgeExibido = etapa === 'AGUARDANDO_CONFIRMACAO' || etapa === 'RECUSADO' || (etapa === 'CONFIRMADO' && item.statusConfirmacao === 'CONFIRMADO')
+              ? etapaVisual
+              : sb;
+            const reagendavel = podeReagendar(item);
+            const novoHorario = podeBuscarNovoHorario(item) && item.idServicoClinica != null;
             const podeCancelar = item.status === 'AGENDADO';
             const podeRemover = item.status === 'AGENDADO';
             const cancelandoEste = cancelarMutation.isPending && eventoParaCancelar?.id === item.id;
             const removendoEste = removerMutation.isPending && removerMutation.variables === item.id;
 
             return (
+<<<<<<< HEAD
               <View key={item.id} style={[s.timelineItem, modoSimples && sSimples.timelineItem]}>
                 <View style={s.timelineRail} pointerEvents="none">
                   <View style={[s.timelineDot, { backgroundColor: visual.cor, borderColor: theme.pages.agenda.card }]} />
                   {index < eventosDoDia.length - 1 && <View style={[s.timelineLine, { backgroundColor: theme.pages.agenda.eventCard.border }]} />}
+=======
+              <View key={item.id} style={s.card}>
+                <Pressable
+                  style={s.cardConteudo}
+                  onPress={() => router.push({ pathname: '/evento/[id]', params: { id: item.id } })}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ver detalhes de ${item.nomeTipoEvento}`}
+                >
+                <View style={[s.cardRow, modoSimples && sSimples.cardRow]}>
+                  <View style={[s.eventoIcone, modoSimples && sSimples.eventoIcone, { backgroundColor: visual.cor }]}>
+                    <AppIcon name={visual.icon} set={visual.iconSet} size={modoSimples ? 26 : 20} color={theme.colors.onPrimary} />
+                  </View>
+                  <View style={s.eventoInfo}>
+                    <Text style={[s.eventoTitulo, modoSimples && sSimples.eventoTitulo]}>{item.nomeTipoEvento}</Text>
+                    {!modoSimples ? (
+                      <View style={s.eventoMetaRow}>
+                        <AppIcon name="time-outline" set="Ionicons" size={12} color={theme.colors.textMuted} />
+                        <Text style={s.eventoMeta}>{formatarDataEHora(item.data, item.hora)}</Text>
+                        <Text style={s.eventoMetaDot}>•</Text>
+                        <AppIcon name="medical-outline" set="Ionicons" size={12} color={theme.colors.textMuted} />
+                        <Text style={s.eventoMeta}>{item.nomeVeterinario}</Text>
+                      </View>
+                    ) : (
+                      <Text style={[s.eventoMeta, sSimples.eventoMeta]}>{formatarDataEvento(item.data)} • {item.nomeVeterinario}</Text>
+                    )}
+                    {!modoSimples && item.observacao ? <Text style={s.eventoObs}>{item.observacao}</Text> : null}
+                    {!modoSimples && item.status === 'CANCELADO' && item.motivoCancelamento ? (
+                      <Text style={s.eventoMotivoCancelamento}>Motivo: {item.motivoCancelamento}</Text>
+                    ) : null}
+                  </View>
+>>>>>>> 3aeb0c6 (feat(agenda): confirmação, reagendamento e lista de espera de consultas)
                 </View>
                 <View style={s.timelineCard}>
                   <View style={s.card}>
@@ -272,6 +327,7 @@ export default function AgendaScreen() {
                       </View>
                     </Pressable>
 
+<<<<<<< HEAD
                     <View style={[s.cardFooter, modoSimples && sSimples.cardFooter]}>
                       <View style={s.badges}>
                         <View style={[s.badge, { backgroundColor: sb.bg }]}>
@@ -320,6 +376,76 @@ export default function AgendaScreen() {
                       </View>
                     </View>
                   </View>
+=======
+                <View style={[s.cardFooter, modoSimples && sSimples.cardFooter]}>
+                  <View style={s.badges}>
+                    <View style={[s.badge, { backgroundColor: badgeExibido.bg }]}>
+                      <Text style={[s.badgeText, { color: badgeExibido.color }]}>{badgeExibido.label}</Text>
+                    </View>
+                  </View>
+                  <View style={s.acoes}>
+                    {reagendavel && (
+                      <Pressable
+                        style={[s.btnAcao, modoSimples && sSimples.btnAcao]}
+                        onPress={() => setEventoParaReagendar(item)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Escolher outro horário para ${item.nomeTipoEvento}`}
+                      >
+                        <Ionicons name="swap-horizontal-outline" size={modoSimples ? 20 : 15} color={theme.colors.primary} />
+                        <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.primary }]}>Outro horário</Text>
+                      </Pressable>
+                    )}
+                    {novoHorario && (
+                      <Pressable
+                        style={[s.btnAcao, modoSimples && sSimples.btnAcao]}
+                        onPress={() => router.push({ pathname: '/(tutor)/agendar-servico', params: { petId: item.petId, servicoId: String(item.idServicoClinica) } })}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Agendar novamente ${item.nomeTipoEvento}`}
+                      >
+                        <Ionicons name="calendar-outline" size={modoSimples ? 20 : 15} color={theme.colors.primary} />
+                        <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.primary }]}>Novo horário</Text>
+                      </Pressable>
+                    )}
+                    {podeCancelar && (
+                      <Pressable
+                        style={[s.btnAcao, s.btnAcaoDanger, modoSimples && sSimples.btnAcao]}
+                        onPress={() => abrirCancelamento(item)}
+                        disabled={cancelandoEste}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Cancelar evento ${item.nomeTipoEvento}`}
+                        accessibilityState={{ disabled: cancelandoEste, busy: cancelandoEste }}
+                      >
+                        {cancelandoEste ? (
+                          <ActivityIndicator size="small" color={theme.colors.danger} />
+                        ) : (
+                          <>
+                            <Ionicons name="close-circle-outline" size={modoSimples ? 20 : 15} color={theme.colors.danger} />
+                            <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.danger }]}>Cancelar</Text>
+                          </>
+                        )}
+                      </Pressable>
+                    )}
+                    {podeRemover && (
+                      <Pressable
+                        style={[s.btnAcao, modoSimples && sSimples.btnAcao]}
+                        onPress={() => handleRemover(item)}
+                        disabled={removendoEste}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Remover evento ${item.nomeTipoEvento}`}
+                        accessibilityState={{ disabled: removendoEste, busy: removendoEste }}
+                      >
+                        {removendoEste ? (
+                          <ActivityIndicator size="small" color={theme.colors.textMuted} />
+                        ) : (
+                          <>
+                            <Ionicons name="trash-outline" size={modoSimples ? 20 : 15} color={theme.colors.textMuted} />
+                            <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.textMuted }]}>Remover</Text>
+                          </>
+                        )}
+                      </Pressable>
+                    )}
+                  </View>
+>>>>>>> 3aeb0c6 (feat(agenda): confirmação, reagendamento e lista de espera de consultas)
                 </View>
               </View>
             );
@@ -337,6 +463,27 @@ export default function AgendaScreen() {
       >
         <Ionicons name="add" size={modoSimples ? 38 : 30} color={theme.colors.onPrimary} />
       </Pressable>
+
+      <ReagendarModal
+        evento={eventoParaReagendar}
+        onFechar={() => setEventoParaReagendar(null)}
+        onAvisarVaga={(evento, idServico, nomeServico) => {
+          setEventoParaReagendar(null);
+          setAlvoEspera({
+            idPet: evento.petId,
+            nomePet: undefined,
+            idServico,
+            nomeServico,
+            idVeterinario: evento.idVeterinario ? Number(evento.idVeterinario) : null,
+            idProfissionalEstetica: evento.idProfissionalEstetica ?? null,
+          });
+        }}
+      />
+      <EntrarListaEsperaModal
+        alvo={alvoEspera}
+        onFechar={() => setAlvoEspera(null)}
+        onEntrou={() => router.push('/(tutor)/lista-espera')}
+      />
 
       <Modal visible={eventoParaCancelar !== null} transparent animationType="fade" onRequestClose={() => setEventoParaCancelar(null)}>
         <View style={s.modalOverlay}>
@@ -472,7 +619,9 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   badges: { flexDirection: 'row', gap: 6 },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 11, fontWeight: '700' },
-  acoes: { flexDirection: 'row', gap: 8 },
+  linkEspera: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 6, marginBottom: 6 },
+  linkEsperaTexto: { color: theme.colors.primary, fontWeight: '700', fontSize: 13 },
+  acoes: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8, flexShrink: 1 },
   btnAcao: {
     flexDirection: 'row',
     alignItems: 'center',

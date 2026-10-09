@@ -22,6 +22,7 @@ import { AppSplashGate } from '../components/animated-splash';
 import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
 import { configurarNotificacoesPush } from '../services/pushNotificationService';
+import { NotificationTapHandler } from '../components/navigation/NotificationTapHandler';
 
 lockFontScaling();
 
@@ -63,6 +64,7 @@ const ROTAS_EXCLUSIVAS_TUTOR = [
   'add-evento',
   'agendar-servico',
   'plano-preventivo',
+  'lista-espera',
   'mensagens-clinica',
   'minha-clinica',
   'add-pet',
@@ -333,6 +335,7 @@ function ThemedRootLayout() {
                 <OfflineBanner />
                 <RootNavigator />
                 <PushNotificationRegistration />
+                <NotificationTapHandler />
                 <BiometricEnrollmentPrompt />
                 <ToastHost />
                 <AppSplashGate />
