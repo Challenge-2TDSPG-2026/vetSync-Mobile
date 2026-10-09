@@ -133,6 +133,27 @@ export default function FichaPacienteScreen() {
           </View>
         </View>
 
+        <View style={s.healthCard}>
+          <View style={s.healthHeader}>
+            <View>
+              <Text style={s.healthEyebrow}>RESUMO DE SAÚDE</Text>
+              <Text style={s.healthTitle}>Informações importantes</Text>
+            </View>
+            <AppIcon name="heart-circle-outline" set="Ionicons" size={24} color={theme.pages.petDetails.primary} />
+          </View>
+          {perfilSaude.isLoading ? (
+            <Text style={s.healthLoading}>Carregando informações de saúde...</Text>
+          ) : perfilSaude.data ? (
+            <>
+              <HealthRow styles={s} label="Peso atual" value={perfilSaude.data.pesoAtual ? `${perfilSaude.data.pesoAtual} kg` : 'Não informado'} />
+              <HealthRow styles={s} label="Alergias" value={perfilSaude.data.alergias || 'Nenhuma informada'} />
+              <HealthRow styles={s} label="Medicamentos contínuos" value={perfilSaude.data.medicamentosContinuos || 'Nenhum informado'} />
+            </>
+          ) : (
+            <Text style={s.healthLoading}>Nenhuma informação adicional cadastrada.</Text>
+          )}
+        </View>
+
         <View style={s.statsRow}>
           <StatCard styles={s} valor={total} label="Total" accentColor={theme.pages.petDetails.info} />
           <StatCard styles={s} valor={pendentes} label="Pendentes" accentColor={theme.pages.petDetails.primary} />
@@ -149,11 +170,15 @@ export default function FichaPacienteScreen() {
             <Text style={s.emptySub}>Esse paciente ainda não tem solicitações ou consultas.</Text>
           </View>
         ) : (
-          eventosDoPaciente.map(item => {
+          <View style={s.timelineList}>
+          {eventosDoPaciente.map((item, index) => {
             const visual = obterVisualTipoEvento(item.nomeTipoEvento);
             const sb = STATUS_EXIBICAO_BADGE[statusExibicao(item)];
             return (
-              <View key={item.id} style={s.card}>
+              <View key={item.id} style={s.timelineItem}>
+                <View style={s.timelineRail}><View style={[s.timelineDot, { backgroundColor: visual.cor }]} />{index < eventosDoPaciente.length - 1 && <View style={s.timelineLine} />}</View>
+                <View style={s.timelineContent}>
+                <View style={s.card}>
                 <View style={s.cardRow}>
                   <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
                     <AppIcon name={visual.icon} set={visual.iconSet} size={18} color={theme.pages.petDetails.white} />
@@ -185,9 +210,12 @@ export default function FichaPacienteScreen() {
                     </View>
                   )}
                 </View>
+                </View>
+              </View>
               </View>
             );
-          })
+          })}
+          </View>
         )}
 
       </ScrollView>
@@ -275,6 +303,10 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   tutorNome: { fontSize: 13, fontWeight: '700', color: theme.pages.petDetails.text, marginTop: 2 },
   tutorContato: { fontSize: 11, color: theme.pages.petDetails.textSecondary, marginTop: 2 },
   healthCard: { backgroundColor: theme.pages.petDetails.healthCard.background, borderRadius: 12, borderWidth: 1, borderColor: theme.pages.petDetails.healthCard.border, padding: 14, marginBottom: 16 },
+  healthHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  healthEyebrow: { fontSize: 10, fontWeight: '800', letterSpacing: 0.8, color: theme.pages.petDetails.primary },
+  healthTitle: { fontSize: 15, fontWeight: '800', color: theme.pages.petDetails.text, marginTop: 3 },
+  healthLoading: { color: theme.pages.petDetails.textSecondary, fontSize: 12, paddingVertical: 8 },
   healthRow: { paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: theme.pages.petDetails.border },
   healthLabel: { fontSize: 10, color: theme.pages.petDetails.textSecondary, fontWeight: '700', textTransform: 'uppercase' },
   healthValue: { fontSize: 12, color: theme.pages.petDetails.text, marginTop: 3, lineHeight: 17 },
@@ -285,6 +317,12 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   statVal: { fontSize: 20, fontWeight: '700', lineHeight: 22 },
 
   secLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase', color: theme.pages.petDetails.textSecondary, marginBottom: 10, marginTop: 4, paddingLeft: 2 },
+  timelineList: { paddingLeft: 2 },
+  timelineItem: { flexDirection: 'row', alignItems: 'stretch' },
+  timelineRail: { width: 20, alignItems: 'center', position: 'relative' },
+  timelineDot: { width: 11, height: 11, borderRadius: 6, marginTop: 20, zIndex: 1, borderWidth: 2, borderColor: theme.pages.petDetails.background },
+  timelineLine: { position: 'absolute', top: 30, bottom: -12, width: 2, backgroundColor: theme.pages.petDetails.historyCard.border },
+  timelineContent: { flex: 1, minWidth: 0 },
 
   empty: { alignItems: 'center', paddingVertical: 48, backgroundColor: theme.pages.petDetails.emptyState.background, borderRadius: 14, borderWidth: 1, borderColor: theme.pages.petDetails.emptyState.border },
   emptyTitle: { fontSize: 14, fontWeight: '700', color: theme.pages.petDetails.text, marginBottom: 4 },
