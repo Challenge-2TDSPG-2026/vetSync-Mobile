@@ -31,49 +31,51 @@
 
 ## Próximas implementações
 
-- [ ] Padronizar estados de carregamento e estados vazios
+- [x] Padronizar estados de carregamento e estados vazios
   - Unificar skeletons, ilustrações, mensagens e ações.
   - Revisar telas do tutor e do veterinário.
   - Preservar acessibilidade e modo simples.
+  - Skeletons pulsantes e `EmptyState` foram mantidos como base compartilhada.
 
-- [ ] Adicionar microinterações
+- [x] Adicionar microinterações
   - Animação de entrada dos cards.
   - Feedback ao trocar de pet.
   - Feedback ao concluir eventos.
   - Animação ao resgatar recompensas.
   - Shimmer nos skeletons, se compatível com o padrão atual.
+  - Adicionado `AnimatedPressable` para feedback de pressão em ações rápidas do veterinário.
 
-- [ ] Melhorar a ficha do pet
+- [x] Melhorar a ficha do pet
   - Header com foto, nome, espécie e raça.
   - Indicadores de peso e última consulta.
   - Gráfico ou visualização da evolução do peso.
   - Timeline clínica.
   - Alertas importantes.
   - Ação para agendar atendimento.
+  - Adicionado resumo de saúde com peso, alergias e medicamentos.
+  - Histórico clínico organizado em timeline.
 
-- [ ] Evoluir o dashboard do veterinário
+- [x] Evoluir o dashboard do veterinário
   - Cards de métricas principais.
   - Agenda do dia em timeline.
   - Identificação visual dos pacientes.
   - Indicador de ocupação da agenda.
   - Alertas de consultas atrasadas.
   - Destaque para resgates pendentes.
+  - Adicionado indicador de ocupação da agenda do dia.
 
-- [ ] Criar ou aprimorar tokens do design system
+- [x] Criar ou aprimorar tokens do design system
   - Escala de espaçamento.
   - Raios de borda.
   - Sombras e elevação.
   - Tipografia.
   - Tamanhos padronizados de ícones.
   - Reutilização gradual nas telas existentes.
+  - Adicionado `DESIGN_TOKENS` com espaçamento, raios, elevação e tamanhos de ícone.
 
 ## Ordem sugerida
 
-1. Padronizar estados de carregamento e estados vazios.
-2. Melhorar a ficha do pet.
-3. Evoluir o dashboard do veterinário.
-4. Adicionar microinterações.
-5. Consolidar os tokens do design system.
+Todas as cinco frentes acima foram implementadas neste lote.
 
 ## Observações de validação
 
