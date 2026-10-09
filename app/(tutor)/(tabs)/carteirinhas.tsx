@@ -33,12 +33,18 @@ export default function CarteirinhasScreen() {
     [eventos],
   );
   const realizadas = vacinas.filter(evento => statusExibicao(evento) === 'CONCLUIDO').length;
+  const atrasadas = vacinas.filter(evento => statusExibicao(evento) === 'ATRASADO').length;
   const proximas = vacinas
     .filter(evento => statusExibicao(evento) === 'AGENDADO')
     .sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime());
   const proximaVacina = proximas[0];
   const vacinasApi = carteira.data?.vacinas ?? [];
   const resumoApi = carteira.data?.resumo;
+  const totalVacinas = resumoApi ? resumoApi.emDia + resumoApi.vencendo + resumoApi.atrasadas : vacinas.length;
+  const vacinasEmDia = resumoApi?.emDia ?? realizadas;
+  const vacinasAtrasadas = resumoApi?.atrasadas ?? atrasadas;
+  const cobertura = totalVacinas > 0 ? vacinasEmDia / totalVacinas : 0;
+  const protecaoEmDia = totalVacinas > 0 && vacinasAtrasadas === 0;
   const proximaApi = vacinasApi
     .filter(vacina => vacina.proximaDoseEm && vacina.status !== 'ATRASADA')
     .sort((a, b) => new Date(a.proximaDoseEm as string).getTime() - new Date(b.proximaDoseEm as string).getTime())[0];
@@ -81,11 +87,29 @@ export default function CarteirinhasScreen() {
           {carregandoEventos ? <ActivityIndicator size="small" color={theme.colors.primary} /> : null}
         </View>
         <View style={[s.resumoCard, modoSimples && sSimples.resumoCard]}>
-          <Resumo styles={s} valor={resumoApi ? resumoApi.emDia + resumoApi.vencendo + resumoApi.atrasadas : vacinas.length} rotulo="Vacinas" cor={theme.pages.vaccinationWallet.summaryCard.vaccineValue} simples={modoSimples} />
+          <Resumo styles={s} valor={totalVacinas} rotulo="Vacinas" cor={theme.pages.vaccinationWallet.summaryCard.vaccineValue} simples={modoSimples} />
           <View style={s.resumoDivisor} />
-          <Resumo styles={s} valor={resumoApi ? resumoApi.emDia : realizadas} rotulo="Realizadas" cor={theme.pages.vaccinationWallet.summaryCard.completedValue} simples={modoSimples} />
+          <Resumo styles={s} valor={vacinasEmDia} rotulo="Em dia" cor={theme.pages.vaccinationWallet.summaryCard.completedValue} simples={modoSimples} />
           <View style={s.resumoDivisor} />
           <Resumo styles={s} valor={resumoApi ? resumoApi.vencendo : proximas.length} rotulo="Próximas" cor={theme.pages.vaccinationWallet.summaryCard.upcomingValue} simples={modoSimples} />
+        </View>
+
+        <View style={[s.protecaoCard, modoSimples && sSimples.protecaoCard, !protecaoEmDia && s.protecaoCardAlerta]}>
+          <View style={[s.protecaoIcone, { backgroundColor: protecaoEmDia ? theme.colors.successBackground : theme.colors.warningBackground }]}>
+            <Ionicons name={protecaoEmDia ? 'shield-checkmark' : 'warning-outline'} size={modoSimples ? 27 : 21} color={protecaoEmDia ? theme.colors.success : theme.colors.warning} />
+          </View>
+          <View style={s.protecaoInfo}>
+            <View style={s.protecaoTituloLinha}>
+              <Text style={[s.protecaoTitulo, modoSimples && sSimples.protecaoTitulo]}>{protecaoEmDia ? 'Proteção em dia' : 'Atenção à proteção'}</Text>
+              <Text style={[s.protecaoPercentual, { color: protecaoEmDia ? theme.colors.success : theme.colors.warning }]}>{Math.round(cobertura * 100)}%</Text>
+            </View>
+            <Text style={[s.protecaoDescricao, modoSimples && sSimples.protecaoDescricao]}>
+              {totalVacinas === 0 ? 'Ainda não há registros de vacinação.' : protecaoEmDia ? 'Nenhuma vacina atrasada para este pet.' : `${vacinasAtrasadas} vacina${vacinasAtrasadas === 1 ? '' : 's'} precisa${vacinasAtrasadas === 1 ? '' : 'm'} de atenção.`}
+            </Text>
+            <View style={s.protecaoTrilha}>
+              <View style={[s.protecaoProgresso, { width: `${Math.max(cobertura * 100, totalVacinas > 0 ? 4 : 0)}%`, backgroundColor: protecaoEmDia ? theme.colors.success : theme.colors.warning }]} />
+            </View>
+          </View>
         </View>
 
         <View style={[s.proximaCard, modoSimples && sSimples.proximaCard]}>
@@ -183,6 +207,17 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   resumoValor: { fontSize: 25, fontWeight: '800', lineHeight: 30, letterSpacing: -0.5 },
   resumoRotulo: { color: theme.colors.textSecondary, fontSize: 11, fontWeight: '700', marginTop: 2 },
 
+  protecaoCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.pages.vaccinationWallet.summaryCard.background, borderRadius: 18, padding: 15, marginBottom: 14, borderWidth: 1, borderColor: theme.colors.successBackground },
+  protecaoCardAlerta: { borderColor: theme.colors.warningBackground },
+  protecaoIcone: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  protecaoInfo: { flex: 1, minWidth: 0 },
+  protecaoTituloLinha: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  protecaoTitulo: { color: theme.colors.text, fontSize: 14, fontWeight: '800' },
+  protecaoPercentual: { fontSize: 17, fontWeight: '800' },
+  protecaoDescricao: { color: theme.colors.textSecondary, fontSize: 11, lineHeight: 16, marginTop: 3 },
+  protecaoTrilha: { height: 6, borderRadius: 3, backgroundColor: theme.pages.vaccinationWallet.summaryCard.divider, overflow: 'hidden', marginTop: 9 },
+  protecaoProgresso: { height: '100%', borderRadius: 3 },
+
   proximaCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.pages.vaccinationWallet.nextVaccineCard.background, borderRadius: 18, padding: 15, gap: 11, marginBottom: 14 },
   proximaIcone: { width: 44, height: 44, borderRadius: 14, backgroundColor: theme.colors.successBackground, justifyContent: 'center', alignItems: 'center' },
   proximaInfo: { flex: 1, minWidth: 0 },
@@ -209,6 +244,11 @@ const sSimples = StyleSheet.create({
   resumoCard: { paddingVertical: 22 },
   resumoValor: { fontSize: 34, lineHeight: 40 },
   resumoRotulo: { fontSize: 14 },
+  protecaoCard: { padding: 21, gap: 15 },
+  protecaoIcone: { width: 60, height: 60, borderRadius: 19 },
+  protecaoTitulo: { fontSize: 20 },
+  protecaoPercentual: { fontSize: 23 },
+  protecaoDescricao: { fontSize: 16, lineHeight: 22, marginTop: 4 },
   proximaCard: { padding: 21, gap: 15 },
   proximaIcone: { width: 60, height: 60, borderRadius: 19 },
   proximaRotulo: { fontSize: 13, marginBottom: 4 },
