@@ -11,6 +11,7 @@ import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList, SkeletonCard } from '../../components/ui/Skeleton';
+import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 import type { AppTheme } from '../../constants/theme';
@@ -26,6 +27,8 @@ export default function VetDashboardScreen() {
   const eventosConcluidos = eventos.filter(e => e.status === 'CONCLUIDO');
   const faturamento = eventosConcluidos.reduce((total, evento) => total + evento.custo, 0);
   const pacientesComPendencia = pacientes.filter(p => p.eventos.some(e => e.status === 'AGENDADO')).length;
+  const atendimentosHojeConcluidos = eventosDeHoje.filter(e => e.status === 'CONCLUIDO').length;
+  const ocupacaoHoje = eventosDeHoje.length > 0 ? Math.round((atendimentosHojeConcluidos / eventosDeHoje.length) * 100) : 0;
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-painel');
 
@@ -80,6 +83,22 @@ export default function VetDashboardScreen() {
         <StatCard styles={s} valor={eventosConcluidos.length} label="Concluídos" accentColor={theme.domain.event.vaccine} />
       </View>
 
+      <View style={s.ocupacaoCard}>
+        <View style={s.ocupacaoHeader}>
+          <View>
+            <Text style={s.ocupacaoEyebrow}>AGENDA DE HOJE</Text>
+            <Text style={s.ocupacaoTitle}>{eventosDeHoje.length === 0 ? 'Agenda livre' : `${ocupacaoHoje}% dos atendimentos concluídos`}</Text>
+          </View>
+          <View style={[s.ocupacaoBadge, { backgroundColor: ocupacaoHoje === 100 && eventosDeHoje.length > 0 ? theme.colors.successBackground : theme.colors.infoBackground }]}>
+            <AppIcon name="pulse-outline" set="Ionicons" size={18} color={ocupacaoHoje === 100 && eventosDeHoje.length > 0 ? theme.colors.success : theme.colors.info} />
+          </View>
+        </View>
+        <View style={s.ocupacaoTrack}>
+          <View style={[s.ocupacaoFill, { width: `${ocupacaoHoje}%`, backgroundColor: ocupacaoHoje === 100 && eventosDeHoje.length > 0 ? theme.colors.success : theme.colors.info }]} />
+        </View>
+        <Text style={s.ocupacaoHint}>{eventosDeHoje.length} atendimento{eventosDeHoje.length === 1 ? '' : 's'} hoje • {atendimentosHojeConcluidos} concluído{atendimentosHojeConcluidos === 1 ? '' : 's'}</Text>
+      </View>
+
       <View style={s.resumoCard}>
         <View style={s.resumoHeader}>
           <View>
@@ -102,7 +121,7 @@ export default function VetDashboardScreen() {
       </View>
 
       <View style={s.quickActions}>
-        <Pressable
+        <AnimatedPressable
           style={s.quickAction}
           onPress={() => router.push('/(vet)/pacientes')}
           accessibilityRole="button"
@@ -112,8 +131,8 @@ export default function VetDashboardScreen() {
             <AppIcon name="paw" set="Ionicons" size={18} color={theme.colors.info} />
           </View>
           <Text style={s.quickLabel}>Ver pacientes</Text>
-        </Pressable>
-        <Pressable
+        </AnimatedPressable>
+        <AnimatedPressable
           style={s.quickAction}
           onPress={() => router.push('/(vet)/disponibilidade')}
           accessibilityRole="button"
@@ -123,8 +142,8 @@ export default function VetDashboardScreen() {
             <AppIcon name="time-outline" set="Ionicons" size={18} color={theme.colors.success} />
           </View>
           <Text style={s.quickLabel}>Ajustar agenda</Text>
-        </Pressable>
-        <Pressable
+        </AnimatedPressable>
+        <AnimatedPressable
           style={s.quickAction}
           onPress={() => router.push('/(vet)/resgates')}
           accessibilityRole="button"
@@ -134,7 +153,7 @@ export default function VetDashboardScreen() {
             <AppIcon name="gift-outline" set="Ionicons" size={18} color={theme.colors.warning} />
           </View>
           <Text style={s.quickLabel}>Resgates</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       {resgatesPendentes.length > 0 && (
@@ -338,6 +357,14 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   resumoValue: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
   resumoLabel: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 3 },
   resumoDivider: { width: 1, height: 34, backgroundColor: theme.pages.vetDashboard.summaryCard.divider, marginHorizontal: 14 },
+  ocupacaoCard: { backgroundColor: theme.pages.vetDashboard.summaryCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.summaryCard.border, borderRadius: 16, padding: 16, marginBottom: 16 },
+  ocupacaoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  ocupacaoEyebrow: { fontSize: 10, color: theme.colors.primary, fontWeight: '800', letterSpacing: 0.7 },
+  ocupacaoTitle: { fontSize: 15, color: theme.colors.text, fontWeight: '800', marginTop: 4 },
+  ocupacaoBadge: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  ocupacaoTrack: { height: 9, borderRadius: 5, overflow: 'hidden', backgroundColor: theme.pages.vetDashboard.quickActionCard.background, marginTop: 15 },
+  ocupacaoFill: { height: '100%', borderRadius: 5 },
+  ocupacaoHint: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 8 },
   quickActions: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   quickAction: { flex: 1, backgroundColor: theme.pages.vetDashboard.quickActionCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.quickActionCard.border, borderRadius: 12, padding: 11, alignItems: 'center', gap: 7 },
   quickIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
