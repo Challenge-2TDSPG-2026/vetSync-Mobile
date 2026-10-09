@@ -209,9 +209,12 @@ export default function RecompensasScreen() {
               />
               <View style={s.cupomInfo}>
                 <Text style={[s.cupomTitulo, modoSimples && sSimples.cupomTitulo]}>{r.nome}</Text>
-                <Text style={[s.cupomSub, modoSimples && sSimples.cupomSub]}>
-                  {r.descricao ? `${r.descricao} • ` : ''}{r.custoPontos} pontos
-                </Text>
+                {r.descricao ? <Text style={[s.cupomSub, modoSimples && sSimples.cupomSub]} numberOfLines={2}>{r.descricao}</Text> : null}
+                <View style={[s.custoPill, !podeResgatar && s.custoPillBloqueado]}>
+                  <AppIcon name="sparkles" set="Ionicons" size={modoSimples ? 15 : 12} color={podeResgatar ? theme.domain.reward.gold : theme.colors.textMuted} />
+                  <Text style={[s.custoPillText, modoSimples && sSimples.custoPillText, !podeResgatar && s.custoPillTextBloqueado]}>{r.custoPontos} pts</Text>
+                </View>
+                {!podeResgatar && <Text style={[s.faltamPontos, modoSimples && sSimples.faltamPontos]}>Faltam {r.custoPontos - saldoPontos} pts</Text>}
               </View>
               <Pressable
                 style={[s.btnResgatar, modoSimples && sSimples.btnResgatar, (!podeResgatar || isPending) && { opacity: 0.5 }]}
@@ -429,7 +432,12 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   },
   cupomInfo: { flex: 1 },
   cupomTitulo: { fontSize: 16, fontWeight: '800', color: theme.colors.text },
-  cupomSub: { fontSize: 13, color: theme.colors.textSecondary, marginTop: 3 },
+  cupomSub: { fontSize: 13, color: theme.colors.textSecondary, marginTop: 3, marginBottom: 5 },
+  custoPill: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 4, backgroundColor: theme.pages.loyalty.levelCard.progressBackground },
+  custoPillBloqueado: { backgroundColor: theme.pages.loyalty.cycleCard.progressBackground },
+  custoPillText: { color: theme.domain.reward.gold, fontSize: 11, fontWeight: '800' },
+  custoPillTextBloqueado: { color: theme.colors.textMuted },
+  faltamPontos: { color: theme.colors.danger, fontSize: 10, fontWeight: '700', marginTop: 4 },
   btnResgatar: {
     backgroundColor: theme.colors.primary, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999,
   },
@@ -492,6 +500,9 @@ const sSimples = StyleSheet.create({
   cupomIconWrap: { width: 65, height: 65, borderRadius: 33 },
   cupomTitulo: { fontSize: 22 },
   cupomSub: { fontSize: 18 },
+  custoPill: { paddingHorizontal: 11, paddingVertical: 6 },
+  custoPillText: { fontSize: 15 },
+  faltamPontos: { fontSize: 14, marginTop: 5 },
   btnResgatar: { paddingHorizontal: 22, paddingVertical: 15 },
   btnResgatarText: { fontSize: 19 },
 
