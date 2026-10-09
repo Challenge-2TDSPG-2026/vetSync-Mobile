@@ -224,7 +224,8 @@ export default function AgendaScreen() {
             style={modoSimples ? sSimples.empty : undefined}
           />
         ) : (
-          eventosDoDia.map(item => {
+          <View style={s.timelineList}>
+          {eventosDoDia.map((item, index) => {
             const visual = obterVisualTipoEvento(item.nomeTipoEvento);
             const sb = STATUS_EXIBICAO_BADGE[item.statusExibicao];
             const podeCancelar = item.status === 'AGENDADO';
@@ -233,88 +234,97 @@ export default function AgendaScreen() {
             const removendoEste = removerMutation.isPending && removerMutation.variables === item.id;
 
             return (
-              <View key={item.id} style={s.card}>
-                <Pressable
-                  style={s.cardConteudo}
-                  onPress={() => router.push({ pathname: '/evento/[id]', params: { id: item.id } })}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Ver detalhes de ${item.nomeTipoEvento}`}
-                >
-                <View style={[s.cardRow, modoSimples && sSimples.cardRow]}>
-                  <View style={[s.eventoIcone, modoSimples && sSimples.eventoIcone, { backgroundColor: visual.cor }]}>
-                    <AppIcon name={visual.icon} set={visual.iconSet} size={modoSimples ? 26 : 20} color={theme.colors.onPrimary} />
-                  </View>
-                  <View style={s.eventoInfo}>
-                    <Text style={[s.eventoTitulo, modoSimples && sSimples.eventoTitulo]}>{item.nomeTipoEvento}</Text>
-                    {!modoSimples ? (
-                      <View style={s.eventoMetaRow}>
-                        <AppIcon name="time-outline" set="Ionicons" size={12} color={theme.colors.textMuted} />
-                        <Text style={s.eventoMeta}>{formatarDataEvento(item.data)}</Text>
-                        <Text style={s.eventoMetaDot}>•</Text>
-                        <AppIcon name="medical-outline" set="Ionicons" size={12} color={theme.colors.textMuted} />
-                        <Text style={s.eventoMeta}>{item.nomeVeterinario}</Text>
-                      </View>
-                    ) : (
-                      <Text style={[s.eventoMeta, sSimples.eventoMeta]}>{formatarDataEvento(item.data)} • {item.nomeVeterinario}</Text>
-                    )}
-                    {!modoSimples && item.observacao ? <Text style={s.eventoObs}>{item.observacao}</Text> : null}
-                    {!modoSimples && item.status === 'CANCELADO' && item.motivoCancelamento ? (
-                      <Text style={s.eventoMotivoCancelamento}>Motivo: {item.motivoCancelamento}</Text>
-                    ) : null}
-                  </View>
+              <View key={item.id} style={[s.timelineItem, modoSimples && sSimples.timelineItem]}>
+                <View style={s.timelineRail} pointerEvents="none">
+                  <View style={[s.timelineDot, { backgroundColor: visual.cor, borderColor: theme.pages.agenda.card }]} />
+                  {index < eventosDoDia.length - 1 && <View style={[s.timelineLine, { backgroundColor: theme.pages.agenda.eventCard.border }]} />}
                 </View>
-                </Pressable>
+                <View style={s.timelineCard}>
+                  <View style={s.card}>
+                    <Pressable
+                      style={s.cardConteudo}
+                      onPress={() => router.push({ pathname: '/evento/[id]', params: { id: item.id } })}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Ver detalhes de ${item.nomeTipoEvento}`}
+                    >
+                      <View style={[s.cardRow, modoSimples && sSimples.cardRow]}>
+                        <View style={[s.eventoIcone, modoSimples && sSimples.eventoIcone, { backgroundColor: visual.cor }]}>
+                          <AppIcon name={visual.icon} set={visual.iconSet} size={modoSimples ? 26 : 20} color={theme.colors.onPrimary} />
+                        </View>
+                        <View style={s.eventoInfo}>
+                          <Text style={[s.eventoTitulo, modoSimples && sSimples.eventoTitulo]}>{item.nomeTipoEvento}</Text>
+                          {!modoSimples ? (
+                            <View style={s.eventoMetaRow}>
+                              <AppIcon name="time-outline" set="Ionicons" size={12} color={theme.colors.textMuted} />
+                              <Text style={s.eventoMeta}>{formatarDataEvento(item.data)}</Text>
+                              <Text style={s.eventoMetaDot}>•</Text>
+                              <AppIcon name="medical-outline" set="Ionicons" size={12} color={theme.colors.textMuted} />
+                              <Text style={s.eventoMeta}>{item.nomeVeterinario}</Text>
+                            </View>
+                          ) : (
+                            <Text style={[s.eventoMeta, sSimples.eventoMeta]}>{formatarDataEvento(item.data)} • {item.nomeVeterinario}</Text>
+                          )}
+                          {!modoSimples && item.observacao ? <Text style={s.eventoObs}>{item.observacao}</Text> : null}
+                          {!modoSimples && item.status === 'CANCELADO' && item.motivoCancelamento ? (
+                            <Text style={s.eventoMotivoCancelamento}>Motivo: {item.motivoCancelamento}</Text>
+                          ) : null}
+                        </View>
+                      </View>
+                    </Pressable>
 
-                <View style={[s.cardFooter, modoSimples && sSimples.cardFooter]}>
-                  <View style={s.badges}>
-                    <View style={[s.badge, { backgroundColor: sb.bg }]}>
-                      <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
+                    <View style={[s.cardFooter, modoSimples && sSimples.cardFooter]}>
+                      <View style={s.badges}>
+                        <View style={[s.badge, { backgroundColor: sb.bg }]}>
+                          <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
+                        </View>
+                      </View>
+                      <View style={s.acoes}>
+                        {podeCancelar && (
+                          <Pressable
+                            style={[s.btnAcao, s.btnAcaoDanger, modoSimples && sSimples.btnAcao]}
+                            onPress={() => abrirCancelamento(item)}
+                            disabled={cancelandoEste}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Cancelar evento ${item.nomeTipoEvento}`}
+                            accessibilityState={{ disabled: cancelandoEste, busy: cancelandoEste }}
+                          >
+                            {cancelandoEste ? (
+                              <ActivityIndicator size="small" color={theme.colors.danger} />
+                            ) : (
+                              <>
+                                <Ionicons name="close-circle-outline" size={modoSimples ? 20 : 15} color={theme.colors.danger} />
+                                <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.danger }]}>Cancelar</Text>
+                              </>
+                            )}
+                          </Pressable>
+                        )}
+                        {podeRemover && (
+                          <Pressable
+                            style={[s.btnAcao, modoSimples && sSimples.btnAcao]}
+                            onPress={() => handleRemover(item)}
+                            disabled={removendoEste}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Remover evento ${item.nomeTipoEvento}`}
+                            accessibilityState={{ disabled: removendoEste, busy: removendoEste }}
+                          >
+                            {removendoEste ? (
+                              <ActivityIndicator size="small" color={theme.colors.textMuted} />
+                            ) : (
+                              <>
+                                <Ionicons name="trash-outline" size={modoSimples ? 20 : 15} color={theme.colors.textMuted} />
+                                <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.textMuted }]}>Remover</Text>
+                              </>
+                            )}
+                          </Pressable>
+                        )}
+                      </View>
                     </View>
-                  </View>
-                  <View style={s.acoes}>
-                    {podeCancelar && (
-                      <Pressable
-                        style={[s.btnAcao, s.btnAcaoDanger, modoSimples && sSimples.btnAcao]}
-                        onPress={() => abrirCancelamento(item)}
-                        disabled={cancelandoEste}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Cancelar evento ${item.nomeTipoEvento}`}
-                        accessibilityState={{ disabled: cancelandoEste, busy: cancelandoEste }}
-                      >
-                        {cancelandoEste ? (
-                          <ActivityIndicator size="small" color={theme.colors.danger} />
-                        ) : (
-                          <>
-                            <Ionicons name="close-circle-outline" size={modoSimples ? 20 : 15} color={theme.colors.danger} />
-                            <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.danger }]}>Cancelar</Text>
-                          </>
-                        )}
-                      </Pressable>
-                    )}
-                    {podeRemover && (
-                      <Pressable
-                        style={[s.btnAcao, modoSimples && sSimples.btnAcao]}
-                        onPress={() => handleRemover(item)}
-                        disabled={removendoEste}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Remover evento ${item.nomeTipoEvento}`}
-                        accessibilityState={{ disabled: removendoEste, busy: removendoEste }}
-                      >
-                        {removendoEste ? (
-                          <ActivityIndicator size="small" color={theme.colors.textMuted} />
-                        ) : (
-                          <>
-                            <Ionicons name="trash-outline" size={modoSimples ? 20 : 15} color={theme.colors.textMuted} />
-                            <Text style={[s.btnAcaoText, modoSimples && sSimples.btnAcaoText, { color: theme.colors.textMuted }]}>Remover</Text>
-                          </>
-                        )}
-                      </Pressable>
-                    )}
                   </View>
                 </View>
               </View>
             );
-          })
+          })}
+          </View>
         )}
       </ScrollView>
 
@@ -416,6 +426,12 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   },
   diaHeaderBadgeText: { fontSize: 11, fontWeight: '800', color: theme.colors.primary },
 
+  timelineList: { paddingLeft: 2 },
+  timelineItem: { flexDirection: 'row', alignItems: 'stretch', minHeight: 124 },
+  timelineRail: { width: 22, alignItems: 'center', position: 'relative' },
+  timelineDot: { width: 13, height: 13, borderRadius: 7, borderWidth: 3, marginTop: 23, zIndex: 1 },
+  timelineLine: { position: 'absolute', top: 35, bottom: -12, width: 2 },
+  timelineCard: { flex: 1, minWidth: 0 },
   card: {
     backgroundColor: theme.pages.agenda.eventCard.background,
     borderRadius: 22,
@@ -531,6 +547,8 @@ const sSimples = StyleSheet.create({
   filtroText: { fontSize: 19 },
 
   diaHeaderTexto: { fontSize: 22 },
+
+  timelineItem: { minHeight: 168 },
 
   cardRow: { padding: 22 },
   eventoIcone: { width: 68, height: 68, borderRadius: 34 },
