@@ -3,6 +3,13 @@ import { DarkTheme, DefaultTheme, type Theme as NavigationTheme } from 'expo-rou
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ResolvedTheme = Exclude<ThemePreference, 'system'>;
 
+export const DESIGN_TOKENS = {
+  spacing: { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32 },
+  radius: { sm: 8, md: 12, lg: 18, xl: 22, pill: 999 },
+  elevation: { card: 2, raised: 4, floating: 6 },
+  icon: { sm: 16, md: 20, lg: 24, xl: 32 },
+} as const;
+
 /** Cores transversais ao produto. Superfícies de cartões vivem nos namespaces de página. */
 export type GlobalThemeColors = {
   background: string;
