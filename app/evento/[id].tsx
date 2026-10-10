@@ -10,6 +10,8 @@ import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 import { useAuditoria } from '../../hooks/useRelatorios';
+import { useOrientacoesEvento } from '../../hooks/useProntuario';
+import { formatarDataHoraProntuario } from '../../utils/prontuario';
 import { withAlpha, type AppTheme } from '../../constants/theme';
 import { ReagendarModal } from '../../components/agenda/ReagendarModal';
 import { EntrarListaEsperaModal, type AlvoListaEspera } from '../../components/espera/EntrarListaEsperaModal';
@@ -27,6 +29,7 @@ export default function EventoDetalhesScreen() {
   const detalhes = useEventoDetalhes(id ?? null, autenticado);
   const auditoria = useAuditoria('EVENTO', id ?? null, autenticado);
   const historico = useHistoricoEvento(id ?? null, autenticado && !!evento);
+  const orientacoes = useOrientacoesEvento(id ?? null, autenticado && !!evento);
   const [reagendando, setReagendando] = useState(false);
   const [alvoEspera, setAlvoEspera] = useState<AlvoListaEspera | null>(null);
 
@@ -132,6 +135,19 @@ export default function EventoDetalhesScreen() {
         </View>
       )}
 
+      {orientacoes.data?.length ? (
+        <View style={s.card}>
+          <Text style={s.sectionTitle}>Orientações do veterinário</Text>
+          {orientacoes.data.map((orientacao, index) => (
+            <View key={orientacao.id} style={[s.auditRow, index > 0 && s.auditDivider]}>
+              <Text style={s.auditAction}>{orientacao.titulo}</Text>
+              <Text style={s.description}>{orientacao.texto}</Text>
+              <Text style={s.auditMeta}>{orientacao.autor ?? 'Veterinário'} • {formatarDataHoraProntuario(orientacao.criadaEm)}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
       {historico.data?.length ? (
         <View style={s.card}>
           <Text style={s.sectionTitle}>Acompanhamento da solicitação</Text>
@@ -150,6 +166,13 @@ export default function EventoDetalhesScreen() {
           ))}
         </View>
       ) : null}
+
+      {evento.status === 'CONCLUIDO' && (
+        <Pressable style={s.secondaryButton} onPress={() => router.push('/(tutor)/prontuario')} accessibilityRole="button">
+          <Ionicons name="document-text-outline" size={18} color={theme.colors.primary} />
+          <Text style={s.secondaryButtonText}>Ver prontuário completo</Text>
+        </Pressable>
+      )}
 
       <Pressable style={s.secondaryButton} onPress={() => router.push('/(tutor)/(tabs)/agenda')}>
         <Ionicons name="calendar-outline" size={18} color={theme.colors.primary} />

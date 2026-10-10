@@ -1,7 +1,7 @@
 import { api } from './api/httpClient';
 
 export type RelacaoPet = 'CUIDADOR' | 'CONJUGE' | 'OUTRO';
-export type PermissaoPet = 'LEITURA' | 'EDICAO';
+export type PermissaoPet = 'LEITURA' | 'EDICAO' | 'VISUALIZAR_PRONTUARIO';
 
 export interface ConvitePet {
   idConvite: string;

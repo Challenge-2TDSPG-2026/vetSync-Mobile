@@ -31,6 +31,13 @@ const ATALHOS = [
     cor: 'danger' as const,
   },
   {
+    titulo: 'Prontuário',
+    descricao: 'Exames, receitas e orientações',
+    icone: 'document-text-outline' as const,
+    rota: '/(tutor)/prontuario' as const,
+    cor: 'info' as const,
+  },
+  {
     titulo: 'Histórico',
     descricao: 'Cuidados realizados',
     icone: 'time-outline' as const,

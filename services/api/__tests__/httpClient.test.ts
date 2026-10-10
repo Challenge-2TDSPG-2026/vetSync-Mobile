@@ -70,6 +70,28 @@ describe('apiRequest', () => {
     );
   });
 
+  it('permite trocar campo, método e rótulo do upload (laudos de exame)', async () => {
+    const append = jest.fn();
+    globalThis.FormData = jest.fn(() => ({ append })) as unknown as typeof FormData;
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      ok: true,
+      text: jest.fn().mockResolvedValue('{}'),
+    } as Partial<Response>) as typeof fetch;
+
+    await api.uploadMultipart('/pets/12/exames/7/arquivo', {
+      uri: 'file:///laudo.pdf',
+      nome: 'laudo.pdf',
+      tipoMime: 'application/pdf',
+    }, true, { campo: 'arquivo', metodo: 'POST', descricao: 'laudo' });
+
+    expect(append.mock.calls[0][0]).toBe('arquivo');
+    expect(globalThis.fetch).toHaveBeenLastCalledWith(
+      'https://vetsync-java.onrender.com/pets/12/exames/7/arquivo',
+      expect.objectContaining({ method: 'POST' })
+    );
+  });
+
   it('no nativo anexa o arquivo por uri, sem baixar o blob antes', async () => {
     const append = jest.fn();
     globalThis.FormData = jest.fn(() => ({ append })) as unknown as typeof FormData;

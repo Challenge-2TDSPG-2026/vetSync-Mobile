@@ -86,3 +86,23 @@ Gerenciamento de Push Notifications centralizado pelo servidor.
 | Método | Endpoint | Descrição |
 | :--- | :--- | :--- |
 | `POST` | `/api/notificacoes/registrar-token`| O app envia o Expo Push Token do dispositivo autenticado, para que o backend gerencie lembretes remotamente e notifique o proprietário quando um convite de acesso for aceito. |
+
+---
+
+## 8. Prontuário Clínico
+Histórico completo do pet (atendimentos concluídos, orientações, receitas e exames), com exportação e compartilhamento por link temporário. Os caminhos abaixo são os reais do backend (sem o prefixo `/api`).
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/pets/:id/prontuario?secoes=&de=&ate=` | Prontuário completo, com linha do tempo. Seções: `PERFIL_SAUDE`, `ATENDIMENTOS`, `ORIENTACOES`, `RECEITAS`, `EXAMES`. Nunca inclui custos, observações do tutor nem dados pessoais do tutor. |
+| `GET` | `/pets/:id/prontuario/exportar?formato=JSON` | Versão exportável (só receitas liberadas). O app gera o PDF a partir dela; a exportação fica na auditoria. |
+| `GET` / `POST` | `/eventos/:id/orientacoes` | Lista / registra orientações do atendimento (registro: veterinário responsável). |
+| `DELETE` | `/eventos/:id/orientacoes/:idOrientacao` | Remove uma orientação (veterinário responsável). |
+| `GET` / `POST` | `/pets/:id/exames` | Lista / registra resultados de exames (registro: veterinário vinculado ao pet). |
+| `POST` | `/pets/:id/exames/:idExame/arquivo` | Anexa o laudo (`multipart`, campo `arquivo`; PDF, JPEG, PNG ou WebP, até 10 MB). |
+| `GET` | `/pets/:id/exames/:idExame/arquivo` | Baixa o laudo (exige autenticação). |
+| `DELETE` | `/pets/:id/exames/:idExame` | Remove um exame (só quem o registrou). |
+| `GET` / `POST` | `/pets/:id/prontuario/compartilhamentos` | Lista / cria links temporários e somente leitura (só o tutor proprietário). A URL pública só vem na resposta da criação. |
+| `DELETE` | `/pets/:id/prontuario/compartilhamentos/:idCompartilhamento` | Revoga o link imediatamente. |
+
+**Permissões:** o tutor proprietário sempre vê. Responsáveis precisam de `EDICAO` (ou `VISUALIZAR_PRONTUARIO`); `LEITURA` não dá acesso. Veterinários veem se já atenderam o pet ou são da clínica contratante ativa do tutor.

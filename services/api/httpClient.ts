@@ -40,6 +40,14 @@ export interface ArquivoUpload {
   tipoMime: string;
 }
 
+/** Ajustes do upload multipart. Os padrões reproduzem o envio de foto do pet (PUT, campo `foto`). */
+export interface OpcoesUpload {
+  campo?: string;
+  metodo?: 'PUT' | 'POST';
+  /** Como o arquivo é chamado nas mensagens de erro (ex.: "foto", "laudo"). */
+  descricao?: string;
+}
+
 async function obterToken(): Promise<string | null> {
   return obterTokenDaSessaoEmMemoria();
 }
@@ -164,7 +172,13 @@ export async function apiRequest<T = unknown>({
   return interpretarResposta<T>(resposta, autenticado);
 }
 
-async function uploadMultipart<T>(path: string, arquivo: ArquivoUpload, autenticado = true): Promise<T> {
+async function uploadMultipart<T>(
+  path: string,
+  arquivo: ArquivoUpload,
+  autenticado = true,
+  opcoes: OpcoesUpload = {}
+): Promise<T> {
+  const { campo = 'foto', metodo = 'PUT', descricao = 'foto' } = opcoes;
   const headers: Record<string, string> = {};
   if (autenticado) {
     const token = await obterToken();
@@ -180,9 +194,9 @@ async function uploadMultipart<T>(path: string, arquivo: ArquivoUpload, autentic
     if (Platform.OS === 'web') {
       const arquivoResposta = await fetch(arquivo.uri);
       const blob = await arquivoResposta.blob();
-      formData.append('foto', blob, arquivo.nome);
+      formData.append(campo, blob, arquivo.nome);
     } else {
-      formData.append('foto', {
+      formData.append(campo, {
         uri: arquivo.uri,
         name: arquivo.nome,
         type: arquivo.tipoMime,
@@ -190,18 +204,18 @@ async function uploadMultipart<T>(path: string, arquivo: ArquivoUpload, autentic
     }
 
     resposta = await fetch(`${API_BASE_URL}${path}`, {
-      method: 'PUT',
+      method: metodo,
       headers,
       body: formData,
       signal: controller.signal,
     });
   } catch (erro) {
     if (erro instanceof Error && erro.name === 'AbortError') {
-      throw new ApiError(0, 'O envio da foto demorou mais que o esperado. Tente novamente.', 'timeout');
+      throw new ApiError(0, `O envio da ${descricao} demorou mais que o esperado. Tente novamente.`, 'timeout');
     }
     throw await erroDeConexao(
-      'Você está sem conexão com a internet. Verifique sua conexão para enviar a foto.',
-      'Não foi possível enviar a foto porque o servidor não respondeu. Tente novamente em instantes.'
+      `Você está sem conexão com a internet. Verifique sua conexão para enviar a ${descricao}.`,
+      `Não foi possível enviar a ${descricao} porque o servidor não respondeu. Tente novamente em instantes.`
     );
   } finally {
     clearTimeout(timeout);

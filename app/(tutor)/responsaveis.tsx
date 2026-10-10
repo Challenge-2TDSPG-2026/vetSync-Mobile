@@ -153,7 +153,7 @@ export default function ResponsaveisScreen() {
                 selected={permissao === 'LEITURA'}
                 icon="eye-outline"
                 title="Acompanhar"
-                description="Pode visualizar informações e lembretes"
+                description="Pode visualizar informações e lembretes, sem acesso ao prontuário"
                 onPress={() => setPermissao('LEITURA')}
               />
               <PermissionOption
@@ -162,7 +162,7 @@ export default function ResponsaveisScreen() {
                 selected={permissao === 'EDICAO'}
                 icon="create-outline"
                 title="Acompanhar e editar"
-                description="Pode visualizar, agendar e atualizar informações"
+                description="Pode visualizar, agendar, atualizar informações e consultar o prontuário"
                 onPress={() => setPermissao('EDICAO')}
               />
             </View>

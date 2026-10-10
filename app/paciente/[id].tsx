@@ -10,7 +10,8 @@ import { PetFoto } from '../../components/pet-foto/PetFoto';
 import { mostrarToast } from '../../components/ui/Toast';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
+import { STATUS_EXIBICAO_BADGE, formatarDataEvento, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
+import { ProntuarioClinicoVet } from '../../components/prontuario/ProntuarioClinicoVet';
 import { usePerfilSaudePet } from '../../hooks/useRelatorios';
 import { useAuth } from '../../context/AuthContext';
 
@@ -50,6 +51,14 @@ export default function FichaPacienteScreen() {
   const cancelados = eventosDoPaciente.filter(e => e.status === 'CANCELADO').length;
 
   const especieInfo = ESPECIES.find(e => e.valor === pet?.especie);
+  const eventosParaProntuario = useMemo(
+    () => [...(paciente?.eventos ?? [])]
+      .filter(e => e.status !== 'CANCELADO')
+      .sort((a, b) => b.data.localeCompare(a.data))
+      .slice(0, 12)
+      .map(e => ({ id: e.id, rotulo: `${e.nomeTipoEvento} · ${formatarDataEvento(e.data)}` })),
+    [paciente?.eventos]
+  );
 
   function abrirModal(tipo: ModalTipo, eventoId: string) {
     setModalTipo(tipo);
@@ -160,6 +169,10 @@ export default function FichaPacienteScreen() {
           <StatCard styles={s} valor={concluidos} label="Concluídas" accentColor={theme.pages.petDetails.success} />
           <StatCard styles={s} valor={cancelados} label="Canceladas" accentColor={theme.pages.petDetails.danger} />
         </View>
+
+        {pet && (
+          <ProntuarioClinicoVet idPet={pet.id} nomePet={pet.nome} eventos={eventosParaProntuario} habilitado={autenticado} />
+        )}
 
         <Text style={s.secLabel}>Histórico Clínico</Text>
 
