@@ -10,13 +10,16 @@ export class ApiError extends Error {
   status: number;
   tipo: TipoErroApi;
   campos?: Record<string, string>;
+  /** Corpo (JSON ou texto) devolvido pela API; usado por fluxos que precisam de mais que a mensagem. */
+  corpo?: unknown;
 
-  constructor(status: number, mensagem: string, tipo: TipoErroApi = 'http', campos?: Record<string, string>) {
+  constructor(status: number, mensagem: string, tipo: TipoErroApi = 'http', campos?: Record<string, string>, corpo?: unknown) {
     super(mensagem);
     this.name = 'ApiError';
     this.status = status;
     this.tipo = tipo;
     this.campos = campos;
+    this.corpo = corpo;
   }
 }
 
@@ -59,6 +62,12 @@ function mensagemPadraoPorStatus(status: number): string {
 }
 
 function extrairErro(status: number, corpo: any): ApiError {
+  const erro = construirErro(status, corpo);
+  erro.corpo = corpo;
+  return erro;
+}
+
+function construirErro(status: number, corpo: any): ApiError {
   if (corpo && typeof corpo === 'object') {
     if (corpo.campos && typeof corpo.campos === 'object') {
       const primeiraMsg = Object.values(corpo.campos)[0];

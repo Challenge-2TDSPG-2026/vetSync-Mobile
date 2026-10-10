@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useTheme } from '../context/ThemeContext';
 import { vinculoClinicaService } from '../services/vinculoClinicaService';
+import { googlePendente } from '../services/googlePendente';
 import { mensagemDeErro } from '../services/api/errorMessages';
 import type { AppTheme } from '../constants/theme';
 
@@ -19,7 +20,7 @@ export default function VinculoClinicaScreen() {
   const { modoSimples } = useAccessibility();
   const { theme } = useTheme();
   const styles = useMemo(() => criarEstilos(theme), [theme]);
-  const { troca } = useLocalSearchParams<{ troca?: string }>();
+  const { troca, origem } = useLocalSearchParams<{ troca?: string; origem?: string }>();
   const [codigo, setCodigo] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [saindo, setSaindo] = useState(false);
@@ -40,8 +41,10 @@ export default function VinculoClinicaScreen() {
         mostrarToast('sucesso', 'Clínica atualizada', `Agora você está vinculado(a) à ${validado.nomeClinica}.`);
         router.replace('/(tutor)/configuracoes');
       } else {
+        // Quem veio do Google conclui o cadastro sem senha (o token fica só em memória).
+        const veioDoGoogle = origem === 'google' && googlePendente.obter() !== null;
         router.replace({
-          pathname: '/cadastro',
+          pathname: veioDoGoogle ? '/cadastro-google' : '/cadastro',
           params: { sessaoVinculo: validado.sessaoVinculo, clinica: validado.nomeClinica },
         });
       }

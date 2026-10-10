@@ -1,7 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ApiError } from '../services/api/httpClient';
-import { authService } from '../services/authService';
+import {
+  authService,
+  type PendenciaSocial,
+  type RegistrarGooglePayload,
+} from '../services/authService';
 import { assinarExpiracaoSessao } from '../services/api/sessionEvents';
 import {
   ativarBiometria,
@@ -58,6 +62,10 @@ type AuthContextValue = {
   dispensarConviteBiometria: () => Promise<void>;
   atualizarBiometria: () => Promise<void>;
   registrar: (dados: RegistrarPayload) => Promise<void>;
+  /** Devolve a pendência (cadastrar/vincular) ou null quando a sessão já foi iniciada. */
+  loginComGoogle: (idToken: string) => Promise<PendenciaSocial | null>;
+  registrarComGoogle: (dados: RegistrarGooglePayload) => Promise<void>;
+  vincularGoogle: (idToken: string, email: string, senha: string) => Promise<void>;
   atualizarVinculoClinica: (temVinculoAtivo: boolean) => Promise<void>;
   logout: () => Promise<void>;
   limparErro: () => void;
@@ -199,6 +207,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [atualizarEstadoBiometria]);
 
+  const iniciarSessaoSocial = useCallback(async (resposta: Sessao) => {
+    await salvarSessaoAposLogin(resposta);
+    setSessao(resposta);
+    await atualizarEstadoBiometria(resposta.idUsuario);
+  }, [atualizarEstadoBiometria]);
+
+  const loginComGoogle = useCallback(async (idToken: string): Promise<PendenciaSocial | null> => {
+    setErro(null);
+    try {
+      const resultado = await authService.loginComGoogle(idToken);
+      if (resultado.tipo === 'PENDENTE') return resultado.pendencia;
+      await iniciarSessaoSocial(resultado.sessao);
+      return null;
+    } catch (e) {
+      setErro(e instanceof ApiError ? e.message : 'Não foi possível entrar com o Google. Tente novamente.');
+      throw e;
+    }
+  }, [iniciarSessaoSocial]);
+
+  const registrarComGoogle = useCallback(async (dados: RegistrarGooglePayload) => {
+    setErro(null);
+    try {
+      await iniciarSessaoSocial(await authService.registrarComGoogle(dados));
+    } catch (e) {
+      setErro(e instanceof ApiError ? e.message : 'Não foi possível criar sua conta. Tente novamente.');
+      throw e;
+    }
+  }, [iniciarSessaoSocial]);
+
+  const vincularGoogle = useCallback(async (idToken: string, email: string, senha: string) => {
+    setErro(null);
+    try {
+      await iniciarSessaoSocial(await authService.vincularGoogle(idToken, email, senha));
+    } catch (e) {
+      setErro(e instanceof ApiError ? e.message : 'Não foi possível vincular o Google. Tente novamente.');
+      throw e;
+    }
+  }, [iniciarSessaoSocial]);
+
   const atualizarVinculoClinica = useCallback(async (temVinculoAtivo: boolean) => { if (!sessao) return; const atualizada = { ...sessao, temVinculoAtivo }; await salvarSessaoAposLogin(atualizada); setSessao(atualizada); }, [sessao]);
 
   const logout = useCallback(async () => {
@@ -230,6 +277,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await atualizarEstadoBiometria(sessao?.idUsuario);
         },
         registrar,
+        loginComGoogle,
+        registrarComGoogle,
+        vincularGoogle,
         atualizarVinculoClinica,
         logout,
         limparErro,

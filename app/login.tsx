@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Text, Pressable, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -8,11 +8,16 @@ import { mostrarToast } from '../components/ui/Toast';
 import { AppIcon } from '../components/AppIcon';
 import { AuthField } from '../components/ui/AuthField';
 import { AuthLayout } from '../components/auth/AuthLayout';
+import { BotaoGoogle } from '../components/auth/BotaoGoogle';
+import { VincularGoogleCard } from '../components/auth/VincularGoogleCard';
+import { googlePendente } from '../services/googlePendente';
+import { destinoDaPendencia, erroDeTokenGoogle } from '../utils/loginSocial';
 import { useTheme } from '../context/ThemeContext';
 import type { AppTheme } from '../constants/theme';
 
 export default function LoginScreen() {
-  const { biometria, entrarComBiometria, login } = useAuth();
+  const { biometria, entrarComBiometria, login, loginComGoogle, vincularGoogle } = useAuth();
+  const router = useRouter();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
 
@@ -21,6 +26,7 @@ export default function LoginScreen() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [errosConta, setErrosConta] = useState<Record<string, string>>({});
   const [autenticando, setAutenticando] = useState(false);
+  const [vinculoGoogle, setVinculoGoogle] = useState<{ idToken: string; email: string } | null>(null);
 
   function validarConta(): boolean {
     const e: Record<string, string> = {};
@@ -58,6 +64,65 @@ export default function LoginScreen() {
     } finally {
       setAutenticando(false);
     }
+  }
+
+  async function handleGoogle(idToken: string) {
+    setAutenticando(true);
+    try {
+      const pendencia = await loginComGoogle(idToken);
+      if (!pendencia) {
+        mostrarToast('sucesso', 'Login realizado');
+        return; // a navegação é reativa (RootNavigator)
+      }
+      const destino = destinoDaPendencia(pendencia);
+      if (destino.acao === 'CADASTRAR') {
+        googlePendente.definir(idToken, pendencia);
+        router.push({ pathname: '/vinculo-clinica', params: { origem: 'google' } });
+      } else if (destino.acao === 'VINCULAR') {
+        setVinculoGoogle({ idToken, email: pendencia.email ?? '' });
+      } else {
+        mostrarToast('erro', 'Não foi possível entrar com o Google', destino.mensagem);
+      }
+    } catch (e) {
+      mostrarToast('erro', 'Não foi possível entrar com o Google', mensagemDeErro(e, 'Tente novamente.'));
+    } finally {
+      setAutenticando(false);
+    }
+  }
+
+  async function handleVincularGoogle(emailConta: string, senhaConta: string) {
+    if (!vinculoGoogle) return;
+    setAutenticando(true);
+    try {
+      await vincularGoogle(vinculoGoogle.idToken, emailConta, senhaConta);
+      mostrarToast('sucesso', 'Google vinculado', 'Da próxima vez é só continuar com o Google.');
+    } catch (e) {
+      if (erroDeTokenGoogle(e)) {
+        setVinculoGoogle(null);
+        mostrarToast('erro', 'Sua confirmação do Google expirou', 'Entre com o Google novamente.');
+      } else {
+        mostrarToast('erro', 'Não foi possível vincular o Google', mensagemDeErro(e, 'Verifique seu e-mail e senha.'));
+      }
+    } finally {
+      setAutenticando(false);
+    }
+  }
+
+  if (vinculoGoogle) {
+    return (
+      <AuthLayout
+        permitirCapturaDeTela
+        title="Vincule sua conta."
+        subtitle="Confirme que a conta VetSync é sua para usar o Google daqui para frente."
+      >
+        <VincularGoogleCard
+          emailInicial={vinculoGoogle.email}
+          enviando={autenticando}
+          onConfirmar={(emailConta, senhaConta) => void handleVincularGoogle(emailConta, senhaConta)}
+          onCancelar={() => setVinculoGoogle(null)}
+        />
+      </AuthLayout>
+    );
   }
 
   return (
@@ -117,6 +182,12 @@ export default function LoginScreen() {
               <Text style={s.btnBiometriaText}>Entrar com {biometria.nome}</Text>
             </Pressable>
           ) : null}
+
+          <BotaoGoogle
+            desabilitado={autenticando}
+            onIdToken={handleGoogle}
+            onErro={(mensagem) => mostrarToast('erro', 'Não foi possível entrar com o Google', mensagem)}
+          />
 
           <Link href="/esqueci-senha" asChild>
             <Pressable

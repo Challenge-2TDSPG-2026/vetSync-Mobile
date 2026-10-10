@@ -196,6 +196,7 @@ function RootNavigator() {
       >
         <Stack.Screen name="login" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="cadastro" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="cadastro-google" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="vinculo-clinica" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="esqueci-senha" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="verificar-codigo" options={TRANSICAO_PAGINA} />

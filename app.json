@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "automatic",
-    "scheme": "vetsync",
+    "scheme": ["vetsync", "com.vetsync.app"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vetsync.app",
