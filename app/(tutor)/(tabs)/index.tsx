@@ -20,6 +20,9 @@ import { SkeletonList } from '../../../components/ui/Skeleton';
 import { DicaTela } from '../../../components/ui/DicaTela';
 import { PlanoPreventivoCard } from '../../../components/plano/PlanoPreventivoCard';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, formatarDataEvento } from '../../../utils/eventoStatus';
+import { usePets } from '../../../hooks/usePets';
+import { UltimaAtualizacao } from '../../../components/ui/UltimaAtualizacao';
+import { atualizacaoMaisAntiga } from '../../../utils/ultimaAtualizacao';
 import { withAlpha, type AppTheme } from '../../../constants/theme';
 
 function calcularIdade(d: string): string {
@@ -39,6 +42,8 @@ export default function DashboardScreen() {
   const { pets, petAtivo, eventos, carregandoEventos, carregando } = usePet();
   const { autenticado } = useAuth();
   const acoesBackend = useProximasAcoes(petAtivo?.id ?? null, autenticado);
+  const petsQuery = usePets(autenticado);
+  const atualizadoEm = atualizacaoMaisAntiga([petsQuery.dataUpdatedAt, acoesBackend.dataUpdatedAt]);
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-dashboard');
   const [fotoEmEdicao, setFotoEmEdicao] = useState(false);
@@ -141,6 +146,8 @@ export default function DashboardScreen() {
     >
 
       <PetSwitcher />
+
+      <UltimaAtualizacao atualizadoEm={atualizadoEm} />
 
       {dicaVisivel && (
         <DicaTela

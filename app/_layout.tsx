@@ -7,7 +7,8 @@ import {
   useSegments,
   usePathname,
 } from 'expo-router';
-import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
+import { QueryClient, onlineManager } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import NetInfo from '@react-native-community/netinfo';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '../context/AuthContext';
@@ -23,6 +24,12 @@ import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
 import { configurarNotificacoesPush } from '../services/pushNotificationService';
 import { NotificationTapHandler } from '../components/navigation/NotificationTapHandler';
+import {
+  CACHE_OFFLINE_VALIDADE_MS,
+  CACHE_OFFLINE_VERSAO,
+  deveSalvarQuery,
+  persisterCacheOffline,
+} from '../storage/cacheOffline';
 
 lockFontScaling();
 
@@ -36,6 +43,8 @@ const queryClient = new QueryClient({
       staleTime: 30_000,
       refetchOnReconnect: true,
       networkMode: 'online',
+      // Precisa ser >= maxAge da persistência, senão os dados restaurados são descartados da memória.
+      gcTime: CACHE_OFFLINE_VALIDADE_MS,
     },
   },
 });
@@ -329,7 +338,15 @@ function ThemedRootLayout() {
         barStyle={isDark ? 'light-content' : 'dark-content'}
         backgroundColor={theme.colors.background}
       />
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: persisterCacheOffline,
+          maxAge: CACHE_OFFLINE_VALIDADE_MS,
+          buster: CACHE_OFFLINE_VERSAO,
+          dehydrateOptions: { shouldDehydrateQuery: deveSalvarQuery },
+        }}
+      >
         <AccessibilityProvider>
           <AuthProvider>
             <PetProvider>
@@ -345,7 +362,7 @@ function ThemedRootLayout() {
             </PetProvider>
           </AuthProvider>
         </AccessibilityProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </NavigationThemeProvider>
   );
 }

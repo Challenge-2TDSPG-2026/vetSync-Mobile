@@ -5,6 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../../context/PetContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useCarteiraVacinacao } from '../../../hooks/usePetHealth';
+import { usePets } from '../../../hooks/usePets';
+import { UltimaAtualizacao } from '../../../components/ui/UltimaAtualizacao';
+import { atualizacaoMaisAntiga } from '../../../utils/ultimaAtualizacao';
 import { useAccessibility } from '../../../context/AccessibilityContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { useDicaPrimeiraVisita } from '../../../hooks/useDicaPrimeiraVisita';
@@ -26,6 +29,8 @@ export default function CarteirinhasScreen() {
   const { pets, petAtivo, petAtivoId, selecionarPet, eventos, carregandoEventos } = usePet();
   const { autenticado } = useAuth();
   const carteira = useCarteiraVacinacao(petAtivoId, autenticado);
+  const petsQuery = usePets(autenticado);
+  const atualizadoEm = atualizacaoMaisAntiga([petsQuery.dataUpdatedAt, carteira.dataUpdatedAt]);
   const [petCarteira, setPetCarteira] = useState<Pet | null>(null);
 
   const vacinas = useMemo(
@@ -62,6 +67,8 @@ export default function CarteirinhasScreen() {
             Acesse os registros de vacina e compartilhe a carteira do seu pet quando precisar.
           </Text>
         </View>
+
+        <UltimaAtualizacao atualizadoEm={atualizadoEm} />
 
         {dicaVisivel && (
           <DicaTela

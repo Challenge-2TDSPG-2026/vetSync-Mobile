@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
+import { onlineManager } from '@tanstack/react-query';
 import type { Evento, Pet } from '../../types';
 import { ESPECIES } from '../../constants';
 import { formatarDataEvento, statusExibicao } from '../../utils/eventoStatus';
@@ -57,6 +58,10 @@ function CarteiraModalConteudo({ pet, eventos, onFechar }: { pet: Pet; eventos: 
     const idPet = pet.id;
 
     async function carregarCarteiraCompartilhada() {
+      if (!onlineManager.isOnline()) {
+        if (ativo) setCarregandoCompartilhamento(false);
+        return;
+      }
       try {
         const carteira = await carteiraCompartilhadaService.buscarAtiva(idPet);
         if (ativo) setCarteiraCompartilhada(carteira);
@@ -76,6 +81,10 @@ function CarteiraModalConteudo({ pet, eventos, onFechar }: { pet: Pet; eventos: 
 
   async function gerarQrCode() {
     if (!pet) return;
+    if (!onlineManager.isOnline()) {
+      mostrarToast('erro', 'Sem conexão', 'Conecte-se à internet para gerar o QR Code.');
+      return;
+    }
     setGerandoQr(true);
     try {
       const criada = await carteiraCompartilhadaService.criarOuRenovar(pet.id);
@@ -93,6 +102,10 @@ function CarteiraModalConteudo({ pet, eventos, onFechar }: { pet: Pet; eventos: 
 
   async function revogarQrCode() {
     if (!pet || !carteiraCompartilhada) return;
+    if (!onlineManager.isOnline()) {
+      mostrarToast('erro', 'Sem conexão', 'Conecte-se à internet para revogar o QR Code.');
+      return;
+    }
     setRevogandoQr(true);
     try {
       await carteiraCompartilhadaService.revogar(pet.id, carteiraCompartilhada.id);

@@ -49,7 +49,7 @@ export function OfflineBanner() {
       accessibilityLiveRegion="polite"
     >
       <Text style={[styles.text, { color: theme.colors.warning }]}>
-        Você está sem conexão. Os dados exibidos podem estar desatualizados.
+        Você está sem conexão. Mostrando os dados salvos neste aparelho; podem estar desatualizados.
       </Text>
       <Pressable
         onPress={tentarNovamente}

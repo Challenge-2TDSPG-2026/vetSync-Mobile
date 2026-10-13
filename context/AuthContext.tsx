@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ApiError } from '../services/api/httpClient';
+import { limparCacheOffline } from '../storage/cacheOffline';
 import {
   authService,
   type PendenciaSocial,
@@ -132,6 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await limparSessaoPersistida();
         setSessao(null);
         queryClient.clear();
+        await limparCacheOffline();
         await atualizarEstadoBiometria();
       } finally {
         encerrandoSessao.current = null;

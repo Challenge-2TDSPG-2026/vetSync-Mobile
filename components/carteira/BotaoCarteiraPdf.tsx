@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useQueryClient } from '@tanstack/react-query';
+import { onlineManager, useQueryClient } from '@tanstack/react-query';
 import type { Pet } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useAuth } from '../../context/AuthContext';
-import { petHealthService } from '../../services/petHealthService';
+import { petHealthService, type CarteiraVacinacao } from '../../services/petHealthService';
 import { carteiraPdfService } from '../../services/carteiraPdfService';
 import { mostrarToast } from '../ui/Toast';
 import type { AppTheme } from '../../constants/theme';
@@ -37,11 +37,21 @@ export function BotaoCarteiraPdf({ pet, variante = 'contorno', style }: Props) {
     if (!pet || gerando) return;
     setGerando(true);
     try {
-      const carteira = await queryClient.fetchQuery({
-        queryKey: ['pets', pet.id, 'carteira-vacinacao'] as const,
-        queryFn: () => petHealthService.buscarCarteiraVacinacao(pet.id),
-        staleTime: 0,
-      });
+      const chave = ['pets', pet.id, 'carteira-vacinacao'] as const;
+      // Sem conexão, o fetch ficaria pausado para sempre: usa a cópia salva no aparelho.
+      const salva = queryClient.getQueryData<CarteiraVacinacao>(chave);
+      if (!onlineManager.isOnline() && !salva) {
+        mostrarToast('erro', 'Sem conexão', 'Abra a carteira com internet ao menos uma vez para poder gerá-la offline.');
+        return;
+      }
+      const carteira =
+        !onlineManager.isOnline() && salva
+          ? salva
+          : await queryClient.fetchQuery({
+              queryKey: chave,
+              queryFn: () => petHealthService.buscarCarteiraVacinacao(pet.id),
+              staleTime: 0,
+            });
       await carteiraPdfService.exportar(pet, carteira, sessao?.token);
     } catch (erro) {
       mostrarToast('erro', 'Não foi possível gerar o PDF', erro instanceof Error ? erro.message : undefined);
