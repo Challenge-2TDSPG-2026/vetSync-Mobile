@@ -139,6 +139,15 @@ export default function ConfiguracoesScreen() {
           <ConfigItem
             styles={s}
             simples={modoSimples}
+            icon="shield-half-outline"
+            title="Acesso compartilhado"
+            description="Quem acessa cada pet e o histórico de alterações"
+            onPress={() => router.push('/(tutor)/acesso-compartilhado')}
+          />
+          <View style={s.divider} />
+          <ConfigItem
+            styles={s}
+            simples={modoSimples}
             icon="paw-outline"
             title="Pets cadastrados"
             description="Veja as identificações e dados dos seus pets"

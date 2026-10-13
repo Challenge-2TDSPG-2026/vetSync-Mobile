@@ -106,3 +106,18 @@ Histórico completo do pet (atendimentos concluídos, orientações, receitas e 
 | `DELETE` | `/pets/:id/prontuario/compartilhamentos/:idCompartilhamento` | Revoga o link imediatamente. |
 
 **Permissões:** o tutor proprietário sempre vê. Responsáveis precisam de `EDICAO` (ou `VISUALIZAR_PRONTUARIO`); `LEITURA` não dá acesso. Veterinários veem se já atenderam o pet ou são da clínica contratante ativa do tutor.
+
+---
+
+## 9. Acesso compartilhado por pet
+Já existentes: `POST /pets/:id/convites`, `GET /pets/:id/acessos`, `DELETE /pets/:id/acessos/:idAcesso` (só o tutor proprietário).
+
+**Novo (histórico de atividade):**
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/pets/:id/atividades?limite=30` | Lista quem fez o quê no pet (convites, acessos concedidos/revogados, edições, eventos, visualização de prontuário). Somente o tutor proprietário (mesma regra de `/pets/:id/acessos`). Implementado no backend em `PetAtividadeController`; o feed é montado a partir da tabela de auditoria. |
+
+Resposta: `[{ "idAtividade": 1, "tipo": "ACESSO_CONCEDIDO", "descricao": "Maria passou a acompanhar a Luna", "autorNome": "Maria", "dtAtividade": "2026-10-13T10:00:00" }]`
+
+`tipo`: `CONVITE_ENVIADO`, `CONVITE_ACEITO`, `ACESSO_CONCEDIDO`, `ACESSO_REVOGADO`, `PET_ATUALIZADO`, `EVENTO_AGENDADO`, `EVENTO_CONCLUIDO`, `EVENTO_CANCELADO`, `PRONTUARIO_VISUALIZADO`. Tipos desconhecidos são exibidos como "Alteração registrada". Se o endpoint responder 404/501, o app mostra "histórico ainda não disponível".

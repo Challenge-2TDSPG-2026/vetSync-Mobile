@@ -70,6 +70,7 @@ const ROTAS_EXCLUSIVAS_TUTOR = [
   'add-pet',
   'assistente',
   'responsaveis',
+  'acesso-compartilhado',
   'configuracoes',
   'pets-cadastrados',
   'gerenciar-conta',
