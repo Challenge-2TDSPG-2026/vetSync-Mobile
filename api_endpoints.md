@@ -1,123 +1,284 @@
 # Documentação da API - VetSync
 
-Esta documentação lista todos os endpoints RESTful necessários para substituir o armazenamento local (mockado via `AsyncStorage`) por um backend real na nuvem. 
+Esta documentação contém o inventário dos endpoints dos controllers enviado para atualização. Os caminhos são os mapeamentos dos controllers; acrescente `/api` apenas se esse prefixo estiver configurado na aplicação ou no gateway.
 
-## 1. Autenticação e Perfil de Usuário
-Gerencia o registro, sessões e preferências dos usuários (Tutores e Veterinários).
-
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `POST` | `/api/auth/registrar` | Cria uma conta e retorna token de sessão JWT. Requer email, senha e tipo (tutor/veterinario). |
-| `POST` | `/api/auth/login` | Autentica o usuário e retorna o token de sessão e dados do perfil. |
-| `POST` | `/api/auth/recuperar-senha` | Envia por e-mail um link para redefinição de senha. Não exige autenticação. |
-| `POST` | `/api/auth/logout` | Invalida o token de sessão atual no servidor. |
-| `GET` | `/api/auth/me` | Retorna os dados do usuário autenticado validando se o token está ativo. |
-| `PUT` | `/api/usuarios/preferencias`| Atualiza preferências de UI, onboarding concluído e notificações locais. |
 
 ---
 
-## 2. Pets
-Gerenciamento do cadastro dos animais de estimação.
+# Inventário atualizado dos endpoints do backend
 
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `GET` | `/api/pets` | Lista todos os pets vinculados ao usuário autenticado. |
-| `GET` | `/api/pets/:id` | Retorna todos os detalhes (peso, espécie, raca, etc) de um pet específico. |
-| `POST` | `/api/pets` | Adiciona um novo pet ao perfil do tutor. |
-| `PUT` | `/api/pets/:id` | Atualiza os dados de um pet existente. |
-| `DELETE` | `/api/pets/:id` | Remove o pet do cadastro do usuário. |
+Esta seção foi atualizada com base nos mapeamentos `@RequestMapping`, `@GetMapping`, `@PostMapping`, `@PutMapping`, `@PatchMapping` e `@DeleteMapping` enviados. Os caminhos abaixo são os mapeamentos dos controllers; o prefixo `/api` só deve ser acrescentado se estiver configurado na aplicação ou no gateway.
 
----
+## Ações de IA
+| Método | Endpoint |
+|---|---|
+| `POST` | `/ia/acoes/preview` |
+| `POST` | `/ia/acoes/{id}/confirmar` |
 
-## 3. Eventos (Agendamentos e Histórico)
-Gerencia vacinas, consultas, checkups, vermífugos e demais interações.
+## Administração
+| Método | Endpoint |
+|---|---|
+| `POST` | `/admins/bootstrap` |
+| `POST` | `/admins` |
+| `GET` | `/auditoria` |
+| `GET` | `/auditoria/tipos` |
+| `GET` | `/painel/resumo` |
 
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `GET` | `/api/eventos` | Lista eventos. Suporta parâmetros de busca como `?petId=123` ou `?veterinarioId=456`. |
-| `POST` | `/api/eventos` | Cria uma solicitação de evento/agendamento. |
-| `PATCH` | `/api/eventos/:id/confirmar`| O veterinário atualiza o status do evento para `confirmado` vinculando seu ID e hora. |
-| `PATCH` | `/api/eventos/:id/concluir` | O veterinário muda o status para `concluido` e insere observações clínicas. |
-| `PATCH` | `/api/eventos/:id/cancelar` | Muda o status do evento para `cancelado` adicionando o motivo do cancelamento. |
-| `DELETE` | `/api/eventos/:id` | Exclusão física/lógica de um evento inserido incorretamente. |
+## Agenda e agendamentos
+| Método | Endpoint |
+|---|---|
+| `GET` | `/agenda/slots` |
+| `GET` | `/agenda/servicos` |
+| `GET` | `/agenda/servicos/{idServico}/slots` |
+| `POST` | `/agenda/servicos/{idServico}/agendar` |
+| `GET` | `/agenda/dia` |
+| `GET` | `/agendamentos-retorno/{token}` |
+| `POST` | `/agendamentos-retorno/{token}/confirmar` |
+| `POST` | `/agenda/espera` |
+| `GET` | `/agenda/espera` |
+| `DELETE` | `/agenda/espera/{id}` |
 
----
+## Autenticação e conta
+| Método | Endpoint |
+|---|---|
+| `POST` | `/auth/login` |
+| `POST` | `/auth/registrar` |
+| `POST` | `/auth/esqueci-senha` |
+| `POST` | `/auth/validar-codigo` |
+| `POST` | `/auth/redefinir-senha` |
+| `POST` | `/auth/logout` |
+| `POST` | `/auth/trocar-senha-inicial` |
+| `GET` | `/auth/me` |
+| `POST` | `/auth/social-login` |
+| `POST` | `/auth/social-registrar` |
+| `POST` | `/auth/social-vincular` |
 
-## 4. Veterinários
-Gerenciamento dos perfis dos profissionais.
+## Carteira compartilhada e pública
+| Método | Endpoint |
+|---|---|
+| `POST` | `/pets/{idPet}/carteira-compartilhavel` |
+| `GET` | `/pets/{idPet}/carteira-compartilhavel` |
+| `DELETE` | `/pets/{idPet}/carteira-compartilhavel/{id}` |
+| `GET` | `/carteiras-publicas/{token}` |
+| `GET` | `/carteiras-publicas/{token}/foto` |
 
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `GET` | `/api/veterinarios` | Lista os profissionais disponíveis, possibilitando filtragem por clínica ou especialidade. |
-| `GET` | `/api/veterinarios/:id` | Detalhes públicos de um veterinário específico. |
-| `POST` | `/api/veterinarios` | Cadastro inicial do perfil do veterinário (nome, crmv, clínica, etc). |
-| `PUT` | `/api/veterinarios/:id` | Atualização dos dados profissionais do veterinário. |
+## Clínica: catálogo, operação, participantes e perfil
+| Método | Endpoint |
+|---|---|
+| `GET` | `/clinica-admin/servicos/modelos` |
+| `GET` | `/clinica-admin/servicos` |
+| `POST` | `/clinica-admin/servicos` |
+| `PUT` | `/clinica-admin/servicos/{idServico}` |
+| `GET` | `/clinica-admin/agenda/dia` |
+| `POST` | `/clinica-admin/agenda` |
+| `PATCH` | `/clinica-admin/agenda/{idEvento}/reagendar` |
+| `PATCH` | `/clinica-admin/agenda/{idEvento}/cancelar` |
+| `GET` | `/clinica-admin/pontos` |
+| `PATCH` | `/clinica-admin/pontos/{idLancamento}/liberar` |
+| `GET` | `/clinica-admin/profissionais` |
+| `GET` | `/clinica-admin/tutores` |
+| `GET` | `/clinica-admin/pets` |
+| `GET` | `/clinica-admin/perfil` |
+| `PUT` | `/clinica-admin/perfil` |
+| `PUT` | `/clinica-admin/perfil/logo` |
+| `GET` | `/clinica-admin/perfil/logo` |
+| `GET` | `/minha-clinica/perfil` |
+| `GET` | `/minha-clinica/logo` |
 
----
+## Equipe e cargos da clínica
+| Método | Endpoint |
+|---|---|
+| `POST` | `/admin-global/clinicas/{idClinica}/dono` |
+| `GET` | `/clinica-admin/equipe` |
+| `POST` | `/clinica-admin/equipe` |
+| `PATCH` | `/clinica-admin/equipe/{idAdmin}` |
+| `GET` | `/clinica-admin/cargos` |
+| `POST` | `/clinica-admin/cargos` |
+| `PUT` | `/clinica-admin/cargos/{idCargo}` |
 
-## 5. Agenda (Disponibilidade e Bloqueios)
-Controle dos horários de atendimento dos veterinários.
+## Clínicas globais e vínculo de clínica
+| Método | Endpoint |
+|---|---|
+| `POST` | `/admin-global/clinicas` |
+| `POST` | `/vinculos-clinica/validar-codigo` |
+| `POST` | `/vinculos-clinica/trocar` |
+| `GET` | `/vinculos-clinica/me` |
+| `GET` | `/vinculos-clinica/clinicas` |
+| `POST` | `/vinculos-clinica/clinicas/{idClinica}/codigo` |
+| `DELETE` | `/vinculos-clinica/clinicas/{idClinica}/codigo` |
+| `PATCH` | `/vinculos-clinica/clinicas/{idClinica}/contrato` |
 
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `GET` | `/api/veterinarios/:id/disponibilidades`| Lista as faixas de horário em que o veterinário atende (dia da semana, início e fim). |
-| `POST`| `/api/veterinarios/:id/disponibilidades`| Adiciona uma nova faixa de horário regular na agenda do veterinário. |
-| `DELETE`| `/api/veterinarios/:id/disponibilidades/:faixaId`| Remove uma faixa de horário. |
-| `GET` | `/api/veterinarios/:id/bloqueios` | Lista exceções e bloqueios da agenda (feriados, imprevistos, folgas). |
-| `POST` | `/api/veterinarios/:id/bloqueios` | Cadastra um novo bloqueio na agenda para impedir marcações em uma data específica. |
-| `DELETE`| `/api/veterinarios/:id/bloqueios/:bloqueioId`| Remove um bloqueio previamente configurado. |
+## Eventos
+| Método | Endpoint |
+|---|---|
+| `POST` | `/eventos` |
+| `POST` | `/eventos/estetica` |
+| `GET` | `/eventos` |
+| `GET` | `/eventos/{id}` |
+| `GET` | `/eventos/{id}/detalhes` |
+| `GET` | `/eventos/{id}/historico` |
+| `PATCH` | `/eventos/{id}/reagendar` |
+| `POST` | `/eventos/{id}/anexos` |
+| `GET` | `/eventos/{id}/anexos` |
+| `GET` | `/eventos/{id}/anexos/{idAnexo}` |
+| `DELETE` | `/eventos/{id}/anexos/{idAnexo}` |
+| `PATCH` | `/eventos/{id}/concluir` |
+| `PATCH` | `/eventos/{id}/cancelar` |
+| `DELETE` | `/eventos/{id}` |
+| `GET` | `/eventos/pet/{idPet}/gasto-total` |
+| `GET` | `/eventos/pet/{idPet}/alertas` |
+| `PATCH` | `/eventos/{id}/confirmar` |
+| `PATCH` | `/eventos/{id}/recusar` |
 
----
+## Mensagens e notificações
+| Método | Endpoint |
+|---|---|
+| `GET` | `/mensagens-clinica/conversas` |
+| `POST` | `/mensagens-clinica/conversas` |
+| `GET` | `/mensagens-clinica/conversas/{id}/mensagens` |
+| `POST` | `/mensagens-clinica/conversas/{id}/mensagens` |
+| `POST` | `/notificacoes/dispositivos` |
+| `DELETE` | `/notificacoes/dispositivos/{token}` |
+| `GET` | `/notificacoes` |
+| `PATCH` | `/notificacoes/{id}/lida` |
+| `PATCH` | `/notificacoes/lidas` |
+| `GET` | `/usuarios/preferencias/notificacoes` |
+| `PUT` | `/usuarios/preferencias/notificacoes` |
 
-## 6. Recompensas
-Gamificação e fidelização do pet/tutor.
+## Pets, responsáveis e atividades
+| Método | Endpoint |
+|---|---|
+| `GET` | `/pets/racas` |
+| `POST` | `/pets` |
+| `GET` | `/pets` |
+| `GET` | `/pets/{id}` (somente IDs numéricos) |
+| `GET` | `/pets/buscar` |
+| `GET` | `/pets/tutor/{idTutor}` |
+| `PUT` | `/pets/{id}` (somente IDs numéricos) |
+| `PUT` | `/pets/{id}/foto` (somente IDs numéricos; multipart) |
+| `DELETE` | `/pets/{id}/foto` (somente IDs numéricos) |
+| `GET` | `/pets/{id}/foto` (somente IDs numéricos) |
+| `DELETE` | `/pets/{id}` (somente IDs numéricos) |
+| `GET` | `/pets/{idPet}/atividades` |
+| `POST` | `/responsaveis/convites` |
+| `GET` | `/responsaveis` |
+| `DELETE` | `/responsaveis/{idResponsavel}` |
+| `POST` | `/pets/{idPet}/convites` |
+| `GET` | `/auth/convites/{token}` |
+| `POST` | `/auth/registrar-convite` |
+| `GET` | `/pets/{idPet}/acessos` |
+| `DELETE` | `/pets/{idPet}/acessos/{idAcesso}` |
+| `PATCH` | `/pets/{idPet}/acessos/{idAcesso}` |
+| `GET` | `/pets/{idPet}/convites` |
+| `POST` | `/convites/{token}/aceitar` |
+| `DELETE` | `/pets/{idPet}/convites/{idConvite}` |
 
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `GET` | `/api/recompensas` | Lista as recompensas ganhas/disponíveis. |
-| `POST` | `/api/recompensas` | Adiciona uma recompensa ao perfil de um pet. |
-| `PATCH` | `/api/recompensas/:id/resgatar` | Permite ao tutor registrar que a recompensa foi resgatada, salvando a data da ação. |
+## Saúde, medicamentos e prontuário
+| Método | Endpoint |
+|---|---|
+| `GET` | `/pets/{id}/proximas-acoes` |
+| `POST` | `/pets/tipos-vacina` |
+| `GET` | `/pets/{id}/carteira-vacinacao` |
+| `POST` | `/pets/{id}/carteira-vacinacao` |
+| `GET` | `/pets/{id}/perfil-saude` |
+| `PUT` | `/pets/{id}/perfil-saude` |
+| `POST` | `/pets/{id}/peso` |
+| `GET` | `/pets/{id}/peso/historico` |
+| `GET` | `/pets/{idPet}/prontuario` |
+| `GET` | `/pets/{idPet}/prontuario/exportar` |
+| `POST` | `/pets/{idPet}/prontuario/compartilhamentos` |
+| `GET` | `/pets/{idPet}/prontuario/compartilhamentos` |
+| `DELETE` | `/pets/{idPet}/prontuario/compartilhamentos/{idCompartilhamento}` |
+| `POST` | `/pets/{idPet}/exames` |
+| `POST` | `/pets/{idPet}/exames/{idExame}/arquivo` |
+| `GET` | `/pets/{idPet}/exames` |
+| `GET` | `/pets/{idPet}/exames/{idExame}/arquivo` |
+| `DELETE` | `/pets/{idPet}/exames/{idExame}` |
+| `POST` | `/eventos/{idEvento}/orientacoes` |
+| `GET` | `/eventos/{idEvento}/orientacoes` |
+| `DELETE` | `/eventos/{idEvento}/orientacoes/{idOrientacao}` |
+| `GET` | `/prontuarios-publicos/{token}` |
+| `GET` | `/prontuarios-publicos/{token}/dados` |
+| `GET` | `/prontuarios-publicos/{token}/exames/{idExame}/arquivo` |
+| `POST` | `/medicamentos` |
+| `GET` | `/medicamentos` |
+| `GET` | `/medicamentos/{id}` |
+| `PUT` | `/medicamentos/{id}` |
+| `DELETE` | `/medicamentos/{id}` |
+| `POST` | `/prescricoes` (multipart) |
+| `GET` | `/prescricoes` |
+| `GET` | `/prescricoes/{id}` |
+| `PATCH` | `/prescricoes/{id}/liberar` |
+| `POST` | `/planos` |
+| `GET` | `/planos` |
+| `GET` | `/planos/{id}` |
+| `PATCH` | `/planos/itens/{idItem}/agendar` |
 
----
+## Pontos e recompensas
+| Método | Endpoint |
+|---|---|
+| `GET` | `/pontos` |
+| `GET` | `/pontos/saldos` |
+| `PATCH` | `/pontos/{id}/liberar` |
+| `PATCH` | `/pontos/{id}/bloquear` |
+| `PATCH` | `/pontos/{id}/desbloquear` |
+| `GET` | `/recompensas` |
+| `GET` | `/recompensas/todas` |
+| `GET` | `/recompensas/{id}` |
+| `POST` | `/recompensas` (multipart) |
+| `PUT` | `/recompensas/{id}` (multipart) |
+| `DELETE` | `/recompensas/{id}` |
+| `GET` | `/recompensas/{id}/imagem` |
+| `GET` | `/recompensas/saldo` |
+| `PATCH` | `/recompensas/{id}/resgatar` |
+| `GET` | `/recompensas/resgates` |
+| `PATCH` | `/recompensas/resgates/{idResgate}/validar` |
 
-## 7. Notificações (Opcional, porém Recomendado)
-Gerenciamento de Push Notifications centralizado pelo servidor.
+## Relatórios e estética
+| Método | Endpoint |
+|---|---|
+| `GET` | `/veterinarios/me/relatorios/resumo` |
+| `POST` | `/relatorios-estetica` |
+| `GET` | `/relatorios-estetica` |
+| `GET` | `/relatorios-estetica/{id}` |
+| `PATCH` | `/relatorios-estetica/{id}/liberar` |
+| `GET` | `/servicos-estetica` |
+| `GET` | `/servicos-estetica/base` |
+| `GET` | `/servicos-estetica/extras` |
+| `GET` | `/profissionais-estetica` |
+| `GET` | `/profissionais-estetica/disponiveis` |
+| `GET` | `/profissionais-estetica/{id}` |
+| `POST` | `/profissionais-estetica` |
+| `PUT` | `/profissionais-estetica/{id}` |
+| `PUT` | `/profissionais-estetica/{id}/servicos` |
+| `GET` | `/profissionais-estetica/{id}/disponibilidade` |
+| `POST` | `/profissionais-estetica/{id}/disponibilidade` |
+| `DELETE` | `/profissionais-estetica/{id}/disponibilidade/{idDisponibilidade}` |
+| `GET` | `/profissionais-estetica/{id}/bloqueios` |
+| `POST` | `/profissionais-estetica/{id}/bloqueios` |
+| `DELETE` | `/profissionais-estetica/{id}/bloqueios/{idBloqueio}` |
 
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `POST` | `/api/notificacoes/registrar-token`| O app envia o Expo Push Token do dispositivo autenticado, para que o backend gerencie lembretes remotamente e notifique o proprietário quando um convite de acesso for aceito. |
+## Tutores e veterinários
+| Método | Endpoint |
+|---|---|
+| `GET` | `/tutores/{id}` |
+| `GET` | `/tutores` |
+| `PUT` | `/tutores/{id}` |
+| `DELETE` | `/tutores/{id}` |
+| `GET` | `/veterinarios` |
+| `GET` | `/veterinarios/{id}` |
+| `POST` | `/veterinarios` |
+| `PUT` | `/veterinarios/{id}` |
+| `GET` | `/veterinarios/{id}/disponibilidade` |
+| `POST` | `/veterinarios/{id}/disponibilidade` |
+| `DELETE` | `/veterinarios/{id}/disponibilidade/{idDisponibilidade}` |
+| `GET` | `/veterinarios/{id}/bloqueios` |
+| `POST` | `/veterinarios/{id}/bloqueios` |
+| `DELETE` | `/veterinarios/{id}/bloqueios/{idBloqueio}` |
+| `GET` | `/tipos-evento` |
 
----
-
-## 8. Prontuário Clínico
-Histórico completo do pet (atendimentos concluídos, orientações, receitas e exames), com exportação e compartilhamento por link temporário. Os caminhos abaixo são os reais do backend (sem o prefixo `/api`).
-
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `GET` | `/pets/:id/prontuario?secoes=&de=&ate=` | Prontuário completo, com linha do tempo. Seções: `PERFIL_SAUDE`, `ATENDIMENTOS`, `ORIENTACOES`, `RECEITAS`, `EXAMES`. Nunca inclui custos, observações do tutor nem dados pessoais do tutor. |
-| `GET` | `/pets/:id/prontuario/exportar?formato=JSON` | Versão exportável (só receitas liberadas). O app gera o PDF a partir dela; a exportação fica na auditoria. |
-| `GET` / `POST` | `/eventos/:id/orientacoes` | Lista / registra orientações do atendimento (registro: veterinário responsável). |
-| `DELETE` | `/eventos/:id/orientacoes/:idOrientacao` | Remove uma orientação (veterinário responsável). |
-| `GET` / `POST` | `/pets/:id/exames` | Lista / registra resultados de exames (registro: veterinário vinculado ao pet). |
-| `POST` | `/pets/:id/exames/:idExame/arquivo` | Anexa o laudo (`multipart`, campo `arquivo`; PDF, JPEG, PNG ou WebP, até 10 MB). |
-| `GET` | `/pets/:id/exames/:idExame/arquivo` | Baixa o laudo (exige autenticação). |
-| `DELETE` | `/pets/:id/exames/:idExame` | Remove um exame (só quem o registrou). |
-| `GET` / `POST` | `/pets/:id/prontuario/compartilhamentos` | Lista / cria links temporários e somente leitura (só o tutor proprietário). A URL pública só vem na resposta da criação. |
-| `DELETE` | `/pets/:id/prontuario/compartilhamentos/:idCompartilhamento` | Revoga o link imediatamente. |
-
-**Permissões:** o tutor proprietário sempre vê. Responsáveis precisam de `EDICAO` (ou `VISUALIZAR_PRONTUARIO`); `LEITURA` não dá acesso. Veterinários veem se já atenderam o pet ou são da clínica contratante ativa do tutor.
-
----
-
-## 9. Acesso compartilhado por pet
-Já existentes: `POST /pets/:id/convites`, `GET /pets/:id/acessos`, `DELETE /pets/:id/acessos/:idAcesso` (só o tutor proprietário).
-
-**Novo (histórico de atividade):**
-
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `GET` | `/pets/:id/atividades?limite=30` | Lista quem fez o quê no pet (convites, acessos concedidos/revogados, edições, eventos, visualização de prontuário). Somente o tutor proprietário (mesma regra de `/pets/:id/acessos`). Implementado no backend em `PetAtividadeController`; o feed é montado a partir da tabela de auditoria. |
-
-Resposta: `[{ "idAtividade": 1, "tipo": "ACESSO_CONCEDIDO", "descricao": "Maria passou a acompanhar a Luna", "autorNome": "Maria", "dtAtividade": "2026-10-13T10:00:00" }]`
-
-`tipo`: `CONVITE_ENVIADO`, `CONVITE_ACEITO`, `ACESSO_CONCEDIDO`, `ACESSO_REVOGADO`, `PET_ATUALIZADO`, `EVENTO_AGENDADO`, `EVENTO_CONCLUIDO`, `EVENTO_CANCELADO`, `PRONTUARIO_VISUALIZADO`. Tipos desconhecidos são exibidos como "Alteração registrada". Se o endpoint responder 404/501, o app mostra "histórico ainda não disponível".
+## Observações
+- Os caminhos foram consolidados a partir da lista de mapeamentos fornecida.
+- Parâmetros de rota como `{id}`, `{idPet}` e `{token}` representam valores variáveis.
+- Endpoints que aceitam upload foram identificados como `multipart` quando isso constava explicitamente na lista.
+- Há rotas com o mesmo caminho-base e métodos distintos; elas foram mantidas separadas.
