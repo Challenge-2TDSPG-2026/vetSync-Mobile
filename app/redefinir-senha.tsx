@@ -66,6 +66,8 @@ export default function RedefinirSenhaScreen() {
     <AuthLayout
       title="Defina uma nova senha."
       subtitle="Escolha uma senha forte, com pelo menos 8 caracteres, incluindo letra e número."
+      mostrarVoltar
+      onVoltar={() => router.back()}
     >
       <AuthField
         label="Nova senha"

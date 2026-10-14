@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Stack } from 'expo-router';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useRelatorioClinica } from '../../hooks/useRelatorios';
@@ -16,6 +17,7 @@ function intervaloMesAtual() {
 
 export default function VetRelatoriosScreen() {
   const { theme } = useTheme();
+  const router = useRouter();
   const s = useMemo(() => styles(theme), [theme]);
   const { sessao } = useAuth();
   const intervalo = intervaloMesAtual();
@@ -24,6 +26,15 @@ export default function VetRelatoriosScreen() {
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
       <Stack.Screen options={{ title: 'Relatórios da clínica' }} />
+      <Pressable
+        style={s.backButton}
+        onPress={() => router.back()}
+        accessibilityRole="button"
+        accessibilityLabel="Voltar"
+      >
+        <Ionicons name="arrow-back" size={21} color={theme.colors.primary} />
+        <Text style={s.backButtonText}>Voltar</Text>
+      </Pressable>
       <Text style={s.title}>Resumo da clínica</Text>
       <Text style={s.subtitle}>Indicadores de {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}.</Text>
       {isLoading ? <ActivityIndicator color={theme.colors.primary} style={s.loading} /> : null}
@@ -49,6 +60,8 @@ function Metric({ styles: s, theme, label, value, accent, wide }: { styles: Retu
 const styles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   content: { padding: 16, paddingBottom: 40 },
+  backButton: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14, paddingVertical: 4 },
+  backButtonText: { color: theme.colors.primary, fontSize: 15, fontWeight: '700' },
   title: { color: theme.colors.text, fontSize: 24, fontWeight: '800' },
   subtitle: { color: theme.colors.textSecondary, marginTop: 4, marginBottom: 18 },
   loading: { marginTop: 30 },

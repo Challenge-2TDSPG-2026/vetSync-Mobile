@@ -169,9 +169,12 @@ export default function CadastroScreen() {
   }
 
   return (
-    <AuthLayout permitirCapturaDeTela
+    <AuthLayout
+      permitirCapturaDeTela
       title="Crie sua conta."
       subtitle="Acompanhe vacinas, consultas e o bem-estar do seu pet em um só lugar."
+      mostrarVoltar
+      onVoltar={() => router.back()}
     >
       {clinica ? <Text style={{ color: theme.colors.primary, fontWeight: "700", marginBottom: 18 }}>Clínica confirmada: {clinica}</Text> : null}
       <AuthField

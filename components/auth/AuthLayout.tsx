@@ -3,6 +3,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,9 +20,18 @@ type AuthLayoutProps = {
   subtitle: string;
   children: ReactNode;
   permitirCapturaDeTela?: boolean;
+  mostrarVoltar?: boolean;
+  onVoltar?: () => void;
 };
 
-export function AuthLayout({ title, subtitle, children, permitirCapturaDeTela = false }: AuthLayoutProps) {
+export function AuthLayout({
+  title,
+  subtitle,
+  children,
+  permitirCapturaDeTela = false,
+  mostrarVoltar = false,
+  onVoltar,
+}: AuthLayoutProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -47,6 +57,17 @@ export function AuthLayout({ title, subtitle, children, permitirCapturaDeTela = 
           end={{ x: 1, y: 1 }}
           style={styles.hero}
         >
+          {mostrarVoltar ? (
+            <Pressable
+              style={styles.botaoVoltar}
+              onPress={onVoltar}
+              accessibilityRole="button"
+              accessibilityLabel="Voltar"
+            >
+              <AppIcon name="arrow-back" set="Ionicons" size={22} color={theme.pages.authentication.heroText} />
+              <Text style={styles.botaoVoltarTexto}>Voltar</Text>
+            </Pressable>
+          ) : null}
           <AppIcon
             name="paw"
             set="MaterialCommunityIcons"
@@ -101,6 +122,20 @@ function createStyles(theme: AppTheme) {
       paddingHorizontal: 30,
       paddingBottom: 56,
       overflow: 'hidden',
+    },
+    botaoVoltar: {
+      position: 'absolute',
+      top: 18,
+      left: 22,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      padding: 8,
+    },
+    botaoVoltarTexto: {
+      color: theme.pages.authentication.heroText,
+      fontSize: 14,
+      fontWeight: '700',
     },
     pawMarca: {
       position: 'absolute',

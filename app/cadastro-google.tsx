@@ -131,6 +131,8 @@ export default function CadastroGoogleScreen() {
       permitirCapturaDeTela
       title="Quase lá."
       subtitle="Complete seu cadastro para começar a cuidar do seu pet."
+      mostrarVoltar
+      onVoltar={() => router.back()}
     >
       <View style={s.conta}>
         <AppIcon name="logo-google" set="Ionicons" size={20} color={theme.colors.primary} />
