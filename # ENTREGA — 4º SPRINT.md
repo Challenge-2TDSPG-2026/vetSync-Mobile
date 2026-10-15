@@ -1,25 +1,26 @@
 # Checklist da Entrega — 4º Sprint
 
-> VetSync Mobile · Challenge 2026 · atualizado em 14/10/2026 · branch `main`, commit `6a8513b`
+> VetSync Mobile · Challenge 2026 · atualizado em 15/10/2026 · branch `main`, commit `1e0e044`
 
-Legenda: `[x]` feito · `[ ]` pendente · **(novo 14/10)** = concluído na atualização de hoje.
+Legenda: `[x]` feito · `[ ]` pendente · **(novo 14/10)** = concluído na atualização anterior.
 
-## Atualização de 14/10 — Publicação web no Firebase Hosting
+## Atualização de 15/10 — Publicação web no Firebase Hosting
 
-_Não é um item do checklist original (a entrega pede o Firebase App Distribution), mas registra o que foi feito hoje no Firebase._
+_Não é um item do checklist original (a entrega pede o Firebase App Distribution), mas registra o estado atual do Firebase._
 
-- [x] firebase init hosting e firebase init hosting:github concluídos (secret FIREBASE_SERVICE_ACCOUNT_VETSYNC_76C0E criado). **(novo 14/10)**
-- [x] firebase.json com "public": "dist" e rewrite ** → /index.html (commit 25417f3); .firebaserc aponta para vetsync-76c0e. **(novo 14/10)**
-- [x] Removido o public/index.html de exemplo do Firebase, que sobrescrevia o index.html do app (commit 6a8513b). **(novo 14/10)**
-- [x] Workflows de merge e de pull request com actions/setup-node@v4 (Node 20, cache npm), npm ci e expo export separados. **(novo 14/10)**
-- [x] Deploy automático pelo GitHub Actions na branch main concluído (verde). **(novo 14/10)**
-- [x] Site publicado: https://vetsync-76c0e.web.app **(novo 14/10)**
+- [x] `firebase init hosting` e `firebase init hosting:github` concluídos; o secret `FIREBASE_SERVICE_ACCOUNT_VETSYNC_76C0E` está configurado no GitHub.
+- [x] `firebase.json` usa `dist` como diretório público e rewrite `**` para `/index.html`; `.firebaserc` aponta para `vetsync-76c0e`.
+- [x] Workflows de merge e pull request usam `actions/setup-node@v4`, Node 20, cache npm, `npm ci` e `expo export --platform web`.
+- [x] O workflow de merge injeta `EXPO_PUBLIC_COMMIT_HASH`, `EXPO_PUBLIC_BUILD_NUMBER` e `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`.
+- [x] Deploy automático na branch `main` concluído com sucesso no commit `1e0e044` (workflow [38735005163](https://github.com/Challenge-2TDSPG-2026/vetSync-Mobile/actions/runs/38735005163)).
+- [x] Site publicado: https://vetsync-76c0e.web.app
+- [x] Verificado que o aplicativo não possui SDK Firebase/Firestore nas dependências; o uso atual do Firebase é somente Hosting e CI/CD.
 
 ### Pendente desta frente
 
 - [ ] Testar login/ações no site publicado e liberar CORS no backend Java (Render) para https://vetsync-76c0e.web.app e https://vetsync-76c0e.firebaseapp.com.
 - [ ] Cadastrar EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (Secrets do GitHub) e autorizar a URL do site no cliente OAuth do Google.
-- [ ] Corrigir os 4 erros de lint para o workflow CI voltar a ficar verde (falha desde o run #36, 13/10).
+- [ ] Adicionar um workflow específico de lint ao CI; o workflow de Hosting atual valida build/deploy, mas não executa `npm run lint`.
 
 ## Prioridade 1 — Itens críticos da avaliação
 
@@ -36,7 +37,7 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 - [x] Confirmar o projeto Firebase utilizado para a distribuição. **(novo 14/10)**
   - _Projeto vetsync-76c0e (já usado no Hosting). Falta habilitar o App Distribution nele._
-- [ ] Configurar o Firebase App Distribution.
+- [ ] Configurar o Firebase App Distribution no projeto `vetsync-76c0e` (Firebase Hosting já está configurado).
 - [ ] Gerar um APK/ build a partir do commit final.
 - [ ] Publicar o build no Firebase App Distribution.
 - [ ] Adicionar o e-mail institucional do professor como tester.
@@ -123,17 +124,17 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 ### Validação automatizada
 
-- [x] Instalar dependências com `npm ci`. **(novo 14/10)**
-  - _Executado no workflow de deploy e verificado em 14/10._
-- [x] Executar `npm run typecheck`. **(novo 14/10)**
-  - _0 erros (verificado em 14/10, commit 25417f3)._
-- [ ] Executar `npm run lint`.
-  - _4 erros: app/(tutor)/agendar-servico.tsx (linhas 39 e 42) e app/(tutor)/mensagens-clinica.tsx (20 e 21), regra setState dentro de useEffect. É o que deixa o workflow CI vermelho._
+- [x] Instalar dependências com `npm ci`.
+  - _Executado localmente e no workflow de deploy; verificado em 15/10/2026._
+- [x] Executar `npm run typecheck`.
+  - _0 erros, verificado em 15/10/2026 no commit `1e0e044`._
+- [x] Executar `npm run lint`.
+  - _0 erros e 6 avisos de regras de hooks/importação/estilo; executado em 15/10/2026._
 - [x] Executar `npm test`. **(novo 14/10)**
   - _42 suítes / 281 testes passando (14/10)._
 - [x] Executar `npm run build`. **(novo 14/10)**
   - _expo export -p web gera 46 arquivos; deploy no Firebase Hosting verde._
-- [ ] Corrigir erros encontrados sem alterar funcionalidades não relacionadas.
+- [x] Corrigir os erros de lint encontrados sem alterar funcionalidades não relacionadas.
 - [ ] Reexecutar todas as validações após as correções.
 
 ### Build e ambiente
