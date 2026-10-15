@@ -3,17 +3,17 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ESPECIES } from '../../constants';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useAuth } from '../../context/AuthContext';
-import { usePet } from '../../context/PetContext';
-import { useTheme } from '../../context/ThemeContext';
-import { PetSwitcher } from '../../components/PetSwitcher';
-import { PetFoto } from '../../components/pet-foto/PetFoto';
-import { mostrarToast } from '../../components/ui/Toast';
-import { usePerfilSaudePet } from '../../hooks/useRelatorios';
-import { resumoEmergenciaPdfService } from '../../services/resumoEmergenciaPdfService';
-import type { AppTheme } from '../../constants/theme';
+import { ESPECIES } from '../../../constants';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useAuth } from '../../../context/AuthContext';
+import { usePet } from '../../../context/PetContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { PetSwitcher } from '../../../components/PetSwitcher';
+import { PetFoto } from '../../../components/pet-foto/PetFoto';
+import { mostrarToast } from '../../../components/ui/Toast';
+import { usePerfilSaudePet } from '../../../hooks/useRelatorios';
+import { resumoEmergenciaPdfService } from '../../../services/resumoEmergenciaPdfService';
+import type { AppTheme } from '../../../constants/theme';
 
 function valor(valor?: string | null): string {
   return valor?.trim() || 'Não informado';
@@ -51,9 +51,6 @@ export default function ResumoEmergenciaScreen() {
 
   const cabecalho = (
     <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
-      <Pressable style={s.backButton} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Voltar">
-        <Ionicons name="arrow-back" size={23} color={theme.components.header.icon} />
-      </Pressable>
       <View style={s.headerCopy}>
         <Text style={[s.headerTitle, modoSimples && ss.headerTitle]}>Ficha de emergência</Text>
         <Text style={[s.headerSubtitle, modoSimples && ss.headerSubtitle]}>Informações rápidas do pet</Text>
@@ -171,7 +168,6 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: page.background },
     header: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingHorizontal: 18, paddingBottom: 15, backgroundColor: theme.components.header.background, borderBottomWidth: 1, borderBottomColor: theme.components.header.border },
-    backButton: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.components.header.accountIconBackground },
     headerCopy: { flex: 1 },
     headerTitle: { color: theme.components.header.title, fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
     headerSubtitle: { color: theme.components.header.accountSubtext, fontSize: 12, marginTop: 2, opacity: 0.85 },

@@ -1,34 +1,32 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAccessibility } from '../../context/AccessibilityContext';
-import { useAuth } from '../../context/AuthContext';
-import { usePet } from '../../context/PetContext';
-import { useTheme } from '../../context/ThemeContext';
-import { withAlpha, type AppTheme } from '../../constants/theme';
-import { PetSwitcher } from '../../components/PetSwitcher';
-import { PetFoto } from '../../components/pet-foto/PetFoto';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { mostrarToast } from '../../components/ui/Toast';
-import { CompartilharProntuarioModal } from '../../components/prontuario/CompartilharProntuarioModal';
-import { ProntuarioLinhaDoTempo } from '../../components/prontuario/ProntuarioLinhaDoTempo';
-import { useRecarregarDados } from '../../hooks/useRecarregarDados';
-import { useProntuario } from '../../hooks/useProntuario';
-import { ApiError } from '../../services/api/httpClient';
-import { compartilhamentoNativoService } from '../../services/compartilhamentoNativoService';
-import { prontuarioPdfService } from '../../services/prontuarioPdfService';
-import type { ExameProntuario } from '../../services/prontuarioService';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { useAuth } from '../../../context/AuthContext';
+import { usePet } from '../../../context/PetContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { withAlpha, type AppTheme } from '../../../constants/theme';
+import { PetSwitcher } from '../../../components/PetSwitcher';
+import { PetFoto } from '../../../components/pet-foto/PetFoto';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { mostrarToast } from '../../../components/ui/Toast';
+import { CompartilharProntuarioModal } from '../../../components/prontuario/CompartilharProntuarioModal';
+import { ProntuarioLinhaDoTempo } from '../../../components/prontuario/ProntuarioLinhaDoTempo';
+import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
+import { useProntuario } from '../../../hooks/useProntuario';
+import { ApiError } from '../../../services/api/httpClient';
+import { compartilhamentoNativoService } from '../../../services/compartilhamentoNativoService';
+import { prontuarioPdfService } from '../../../services/prontuarioPdfService';
+import type { ExameProntuario } from '../../../services/prontuarioService';
 import {
   contarPorTipo,
   FILTROS_LINHA_DO_TEMPO,
   montarItensProntuario,
   type FiltroLinhaDoTempo,
-} from '../../utils/prontuario';
+} from '../../../utils/prontuario';
 
 export default function ProntuarioScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const { modoSimples } = useAccessibility();
@@ -79,9 +77,6 @@ export default function ProntuarioScreen() {
 
   const cabecalho = (
     <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
-      <Pressable style={s.backButton} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Voltar">
-        <Ionicons name="arrow-back" size={23} color={theme.components.header.icon} />
-      </Pressable>
       <View style={s.headerCopy}>
         <Text style={[s.headerTitle, modoSimples && ss.headerTitle]}>Prontuário</Text>
         <Text style={[s.headerSubtitle, modoSimples && ss.headerSubtitle]}>Histórico clínico completo</Text>
@@ -221,7 +216,6 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: page.background },
     header: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingHorizontal: 18, paddingBottom: 15, backgroundColor: theme.components.header.background, borderBottomWidth: 1, borderBottomColor: theme.components.header.border },
-    backButton: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.components.header.accountIconBackground },
     headerCopy: { flex: 1 },
     headerTitle: { color: theme.components.header.title, fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
     headerSubtitle: { color: theme.components.header.accountSubtext, fontSize: 12, marginTop: 2, opacity: 0.85 },

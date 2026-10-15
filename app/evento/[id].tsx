@@ -168,7 +168,7 @@ export default function EventoDetalhesScreen() {
       ) : null}
 
       {evento.status === 'CONCLUIDO' && (
-        <Pressable style={s.secondaryButton} onPress={() => router.push('/(tutor)/prontuario')} accessibilityRole="button">
+        <Pressable style={s.secondaryButton} onPress={() => router.push('/(tutor)/(tabs)/prontuario')} accessibilityRole="button">
           <Ionicons name="document-text-outline" size={18} color={theme.colors.primary} />
           <Text style={s.secondaryButtonText}>Ver prontuário completo</Text>
         </Pressable>

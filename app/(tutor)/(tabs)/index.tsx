@@ -368,7 +368,7 @@ export default function DashboardScreen() {
         </View>
         <Pressable
           style={[s.emergencyButton, modoSimples && sSimples.emergencyButton]}
-          onPress={() => router.push('/(tutor)/resumo-emergencia')}
+          onPress={() => router.push('/(tutor)/(tabs)/resumo-emergencia')}
           accessibilityRole="button"
           accessibilityLabel={`Abrir ficha de emergência de ${petAtivo.nome}`}
         >

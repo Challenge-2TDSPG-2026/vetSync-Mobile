@@ -64,7 +64,6 @@ const ROTAS_FORA_DO_GRUPO = [
   'redefinir-senha',
   'modo-simples',
   'pets-cadastrados',
-  'gerenciar-conta',
   'notificacoes',
   'vinculo-clinica',
   'sobre-app',
@@ -215,7 +214,6 @@ function RootNavigator() {
         <Stack.Screen name="(vet)" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="modo-simples" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="pets-cadastrados" options={TRANSICAO_PAGINA} />
-        <Stack.Screen name="gerenciar-conta" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="sobre-app" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="paciente/[id]" options={{ headerShown: true, ...TRANSICAO_PAGINA }} />
         <Stack.Screen name="evento/[id]" options={{ headerShown: false, ...TRANSICAO_PAGINA }} />

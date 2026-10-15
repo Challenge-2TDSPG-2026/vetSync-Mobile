@@ -178,6 +178,10 @@ export default function TabsLayout() {
           headerShown: false,
         }}
       />
+
+      <Tabs.Screen name="resumo-emergencia" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="prontuario" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="gerenciar-conta" options={{ href: null, headerShown: false }} />
     </Tabs>
   );
 }

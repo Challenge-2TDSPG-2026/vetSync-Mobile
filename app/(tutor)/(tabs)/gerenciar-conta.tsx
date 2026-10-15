@@ -13,15 +13,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { useAccessibility } from '../context/AccessibilityContext';
-import { buscarEnderecoPorCep, formatarCep } from '../services/cepService';
-import { useAtualizarTutor, useTutor } from '../hooks/useTutor';
-import { mensagemDeErro } from '../services/api/errorMessages';
-import { mostrarToast } from '../components/ui/Toast';
-import type { AppTheme } from '../constants/theme';
-import type { AtualizarTutorPayload, DadosTutor } from '../services/tutorService';
+import { useAuth } from '../../../context/AuthContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { useAccessibility } from '../../../context/AccessibilityContext';
+import { buscarEnderecoPorCep, formatarCep } from '../../../services/cepService';
+import { useAtualizarTutor, useTutor } from '../../../hooks/useTutor';
+import { mensagemDeErro } from '../../../services/api/errorMessages';
+import { mostrarToast } from '../../../components/ui/Toast';
+import type { AppTheme } from '../../../constants/theme';
+import type { AtualizarTutorPayload, DadosTutor } from '../../../services/tutorService';
 
 type FormularioConta = AtualizarTutorPayload;
 type SecaoEdicao = 'contato' | 'endereco' | null;
@@ -705,12 +705,10 @@ const createStyles = (theme: AppTheme) =>
       borderBottomColor: theme.components.header.border,
     },
     backButton: {
-      width: 44,
-      height: 44,
+      width: 40,
+      height: 40,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 14,
-      backgroundColor: theme.components.header.accountIconBackground,
     },
     headerCopy: { flex: 1, minWidth: 0 },
     title: {

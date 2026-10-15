@@ -121,7 +121,7 @@ export default function VinculoClinicaScreen() {
       {sessao && troca ? (
         <Pressable
           style={styles.voltarCadastro}
-          onPress={() => router.replace('/gerenciar-conta')}
+          onPress={() => router.replace('/(tutor)/(tabs)/gerenciar-conta')}
           disabled={enviando || saindo}
           accessibilityRole="button"
           accessibilityLabel="Voltar para gerenciar conta"

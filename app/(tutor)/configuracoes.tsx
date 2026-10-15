@@ -92,7 +92,7 @@ export default function ConfiguracoesScreen() {
             icon="person-circle-outline"
             title="Dados da conta"
             description="Contato e endereço"
-            onPress={() => router.push('/gerenciar-conta')}
+            onPress={() => router.push('/(tutor)/(tabs)/gerenciar-conta')}
           />
           <View style={s.divider} />
           <ConfigItem

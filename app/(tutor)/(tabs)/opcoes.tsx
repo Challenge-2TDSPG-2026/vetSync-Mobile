@@ -27,14 +27,14 @@ const ATALHOS = [
     titulo: 'Emergência',
     descricao: 'Ficha rápida do pet',
     icone: 'medical-outline' as const,
-    rota: '/(tutor)/resumo-emergencia' as const,
+    rota: '/(tutor)/(tabs)/resumo-emergencia' as const,
     cor: 'danger' as const,
   },
   {
     titulo: 'Prontuário',
     descricao: 'Exames, receitas e orientações',
     icone: 'document-text-outline' as const,
-    rota: '/(tutor)/prontuario' as const,
+    rota: '/(tutor)/(tabs)/prontuario' as const,
     cor: 'info' as const,
   },
   {
