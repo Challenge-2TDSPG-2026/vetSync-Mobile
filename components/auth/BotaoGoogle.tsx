@@ -16,6 +16,8 @@ type BotaoGoogleProps = {
   onIdToken: (idToken: string) => void | Promise<void>;
   onErro: (mensagem: string) => void;
   desabilitado?: boolean;
+  label?: string;
+  mostrarDivisor?: boolean;
 };
 
 /**
@@ -23,11 +25,11 @@ type BotaoGoogleProps = {
 * (ele lança erro), então usamos uma versão que só avisa o motivo ao ser tocada.
 */
 export function BotaoGoogle(props: BotaoGoogleProps) {
-  if (!loginGoogleDisponivel()) return <BotaoGoogleIndisponivel desabilitado={props.desabilitado} />;
+  if (!loginGoogleDisponivel()) return <BotaoGoogleIndisponivel {...props} />;
   return <BotaoGoogleAtivo {...props} />;
 }
 
-function BotaoGoogleIndisponivel({ desabilitado = false }: { desabilitado?: boolean }) {
+function BotaoGoogleIndisponivel({ desabilitado = false, label, mostrarDivisor }: BotaoGoogleProps) {
   useEffect(() => {
     if (__DEV__) {
       console.warn(
@@ -48,10 +50,10 @@ function BotaoGoogleIndisponivel({ desabilitado = false }: { desabilitado?: bool
     );
   }
 
-  return <BotaoGoogleVisual onPress={avisar} desabilitado={desabilitado} esmaecido />;
+  return <BotaoGoogleVisual onPress={avisar} desabilitado={desabilitado} esmaecido label={label} mostrarDivisor={mostrarDivisor} />;
 }
 
-function BotaoGoogleAtivo({ onIdToken, onErro, desabilitado = false }: BotaoGoogleProps) {
+function BotaoGoogleAtivo({ onIdToken, onErro, desabilitado = false, label, mostrarDivisor }: BotaoGoogleProps) {
   const ultimaRespostaTratada = useRef<unknown>(null);
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
@@ -82,6 +84,8 @@ function BotaoGoogleAtivo({ onIdToken, onErro, desabilitado = false }: BotaoGoog
     <BotaoGoogleVisual
       onPress={() => void promptAsync()}
       desabilitado={desabilitado || !request}
+      label={label}
+      mostrarDivisor={mostrarDivisor}
     />
   );
 }
@@ -91,19 +95,23 @@ type BotaoGoogleVisualProps = {
   desabilitado?: boolean;
   /** Visual de "não configurado": continua tocável para explicar o motivo. */
   esmaecido?: boolean;
+  label?: string;
+  mostrarDivisor?: boolean;
 };
 
-function BotaoGoogleVisual({ onPress, desabilitado = false, esmaecido = false }: BotaoGoogleVisualProps) {
+function BotaoGoogleVisual({ onPress, desabilitado = false, esmaecido = false, label = 'Continuar com o Google', mostrarDivisor = true }: BotaoGoogleVisualProps) {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View>
-      <View style={s.divisor}>
-        <View style={s.linha} />
-        <Text style={s.divisorTexto}>ou</Text>
-        <View style={s.linha} />
-      </View>
+      {mostrarDivisor ? (
+        <View style={s.divisor}>
+          <View style={s.linha} />
+          <Text style={s.divisorTexto}>ou</Text>
+          <View style={s.linha} />
+        </View>
+      ) : null}
       <Pressable
         style={({ pressed }) => [
           s.botao,
@@ -113,11 +121,11 @@ function BotaoGoogleVisual({ onPress, desabilitado = false, esmaecido = false }:
         onPress={onPress}
         disabled={desabilitado}
         accessibilityRole="button"
-        accessibilityLabel="Continuar com o Google"
+        accessibilityLabel={label}
         accessibilityState={{ disabled: desabilitado }}
       >
         <AppIcon name="logo-google" set="Ionicons" size={19} color={theme.colors.text} />
-        <Text style={s.botaoTexto}>Continuar com o Google</Text>
+        <Text style={s.botaoTexto}>{label}</Text>
       </Pressable>
     </View>
   );

@@ -26,6 +26,7 @@ jest.mock('../api/httpClient', () => ({
 }));
 
 const apiPost = api.post as jest.Mock;
+const apiGet = api.get as jest.Mock;
 
 const sessao = {
   token: 'jwt-interno',
@@ -139,6 +140,13 @@ describe('authService - cadastro e vínculo com Google', () => {
       { provider: 'GOOGLE', idToken: 'id-token', email: 'maria@teste.com', senha: 'Senha Com Espaço ' },
       false,
     );
+  });
+
+  it('consulta o estado de vínculo Google na sessão autenticada', async () => {
+    apiGet.mockResolvedValue({ googleVinculado: true });
+
+    await expect(authService.obterEstadoContaSocial()).resolves.toEqual({ googleVinculado: true });
+    expect(apiGet).toHaveBeenCalledWith('/auth/me');
   });
 });
 

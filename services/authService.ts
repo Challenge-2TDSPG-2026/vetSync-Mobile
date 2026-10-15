@@ -30,6 +30,10 @@ export interface RegistrarGooglePayload {
   sessaoVinculo: string;
 }
 
+export interface EstadoContaSocial {
+  googleVinculado: boolean;
+}
+
 const STATUS_PENDENCIA: readonly string[] = [
   'CADASTRO_NECESSARIO',
   'VINCULO_NECESSARIO',
@@ -52,6 +56,10 @@ export function extrairPendenciaSocial(erro: unknown): PendenciaSocial | null {
 }
 
 export const authService = {
+  obterEstadoContaSocial(): Promise<EstadoContaSocial> {
+    return api.get<EstadoContaSocial>('/auth/me');
+  },
+
   async login(email: string, senha: string): Promise<Sessao> {
     try {
       return await api.post<Sessao>(
