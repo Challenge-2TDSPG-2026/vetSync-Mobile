@@ -6,6 +6,8 @@ import { clinicaService, type ConversaClinica, type MensagemClinica } from '../.
 import { mostrarToast } from '../../components/ui/Toast';
 import { mensagemDeErro } from '../../services/api/errorMessages';
 
+const avisarErro = (titulo: string) => (e: unknown) => mostrarToast('erro', titulo, mensagemDeErro(e, 'Tente novamente.'));
+
 export default function MensagensClinicaScreen() {
   const { theme } = useTheme(); const router = useRouter();
   const [conversas, setConversas] = useState<ConversaClinica[]>([]);
@@ -17,10 +19,17 @@ export default function MensagensClinicaScreen() {
     finally { setLoading(false); } }
   async function carregarMensagens(id: number) { try { setMensagens(await clinicaService.mensagens(id)); }
     catch (e) { mostrarToast('erro', 'Não foi possível carregar as mensagens', mensagemDeErro(e, 'Tente novamente.')); } }
-  useEffect(() => { void carregar(); }, []);
-  useEffect(() => { if (!ativa) return; void carregarMensagens(ativa.idConversa);
-    const timer = setInterval(() => void carregarMensagens(ativa.idConversa), 15000);
-    return () => clearInterval(timer); }, [ativa?.idConversa]);
+  useEffect(() => {
+    clinicaService.conversas().then(setConversas).catch(avisarErro('Não foi possível carregar as conversas')).finally(() => setLoading(false));
+  }, []);
+  useEffect(() => {
+    if (!ativa) return;
+    const id = ativa.idConversa;
+    const buscar = () => { clinicaService.mensagens(id).then(setMensagens).catch(avisarErro('Não foi possível carregar as mensagens')); };
+    buscar();
+    const timer = setInterval(buscar, 15000);
+    return () => clearInterval(timer);
+  }, [ativa?.idConversa]);
   async function iniciar() { try { const c = await clinicaService.iniciarConversa(); setAtiva(c); await carregar(); }
     catch (e) { mostrarToast('erro', 'Não foi possível iniciar a conversa', mensagemDeErro(e, 'Tente novamente.')); } }
   async function enviar() { if (!ativa || !texto.trim()) return; setEnviando(true);

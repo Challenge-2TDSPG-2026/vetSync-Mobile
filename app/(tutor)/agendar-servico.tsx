@@ -10,6 +10,8 @@ import { mensagemDeErro } from '../../services/api/errorMessages';
 import { encontrarServicoPorNome } from '../../utils/planoNavegacao';
 import { EntrarListaEsperaModal, type AlvoListaEspera } from '../../components/espera/EntrarListaEsperaModal';
 
+const SEM_SLOTS: SlotClinica[] = [];
+
 export default function AgendarServicoScreen() {
   const { theme } = useTheme();
   const router = useRouter();
@@ -18,15 +20,21 @@ export default function AgendarServicoScreen() {
   const { pets, petAtivo } = usePet();
   const [servicos, setServicos] = useState<ServicoClinica[]>([]);
   const [servico, setServico] = useState<ServicoClinica | null>(null);
-  const [idPet, setIdPet] = useState<string | null>(params.petId ?? petAtivo?.id ?? null);
+  const [idPetEscolhido, setIdPetEscolhido] = useState<string | null>(params.petId ?? petAtivo?.id ?? null);
+  const idPet = idPetEscolhido ?? pets[0]?.id ?? null;
   const [data, setData] = useState(/^\d{4}-\d{2}-\d{2}$/.test(params.data ?? '') ? (params.data as string) : new Date().toLocaleDateString('sv-SE'));
-  const [slots, setSlots] = useState<SlotClinica[]>([]);
-  const [slot, setSlot] = useState<SlotClinica | null>(null);
+  const [resultadoSlots, setResultadoSlots] = useState<{ chave: string; lista: SlotClinica[] } | null>(null);
+  const [escolha, setEscolha] = useState<{ chave: string; slot: SlotClinica } | null>(null);
   const [observacao, setObservacao] = useState('');
   const [carregando, setCarregando] = useState(true);
-  const [carregandoSlots, setCarregandoSlots] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [alvoEspera, setAlvoEspera] = useState<AlvoListaEspera | null>(null);
+  // Os horários valem para um par serviço+data; ao mudar o par, lista e escolha antigas deixam de valer sem precisar de effect.
+  const idServico = servico?.id;
+  const chaveSlots = idServico !== undefined && /^\d{4}-\d{2}-\d{2}$/.test(data) ? `${idServico}|${data}` : null;
+  const slots = resultadoSlots?.chave === chaveSlots ? resultadoSlots.lista : SEM_SLOTS;
+  const slot = escolha?.chave === chaveSlots ? escolha.slot : null;
+  const carregandoSlots = chaveSlots !== null && resultadoSlots?.chave !== chaveSlots;
   // Hora sugerida pela notificação de vaga; selecionada uma única vez quando os horários chegam.
   const horaSugerida = useRef<string | undefined>(params.hora);
 
@@ -36,27 +44,23 @@ export default function AgendarServicoScreen() {
       .finally(() => setCarregando(false));
   }, []);
 
-  useEffect(() => { if (!idPet && pets.length) setIdPet(pets[0].id); }, [pets, idPet]);
-
   useEffect(() => {
-    setSlot(null); setSlots([]);
-    if (!servico || !/^\d{4}-\d{2}-\d{2}$/.test(data)) return;
-    let valido = true; setCarregandoSlots(true);
-    clinicaService.listarSlots(servico.id, data).then(lista => {
+    if (!chaveSlots || idServico === undefined) return;
+    let valido = true;
+    clinicaService.listarSlots(idServico, data).then(lista => {
       if (!valido) return;
-      setSlots(lista);
+      setResultadoSlots({ chave: chaveSlots, lista });
       const sugerida = horaSugerida.current;
       if (sugerida) {
         horaSugerida.current = undefined;
         const achado = lista.find(item => item.hora === sugerida);
-        if (achado) setSlot(achado);
+        if (achado) setEscolha({ chave: chaveSlots, slot: achado });
         else mostrarToast('info', 'Essa vaga já foi preenchida', 'Escolha outro horário ou continue na lista de espera.');
       }
     })
-      .catch(e => { if (valido) mostrarToast('erro', 'Não foi possível consultar os horários', mensagemDeErro(e, 'Tente novamente.')); })
-      .finally(() => { if (valido) setCarregandoSlots(false); });
+      .catch(e => { if (valido) { setResultadoSlots({ chave: chaveSlots, lista: [] }); mostrarToast('erro', 'Não foi possível consultar os horários', mensagemDeErro(e, 'Tente novamente.')); } });
     return () => { valido = false; };
-  }, [servico?.id, data]);
+  }, [chaveSlots, idServico, data]);
 
   async function confirmar() {
     if (!servico || !slot || !idPet) return;
@@ -85,7 +89,7 @@ export default function AgendarServicoScreen() {
         </Pressable>)}</View> : <Text style={{ color: theme.colors.textSecondary }}>Esta clínica ainda não disponibilizou serviços para agendamento.</Text>}
 
         <Text style={[s.heading, { color: theme.colors.text }]}>Pet</Text>
-        <View style={s.wrap}>{pets.map(pet => <Pressable key={pet.id} onPress={() => setIdPet(pet.id)}
+        <View style={s.wrap}>{pets.map(pet => <Pressable key={pet.id} onPress={() => setIdPetEscolhido(pet.id)}
           style={[s.chip, card, idPet === pet.id && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]}>
           <Text style={{ color: idPet === pet.id ? theme.colors.onPrimary : theme.colors.text }}>{pet.nome}</Text>
         </Pressable>)}</View>
@@ -98,7 +102,7 @@ export default function AgendarServicoScreen() {
         <Text style={[s.heading, { color: theme.colors.text }]}>Horário e profissional</Text>
         {carregandoSlots ? <ActivityIndicator color={theme.colors.primary} /> : slots.length ?
           <View style={s.wrap}>{slots.map(item => <Pressable key={`${item.tipoProfissional}:${item.idProfissional}:${item.hora}`}
-            onPress={() => setSlot(item)} style={[s.chip, card, slot === item && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]}>
+            onPress={() => chaveSlots && setEscolha({ chave: chaveSlots, slot: item })} style={[s.chip, card, slot === item && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]}>
             <Text style={{ color: slot === item ? theme.colors.onPrimary : theme.colors.text }}>{item.hora}</Text>
             <Text style={{ color: slot === item ? theme.colors.onPrimary : theme.colors.textSecondary, fontSize: 12 }}>{item.nomeProfissional}</Text>
           </Pressable>)}</View> : <Text style={{ color: theme.colors.textSecondary }}>Sem horários disponíveis nesta data.</Text>}
