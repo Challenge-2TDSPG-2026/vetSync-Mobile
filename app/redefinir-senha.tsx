@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Text, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { voltarOuIrPara } from '../utils/navegacao';
 import { ApiError } from '../services/api/httpClient';
 import { authService } from '../services/authService';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -67,7 +68,7 @@ export default function RedefinirSenhaScreen() {
       title="Defina uma nova senha."
       subtitle="Escolha uma senha forte, com pelo menos 8 caracteres, incluindo letra e número."
       mostrarVoltar
-      onVoltar={() => router.back()}
+      onVoltar={() => voltarOuIrPara(router)}
     >
       <AuthField
         label="Nova senha"

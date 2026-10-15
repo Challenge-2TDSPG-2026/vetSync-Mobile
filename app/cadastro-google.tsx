@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { voltarOuIrPara } from '../utils/navegacao';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -132,7 +133,10 @@ export default function CadastroGoogleScreen() {
       title="Quase lá."
       subtitle="Complete seu cadastro para começar a cuidar do seu pet."
       mostrarVoltar
-      onVoltar={() => router.back()}
+      onVoltar={() => {
+        googlePendente.limpar();
+        voltarOuIrPara(router);
+      }}
     >
       <View style={s.conta}>
         <AppIcon name="logo-google" set="Ionicons" size={20} color={theme.colors.primary} />

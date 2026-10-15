@@ -66,6 +66,12 @@ export default function VinculoClinicaScreen() {
     setScannerAberto(true);
   }
 
+  function voltarParaLogin() {
+    // Quem desiste no meio do cadastro com Google perde o token guardado em memória.
+    googlePendente.limpar();
+    router.replace('/login');
+  }
+
   async function sairParaOutraConta() {
     setSaindo(true);
     try {
@@ -147,14 +153,14 @@ export default function VinculoClinicaScreen() {
       ) : (
         <Pressable
           style={styles.voltarCadastro}
-          onPress={() => router.back()}
+          onPress={voltarParaLogin}
           disabled={enviando}
           accessibilityRole="button"
-          accessibilityLabel="Voltar ao cadastro"
+          accessibilityLabel="Voltar para o login"
         >
           <AppIcon name="arrow-back" set="Ionicons" size={18} color={theme.colors.primary} />
           <Text style={[styles.voltarCadastroTexto, modoSimples && stylesSimples.linkTexto]}>
-            Voltar ao cadastro
+            Voltar para o login
           </Text>
         </Pressable>
       )}

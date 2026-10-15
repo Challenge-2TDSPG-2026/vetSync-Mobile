@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Text, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, Link } from 'expo-router';
+import { voltarOuIrPara } from '../utils/navegacao';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api/httpClient';
 import { mensagemDeErro } from '../services/api/errorMessages';
@@ -174,7 +175,7 @@ export default function CadastroScreen() {
       title="Crie sua conta."
       subtitle="Acompanhe vacinas, consultas e o bem-estar do seu pet em um só lugar."
       mostrarVoltar
-      onVoltar={() => router.back()}
+      onVoltar={() => voltarOuIrPara(router)}
     >
       {clinica ? <Text style={{ color: theme.colors.primary, fontWeight: "700", marginBottom: 18 }}>Clínica confirmada: {clinica}</Text> : null}
       <AuthField

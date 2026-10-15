@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { AppIcon } from '../AppIcon';
+import { mostrarToast } from '../ui/Toast';
 import { useTheme } from '../../context/ThemeContext';
 import { GOOGLE_CLIENT_IDS, loginGoogleDisponivel } from '../../constants/googleAuth';
 import type { AppTheme } from '../../constants/theme';
@@ -17,15 +18,40 @@ type BotaoGoogleProps = {
   desabilitado?: boolean;
 };
 
-/** Só monta o botão (e o hook do Google) quando existe client ID para a plataforma atual. */
+/**
+* O botão aparece SEMPRE. Sem client ID para a plataforma, o hook do Google não pode ser montado
+* (ele lança erro), então usamos uma versão que só avisa o motivo ao ser tocada.
+*/
 export function BotaoGoogle(props: BotaoGoogleProps) {
-  if (!loginGoogleDisponivel()) return null;
+  if (!loginGoogleDisponivel()) return <BotaoGoogleIndisponivel desabilitado={props.desabilitado} />;
   return <BotaoGoogleAtivo {...props} />;
 }
 
+function BotaoGoogleIndisponivel({ desabilitado = false }: { desabilitado?: boolean }) {
+  useEffect(() => {
+    if (__DEV__) {
+      console.warn(
+        '[BotaoGoogle] Client ID do Google ausente para esta plataforma. ' +
+          'Defina EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (web), EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ou ' +
+          'EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID no .env e reinicie com "npx expo start -c".',
+      );
+    }
+  }, []);
+
+  function avisar() {
+    mostrarToast(
+      'erro',
+      'Login com Google indisponível',
+      __DEV__
+        ? 'Falta o client ID no .env (EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID). Reinicie com "npx expo start -c".'
+        : 'Entre com e-mail e senha por enquanto.',
+    );
+  }
+
+  return <BotaoGoogleVisual onPress={avisar} desabilitado={desabilitado} esmaecido />;
+}
+
 function BotaoGoogleAtivo({ onIdToken, onErro, desabilitado = false }: BotaoGoogleProps) {
-  const { theme } = useTheme();
-  const s = useMemo(() => createStyles(theme), [theme]);
   const ultimaRespostaTratada = useRef<unknown>(null);
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
@@ -52,7 +78,24 @@ function BotaoGoogleAtivo({ onIdToken, onErro, desabilitado = false }: BotaoGoog
     // 'cancel' e 'dismiss': a pessoa fechou a janela, não é erro.
   }, [response, onIdToken, onErro]);
 
-  const bloqueado = desabilitado || !request;
+  return (
+    <BotaoGoogleVisual
+      onPress={() => void promptAsync()}
+      desabilitado={desabilitado || !request}
+    />
+  );
+}
+
+type BotaoGoogleVisualProps = {
+  onPress: () => void;
+  desabilitado?: boolean;
+  /** Visual de "não configurado": continua tocável para explicar o motivo. */
+  esmaecido?: boolean;
+};
+
+function BotaoGoogleVisual({ onPress, desabilitado = false, esmaecido = false }: BotaoGoogleVisualProps) {
+  const { theme } = useTheme();
+  const s = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View>
@@ -62,12 +105,16 @@ function BotaoGoogleAtivo({ onIdToken, onErro, desabilitado = false }: BotaoGoog
         <View style={s.linha} />
       </View>
       <Pressable
-        style={({ pressed }) => [s.botao, pressed && s.botaoPressionado, bloqueado && { opacity: 0.65 }]}
-        onPress={() => void promptAsync()}
-        disabled={bloqueado}
+        style={({ pressed }) => [
+          s.botao,
+          pressed && s.botaoPressionado,
+          (desabilitado || esmaecido) && { opacity: 0.65 },
+        ]}
+        onPress={onPress}
+        disabled={desabilitado}
         accessibilityRole="button"
         accessibilityLabel="Continuar com o Google"
-        accessibilityState={{ disabled: bloqueado }}
+        accessibilityState={{ disabled: desabilitado }}
       >
         <AppIcon name="logo-google" set="Ionicons" size={19} color={theme.colors.text} />
         <Text style={s.botaoTexto}>Continuar com o Google</Text>
