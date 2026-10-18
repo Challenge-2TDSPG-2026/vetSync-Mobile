@@ -1,29 +1,95 @@
 {
-  "project_info": {
-    "project_number": "376247909118",
-    "project_id": "vetsync-76c0e",
-    "storage_bucket": "vetsync-76c0e.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:376247909118:android:334d8f77fb63b6d07903af",
-        "android_client_info": {
-          "package_name": "com.vetsync.app"
-        }
+  "expo": {
+    "name": "VetSync",
+    "slug": "vetsync",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": ["vetsync", "com.vetsync.app"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vetsync.app",
+      "infoPlist": {
+        "NSCalendarsUsageDescription": "Precisamos acessar seu calendário para adicionar os eventos de saúde do seu pet.",
+        "NSRemindersUsageDescription": "Precisamos acessar seus lembretes para agendar notificações dos eventos.",
+        "NSPhotoLibraryUsageDescription": "Precisamos acessar suas fotos para definir a foto do pet."
+      }
+    },
+    "android": {
+      "versionCode": 1,
+      "softwareKeyboardLayoutMode": "resize",
+      "googleServicesFile": "./config/google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#1A5276"
       },
-      "oauth_client": [],
-      "api_key": [
+      "package": "com.vetsync.app",
+      "permissions": [
+        "READ_CALENDAR",
+        "WRITE_CALENDAR",
+        "SCHEDULE_EXACT_ALARM",
+        "POST_NOTIFICATIONS",
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
         {
-          "current_key": "AIzaSyDSMaoNNGXHIGc0SXwPD9uwHYprLZuo-8I"
+          "backgroundColor": "#0e3326",
+          "image": "./assets/splash-ponte.png",
+          "imageWidth": 100,
+          "resizeMode": "contain"
         }
       ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Precisamos acessar seu calendário para adicionar os eventos de saúde do seu pet."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo.png",
+          "color": "#22a06b"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Precisamos acessar suas fotos para definir a foto do pet.",
+          "cameraPermission": "Usamos a câmera para ler o QR code da clínica e tirar a foto do seu pet."
+        }
+      ],
+      "expo-sharing",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Usamos a câmera para ler o QR code da clínica e tirar a foto do seu pet."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Usamos o Face ID para proteger o acesso à sua conta VetSync neste aparelho."
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "65c847ac-eddf-4dc7-9be0-446b1105c4c1"
       }
     }
-  ],
-  "configuration_version": "1"
+  }
 }

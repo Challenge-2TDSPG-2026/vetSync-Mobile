@@ -19,7 +19,7 @@
     "android": {
       "versionCode": 1,
       "softwareKeyboardLayoutMode": "resize",
-      "googleServicesFile": "./config/google-services.json",
+      "googleServicesFile": "google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#1A5276"
@@ -88,7 +88,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "214b44b5-9a00-4d9f-8928-7928046899aa"
+        "projectId": "65c847ac-eddf-4dc7-9be0-446b1105c4c1"
       }
     }
   }
