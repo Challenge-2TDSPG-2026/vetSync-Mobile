@@ -37,14 +37,20 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 - [x] Confirmar o projeto Firebase utilizado para a distribuição. **(novo 14/10)**
   - _Projeto vetsync-76c0e (já usado no Hosting). Falta habilitar o App Distribution nele._
-- [ ] Configurar o Firebase App Distribution no projeto `vetsync-76c0e` (Firebase Hosting já está configurado).
-- [ ] Gerar um APK/ build a partir do commit final.
-- [ ] Publicar o build no Firebase App Distribution.
-- [ ] Adicionar o e-mail institucional do professor como tester.
+- [x] Configurar o Firebase App Distribution no projeto `vetsync-76c0e` (Firebase Hosting já está configurado).
+  - _Aplicativo Android cadastrado com o package `com.vetsync.app`; projeto Expo/EAS vinculado à conta `thurbrito`._
+- [x] Gerar um APK/ build a partir do commit final.
+  - _Versão `0.1.0`, build `3`, perfil EAS `preview`, build concluído em 18/10/2026._
+- [x] Publicar o build no Firebase App Distribution.
+  - _Release `0tamplp3t5100`, publicada no app Android `1:376247909118:android:334d8f77fb63b6d07903af`._
+- [x] Adicionar o e-mail institucional do professor como tester.
+  - _Testers cadastrados e convidados: `proflucas.santos@fiap.com.br` e `pf2275@fiap.com.br`._
 - [ ] Confirmar o recebimento do convite pelo professor.
 - [ ] Testar a instalação e a execução do aplicativo publicado.
-- [ ] Registrar a versão publicada, o build e o hash do commit.
+- [x] Registrar a versão publicada, o build e o hash do commit.
+  - _Versão `0.1.0`, build `3`, commit publicado `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`._
 - [ ] Garantir que o código entregue no repositório seja o mesmo usado no APK publicado.
+  - _O APK foi gerado a partir do commit `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`; conferir e consolidar as alterações locais antes da entrega final._
 
 ### Notificações reais
 
