@@ -55,15 +55,16 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 ### Notificações reais
 
 - [ ] Confirmar com o backend o endpoint definitivo para registro do token.
-- [ ] Padronizar o endpoint no código e na documentação.
+- [x] Padronizar o endpoint no código e na documentação.
 - [ ] Confirmar que o backend está enviando notificações para o dispositivo.
-- [ ] Implementar o tratamento de toque na notificação.
-- [ ] Navegar para o evento, pet ou tela relacionada ao tocar na notificação.
+- [x] Implementar o tratamento de toque na notificação.
+- [x] Navegar para o evento, pet ou tela relacionada ao tocar na notificação.
 - [ ] Testar recebimento com o aplicativo em foreground.
 - [ ] Testar recebimento com o aplicativo em background.
 - [ ] Testar um cenário realista, como lembrete de vacina, consulta ou retorno.
 - [ ] Confirmar que a notificação tem impacto real no fluxo do aplicativo.
-- [ ] Avaliar a remoção do token no logout ou quando ele se tornar inválido.
+- [x] Avaliar a remoção do token no logout ou quando ele se tornar inválido.
+  - _O token registrado é removido pelo endpoint `DELETE /notificacoes/dispositivos/{token}` durante o logout. Se a remoção falhar, ele permanece armazenado para nova tentativa no próximo login._
 
 ## Prioridade 2 — Validação funcional completa
 
@@ -161,7 +162,7 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 - [ ] Atualizar a lista de funcionalidades finais.
 - [ ] Documentar como executar o projeto.
 - [ ] Documentar como executar os testes e validações.
-- [ ] Documentar o fluxo de notificações.
+- [x] Documentar o fluxo de notificações.
 - [ ] Documentar o processo de publicação.
 - [ ] Adicionar a versão e o hash do commit publicado.
 - [ ] Adicionar o link atualizado do vídeo final.

@@ -19,6 +19,7 @@ import {
   salvarSessaoAposLogin,
   SessaoProtegida,
 } from '../services/biometriaService';
+import { removerTokenPushRegistrado } from '../services/pushNotificationService';
 
 export type Perfil = 'TUTOR' | 'VETERINARIO' | 'ADMIN';
 
@@ -252,6 +253,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
+      try {
+        await removerTokenPushRegistrado();
+      } catch (erroToken) {
+        console.warn('Não foi possível remover o dispositivo das notificações.', erroToken);
+      }
       await authService.logout();
     } catch (erroLogout) {
       console.warn('Não foi possível invalidar a sessão no servidor.', erroLogout);

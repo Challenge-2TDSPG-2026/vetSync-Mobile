@@ -4,6 +4,7 @@ import type * as NotificationsModule from 'expo-notifications';
 import { api } from './api/httpClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../constants';
+import { notificacaoService } from './notificationService';
 
 let notifications: typeof NotificationsModule | null | undefined;
 let registroTokenEmAndamento: Promise<void> | null = null;
@@ -67,6 +68,18 @@ async function registrarTokenPushUmaVez(token: string): Promise<void> {
   } finally {
     registroTokenEmAndamento = null;
   }
+}
+
+/**
+ * Remove o token associado à sessão atual. O token permanece armazenado quando a API falha,
+ * permitindo uma nova tentativa no próximo login em vez de perder o vínculo remotamente.
+ */
+export async function removerTokenPushRegistrado(): Promise<void> {
+  const token = await AsyncStorage.getItem(STORAGE_KEYS.PUSH_TOKEN);
+  if (!token) return;
+
+  await notificacaoService.removerDispositivo(token);
+  await AsyncStorage.removeItem(STORAGE_KEYS.PUSH_TOKEN);
 }
 
 /**

@@ -145,6 +145,17 @@ Esta seção foi atualizada com base nos mapeamentos `@RequestMapping`, `@GetMap
 | `GET` | `/usuarios/preferencias/notificacoes` |
 | `PUT` | `/usuarios/preferencias/notificacoes` |
 
+O aplicativo envia o Expo Push Token para `/notificacoes/dispositivos` após a permissão de
+notificações ser concedida. Ao sair da conta, o token armazenado localmente é removido pelo
+endpoint `DELETE`, para que o usuário não continue recebendo notificações nessa sessão.
+
+Para notificações push que devem abrir uma tela, o payload `data` deve conter `tipo` e, quando
+aplicável, `referenciaTipo` igual a `EVENTO` e `referenciaId` com o ID numérico do evento.
+Os tipos de evento suportados pelo aplicativo são `EVENTO_CONFIRMADO`, `EVENTO_RECUSADO` e
+`EVENTO_PROXIMO`. `VAGA_DISPONIVEL` pode incluir `petId`, `servicoId`, `data` e `hora`.
+O aplicativo não aceita uma rota arbitrária no payload: a tela é escolhida a partir desses
+campos conhecidos.
+
 ## Pets, responsáveis e atividades
 | Método | Endpoint |
 |---|---|
