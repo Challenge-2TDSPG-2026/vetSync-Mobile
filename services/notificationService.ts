@@ -31,7 +31,7 @@ export const notificacaoService = {
   async listar(lida?: boolean): Promise<Notificacao[]> {
     const query =
       lida === undefined
-        ? ''
+        ? '?page=0&size=50'
         : `?lida=${lida}&page=0&size=50`;
 
     const resposta = await api.get<
@@ -74,7 +74,7 @@ export const notificacaoService = {
 };
 
 export async function listarNotificacoes(): Promise<Notificacao[]> {
-  return notificacaoService.listar(false);
+  return notificacaoService.listar();
 }
 
 export function marcarNotificacaoComoLida(
