@@ -202,7 +202,12 @@ describe('calendarService', () => {
         content: expect.objectContaining({
           title: 'Evento em 1 dia',
           body: 'Vacina V10 — Luna',
-          data: { eventoId: eventoFuturo.id },
+          data: {
+            tipo: 'EVENTO_PROXIMO',
+            referenciaTipo: 'EVENTO',
+            referenciaId: String(eventoFuturo.id),
+            petId: String(petLuna.id),
+          },
         }),
       }));
       expect(ids).toEqual(['lembrete-1-dia']);

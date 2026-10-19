@@ -114,7 +114,12 @@ export async function agendarLembretes(
       content: {
         title: dias === 0 ? 'Evento hoje' : `Evento em ${dias} dia${dias > 1 ? 's' : ''}`,
         body: `${evento.nomeTipoEvento}${pet ? ` — ${pet.nome}` : ''}`,
-        data: { eventoId: evento.id },
+        data: {
+          tipo: 'EVENTO_PROXIMO',
+          referenciaTipo: 'EVENTO',
+          referenciaId: String(evento.id),
+          ...(pet ? { petId: String(pet.id) } : {}),
+        },
       },
       trigger: { type: notificacoes.SchedulableTriggerInputTypes.DATE, date: disparo },
     });
