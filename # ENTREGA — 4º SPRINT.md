@@ -54,11 +54,13 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 ### Notificações reais
 
-- [ ] Confirmar com o backend o endpoint definitivo para registro do token.
+- [x] Confirmar com o backend o endpoint definitivo para registro do token.
+  - _Confirmado no controller Spring Boot: `POST /notificacoes/dispositivos`, usado pelo app para registrar ou reativar o token do tutor._
 - [x] Padronizar o endpoint no código e na documentação.
 - [x] Corrigir a lista de notificações para exibir itens lidos e não lidos.
   - _A tela consulta a primeira página sem filtro de leitura (`GET /notificacoes?page=0&size=50`), preserva os filtros opcionais e mantém as ações de marcar como lida._
-- [ ] Confirmar que o backend está enviando notificações para o dispositivo.
+- [x] Confirmar que o backend está enviando notificações para o dispositivo.
+  - _O backend cria a notificação, envia o payload para a API do Expo após o commit da transação e desativa tokens retornados como inválidos. A entrega efetiva no aparelho ainda depende do teste manual._
 - [x] Implementar o tratamento de toque na notificação.
 - [x] Navegar para o evento, pet ou tela relacionada ao tocar na notificação.
 - [ ] Testar recebimento com o aplicativo em foreground.
