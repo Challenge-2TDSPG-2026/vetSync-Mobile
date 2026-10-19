@@ -1,7 +1,7 @@
 # ClyvoVet (VetSync) — Mobile Application
 
 **FIAP Challenge 2026 — 2º Ano ADS — 4º Semestre**
-**Disciplina: Mobile Application Development — Entrega Sprint 3**
+**Disciplina: Mobile Application Development — Entrega Sprint 4**
 
 Aplicativo mobile em React Native (Expo Router) para o desafio proposto pela **CLYVO VET**, com experiências completas de **Tutor** e **Veterinário** integradas a um backend real em Spring Boot.
 
@@ -9,7 +9,7 @@ Aplicativo mobile em React Native (Expo Router) para o desafio proposto pela **C
 
 ## Vídeo de Demonstração
 
-> **Link: https://youtu.be/LDCI2De3tXw**
+> **Link: **
 
 O vídeo demonstra: navegação entre telas, autenticação (login de tutor e veterinário), integração com a API backend (agendamento, conclusão e cancelamento de eventos, CRUD de pets) e o app rodando em dispositivo/emulador real.
 
@@ -24,7 +24,7 @@ A **VetSync** resolve isso unificando, em um único aplicativo, a jornada de sa�
 - O **tutor** cadastra pets, agenda e acompanha eventos de saúde (vacinas, consultas, vermífugos, check-ups), consulta a carteira de vacinação digital e participa de um programa de fidelidade com pontos e recompensas.
 - O **veterinário** enxerga sua agenda, atende pacientes, conclui ou cancela consultas, define horários de disponibilidade/bloqueios e valida resgates de recompensas.
 
-Diferente do protótipo da Sprint 1 e 2 (dados mockados em `AsyncStorage`), a Sprint 3 substitui toda a persistência local por **chamadas HTTP reais** a uma API Spring Boot, com autenticação por sessão, estados de carregamento e atualização automática de dados via TanStack Query.
+Diferente do protótipo das sprints anteriores (dados mockados em `AsyncStorage`), a Sprint 4 mantém a persistência remota por **chamadas HTTP reais** a uma API Spring Boot e acrescenta publicação nativa, notificações push, lembretes locais, tela de versionamento e distribuição por Firebase App Distribution.
 
 ---
 
@@ -44,6 +44,7 @@ Diferente do protótipo da Sprint 1 e 2 (dados mockados em `AsyncStorage`), a Sp
 - **Acesso compartilhado** — convite de cuidadores por e-mail com permissão de leitura ou edição por pet, revogação de acesso.
 - **Modo simples** — modo de acessibilidade com textos maiores e botões ampliados.
 - **Recuperação de senha** — fluxo de 3 passos (e-mail → código de verificação → nova senha).
+- **Notificações e lembretes** — token push registrado no backend, avisos na tela, lembretes locais e abertura do evento relacionado ao tocar no aviso.
 
 ### Área do Veterinário
 - **Painel** — agendados, atendimentos de hoje, alertas de resgates pendentes.
@@ -52,6 +53,17 @@ Diferente do protótipo da Sprint 1 e 2 (dados mockados em `AsyncStorage`), a Sp
 - **Conclusão de consulta** — observações clínicas e custo.
 - **Disponibilidade** — horários fixos de atendimento por dia da semana e bloqueios de agenda (férias, imprevistos).
 - **Resgates** — validação (aprovação/negação) de resgates de recompensa solicitados por tutores.
+
+### Publicação da Sprint 4
+
+- Firebase App Distribution: projeto `vetsync-76c0e`, aplicativo Android `com.vetsync.app`.
+- APK publicado: versão `0.1.0`, build `3`.
+- Commit usado no APK publicado: `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`.
+- Site complementar: https://vetsync-76c0e.web.app
+
+O código só deve ser publicado novamente depois de definir `EXPO_PUBLIC_COMMIT_HASH`
+com o SHA completo do commit final. O valor exibido em **Sobre o App** deve ser
+igual ao commit usado no build distribuído.
 
 ---
 
@@ -118,6 +130,24 @@ storage/          # petStorage.ts — únicas chaves ainda locais (pet ativo, on
 - Sessão persistida em `AsyncStorage` e restaurada automaticamente na abertura do app.
 - Redirecionamento automático por perfil e bloqueio de rotas internas para usuários não autenticados, controlado em `app/_layout.tsx`.
 - Logout limpa sessão local, cache do TanStack Query e notifica o backend.
+
+### Notificações
+
+Depois que o usuário concede a permissão nativa, o aplicativo obtém um Expo Push
+Token e o registra em `POST /notificacoes/dispositivos`, junto com a plataforma e
+o fuso horário. Ao sair da conta, o token é removido por
+`DELETE /notificacoes/dispositivos/{token}`. Se a remoção falhar, ele permanece
+localmente para uma nova tentativa no próximo login.
+
+O payload push deve enviar em `data` um `tipo`. Para abrir um evento, use
+`referenciaTipo: "EVENTO"` e o `referenciaId` numérico. Os tipos de evento
+suportados são `EVENTO_CONFIRMADO`, `EVENTO_RECUSADO` e `EVENTO_PROXIMO`.
+`VAGA_DISPONIVEL` pode incluir `petId`, `servicoId`, `data` e `hora`. O app
+ignora rotas livres recebidas no payload e navega apenas para destinos conhecidos.
+
+Para lembretes locais, a tela de criação do evento solicita a permissão de
+notificações e agenda os avisos selecionados para 7 dias ou 1 dia antes, às 9h.
+A exclusão do evento cancela os identificadores dos lembretes associados.
 
 ---
 
@@ -221,7 +251,7 @@ npm run format        # formata os arquivos de configuração
 
 ---
 
-## Atendimento aos Requisitos da Sprint 3
+## Atendimento aos Requisitos da Sprint 4
 
 | Requisito | Status |
 |---|---|
@@ -234,6 +264,9 @@ npm run format        # formata os arquivos de configuração
 | Proteção de rotas por perfil | ✅ |
 | Logout funcional | ✅ |
 | Arquitetura com separação de responsabilidades | ✅ |
+| Notificações push e lembretes locais | ✅ (integração do cliente; envio real depende do backend/dispositivo) |
+| Tela de versão, build e commit | ✅ |
+| Publicação Android no Firebase App Distribution | ✅ (build 3) |
 
 ---
 

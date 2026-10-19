@@ -1,6 +1,6 @@
 # Checklist da Entrega — 4º Sprint
 
-> VetSync Mobile · Challenge 2026 · atualizado em 15/10/2026 · branch `main`, commit `1e0e044`
+> VetSync Mobile · Challenge 2026 · atualizado em 19/10/2026 · branch `main`
 
 Legenda: `[x]` feito · `[ ]` pendente · **(novo 14/10)** = concluído na atualização anterior.
 
@@ -20,7 +20,7 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 - [ ] Testar login/ações no site publicado e liberar CORS no backend Java (Render) para https://vetsync-76c0e.web.app e https://vetsync-76c0e.firebaseapp.com.
 - [ ] Cadastrar EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (Secrets do GitHub) e autorizar a URL do site no cliente OAuth do Google.
-- [ ] Adicionar um workflow específico de lint ao CI; o workflow de Hosting atual valida build/deploy, mas não executa `npm run lint`.
+- [x] Confirmar lint no CI; `.github/workflows/ci.yml` executa `npm run lint` junto com typecheck, testes, formatação e build.
 
 ## Prioridade 1 — Itens críticos da avaliação
 
@@ -142,32 +142,37 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 - [x] Executar `npm run build`. **(novo 14/10)**
   - _expo export -p web gera 46 arquivos; deploy no Firebase Hosting verde._
 - [x] Corrigir os erros de lint encontrados sem alterar funcionalidades não relacionadas.
-- [ ] Reexecutar todas as validações após as correções.
+- [x] Reexecutar todas as validações após as correções.
+  - _Typecheck, lint, build web e suíte completa executados em 19/10/2026. Resultado: 43 suítes / 287 testes passando, typecheck sem erros, build web concluído e lint sem erros (6 avisos preexistentes)._
 
 ### Build e ambiente
 
 - [ ] Validar o aplicativo em build nativo, não apenas no Expo Go.
-- [ ] Confirmar as permissões de calendário, câmera, fotos e notificações.
-- [ ] Confirmar o `projectId` do Expo usado no build.
-- [ ] Confirmar o `version` e o `versionCode` finais.
+- [x] Confirmar as permissões de calendário, câmera, fotos e notificações.
+  - _Permissões e descrições configuradas em `app.json`; o teste de concessão efetiva ainda depende de build nativo/dispositivo._
+- [x] Confirmar o `projectId` do Expo usado no build.
+  - _Project ID `65c847ac-eddf-4dc7-9be0-446b1105c4c1`, configurado em `app.json`._
+- [x] Confirmar o `version` e o `versionCode` finais.
+  - _Versão `0.1.0` e `versionCode` `3`, alinhados ao APK publicado._
 - [ ] Confirmar que as variáveis de ambiente necessárias estão configuradas.
   - _Pendente: EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID no GitHub Secrets (login Google na web). EXPO_PUBLIC_API_BASE_URL tem fallback no código._
-- [ ] Guardar os dados do build publicado para referência da equipe.
+- [x] Guardar os dados do build publicado para referência da equipe.
+  - _Versão `0.1.0`, build `3`, commit `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`, Firebase App Distribution no projeto `vetsync-76c0e`._
 
 ## Prioridade 4 — Documentação e apresentação
 
 ### README
 
-- [ ] Atualizar o título e a descrição da Sprint 3 para a Sprint 4.
-- [ ] Atualizar a lista de funcionalidades finais.
-- [ ] Documentar como executar o projeto.
-- [ ] Documentar como executar os testes e validações.
+- [x] Atualizar o título e a descrição da Sprint 3 para a Sprint 4.
+- [x] Atualizar a lista de funcionalidades finais.
+- [x] Documentar como executar o projeto.
+- [x] Documentar como executar os testes e validações.
 - [x] Documentar o fluxo de notificações.
-- [ ] Documentar o processo de publicação.
-- [ ] Adicionar a versão e o hash do commit publicado.
+- [x] Documentar o processo de publicação.
+- [x] Adicionar a versão e o hash do commit publicado.
 - [ ] Adicionar o link atualizado do vídeo final.
-- [ ] Adicionar o link ou instruções de acesso ao Firebase App Distribution.
-  - _Ainda sem App Distribution. O link do site (Hosting) pode entrar no README como complemento._
+- [x] Adicionar o link ou instruções de acesso ao Firebase App Distribution.
+  - _Projeto Firebase `vetsync-76c0e`, app Android `com.vetsync.app`, versão `0.1.0`, build `3`; o convite é acessado pelo e-mail do tester ou pelo Firebase App Distribution._
 
 ### Vídeo final
 

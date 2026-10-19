@@ -17,7 +17,7 @@
       }
     },
     "android": {
-      "versionCode": 1,
+      "versionCode": 3,
       "softwareKeyboardLayoutMode": "resize",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
@@ -26,8 +26,6 @@
       },
       "package": "com.vetsync.app",
       "permissions": [
-        "READ_CALENDAR",
-        "WRITE_CALENDAR",
         "SCHEDULE_EXACT_ALARM",
         "POST_NOTIFICATIONS",
         "android.permission.READ_CALENDAR",
