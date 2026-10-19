@@ -121,7 +121,8 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 ### Arquitetura e organização
 
-- [ ] Confirmar que as telas não fazem chamadas HTTP diretamente.
+- [x] Confirmar que as telas não fazem chamadas HTTP diretamente.
+  - _A tela `minha-clinica` usa `clinicaService` para carregar perfil, serviços e logo autenticada._
 - [ ] Confirmar que regras reutilizáveis estão em hooks ou serviços.
 - [ ] Remover duplicações relevantes entre telas.
 - [ ] Revisar componentes ou ações marcados como “Em breve”.
