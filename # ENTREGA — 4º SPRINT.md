@@ -56,6 +56,8 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 - [ ] Confirmar com o backend o endpoint definitivo para registro do token.
 - [x] Padronizar o endpoint no código e na documentação.
+- [x] Corrigir a lista de notificações para exibir itens lidos e não lidos.
+  - _A tela consulta a primeira página sem filtro de leitura (`GET /notificacoes?page=0&size=50`), preserva os filtros opcionais e mantém as ações de marcar como lida._
 - [ ] Confirmar que o backend está enviando notificações para o dispositivo.
 - [x] Implementar o tratamento de toque na notificação.
 - [x] Navegar para o evento, pet ou tela relacionada ao tocar na notificação.
@@ -88,7 +90,8 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 - [ ] Validar responsáveis e compartilhamento de acesso.
 - [ ] Validar recompensas e resgates.
 - [ ] Validar assistente.
-- [ ] Validar tela de notificações.
+- [ ] Validar tela de notificações manualmente em dispositivo/build nativo.
+  - _A correção da lista foi coberta por testes automatizados; ainda falta validar a tela com a API e o aplicativo executando em dispositivo._
 - [ ] Validar biometria.
 - [ ] Validar modo simples.
 - [ ] Validar tema claro e escuro.
