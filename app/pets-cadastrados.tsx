@@ -13,6 +13,7 @@ import { confirmar } from '../utils/alert';
 import { mostrarToast } from '../components/ui/Toast';
 import type { AppTheme } from '../constants/theme';
 import type { Pet } from '../types';
+import { IllustratedPageHero } from '../components/ui/IllustratedPageHero';
 
 function formatarData(data: string): string {
   const apenasData = data.slice(0, 10);
@@ -48,22 +49,16 @@ export default function PetsCadastradosScreen() {
 
   return (
     <View style={s.container}>
-      <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
-        <Pressable
-          style={s.backButton}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Voltar para configurações"
-        >
-          <Ionicons name="arrow-back" size={23} color={theme.components.header.icon} />
-        </Pressable>
-        <View style={s.headerCopy}>
-          <Text style={[s.title, modoSimples && sSimples.title]}>Pets cadastrados</Text>
-          <Text style={[s.subtitle, modoSimples && sSimples.subtitle]}>
-            Dados de identificação dos seus pets.
-          </Text>
-        </View>
-      </View>
+      <IllustratedPageHero
+        image={require('../assets/images/registeredPets.png')}
+        title="Pets cadastrados"
+        subtitle="Consulte a identificação dos seus pets e mantenha suas fotos atualizadas."
+        icon="paw-outline"
+        accessibilityLabel="Veterinária e tutor cuidando de um cachorro e um gato"
+        simple={modoSimples}
+        onBack={() => router.back()}
+        backLabel="Voltar para configurações"
+      />
 
       <ScrollView
         contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
