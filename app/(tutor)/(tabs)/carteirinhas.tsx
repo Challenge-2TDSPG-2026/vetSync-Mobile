@@ -16,6 +16,7 @@ import { CarteiraModal } from '../../../components/carteira/CarteiraModal';
 import { BotaoCarteiraPdf } from '../../../components/carteira/BotaoCarteiraPdf';
 import { AppIcon } from '../../../components/AppIcon';
 import { DicaTela } from '../../../components/ui/DicaTela';
+import { IllustratedPageHero } from '../../../components/ui/IllustratedPageHero';
 import { formatarDataEvento, parseDataEvento, statusExibicao } from '../../../utils/eventoStatus';
 import type { Pet } from '../../../types';
 import type { AppTheme } from '../../../constants/theme';
@@ -62,6 +63,14 @@ export default function CarteirinhasScreen() {
   return (
     <>
       <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <IllustratedPageHero
+          image={require('../../../assets/images/wallet.png')}
+          title={petAtivo ? `Carteirinha de ${petAtivo.nome}` : 'Carteira de vacinação'}
+          subtitle="Acompanhe vacinas registradas, próximas doses e a proteção do seu pet."
+          icon="card-outline"
+          accessibilityLabel="Veterinária cuidando de um pet na clínica"
+          simple={modoSimples}
+        />
         <View style={s.cabecalho}>
           <Text style={[s.descricao, modoSimples && sSimples.descricao]}>
             Acesse os registros de vacina e compartilhe a carteira do seu pet quando precisar.
