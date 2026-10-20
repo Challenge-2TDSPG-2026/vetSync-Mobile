@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { usePet } from '../../../context/PetContext';
 import { useAccessibility } from '../../../context/AccessibilityContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -21,6 +20,7 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import { mostrarToast } from '../../../components/ui/Toast';
 import { DicaTela } from '../../../components/ui/DicaTela';
+import { IllustratedPageHero } from '../../../components/ui/IllustratedPageHero';
 import { mensagemDeErro } from '../../../services/api/errorMessages';
 import { confirmar } from '../../../utils/alert';
 import { META_CONSULTAS_RECOMPENSA } from '../../../constants/gamification';
@@ -97,7 +97,14 @@ export default function RecompensasScreen() {
       contentContainerStyle={s.content}
       refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.loyalty.pageBackground} />}
     >
-
+      <IllustratedPageHero
+        image={require('../../../assets/images/rewards.png')}
+        title="Programa de fidelidade"
+        subtitle={`Acumule pontos cuidando de ${petAtivo?.nome ?? 'seu pet'} e troque por benefícios na clínica.`}
+        icon="gift-outline"
+        accessibilityLabel="Tutor e veterinária comemorando os cuidados de um pet"
+        simple={modoSimples}
+      />
       <PetSwitcher />
 
       {dicaVisivel && (
@@ -108,21 +115,6 @@ export default function RecompensasScreen() {
           onFechar={fecharDica}
           simples={modoSimples}
         />
-      )}
-
-      {/* Banner — some no modo simples */}
-      {!modoSimples && (
-        <LinearGradient colors={[theme.pages.loyalty.heroCard.background, theme.pages.loyalty.heroCard.backgroundAccent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.banner}>
-          <AppIcon name="paw" set="MaterialCommunityIcons" size={176} color="rgba(255,255,255,0.06)" style={s.bannerPaw} />
-          <View style={s.bannerIconWrap}>
-            <AppIcon name="gift-outline" set="Ionicons" size={30} color={theme.pages.loyalty.heroCard.title} />
-          </View>
-          <Text style={s.bannerKicker}>CUIDADO QUE RECOMPENSA</Text>
-          <Text style={s.bannerTitulo}>Programa de Fidelidade</Text>
-          <Text style={s.bannerSub}>
-            Acumule pontos em cada atendimento e resgate benefícios exclusivos para {petAtivo?.nome ?? 'seu pet'}.
-          </Text>
-        </LinearGradient>
       )}
 
       <View style={[s.nivelCard, modoSimples && sSimples.nivelCard]}>
