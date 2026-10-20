@@ -45,8 +45,8 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
   - _Release `0tamplp3t5100`, publicada no app Android `1:376247909118:android:334d8f77fb63b6d07903af`._
 - [x] Adicionar o e-mail institucional do professor como tester.
   - _Testers cadastrados e convidados: `proflucas.santos@fiap.com.br` e `pf2275@fiap.com.br`._
-- [ ] Confirmar o recebimento do convite pelo professor.
-- [ ] Testar a instalação e a execução do aplicativo publicado.
+- [x] Confirmar o recebimento do convite pelo professor.
+- [x] Testar a instalação e a execução do aplicativo publicado.
 - [x] Registrar a versão publicada, o build e o hash do commit.
   - _Versão `0.1.0`, build `3`, commit publicado `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`._
 - [ ] Garantir que o código entregue no repositório seja o mesmo usado no APK publicado.
@@ -130,7 +130,8 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
   - _A tela `minha-clinica` usa `clinicaService` para carregar perfil, serviços e logo autenticada._
 - [ ] Confirmar que regras reutilizáveis estão em hooks ou serviços.
 - [ ] Remover duplicações relevantes entre telas.
-- [ ] Revisar componentes ou ações marcados como “Em breve”.
+- [x] Revisar estados vazios e opções sem ação.
+  - _Catálogo vazio agora permite atualizar; falhas de carregamento têm nova tentativa; atalhos exigem uma ação conectada e datas ausentes são comunicadas com clareza._
 - [ ] Padronizar nomes e responsabilidades dos serviços.
 - [ ] Padronizar endpoints e exemplos da documentação.
 - [ ] Revisar mensagens de erro e evitar falhas silenciosas.
@@ -161,7 +162,7 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 - [x] Confirmar o `version` e o `versionCode` finais.
   - _Versão `0.1.0` e `versionCode` `3`, alinhados ao APK publicado._
 - [ ] Confirmar que as variáveis de ambiente necessárias estão configuradas.
-  - _Pendente: EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID no GitHub Secrets (login Google na web). EXPO_PUBLIC_API_BASE_URL tem fallback no código._
+  - _EXPO_PUBLIC_API_BASE_URL aponta para a API Azure no `.env`, `.env.example`, fallback do app e workflow do Hosting. Pendente: EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID no GitHub Secret e URLs autorizadas no cliente OAuth._
 - [x] Guardar os dados do build publicado para referência da equipe.
   - _Versão `0.1.0`, build `3`, commit `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`, Firebase App Distribution no projeto `vetsync-76c0e`._
 
