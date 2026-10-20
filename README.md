@@ -9,7 +9,7 @@ Aplicativo mobile em React Native (Expo Router) para o desafio proposto pela **C
 
 ## Vídeo de Demonstração
 
-> **Link: **
+> Vídeo ainda não publicado.
 
 O vídeo demonstra: navegação entre telas, autenticação (login de tutor e veterinário), integração com a API backend (agendamento, conclusão e cancelamento de eventos, CRUD de pets) e o app rodando em dispositivo/emulador real.
 
@@ -72,13 +72,14 @@ igual ao commit usado no build distribuído.
 | Tecnologia | Versão | Uso |
 |---|---|---|
 | React Native | 0.86.3 | Framework mobile |
-| Expo | ~57.0.25 | Plataforma e toolchain |
-| Expo Router | ~57.0.23 | Navegação baseada em arquivos, com grupos `(tutor)` e `(vet)` |
+| Expo | ~57.0.28 | Plataforma e toolchain |
+| Expo Router | ~57.0.26 | Navegação baseada em arquivos, com grupos `(tutor)` e `(vet)` |
 | TypeScript | ~6.0.3 | Tipagem estática |
 | TanStack Query | ^5.90.5 | Cache, requisições HTTP, invalidação e refetch automático |
-| AsyncStorage | 2.2.0 | Persistência local de sessão e preferências |
+| AsyncStorage | 2.2.0 | Preferências, sessão web e cache offline limitado |
+| Expo SecureStore | ~57.0.4 | Persistência segura da sessão nos apps nativos |
 | @expo/vector-icons | ^15.0.3 | Ícones (Ionicons, MaterialCommunityIcons) |
-| expo-calendar / expo-notifications | ~15.0.8 / ~0.32.17 | Integração com calendário nativo e lembretes locais |
+| expo-calendar / expo-notifications | ~57.0.5 / ~57.0.22 | Integração com calendário nativo e lembretes locais |
 | React Navigation | ^7.4.1 | Base de navegação sob o Expo Router |
 
 Backend consumido: **VetSync Java** (Spring Boot + Flyway + Oracle), repositório separado.
