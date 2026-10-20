@@ -130,7 +130,7 @@ export const veterinarioService = {
   },
 
   async listarAuditoria(entidade: string, entidadeId: string): Promise<RegistroAuditoria[]> {
-    const resposta = await api.get<Array<{
+    const resposta = await api.get<{
       id: number;
       acao: string;
       ator: string;
@@ -138,7 +138,7 @@ export const veterinarioService = {
       valorAnterior?: string | null;
       valorNovo?: string | null;
       ocorridoEm: string;
-    }>>(
+    }[]>(
       `/auditoria?entidade=${encodeURIComponent(entidade)}&entidadeId=${encodeURIComponent(entidadeId)}`
     );
     return resposta.map(item => ({

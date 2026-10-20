@@ -157,6 +157,7 @@ function RootNavigator() {
     autenticado,
     ehTutor,
     ehVeterinario,
+    sessao?.temVinculoAtivo,
     onboardingConcluido,
     carregando,
     segments,

@@ -1,4 +1,4 @@
-﻿import { api } from './api/httpClient';
+import { api } from './api/httpClient';
 import type { TipoEvento, Veterinario, Pet } from '../types';
 import { ESPECIE_APP_PARA_API } from './petService';
 

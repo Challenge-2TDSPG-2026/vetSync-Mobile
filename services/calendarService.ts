@@ -10,6 +10,8 @@ function obterNotificacoes(): typeof NotificationsModule | null {
   if (notifications !== undefined) return notifications;
 
   try {
+    // Carregamento tardio: o módulo pode não estar disponível em alguns ambientes Expo Go.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     notifications = require('expo-notifications') as typeof NotificationsModule;
     notifications.setNotificationHandler({
       handleNotification: async () => ({

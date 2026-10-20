@@ -42,7 +42,7 @@ export default function AgendarServicoScreen() {
     clinicaService.listarServicos().then(lista => { setServicos(lista); setServico(lista.find(item => String(item.id) === params.servicoId) ?? encontrarServicoPorNome(lista, params.servico) ?? lista[0] ?? null); })
       .catch(e => mostrarToast('erro', 'Serviços indisponíveis', mensagemDeErro(e, 'Tente novamente.')))
       .finally(() => setCarregando(false));
-  }, []);
+  }, [params.servico, params.servicoId]);
 
   useEffect(() => {
     if (!chaveSlots || idServico === undefined) return;
