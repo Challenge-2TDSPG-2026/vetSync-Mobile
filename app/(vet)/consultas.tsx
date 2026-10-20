@@ -19,6 +19,8 @@ import type { Evento } from '../../types';
 import type { AppTheme } from '../../constants/theme';
 import { VetPageIntro } from '../../components/vet/VetPageIntro';
 
+type FiltroAgenda = 'todas' | 'hoje' | 'proximas' | 'pendentes' | 'confirmadas';
+
 export default function ConsultasScreen() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -57,7 +59,21 @@ export default function ConsultasScreen() {
     }
   }
 
-  const listaOrdenada = [...eventosAgendados].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+  const [filtroAgenda, setFiltroAgenda] = useState<FiltroAgenda>('todas');
+  const listaOrdenada = useMemo(() => {
+    const inicioHoje = new Date(); inicioHoje.setHours(0, 0, 0, 0);
+    const inicioAmanha = new Date(inicioHoje); inicioAmanha.setDate(inicioAmanha.getDate() + 1);
+    return [...eventosAgendados]
+      .filter(item => {
+        const data = new Date(item.data);
+        if (filtroAgenda === 'hoje') return data >= inicioHoje && data < inicioAmanha;
+        if (filtroAgenda === 'proximas') return data >= inicioAmanha;
+        if (filtroAgenda === 'pendentes') return ehPendenteDeConfirmacao(item);
+        if (filtroAgenda === 'confirmadas') return !ehPendenteDeConfirmacao(item);
+        return true;
+      })
+      .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+  }, [eventosAgendados, filtroAgenda]);
 
   return (
     <View style={s.container}>
@@ -75,13 +91,23 @@ export default function ConsultasScreen() {
           />
         )}
 
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filtros} accessibilityLabel="Filtros da agenda">
+          {([
+            ['todas', 'Todas'], ['hoje', 'Hoje'], ['proximas', 'Próximas'], ['pendentes', 'Aguardando'], ['confirmadas', 'Confirmadas'],
+          ] as const).map(([valor, label]) => (
+            <Pressable key={valor} onPress={() => setFiltroAgenda(valor)} style={[s.filtro, filtroAgenda === valor && s.filtroAtivo]} accessibilityRole="button" accessibilityState={{ selected: filtroAgenda === valor }}>
+              <Text style={[s.filtroTexto, filtroAgenda === valor && s.filtroTextoAtivo]}>{label}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
         {carregando ? (
           <SkeletonList linhas={4} />
         ) : listaOrdenada.length === 0 ? (
           <EmptyState
             icon="checkmark-done-outline"
-            title="Nada por aqui"
-            subtitle="Nenhuma consulta agendada no momento."
+            title="Nenhuma consulta neste filtro"
+            subtitle="Escolha outro período ou situação para ver os atendimentos."
             accentColor={theme.colors.primary}
           />
         ) : (
@@ -183,6 +209,11 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
 
   content: { padding: 20, paddingBottom: 44 },
+  filtros: { gap: 8, paddingBottom: 16 },
+  filtro: { borderRadius: 20, paddingHorizontal: 13, paddingVertical: 8, borderWidth: 1, borderColor: theme.pages.vetAppointments.border, backgroundColor: theme.pages.vetAppointments.card },
+  filtroAtivo: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  filtroTexto: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '700' },
+  filtroTextoAtivo: { color: theme.colors.onPrimary },
   empty: { alignItems: 'center', paddingVertical: 56 },
   emptyTitle: { fontSize: 15, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
   emptySub: { fontSize: 13, color: theme.colors.textSecondary, textAlign: 'center' },

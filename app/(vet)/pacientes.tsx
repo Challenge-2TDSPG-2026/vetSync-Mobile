@@ -10,6 +10,7 @@ import type { AppTheme } from '../../constants/theme';
 import { VetPageIntro } from '../../components/vet/VetPageIntro';
 
 type Filtro = 'todos' | 'pendentes' | 'atendidos';
+type Ordenacao = 'recentes' | 'nome' | 'pendencias';
 
 export default function VetPacientesScreen() {
   const router = useRouter();
@@ -19,19 +20,28 @@ export default function VetPacientesScreen() {
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState<Filtro>('todos');
+  const [ordenacao, setOrdenacao] = useState<Ordenacao>('recentes');
 
   const pacientesFiltrados = useMemo(() => {
     const termo = busca.trim().toLocaleLowerCase();
-    return pacientes.filter(({ pet, eventos }) => {
+    const filtrados = pacientes.filter(({ pet, eventos }) => {
       const correspondeBusca = !termo
         || pet.nome.toLocaleLowerCase().includes(termo)
         || pet.raca.toLocaleLowerCase().includes(termo)
-        || pet.tutor?.nome?.toLocaleLowerCase().includes(termo);
+        || pet.especie.toLocaleLowerCase().includes(termo)
+        || pet.tutor?.nome?.toLocaleLowerCase().includes(termo)
+        || (!!termo.replace(/\D/g, '') && !!pet.tutor?.telefone?.replace(/\D/g, '').includes(termo.replace(/\D/g, '')));
       const temPendente = eventos.some(evento => evento.status === 'AGENDADO');
       const correspondeFiltro = filtro === 'todos' || (filtro === 'pendentes' && temPendente) || (filtro === 'atendidos' && !temPendente);
       return correspondeBusca && correspondeFiltro;
     });
-  }, [busca, filtro, pacientes]);
+    return filtrados.sort((a, b) => {
+      if (ordenacao === 'nome') return a.pet.nome.localeCompare(b.pet.nome, 'pt-BR');
+      if (ordenacao === 'pendencias') return b.eventos.filter(e => e.status === 'AGENDADO').length - a.eventos.filter(e => e.status === 'AGENDADO').length;
+      const maisRecente = (eventos: typeof a.eventos) => eventos.reduce((max, evento) => Math.max(max, new Date(evento.data).getTime()), 0);
+      return maisRecente(b.eventos) - maisRecente(a.eventos);
+    });
+  }, [busca, filtro, ordenacao, pacientes]);
 
   if (carregando) {
     return <View style={s.loading}><ActivityIndicator color={theme.colors.primary} /><Text style={s.loadingText}>Carregando pacientes...</Text></View>;
@@ -49,7 +59,7 @@ export default function VetPacientesScreen() {
         <TextInput
           value={busca}
           onChangeText={setBusca}
-          placeholder="Buscar paciente ou tutor"
+          placeholder="Buscar pet, tutor, espécie ou telefone"
           placeholderTextColor={theme.colors.textMuted}
           style={s.searchInput}
           accessibilityLabel="Buscar pacientes"
@@ -68,6 +78,14 @@ export default function VetPacientesScreen() {
         ))}
       </View>
 
+      <View style={s.sortRow}>
+        <Text style={s.count}>Ordenar:</Text>
+        {([['recentes', 'Recentes'], ['nome', 'Nome'], ['pendencias', 'Pend�ncias']] as const).map(([valor, label]) => (
+          <Pressable key={valor} onPress={() => setOrdenacao(valor)} style={[s.sortChip, ordenacao === valor && s.sortChipActive]} accessibilityRole="button" accessibilityState={{ selected: ordenacao === valor }}>
+            <Text style={[s.sortText, ordenacao === valor && s.sortTextActive]}>{label}</Text>
+          </Pressable>
+        ))}
+      </View>
       <Text style={s.count}>{pacientesFiltrados.length} {pacientesFiltrados.length === 1 ? 'paciente encontrado' : 'pacientes encontrados'}</Text>
       {pacientesFiltrados.length === 0 ? (
         <EmptyState icon="paw-outline" title="Nenhum paciente encontrado" subtitle="Tente mudar a busca ou o filtro." accentColor={theme.colors.primary} />
@@ -80,6 +98,7 @@ export default function VetPacientesScreen() {
             <View style={s.cardBody}>
               <Text style={s.petName}>{pet.nome}</Text>
               <Text style={s.meta}>{pet.raca || pet.especie} {pet.tutor?.nome ? `• ${pet.tutor.nome}` : ''}</Text>
+              {pet.tutor?.telefone ? <Text style={s.meta}>Tutor: {pet.tutor.telefone}</Text> : null}
               <Text style={s.history}>{ultimo ? `Último atendimento: ${new Date(ultimo.data).toLocaleDateString('pt-BR')}` : 'Sem atendimento concluído'}</Text>
             </View>
             {pendentes > 0 ? <View style={s.pending}><Text style={s.pendingText}>{pendentes}</Text><Text style={s.pendingLabel}>pend.</Text></View> : null}
@@ -101,6 +120,11 @@ const styles = (theme: AppTheme) => StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.pages.vetPatients.searchField.background, borderWidth: 1, borderColor: theme.pages.vetPatients.searchField.border, borderRadius: 15, paddingHorizontal: 15, height: 52, elevation: 1 },
   searchInput: { flex: 1, color: theme.colors.text, fontSize: 14 },
   filters: { flexDirection: 'row', gap: 8, marginVertical: 16, flexWrap: 'wrap' },
+  sortRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 12 },
+  sortChip: { borderRadius: 16, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: theme.pages.vetPatients.filterChip.border, backgroundColor: theme.pages.vetPatients.filterChip.background },
+  sortChipActive: { backgroundColor: theme.colors.infoBackground, borderColor: theme.colors.info },
+  sortText: { color: theme.colors.textSecondary, fontSize: 11, fontWeight: '700' },
+  sortTextActive: { color: theme.colors.info },
   filter: { borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: theme.pages.vetPatients.filterChip.border, backgroundColor: theme.pages.vetPatients.filterChip.background },
   filterActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   filterText: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '700' },

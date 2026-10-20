@@ -157,6 +157,10 @@ export default function FichaPacienteScreen() {
               <HealthRow styles={s} label="Peso atual" value={perfilSaude.data.pesoAtual ? `${perfilSaude.data.pesoAtual} kg` : 'N√£o informado'} />
               <HealthRow styles={s} label="Alergias" value={perfilSaude.data.alergias || 'Nenhuma informada'} />
               <HealthRow styles={s} label="Medicamentos cont√≠nuos" value={perfilSaude.data.medicamentosContinuos || 'Nenhum informado'} />
+              <HealthRow styles={s} label="CondiÁıes prÈ-existentes" value={perfilSaude.data.condicoesPreExistentes || 'Nenhuma informada'} />
+              <HealthRow styles={s} label="RestriÁıes alimentares" value={perfilSaude.data.restricoesAlimentares || 'Nenhuma informada'} />
+              <HealthRow styles={s} label="ObservaÁıes importantes" value={perfilSaude.data.observacoesImportantes || 'Nenhuma informada'} />
+              {perfilSaude.data.contatoEmergencia ? <HealthRow styles={s} label="Contato de emergÍncia" value={perfilSaude.data.contatoEmergencia} /> : null}
             </>
           ) : (
             <Text style={s.healthLoading}>Nenhuma informa√ß√£o adicional cadastrada.</Text>

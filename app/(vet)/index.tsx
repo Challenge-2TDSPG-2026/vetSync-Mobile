@@ -36,6 +36,8 @@ function VetDashboardMobile() {
   const faturamento = eventosConcluidos.reduce((total, evento) => total + evento.custo, 0);
   const pacientesComPendencia = pacientes.filter(p => p.eventos.some(e => e.status === 'AGENDADO')).length;
   const atendimentosHojeConcluidos = eventosDeHoje.filter(e => e.status === 'CONCLUIDO').length;
+  const vacinasDeHoje = eventosDeHoje.filter(e => e.nomeTipoEvento.toLocaleLowerCase().includes('vacin') && e.status === 'AGENDADO').length;
+  const atrasados = eventos.filter(e => statusExibicao(e) === 'ATRASADO');
   const ocupacaoHoje = eventosDeHoje.length > 0 ? Math.round((atendimentosHojeConcluidos / eventosDeHoje.length) * 100) : 0;
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-painel');
@@ -163,6 +165,18 @@ function VetDashboardMobile() {
           <Text style={s.quickLabel}>Resgates</Text>
         </AnimatedPressable>
       </View>
+
+      {(eventosDeHoje.length > 0 || atrasados.length > 0) && (
+        <View style={s.prioridadesCard}>
+          <View style={s.prioridadesTituloRow}>
+            <AppIcon name="alert-circle-outline" set="Ionicons" size={20} color={theme.colors.warning} />
+            <Text style={s.prioridadesTitulo}>Atenção de hoje</Text>
+          </View>
+          {eventosDeHoje.length > 0 ? <Text style={s.prioridadesTexto}>{eventosDeHoje.length} atendimento{eventosDeHoje.length === 1 ? '' : 's'} na agenda{vacinasDeHoje ? `, incluindo ${vacinasDeHoje} vacina${vacinasDeHoje === 1 ? '' : 's'}` : ''}.</Text> : null}
+          {atrasados.length > 0 ? <Text style={s.prioridadesTexto}>{atrasados.length} compromisso{atrasados.length === 1 ? '' : 's'} em atraso para revisar.</Text> : null}
+          <Pressable onPress={() => router.push('/(vet)/consultas')} accessibilityRole="button" style={s.prioridadesLink}><Text style={s.prioridadesLinkText}>Abrir agenda</Text><AppIcon name="arrow-forward" set="Ionicons" size={15} color={theme.colors.primary} /></Pressable>
+        </View>
+      )}
 
       {resgatesPendentes.length > 0 && (
         <Pressable
@@ -374,6 +388,12 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   ocupacaoFill: { height: '100%', borderRadius: 5 },
   ocupacaoHint: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 8 },
   quickActions: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  prioridadesCard: { backgroundColor: theme.pages.vetDashboard.card, borderColor: theme.pages.vetDashboard.border, borderWidth: 1, borderRadius: 16, padding: 15, marginBottom: 18 },
+  prioridadesTituloRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 7 },
+  prioridadesTitulo: { color: theme.colors.text, fontSize: 14, fontWeight: '800' },
+  prioridadesTexto: { color: theme.colors.textSecondary, fontSize: 12, lineHeight: 18, marginBottom: 3 },
+  prioridadesLink: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, paddingTop: 8 },
+  prioridadesLinkText: { color: theme.colors.primary, fontWeight: '700', fontSize: 12 },
   quickAction: { flex: 1, backgroundColor: theme.pages.vetDashboard.quickActionCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.quickActionCard.border, borderRadius: 16, padding: 13, alignItems: 'center', gap: 8, elevation: 1 },
   quickIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
   quickLabel: { fontSize: 10, color: theme.colors.text, fontWeight: '700', textAlign: 'center' },

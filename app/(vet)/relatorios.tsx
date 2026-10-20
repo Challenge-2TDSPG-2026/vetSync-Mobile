@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,11 +8,15 @@ import { useRelatorioClinica } from '../../hooks/useRelatorios';
 import type { AppTheme } from '../../constants/theme';
 import { VetPageIntro } from '../../components/vet/VetPageIntro';
 
-function intervaloMesAtual() {
+type Periodo = 'mes' | '7dias' | '30dias';
+
+function intervaloRelatorio(periodo: Periodo) {
   const hoje = new Date();
-  const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-  const iso = (data: Date) => data.toISOString().slice(0, 10);
+  const fim = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const inicio = new Date(fim);
+  if (periodo === 'mes') inicio.setDate(1);
+  else inicio.setDate(inicio.getDate() - (periodo === '7dias' ? 6 : 29));
+  const iso = (data: Date) => `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
   return { inicio: iso(inicio), fim: iso(fim) };
 }
 
@@ -21,7 +25,8 @@ export default function VetRelatoriosScreen() {
   const router = useRouter();
   const s = useMemo(() => styles(theme), [theme]);
   const { sessao } = useAuth();
-  const intervalo = intervaloMesAtual();
+  const [periodo, setPeriodo] = useState<Periodo>('mes');
+  const intervalo = intervaloRelatorio(periodo);
   const { data, isLoading, isError } = useRelatorioClinica(intervalo.inicio, intervalo.fim, sessao?.perfil === 'VETERINARIO');
 
   return (
@@ -37,6 +42,13 @@ export default function VetRelatoriosScreen() {
         <Text style={s.backButtonText}>Voltar</Text>
       </Pressable>
       <VetPageIntro eyebrow="VISÃO DO NEGÓCIO" title="Relatórios" description={`Indicadores da clínica para ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}.`} icon="bar-chart-outline" />
+      <View style={s.periodos}>
+        {([['7dias', '7 dias'], ['30dias', '30 dias'], ['mes', 'Este mês']] as const).map(([valor, label]) => (
+          <Pressable key={valor} onPress={() => setPeriodo(valor)} style={[s.periodo, periodo === valor && s.periodoAtivo]} accessibilityRole="button" accessibilityState={{ selected: periodo === valor }}>
+            <Text style={[s.periodoTexto, periodo === valor && s.periodoTextoAtivo]}>{label}</Text>
+          </Pressable>
+        ))}
+      </View>
       {isLoading ? <ActivityIndicator color={theme.colors.primary} style={s.loading} /> : null}
       {isError ? <Text style={s.error}>Não foi possível carregar os relatórios. Tente novamente mais tarde.</Text> : null}
       {data ? (
@@ -61,6 +73,11 @@ const styles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   content: { padding: 20, paddingBottom: 44 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14, paddingVertical: 4 },
+  periodos: { flexDirection: 'row', gap: 8, marginBottom: 18 },
+  periodo: { flex: 1, alignItems: 'center', borderRadius: 18, paddingVertical: 9, borderWidth: 1, borderColor: theme.pages.vetReports.border, backgroundColor: theme.pages.vetReports.card },
+  periodoAtivo: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  periodoTexto: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '700' },
+  periodoTextoAtivo: { color: theme.colors.onPrimary },
   backButtonText: { color: theme.colors.primary, fontSize: 15, fontWeight: '700' },
   loading: { marginTop: 30 },
   error: { color: theme.colors.danger, backgroundColor: theme.colors.dangerBackground, borderRadius: 10, padding: 12 },
