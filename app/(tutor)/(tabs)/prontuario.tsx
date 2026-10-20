@@ -8,10 +8,10 @@ import { usePet } from '../../../context/PetContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { withAlpha, type AppTheme } from '../../../constants/theme';
 import { PetSwitcher } from '../../../components/PetSwitcher';
-import { PetFoto } from '../../../components/pet-foto/PetFoto';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { mostrarToast } from '../../../components/ui/Toast';
 import { CompartilharProntuarioModal } from '../../../components/prontuario/CompartilharProntuarioModal';
+import { IllustratedPageHero } from '../../../components/ui/IllustratedPageHero';
 import { ProntuarioLinhaDoTempo } from '../../../components/prontuario/ProntuarioLinhaDoTempo';
 import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
 import { useProntuario } from '../../../hooks/useProntuario';
@@ -76,12 +76,14 @@ export default function ProntuarioScreen() {
   }
 
   const cabecalho = (
-    <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
-      <View style={s.headerCopy}>
-        <Text style={[s.headerTitle, modoSimples && ss.headerTitle]}>Prontuário</Text>
-        <Text style={[s.headerSubtitle, modoSimples && ss.headerSubtitle]}>Histórico clínico completo</Text>
-      </View>
-    </View>
+    <IllustratedPageHero
+      image={require('../../../assets/images/record.png')}
+      title="Prontuário clínico"
+      subtitle={petAtivo ? `Histórico clínico completo de ${petAtivo.nome}.` : 'Exames, orientações e registros clínicos do pet.'}
+      icon="document-text-outline"
+      accessibilityLabel="Veterinária examinando um pet na clínica"
+      simple={modoSimples}
+    />
   );
 
   if (!petAtivo) {
@@ -105,17 +107,6 @@ export default function ProntuarioScreen() {
         refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} />}
       >
         <PetSwitcher />
-
-        <View style={s.hero}>
-          <PetFoto pet={petAtivo} size={modoSimples ? 80 : 64} color={theme.colors.primary} backgroundColor={theme.pages.shared.cardSecondary} accessibilityLabel={`Foto de ${petAtivo.nome}`} />
-          <View style={s.heroCopy}>
-            <Text style={[s.eyebrow, modoSimples && ss.eyebrow]}>PRONTUÁRIO CLÍNICO</Text>
-            <Text style={[s.petNome, modoSimples && ss.petNome]} numberOfLines={1}>{petAtivo.nome}</Text>
-            <Text style={[s.petMeta, modoSimples && ss.petMeta]}>
-              {contagem ? `${contagem.TUDO} ${contagem.TUDO === 1 ? 'registro' : 'registros'}` : 'Carregando registros...'}
-            </Text>
-          </View>
-        </View>
 
         <View style={s.acoes}>
           <Pressable
