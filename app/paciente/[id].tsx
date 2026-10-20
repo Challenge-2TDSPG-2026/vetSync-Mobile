@@ -1,6 +1,7 @@
 import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
 import React, { useMemo, useState } from 'react';
+import { VetReturnReminder } from '../../components/vet/VetReturnReminder';
 import { View, Text, ScrollView, Pressable, StyleSheet, Modal, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useVet } from '../../context/VetContext';
@@ -166,6 +167,8 @@ export default function FichaPacienteScreen() {
             <Text style={s.healthLoading}>Nenhuma informação adicional cadastrada.</Text>
           )}
         </View>
+
+        <VetReturnReminder petId={pet.id} />
 
         <View style={s.statsRow}>
           <StatCard styles={s} valor={total} label="Total" accentColor={theme.pages.petDetails.info} />
