@@ -13,7 +13,8 @@ export function AnimatedPressable({ style, children, ...props }: Props) {
   }, [scale]);
 
   return (
-    <Pressable
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
       {...props}
       onPressIn={event => {
         Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 30, bounciness: 4 }).start();
@@ -23,12 +24,10 @@ export function AnimatedPressable({ style, children, ...props }: Props) {
         Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 24, bounciness: 5 }).start();
         props.onPressOut?.(event);
       }}
-      style={state => [
-        typeof style === 'function' ? style(state) : style,
-        { transform: [{ scale }] },
-      ]}
+      style={style}
     >
       {children}
-    </Pressable>
+      </Pressable>
+    </Animated.View>
   );
 }
