@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { useAccessibility } from '../context/AccessibilityContext';
 import { useTheme } from '../context/ThemeContext';
 import { APP_INFO } from '../constants/appInfo';
 import type { AppTheme } from '../constants/theme';
+import { IllustratedPageHero } from '../components/ui/IllustratedPageHero';
 
 export default function SobreAppScreen() {
   const router = useRouter();
@@ -17,19 +18,15 @@ export default function SobreAppScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Voltar"
-        >
-          <Ionicons name="arrow-back" size={23} color={theme.components.header.icon} />
-        </Pressable>
-        <Text style={[styles.headerTitle, modoSimples && styles.largeHeaderTitle]}>
-          Sobre o projeto
-        </Text>
-      </View>
+      <IllustratedPageHero
+        image={require('../assets/images/About.png')}
+        title="Sobre o VetSync"
+        subtitle="Conheça a versão instalada e identifique o código usado para criá-la."
+        icon="information-circle-outline"
+        accessibilityLabel="Ilustração de uma pessoa usando o aplicativo VetSync"
+        simple={modoSimples}
+        onBack={() => router.back()}
+      />
 
       <ScrollView
         contentContainerStyle={[
