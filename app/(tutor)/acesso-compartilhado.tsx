@@ -30,6 +30,7 @@ import type { PermissaoPet, RelacaoPet } from '../../services/petAcessoService';
 import type { TipoAtividadePet } from '../../services/petAtividadeService';
 import { confirmar } from '../../utils/alert';
 import type { AppTheme } from '../../constants/theme';
+import { IllustratedPageHero } from '../../components/ui/IllustratedPageHero';
 
 const RELACOES: { valor: RelacaoPet; label: string }[] = [
   { valor: 'CUIDADOR', label: 'Cuidador' },
@@ -155,20 +156,15 @@ export default function AcessoCompartilhadoScreen() {
 
   return (
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
-        <Pressable
-          style={s.backButton}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Voltar"
-        >
-          <Ionicons name="arrow-back" size={23} color={theme.colors.text} />
-        </Pressable>
-        <View style={s.headerCopy}>
-          <Text style={s.title}>Acesso compartilhado</Text>
-          <Text style={s.subtitle}>Quem cuida de cada pet e o que mudou.</Text>
-        </View>
-      </View>
+      <IllustratedPageHero
+        image={require('../../assets/images/sharedAccess.png')}
+        title="Acesso compartilhado"
+        subtitle="Escolha quem pode acompanhar cada pet e quais ações essa pessoa pode fazer."
+        icon="people-outline"
+        accessibilityLabel="Tutor e veterinária compartilhando o cuidado de um pet"
+        simple={modoSimples}
+        onBack={() => router.back()}
+      />
 
       <ScrollView
         contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
