@@ -156,3 +156,11 @@ export function observarToquesEmNotificacao(aoTocar: (toque: ToqueEmNotificacao)
   });
   return () => assinatura.remove();
 }
+
+/** Escuta a chegada de uma notificação push enquanto o app está em primeiro plano. */
+export function observarNotificacoesRecebidas(aoReceber: () => void): () => void {
+  const notificacoes = obterNotificacoes();
+  if (!notificacoes) return () => {};
+  const assinatura = notificacoes.addNotificationReceivedListener(() => aoReceber());
+  return () => assinatura.remove();
+}

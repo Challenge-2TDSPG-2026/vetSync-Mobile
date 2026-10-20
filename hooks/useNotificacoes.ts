@@ -18,6 +18,11 @@ export function useNotificacoes(habilitado: boolean) {
     queryKey: notificacaoKeys.all,
     queryFn: () => notificacaoService.listar(),
     enabled: habilitado,
+    staleTime: 10_000,
+    refetchInterval: habilitado ? 30_000 : false,
+    refetchIntervalInBackground: false,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: 'always',
   });
 }
 
