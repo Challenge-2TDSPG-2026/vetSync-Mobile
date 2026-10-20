@@ -28,6 +28,16 @@ export default function VetRelatoriosScreen() {
   const [periodo, setPeriodo] = useState<Periodo>('mes');
   const intervalo = intervaloRelatorio(periodo);
   const { data, isLoading, isError } = useRelatorioClinica(intervalo.inicio, intervalo.fim, sessao?.perfil === 'VETERINARIO');
+  const intervaloAnterior = useMemo(() => {
+    const inicio = new Date(`${intervalo.inicio}T12:00:00`);
+    const fim = new Date(`${intervalo.fim}T12:00:00`);
+    const duracao = Math.round((fim.getTime() - inicio.getTime()) / 86_400_000) + 1;
+    const fimAnt = new Date(inicio); fimAnt.setDate(fimAnt.getDate() - 1);
+    const inicioAnt = new Date(fimAnt); inicioAnt.setDate(inicioAnt.getDate() - duracao + 1);
+    const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return { inicio: iso(inicioAnt), fim: iso(fimAnt) };
+  }, [intervalo.inicio, intervalo.fim]);
+  const anterior = useRelatorioClinica(intervaloAnterior.inicio, intervaloAnterior.fim, sessao?.perfil === 'VETERINARIO');
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
@@ -53,20 +63,27 @@ export default function VetRelatoriosScreen() {
       {isError ? <Text style={s.error}>Não foi possível carregar os relatórios. Tente novamente mais tarde.</Text> : null}
       {data ? (
         <View style={s.grid}>
-          <Metric styles={s} theme={theme} label="Agendadas" value={data.consultasAgendadas} />
-          <Metric styles={s} theme={theme} label="Concluídas" value={data.consultasConcluidas} accent={theme.colors.success} />
-          <Metric styles={s} theme={theme} label="Cancelamentos" value={data.cancelamentos} accent={theme.colors.danger} />
-          <Metric styles={s} theme={theme} label="Pacientes atendidos" value={data.pacientesAtendidos} accent={theme.colors.info} />
-          <Metric styles={s} theme={theme} label="Vacinas aplicadas" value={data.vacinasAplicadas} accent={theme.domain.event.vaccine} />
-          <Metric styles={s} theme={theme} label="Faturamento" value={`R$ ${data.faturamento.toFixed(2).replace('.', ',')}`} wide />
+          <Metric styles={s} theme={theme} label="Agendadas" value={data.consultasAgendadas} anterior={anterior.data?.consultasAgendadas} />
+          <Metric styles={s} theme={theme} label="Concluídas" value={data.consultasConcluidas} anterior={anterior.data?.consultasConcluidas} accent={theme.colors.success} />
+          <Metric styles={s} theme={theme} label="Cancelamentos" value={data.cancelamentos} anterior={anterior.data?.cancelamentos} accent={theme.colors.danger} />
+          <Metric styles={s} theme={theme} label="Pacientes atendidos" value={data.pacientesAtendidos} anterior={anterior.data?.pacientesAtendidos} accent={theme.colors.info} />
+          <Metric styles={s} theme={theme} label="Vacinas aplicadas" value={data.vacinasAplicadas} anterior={anterior.data?.vacinasAplicadas} accent={theme.domain.event.vaccine} />
+          <Metric styles={s} theme={theme} label="Faturamento" value={`R$ ${data.faturamento.toFixed(2).replace('.', ',')}`} anterior={anterior.data?.faturamento} wide />
+          {data.faltas !== undefined ? <Metric styles={s} theme={theme} label="Faltas" value={data.faltas} anterior={anterior.data?.faltas} accent={theme.colors.danger} /> : null}
+          {data.retornosPendentes !== undefined ? <Metric styles={s} theme={theme} label="Retornos pendentes" value={data.retornosPendentes} anterior={anterior.data?.retornosPendentes} accent={theme.colors.warning} /> : null}
+          {data.tempoMedioConclusaoHoras !== undefined ? <Metric styles={s} theme={theme} label="Tempo médio de conclusão" value={`${data.tempoMedioConclusaoHoras.toFixed(1).replace('.', ',')} h`} anterior={anterior.data?.tempoMedioConclusaoHoras} /> : null}
         </View>
       ) : null}
+      {data ? <Text style={s.comparativoHint}>{anterior.isLoading ? 'Carregando comparação com o período anterior…' : 'Variação comparada ao período imediatamente anterior, com a mesma duração.'}</Text> : null}
     </ScrollView>
   );
 }
 
-function Metric({ styles: s, theme, label, value, accent, wide }: { styles: ReturnType<typeof styles>; theme: AppTheme; label: string; value: string | number; accent?: string; wide?: boolean }) {
-  return <View style={[s.metricCard, wide && s.metricWide]}><Text style={[s.metricValue, accent ? { color: accent } : null]}>{value}</Text><Text style={s.metricLabel}>{label}</Text></View>;
+function Metric({ styles: s, theme, label, value, anterior, accent, wide }: { styles: ReturnType<typeof styles>; theme: AppTheme; label: string; value: string | number; anterior?: number; accent?: string; wide?: boolean }) {
+  const atualNumerico = typeof value === 'number' ? value : Number(String(value).replace(/[^\d,.-]/g, '').replace(',', '.'));
+  const variacao = anterior === undefined || anterior === 0 ? null : Math.round(((atualNumerico - anterior) / Math.abs(anterior)) * 100);
+  const anteriorExibido = label === 'Faturamento' && anterior !== undefined ? `R$ ${anterior.toFixed(2).replace('.', ',')}` : anterior;
+  return <View style={[s.metricCard, wide && s.metricWide]}><Text style={[s.metricValue, accent ? { color: accent } : null]}>{value}</Text><Text style={s.metricLabel}>{label}</Text>{anterior !== undefined ? <Text style={s.variacao}>{variacao === null ? `Período anterior: ${anteriorExibido}` : `${variacao > 0 ? '+' : ''}${variacao}% · anterior ${anteriorExibido}`}</Text> : <Text style={s.variacao}>Comparação indisponível</Text>}</View>;
 }
 
 const styles = (theme: AppTheme) => StyleSheet.create({
@@ -86,4 +103,6 @@ const styles = (theme: AppTheme) => StyleSheet.create({
   metricWide: { width: '100%' },
   metricValue: { fontSize: 22, fontWeight: '800', color: theme.pages.vetReports.primary },
   metricLabel: { color: theme.pages.vetReports.textSecondary, fontSize: 11, marginTop: 5, fontWeight: '700' },
+  variacao: { color: theme.colors.textSecondary, fontSize: 10, marginTop: 7, fontWeight: '600' },
+  comparativoHint: { color: theme.colors.textSecondary, fontSize: 11, marginTop: 1, marginBottom: 8, textAlign: 'center' },
 });
