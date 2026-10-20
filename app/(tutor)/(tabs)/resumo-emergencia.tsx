@@ -9,10 +9,10 @@ import { useAuth } from '../../../context/AuthContext';
 import { usePet } from '../../../context/PetContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { PetSwitcher } from '../../../components/PetSwitcher';
-import { PetFoto } from '../../../components/pet-foto/PetFoto';
 import { mostrarToast } from '../../../components/ui/Toast';
 import { usePerfilSaudePet } from '../../../hooks/useRelatorios';
 import { resumoEmergenciaPdfService } from '../../../services/resumoEmergenciaPdfService';
+import { IllustratedPageHero } from '../../../components/ui/IllustratedPageHero';
 import type { AppTheme } from '../../../constants/theme';
 
 function valor(valor?: string | null): string {
@@ -50,12 +50,14 @@ export default function ResumoEmergenciaScreen() {
   }
 
   const cabecalho = (
-    <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
-      <View style={s.headerCopy}>
-        <Text style={[s.headerTitle, modoSimples && ss.headerTitle]}>Ficha de emergência</Text>
-        <Text style={[s.headerSubtitle, modoSimples && ss.headerSubtitle]}>Informações rápidas do pet</Text>
-      </View>
-    </View>
+    <IllustratedPageHero
+      image={require('../../../assets/images/resume.png')}
+      title="Ficha de emergência"
+      subtitle={petAtivo ? `Informações importantes sobre ${petAtivo.nome}, prontas para compartilhar.` : 'Tenha os dados essenciais do pet em um só lugar.'}
+      icon="medkit-outline"
+      accessibilityLabel="Veterinária atendendo um pet e preparando as informações de saúde"
+      simple={modoSimples}
+    />
   );
 
   if (!petAtivo) {
@@ -77,18 +79,6 @@ export default function ResumoEmergenciaScreen() {
       {cabecalho}
       <ScrollView contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 34 }]} showsVerticalScrollIndicator={false}>
         <PetSwitcher />
-
-        <View style={s.hero}>
-          <View style={[s.heroPhoto, modoSimples && ss.heroPhoto]}>
-            <PetFoto pet={petAtivo} size={modoSimples ? 94 : 76} color={theme.colors.primary} backgroundColor={theme.pages.shared.cardSecondary} accessibilityLabel={`Foto de ${petAtivo.nome}`} />
-          </View>
-          <View style={s.heroCopy}>
-            <Text style={[s.eyebrow, modoSimples && ss.eyebrow]}>RESUMO DE EMERGÊNCIA</Text>
-            <Text style={[s.petName, modoSimples && ss.petName]}>{petAtivo.nome}</Text>
-            <Text style={[s.petMeta, modoSimples && ss.petMeta]}>{especie}{petAtivo.raca?.trim() ? ` · ${petAtivo.raca}` : ''}</Text>
-          </View>
-          <Ionicons name="medical" size={28} color={theme.colors.danger} />
-        </View>
 
         {perfil.isLoading ? (
           <View style={s.stateCard}>
