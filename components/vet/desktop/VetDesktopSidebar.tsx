@@ -21,12 +21,10 @@ type ItemMenu = {
 /** Itens da barra lateral do veterinário, na ordem pedida. */
 const ITENS: ItemMenu[] = [
   { label: 'SIA · Assistente veterinário', icon: 'sparkles-outline', href: '/(tutor)/assistente' },
-  { label: 'Ferramentas', icon: 'construct-outline', rota: 'opcoes' },
   { label: 'Consultas', icon: 'medkit-outline', rota: 'consultas' },
   { label: 'Pacientes', icon: 'paw-outline', rota: 'pacientes' },
   { label: 'Disponibilidade', icon: 'calendar-outline', rota: 'disponibilidade' },
   { label: 'Resgates', icon: 'gift-outline', rota: 'resgates' },
-  { label: 'Relatórios', icon: 'bar-chart-outline', rota: 'relatorios' },
 ];
 
 /** Barra lateral fixa do painel do veterinário (somente desktop). */
