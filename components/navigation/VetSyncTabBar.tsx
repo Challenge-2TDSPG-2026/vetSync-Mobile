@@ -39,8 +39,8 @@ export function OptionsGridIcon({ color, size }: { color: ColorValue; size: numb
   return <MaterialCommunityIcons name="apps" size={size} color={color} />;
 }
 
-function OptionsItem({ simples, color }: { simples?: boolean; color: string }) {
-  return <Pressable disabled accessibilityRole="button" accessibilityState={{ disabled: true }} accessibilityLabel="Opções, indisponível" style={s.item}>
+function OptionsItem({ simples, color, onPress }: { simples?: boolean; color: string; onPress: () => void }) {
+  return <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel="Abrir opções" style={s.item}>
     <View style={[s.iconWrap, simples && sSimples.iconWrap]}>
       <OptionsGridIcon color={color} size={simples ? 34 : 26} />
     </View>
@@ -50,6 +50,7 @@ function OptionsItem({ simples, color }: { simples?: boolean; color: string }) {
 
 /** Tab bar única para tutor e veterinário: Início, IA, Opções e Conta. */
 export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarProps) {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { modoSimples } = useAccessibility();
   const { theme } = useTheme();
@@ -82,7 +83,7 @@ export function VetSyncTabBar({ state, descriptors, navigation }: VetSyncTabBarP
             colors={theme.components.navigation}
           />
           {route.name === 'opcoes' && <AssistantItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} />}
-          {!possuiRotaOpcoes && index === 0 && <OptionsItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} />}
+          {!possuiRotaOpcoes && index === 0 && <OptionsItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} onPress={() => router.push('/(vet)/opcoes')} />}
           {!possuiRotaOpcoes && index === 0 && <AssistantItem simples={modoSimples} color={theme.components.navigation.inactiveIcon} />}
         </React.Fragment>;
       })}

@@ -67,6 +67,7 @@ const ROTAS_FORA_DO_GRUPO = [
   'notificacoes',
   'vinculo-clinica',
   'sobre-app',
+  'assistente',
 ];
 const ROTAS_EXCLUSIVAS_TUTOR = [
   'add-evento',
@@ -76,7 +77,6 @@ const ROTAS_EXCLUSIVAS_TUTOR = [
   'mensagens-clinica',
   'minha-clinica',
   'add-pet',
-  'assistente',
   'responsaveis',
   'acesso-compartilhado',
   'configuracoes',

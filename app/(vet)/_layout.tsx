@@ -112,6 +112,17 @@ export default function VetTabsLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="opcoes"
+        options={{
+          title: 'Opções',
+          headerTitle: 'Central da clínica',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

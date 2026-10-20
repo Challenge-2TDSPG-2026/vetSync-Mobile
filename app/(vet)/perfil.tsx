@@ -15,7 +15,7 @@ export default function VetPerfilScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
-  const { veterinarioAtivo, pacientes, eventosAgendados } = useVet();
+  const { veterinarioAtivo, pacientes, eventosAgendados, eventos, eventosDeHoje } = useVet();
   const { sessao, logout } = useAuth();
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-perfil');
@@ -31,6 +31,7 @@ export default function VetPerfilScreen() {
   }
 
   const iniciais = (veterinarioAtivo?.nome ?? sessao?.nome ?? '?')[0]?.toUpperCase() ?? '?';
+  const atendimentosConcluidos = eventos.filter(evento => evento.status === 'CONCLUIDO').length;
 
   return (
     <>
@@ -42,7 +43,8 @@ export default function VetPerfilScreen() {
           </View>
           <View style={s.bannerInfo}>
             <Text style={s.bannerNome}>{veterinarioAtivo?.nome ?? sessao?.nome}</Text>
-            <Text style={s.bannerRole}>{sessao?.email}</Text>
+            <Text style={s.bannerRole}>Médico-veterinário{veterinarioAtivo?.especialidade ? ` · ${veterinarioAtivo.especialidade}` : ''}</Text>
+            <Text style={s.bannerEmail}>{sessao?.email}</Text>
           </View>
         </View>
 
@@ -57,19 +59,25 @@ export default function VetPerfilScreen() {
 
         <View style={s.statsRow}>
           <StatCard styles={s} valor={pacientes.length} label="Pacientes" />
-          <StatCard styles={s} valor={eventosAgendados.length} label="Agendados" />
+          <StatCard styles={s} valor={eventosDeHoje.length} label="Hoje" />
+          <StatCard styles={s} valor={atendimentosConcluidos} label="Concluídos" />
+        </View>
+
+        <Text style={s.secLabel}>Suporte ao tutor</Text>
+        <View style={s.actionGroup}>
+          <ActionRow styles={s} icon="sparkles" title="Assistente veterinário SIA" description="Estruture orientações, retornos e comunicação clínica." onPress={() => router.push('/(tutor)/assistente')} />
+          <ActionRow styles={s} icon="paw-outline" title="Localizar um paciente" description="Acesse o histórico para orientar o tutor com contexto." onPress={() => router.push('/(vet)/pacientes')} />
+          <ActionRow styles={s} icon="calendar-outline" title="Acompanhar consultas" description="Revise solicitações e próximos atendimentos." onPress={() => router.push('/(vet)/consultas')} last />
+        </View>
+
+        <Text style={s.secLabel}>Gestão da clínica</Text>
+        <View style={s.actionGroup}>
+          <ActionRow styles={s} icon="time-outline" title="Disponibilidade" description="Edite horários de atendimento e bloqueios." onPress={() => router.push('/(vet)/disponibilidade')} />
+          <ActionRow styles={s} icon="gift-outline" title="Resgates de tutores" description="Valide benefícios pendentes do programa de fidelidade." onPress={() => router.push('/(vet)/resgates')} />
+          <ActionRow styles={s} icon="analytics-outline" title="Relatórios da clínica" description="Acompanhe consultas, faturamento e retornos." onPress={() => router.push('/(vet)/relatorios')} last />
         </View>
 
         <AppearancePreferences />
-
-        <Pressable style={s.reportButton} onPress={() => router.push('/(vet)/relatorios')} accessibilityRole="button">
-          <Ionicons name="analytics-outline" size={19} color={theme.colors.primary} />
-          <View style={s.reportCopy}>
-            <Text style={s.reportTitle}>Relatórios da clínica</Text>
-            <Text style={s.reportDescription}>Acompanhe consultas, faturamento e retornos.</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
-        </Pressable>
 
         <Pressable style={s.reportButton} onPress={() => router.push('/sobre-app')} accessibilityRole="button">
           <Ionicons name="information-circle-outline" size={19} color={theme.colors.primary} />
@@ -85,6 +93,8 @@ export default function VetPerfilScreen() {
           {[
             ['CRMV', veterinarioAtivo?.crmv ?? '–'],
             ['Clínica', veterinarioAtivo?.nomeClinica ?? '–'],
+            ['Especialidade', veterinarioAtivo?.especialidade ?? 'Não informada'],
+            ['E-mail de acesso', sessao?.email ?? '–'],
             ['Perfil', 'Veterinário'],
           ].map(([label, valor], i, arr) => (
             <View key={label}>
@@ -121,24 +131,47 @@ function StatCard({ styles, valor, label }: { styles: ReturnType<typeof createSt
   );
 }
 
+function ActionRow({ styles, icon, title, description, onPress, last }: { styles: ReturnType<typeof createStyles>; icon: React.ComponentProps<typeof Ionicons>['name']; title: string; description: string; onPress: () => void; last?: boolean }) {
+  return (
+    <Pressable style={[styles.actionRow, last && styles.actionRowLast]} onPress={onPress} accessibilityRole="button" accessibilityLabel={title}>
+      <View style={styles.actionIcon}><Ionicons name={icon} size={19} color={styles.actionIconColor.color} /></View>
+      <View style={styles.actionCopy}>
+        <Text style={styles.actionTitle}>{title}</Text>
+        <Text style={styles.actionDescription}>{description}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={styles.chevronColor.color} />
+    </Pressable>
+  );
+}
+
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: 16, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 44 },
 
-  banner: { backgroundColor: theme.pages.vetProfile.heroBackground, borderRadius: 16, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
-  avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center' },
+  banner: { backgroundColor: theme.pages.vetProfile.heroBackground, borderRadius: 22, padding: 22, flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 18, minHeight: 112, elevation: 3 },
+  avatar: { width: 58, height: 58, borderRadius: 20, backgroundColor: theme.pages.vetProfile.heroAccent, justifyContent: 'center', alignItems: 'center' },
   avatarText: { fontSize: 18, fontWeight: '700', color: theme.colors.onPrimary },
   bannerInfo: { flex: 1 },
   bannerNome: { fontSize: 16, fontWeight: '700', color: theme.pages.vetProfile.heroText },
-  bannerRole: { fontSize: 11, color: theme.pages.vetProfile.heroText, opacity: 0.5, marginTop: 2 },
+  bannerRole: { fontSize: 12, color: theme.pages.vetProfile.heroText, opacity: 0.9, marginTop: 4, fontWeight: '700' },
+  bannerEmail: { fontSize: 11, color: theme.pages.vetProfile.heroText, opacity: 0.68, marginTop: 3 },
 
-  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
-  statCard: { flex: 1, backgroundColor: theme.pages.vetProfile.card, borderWidth: 1, borderColor: theme.pages.vetProfile.border, borderRadius: 12, padding: 14, alignItems: 'center' },
+  statsRow: { flexDirection: 'row', gap: 9, marginBottom: 24 },
+  statCard: { flex: 1, backgroundColor: theme.pages.vetProfile.card, borderWidth: 1, borderColor: theme.pages.vetProfile.border, borderRadius: 17, paddingVertical: 15, paddingHorizontal: 7, alignItems: 'center', elevation: 2 },
   statVal: { fontSize: 22, fontWeight: '700', color: theme.colors.primary },
   statLabel: { fontSize: 10, color: theme.colors.textSecondary, fontWeight: '700', marginTop: 4, textTransform: 'uppercase' },
 
-  secLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 10, paddingLeft: 2 },
-  card: { backgroundColor: theme.pages.vetProfile.card, borderRadius: 12, borderWidth: 1, borderColor: theme.pages.vetProfile.border, paddingHorizontal: 16, marginBottom: 24 },
+  secLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 10, marginTop: 4, paddingLeft: 2 },
+  actionGroup: { backgroundColor: theme.pages.vetProfile.card, borderRadius: 18, borderWidth: 1, borderColor: theme.pages.vetProfile.border, paddingHorizontal: 14, marginBottom: 22, elevation: 1 },
+  actionRow: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 1, borderBottomColor: theme.pages.vetProfile.border },
+  actionRowLast: { borderBottomWidth: 0 },
+  actionIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: theme.colors.successBackground, alignItems: 'center', justifyContent: 'center' },
+  actionIconColor: { color: theme.colors.primary },
+  actionCopy: { flex: 1 },
+  actionTitle: { fontSize: 13, fontWeight: '800', color: theme.colors.text },
+  actionDescription: { fontSize: 10, lineHeight: 14, color: theme.colors.textSecondary, marginTop: 3 },
+  chevronColor: { color: theme.colors.textMuted },
+  card: { backgroundColor: theme.pages.vetProfile.card, borderRadius: 16, borderWidth: 1, borderColor: theme.pages.vetProfile.border, paddingHorizontal: 16, marginBottom: 22 },
   divisor: { height: 1, backgroundColor: theme.pages.vetProfile.border },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 13 },
   infoLabel: { fontSize: 13, color: theme.colors.textSecondary },
@@ -146,7 +179,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
 
   btnSair: { backgroundColor: theme.colors.danger, paddingVertical: 14, borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
   btnSairText: { color: theme.colors.onPrimary, fontSize: 14, fontWeight: '700' },
-  reportButton: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.pages.vetProfile.card, borderWidth: 1, borderColor: theme.pages.vetProfile.border, borderRadius: 12, padding: 14, marginBottom: 24 },
+  reportButton: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.pages.vetProfile.card, borderWidth: 1, borderColor: theme.pages.vetProfile.border, borderRadius: 14, padding: 14, marginBottom: 22 },
   reportCopy: { flex: 1 },
   reportTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '700' },
   reportDescription: { color: theme.colors.textSecondary, fontSize: 11, marginTop: 3 },

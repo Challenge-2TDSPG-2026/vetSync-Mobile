@@ -21,7 +21,7 @@ export interface PacienteComHistorico {
 
 type VetContextValue = {
   veterinarioAtivoId: string | null;
-  veterinarioAtivo: { id: string; nome: string; crmv: string; idClinica: string | null; nomeClinica: string | null } | null;
+  veterinarioAtivo: { id: string; nome: string; crmv: string; idClinica: string | null; nomeClinica: string | null; especialidade: string | null } | null;
   carregando: boolean;
 
   eventos: Evento[];
