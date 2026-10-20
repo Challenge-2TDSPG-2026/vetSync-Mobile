@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Modal } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,63 +8,13 @@ import { useAuth } from '../../../context/AuthContext';
 import { useAccessibility } from '../../../context/AccessibilityContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { useDicaPrimeiraVisita } from '../../../hooks/useDicaPrimeiraVisita';
+import { useNotificacoes } from '../../../hooks/useNotificacoes';
+import { useQueryClient } from '@tanstack/react-query';
+import { observarNotificacoesRecebidas } from '../../../services/pushNotificationService';
 import { DicaTela } from '../../../components/ui/DicaTela';
 import { withAlpha, type AppTheme } from '../../../constants/theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
-
-const GUIAS_DE_AJUDA: { icone: IconName; titulo: string; descricao: string }[] = [
-  {
-    icone: 'paw-outline',
-    titulo: 'Cadastre e escolha seu pet',
-    descricao: 'Mantenha os dados de cada pet atualizados. Quando houver mais de um cadastrado, escolha qual deles você quer consultar antes de ver agenda, histórico ou carteira.',
-  },
-  {
-    icone: 'calendar-outline',
-    titulo: 'Organize a agenda',
-    descricao: 'Toque em uma data para ver os cuidados previstos naquele dia. Para incluir um novo compromisso, use a opção de adicionar evento e informe o tipo, a data e o horário.',
-  },
-  {
-    icone: 'notifications-outline',
-    titulo: 'Escolha os lembretes',
-    descricao: 'Ao criar um evento, você pode escolher quando quer ser avisado. Se não selecionar nenhum lembrete, o compromisso continua salvo, mas não haverá aviso.',
-  },
-  {
-    icone: 'card-outline',
-    titulo: 'Consulte a carteirinha de vacinação',
-    descricao: 'Na carteirinha você acompanha as vacinas já registradas e as próximas. Toque na carteira do pet para ver os detalhes e escolher outro pet quando necessário.',
-  },
-  {
-    icone: 'time-outline',
-    titulo: 'Veja o histórico de saúde',
-    descricao: 'O histórico reúne os registros de cuidados do pet. Use-o para relembrar atendimentos, vacinas e outros eventos que já foram cadastrados.',
-  },
-  {
-    icone: 'camera-outline',
-    titulo: 'Atualize a foto do pet',
-    descricao: 'Toque na foto do pet para usar a câmera ou escolher uma imagem da galeria. Antes de salvar, você poderá ajustar o enquadramento da foto.',
-  },
-  {
-    icone: 'people-outline',
-    titulo: 'Compartilhe os cuidados',
-    descricao: 'Em Configurações, convide outra pessoa para acompanhar o pet. Você decide se ela poderá somente consultar as informações ou também atualizar e agendar cuidados.',
-  },
-  {
-    icone: 'business-outline',
-    titulo: 'Confira a clínica vinculada',
-    descricao: 'Em Configurações, você pode trocar a clínica usando o código ou o QR code recebido. Seus pets e o histórico permanecem na sua conta.',
-  },
-  {
-    icone: 'settings-outline',
-    titulo: 'Ajuste sua conta',
-    descricao: 'Use Configurações para atualizar seus dados, cuidar da segurança, escolher a aparência e ativar o modo simples, que deixa textos e botões maiores.',
-  },
-  {
-    icone: 'sparkles-outline',
-    titulo: 'Converse com a SIA',
-    descricao: 'A SIA ajuda a organizar dúvidas sobre a rotina e a marcar uma consulta. Para sintomas, urgências ou qualquer preocupação com a saúde do pet, procure uma clínica veterinária presencialmente.',
-  },
-];
 
 function obterIniciais(nome: string | undefined): string {
   const partes = nome?.trim().split(/\s+/).filter(Boolean) ?? [];
@@ -79,13 +29,19 @@ function obterIniciais(nome: string | undefined): string {
 
 export default function PerfilScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const { sessao } = useAuth();
   const { modoSimples } = useAccessibility();
   const { pets } = usePet();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-perfil');
-  const [ajudaVisivel, setAjudaVisivel] = useState(false);
+  const notificacoesQuery = useNotificacoes(Boolean(sessao));
+  const notificacoesNaoLidas = notificacoesQuery.data?.filter(notificacao => !notificacao.lida).length ?? 0;
+
+  useEffect(() => observarNotificacoesRecebidas(() => {
+    void queryClient.invalidateQueries({ queryKey: ['notificacoes'] });
+  }), [queryClient]);
 
   const nome = sessao?.nome?.trim() || 'Conta VetSync';
   const email = sessao?.email?.trim() || 'E-mail não disponível';
@@ -163,12 +119,15 @@ export default function PerfilScreen() {
           <QuickAccessCard
             styles={s}
             theme={theme}
-            icon="mail-outline"
-            title="Mensagens"
-            description="Avisos e lembretes"
+            icon="notifications-outline"
+            title="Notificações"
+            description={notificacoesNaoLidas
+              ? `${notificacoesNaoLidas} ${notificacoesNaoLidas === 1 ? 'aviso novo' : 'avisos novos'}`
+              : 'Avisos e lembretes'}
             color={theme.colors.primary}
             onPress={() => router.push('/(tutor)/(tabs)/notificacoes')}
             simples={modoSimples}
+            badgeCount={notificacoesNaoLidas}
           />
           <QuickAccessCard
             styles={s}
@@ -197,7 +156,7 @@ export default function PerfilScreen() {
             title="Ajuda"
             description="Guias para usar o app"
             color={theme.colors.warning}
-            onPress={() => setAjudaVisivel(true)}
+            onPress={() => router.push('/(tutor)/ajuda')}
             simples={modoSimples}
           />
           <QuickAccessCard
@@ -232,53 +191,6 @@ export default function PerfilScreen() {
         </View>
       </ScrollView>
 
-      <Modal visible={ajudaVisivel} animationType="slide" onRequestClose={() => setAjudaVisivel(false)}>
-        <View style={s.ajudaTela}>
-          <View style={s.ajudaCabecalho}>
-            <View style={s.ajudaCabecalhoCopy}>
-              <Text style={[s.ajudaKicker, modoSimples && sSimples.ajudaKicker]}>CENTRAL DE AJUDA</Text>
-              <Text style={[s.ajudaTitulo, modoSimples && sSimples.ajudaTitulo]}>Como usar o VetSync</Text>
-            </View>
-            <Pressable
-              style={s.ajudaFechar}
-              onPress={() => setAjudaVisivel(false)}
-              accessibilityRole="button"
-              accessibilityLabel="Fechar ajuda"
-            >
-              <Ionicons name="close" size={modoSimples ? 29 : 22} color={theme.colors.text} />
-            </Pressable>
-          </View>
-
-          <ScrollView contentContainerStyle={s.ajudaConteudo} showsVerticalScrollIndicator={false}>
-            <View style={s.ajudaIntroducao}>
-              <View style={s.ajudaIntroducaoIcone}>
-                <Ionicons name="help-buoy-outline" size={modoSimples ? 29 : 22} color={theme.colors.primary} />
-              </View>
-              <Text style={[s.ajudaIntroducaoTexto, modoSimples && sSimples.ajudaIntroducaoTexto]}>
-                Encontre aqui explicações simples sobre as principais partes do app. Você pode voltar a esta lista sempre que precisar.
-              </Text>
-            </View>
-
-            <Text style={[s.ajudaSecaoTitulo, modoSimples && sSimples.ajudaSecaoTitulo]}>Guias rápidos</Text>
-            <View style={s.listaGuias}>
-              {GUIAS_DE_AJUDA.map((guia, indice) => (
-                <View key={guia.titulo} style={s.guiaItem}>
-                  <View style={s.guiaNumero}>
-                    <Text style={[s.guiaNumeroTexto, modoSimples && sSimples.guiaNumeroTexto]}>{indice + 1}</Text>
-                  </View>
-                  <View style={s.guiaConteudo}>
-                    <View style={s.guiaTituloLinha}>
-                      <Ionicons name={guia.icone} size={modoSimples ? 23 : 18} color={theme.colors.primary} />
-                      <Text style={[s.guiaTitulo, modoSimples && sSimples.guiaTitulo]}>{guia.titulo}</Text>
-                    </View>
-                    <Text style={[s.guiaDescricao, modoSimples && sSimples.guiaDescricao]}>{guia.descricao}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
     </>
   );
 }
@@ -292,6 +204,7 @@ function QuickAccessCard({
   color,
   onPress,
   simples,
+  badgeCount = 0,
 }: {
   styles: ReturnType<typeof createStyles>;
   theme: AppTheme;
@@ -301,7 +214,9 @@ function QuickAccessCard({
   color: string;
   onPress: () => void;
   simples: boolean;
+  badgeCount?: number;
 }) {
+  const badgeTexto = badgeCount > 99 ? '99+' : String(badgeCount);
   return (
     <Pressable
       style={({ pressed }) => [
@@ -311,7 +226,7 @@ function QuickAccessCard({
       ]}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={badgeCount ? `${title}, ${badgeCount} ${badgeCount === 1 ? 'não lida' : 'não lidas'}` : title}
       accessibilityHint={`Abre ${title.toLocaleLowerCase('pt-BR')}`}
     >
       <View
@@ -323,6 +238,11 @@ function QuickAccessCard({
       >
         <Ionicons name={icon} size={simples ? 29 : 22} color={color} />
       </View>
+      {badgeCount > 0 ? (
+        <View style={styles.unreadBadge} pointerEvents="none">
+          <Text style={styles.unreadBadgeText}>{badgeTexto}</Text>
+        </View>
+      ) : null}
       <View style={styles.quickAccessCopy}>
         <Text
           numberOfLines={1}
@@ -491,6 +411,7 @@ const createStyles = (theme: AppTheme) =>
 
     acessosRapidos: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 22 },
     quickAccessCard: {
+      position: 'relative',
       flexBasis: '47.5%',
       minHeight: 104,
       flexDirection: 'row',
@@ -509,6 +430,22 @@ const createStyles = (theme: AppTheme) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
+    unreadBadge: {
+      position: 'absolute',
+      top: 6,
+      right: 6,
+      minWidth: 20,
+      height: 20,
+      paddingHorizontal: 5,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 10,
+      backgroundColor: theme.colors.danger,
+      borderWidth: 2,
+      borderColor: theme.pages.tutorProfile.card,
+      zIndex: 1,
+    },
+    unreadBadgeText: { color: '#ffffff', fontSize: 9, fontWeight: '900' },
     quickAccessCopy: { flex: 1, minWidth: 0 },
     quickAccessTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '800' },
     quickAccessDescription: {
@@ -537,75 +474,6 @@ const createStyles = (theme: AppTheme) =>
       lineHeight: 17,
     },
 
-    ajudaTela: { flex: 1, backgroundColor: theme.colors.background },
-    ajudaCabecalho: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 16,
-      paddingHorizontal: 20,
-      paddingTop: 24,
-      paddingBottom: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.pages.tutorProfile.border,
-      backgroundColor: theme.pages.tutorProfile.card,
-    },
-    ajudaCabecalhoCopy: { flex: 1, minWidth: 0 },
-    ajudaKicker: { color: theme.colors.primary, fontSize: 10, fontWeight: '800', letterSpacing: 1 },
-    ajudaTitulo: { color: theme.colors.text, fontSize: 22, fontWeight: '800', marginTop: 3 },
-    ajudaFechar: {
-      width: 42,
-      height: 42,
-      borderRadius: 21,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.pages.tutorProfile.cardSecondary,
-    },
-    ajudaConteudo: { padding: 16, paddingBottom: 40 },
-    ajudaIntroducao: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      padding: 16,
-      borderRadius: 18,
-      backgroundColor: theme.pages.tutorProfile.card,
-      borderWidth: 1,
-      borderColor: theme.pages.tutorProfile.border,
-    },
-    ajudaIntroducaoIcone: {
-      width: 42,
-      height: 42,
-      borderRadius: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.pages.tutorProfile.cardSecondary,
-    },
-    ajudaIntroducaoTexto: { flex: 1, color: theme.colors.textSecondary, fontSize: 13, lineHeight: 19 },
-    ajudaSecaoTitulo: { color: theme.colors.text, fontSize: 16, fontWeight: '800', marginTop: 24, marginBottom: 12 },
-    listaGuias: { gap: 12 },
-    guiaItem: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: 12,
-      padding: 15,
-      borderRadius: 18,
-      backgroundColor: theme.pages.tutorProfile.card,
-      borderWidth: 1,
-      borderColor: theme.pages.tutorProfile.border,
-    },
-    guiaNumero: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.colors.primary,
-    },
-    guiaNumeroTexto: { color: theme.colors.onPrimary, fontSize: 13, fontWeight: '800' },
-    guiaConteudo: { flex: 1, minWidth: 0 },
-    guiaTituloLinha: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-    guiaTitulo: { flexShrink: 1, color: theme.colors.text, fontSize: 15, fontWeight: '800' },
-    guiaDescricao: { color: theme.colors.textSecondary, fontSize: 13, lineHeight: 19, marginTop: 7 },
   });
 
 const sSimples = StyleSheet.create({
@@ -623,11 +491,4 @@ const sSimples = StyleSheet.create({
   shortcutIcon: { width: 58, height: 58, borderRadius: 18 },
   shortcutTitle: { fontSize: 22 },
   shortcutDescription: { fontSize: 17, lineHeight: 23 },
-  ajudaKicker: { fontSize: 13 },
-  ajudaTitulo: { fontSize: 29, lineHeight: 34 },
-  ajudaIntroducaoTexto: { fontSize: 18, lineHeight: 25 },
-  ajudaSecaoTitulo: { fontSize: 22, marginTop: 28, marginBottom: 14 },
-  guiaNumeroTexto: { fontSize: 17 },
-  guiaTitulo: { fontSize: 21, lineHeight: 26 },
-  guiaDescricao: { fontSize: 17, lineHeight: 24, marginTop: 9 },
 });
