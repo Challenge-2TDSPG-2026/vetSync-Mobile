@@ -12,6 +12,7 @@ import { PetSwitcher } from '../../../components/PetSwitcher';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import { DicaTela } from '../../../components/ui/DicaTela';
+import { IllustratedPageHero } from '../../../components/ui/IllustratedPageHero';
 import { statusExibicao, STATUS_EXIBICAO_BADGE, parseDataEvento } from '../../../utils/eventoStatus';
 
 function mesAno(iso: string): string {
@@ -26,7 +27,7 @@ export default function HistoricoScreen() {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const sSimples = useMemo(() => createSimpleStyles(theme), [theme]);
-  const { eventos, carregandoEventos } = usePet();
+  const { petAtivo, eventos, carregandoEventos } = usePet();
   const { modoSimples } = useAccessibility();
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-historico');
@@ -62,7 +63,14 @@ export default function HistoricoScreen() {
       contentContainerStyle={s.content}
       refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.pages.history.primary} colors={[theme.pages.history.primary]} />}
     >
-
+      <IllustratedPageHero
+        image={require('../../../assets/images/history.png')}
+        title="Histórico de cuidados"
+        subtitle={petAtivo ? `Acompanhe tudo o que já foi registrado para ${petAtivo.nome}.` : 'Acompanhe os eventos de saúde registrados para seus pets.'}
+        icon="time-outline"
+        accessibilityLabel="Tutor conversando com a equipe veterinária sobre os cuidados do pet"
+        simple={modoSimples}
+      />
       <PetSwitcher />
 
       {dicaVisivel && (
