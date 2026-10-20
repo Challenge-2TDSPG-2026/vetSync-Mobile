@@ -12,4 +12,6 @@ export const STORAGE_KEYS = {
   DISPONIBILIDADE: '@vetsync:disponibilidade',
   BLOQUEIOS_AGENDA: '@vetsync:bloqueios_agenda',
   PUSH_TOKEN: '@vetsync:push_token',
+  RETORNOS_LOCAIS_VET: '@vetsync:retornos_locais_vet',
+  ETAPAS_ATENDIMENTO_VET: '@vetsync:etapas_atendimento_vet',
 };
