@@ -214,7 +214,7 @@ npm run check         # executa todas as verificações acima
 npm run format        # formata os arquivos de configuração
 ```
 
-> A URL da API é resolvida automaticamente em `constants/api.ts`: `http://localhost:8080` para iOS/Web e `http://10.0.2.2:8080` para o emulador Android — não precisa configurar nada manualmente ao rodar localmente.
+> A URL da API vem de `EXPO_PUBLIC_API_BASE_URL` no arquivo `.env` (use `.env.example` como referência). O padrão aponta para a API publicada no Azure. Para executar um backend local, configure `http://localhost:8080` no navegador/iOS Simulator ou `http://10.0.2.2:8080` no emulador Android. Em dispositivo físico, use o endereço da máquina na rede local e reinicie o Expo após mudar o `.env`.
 
 ### Contas de teste
 

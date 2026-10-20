@@ -34,7 +34,7 @@ describe('petMapper', () => {
   });
 
   it('normaliza o caminho relativo da foto devolvido pelo Java', () => {
-    expect(normalizarFotoUrl('/pets/12/foto')).toBe('https://vetsync-java.onrender.com/pets/12/foto');
+    expect(normalizarFotoUrl('/pets/12/foto')).toBe('https://app-vetsync-rm563197.azurewebsites.net/pets/12/foto');
     expect(normalizarFotoUrl(null)).toBeNull();
   });
 

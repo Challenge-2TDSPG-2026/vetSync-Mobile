@@ -26,11 +26,9 @@ jobs:
         env:
           EXPO_PUBLIC_COMMIT_HASH: ${{ github.sha }}
           EXPO_PUBLIC_BUILD_NUMBER: ${{ github.run_number }}
-          # Só descomente se for sobrescrever o padrão do código (https://vetsync-java.onrender.com):
-          # EXPO_PUBLIC_API_BASE_URL: ${{ secrets.EXPO_PUBLIC_API_BASE_URL }}
+          EXPO_PUBLIC_API_BASE_URL: https://app-vetsync-rm563197.azurewebsites.net
           # Necessário para o login com Google na web:
           EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

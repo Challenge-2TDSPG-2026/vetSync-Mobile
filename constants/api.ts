@@ -1,8 +1,11 @@
-const DEFAULT_API_BASE_URL = 'https://vetsync-java.onrender.com';
+const DEFAULT_API_BASE_URL = 'https://app-vetsync-rm563197.azurewebsites.net';
 
 function normalizarBaseUrl(url: string | undefined, padrao: string): string {
   const valor = url?.trim();
-  return valor ? valor.replace(/\/+$/, '') : padrao;
+  if (!valor) return padrao;
+
+  const comProtocolo = /^[a-z][a-z\d+.-]*:\/\//i.test(valor) ? valor : `https://${valor}`;
+  return comProtocolo.replace(/\/+$/, '');
 }
 
 // EXPO_PUBLIC_* é incorporada no bundle web durante o build da Vercel.

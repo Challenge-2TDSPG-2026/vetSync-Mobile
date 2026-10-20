@@ -82,7 +82,7 @@ describe('petService', () => {
     const pet = await petService.enviarFoto('12', arquivo);
 
     expect(api.uploadMultipart).toHaveBeenCalledWith('/pets/12/foto', arquivo);
-    expect(pet.fotoUrl).toBe('https://vetsync-java.onrender.com/pets/12/foto.jpg');
+    expect(pet.fotoUrl).toBe('https://app-vetsync-rm563197.azurewebsites.net/pets/12/foto.jpg');
   });
 
   it('remove a foto do pet via DELETE e devolve o pet sem foto', async () => {

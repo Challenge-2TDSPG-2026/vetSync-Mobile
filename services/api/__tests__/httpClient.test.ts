@@ -65,7 +65,7 @@ describe('apiRequest', () => {
 
     expect(append.mock.calls[0][0]).toBe('foto');
     expect(globalThis.fetch).toHaveBeenLastCalledWith(
-      'https://vetsync-java.onrender.com/pets/12/foto',
+      'https://app-vetsync-rm563197.azurewebsites.net/pets/12/foto',
       expect.objectContaining({ method: 'PUT', headers: { Authorization: 'Bearer token-valido' } })
     );
   });
@@ -87,7 +87,7 @@ describe('apiRequest', () => {
 
     expect(append.mock.calls[0][0]).toBe('arquivo');
     expect(globalThis.fetch).toHaveBeenLastCalledWith(
-      'https://vetsync-java.onrender.com/pets/12/exames/7/arquivo',
+      'https://app-vetsync-rm563197.azurewebsites.net/pets/12/exames/7/arquivo',
       expect.objectContaining({ method: 'POST' })
     );
   });
