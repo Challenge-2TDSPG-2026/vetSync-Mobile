@@ -79,7 +79,12 @@ export function IllustratedPageHero({
 
 function createStyles(theme: AppTheme, height: number) {
   return StyleSheet.create({
-    hero: { height, justifyContent: 'flex-end', backgroundColor: theme.pages.shared.heroBackground },
+    hero: {
+      height,
+      marginHorizontal: -18,
+      justifyContent: 'flex-end',
+      backgroundColor: theme.pages.shared.heroBackground,
+    },
     image: { width: '100%', height: '100%' },
     back: {
       position: 'absolute',
