@@ -20,6 +20,7 @@ import { buscarEnderecoPorCep, formatarCep } from '../../../services/cepService'
 import { useAtualizarTutor, useTutor } from '../../../hooks/useTutor';
 import { mensagemDeErro } from '../../../services/api/errorMessages';
 import { mostrarToast } from '../../../components/ui/Toast';
+import { IllustratedPageHero } from '../../../components/ui/IllustratedPageHero';
 import type { AppTheme } from '../../../constants/theme';
 import type { AtualizarTutorPayload, DadosTutor } from '../../../services/tutorService';
 
@@ -181,22 +182,16 @@ export default function GerenciarContaScreen() {
   }
 
   const cabecalho = (
-    <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
-      <Pressable
-        style={s.backButton}
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Voltar para conta"
-      >
-        <Ionicons name="arrow-back" size={23} color={theme.components.header.icon} />
-      </Pressable>
-      <View style={s.headerCopy}>
-        <Text style={[s.title, modoSimples && sSimples.title]}>Gerenciar conta</Text>
-        <Text style={[s.subtitle, modoSimples && sSimples.subtitle]}>
-          Consulte e mantenha seus dados atualizados.
-        </Text>
-      </View>
-    </View>
+    <IllustratedPageHero
+      image={require('../../../assets/images/manageAccount.png')}
+      title="Dados da conta"
+      subtitle="Consulte e mantenha seus dados pessoais e de contato atualizados."
+      icon="person-circle-outline"
+      accessibilityLabel="Equipe veterinária acolhendo um pet"
+      simple={modoSimples}
+      onBack={() => router.back()}
+      backLabel="Voltar para configurações"
+    />
   );
 
   if (tutor.isLoading) {
