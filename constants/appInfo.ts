@@ -27,12 +27,3 @@ export const APP_INFO = {
   commitShort: commitHash ? commitHash.slice(0, 7) : NOT_DEFINED,
   hasCommitHash: Boolean(commitHash),
 } as const;
-
-// TEMPORÁRIO: remover depois do teste
-console.log(
-  'APP_INFO debug',
-  Platform.OS,
-  Constants.executionEnvironment,
-  JSON.stringify(Constants.expoConfig?.extra),
-  JSON.stringify(APP_INFO),
-);
