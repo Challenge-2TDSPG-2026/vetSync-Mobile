@@ -133,13 +133,13 @@ export default function ResgatesPendentesScreen() {
 
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.pages.vetRedemptions.background },
-  content: { padding: 20, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 44 },
   loadingContainer: { flex: 1, backgroundColor: theme.pages.vetRedemptions.background, justifyContent: 'center', alignItems: 'center' },
 
   banner: {
     backgroundColor: theme.pages.vetRedemptions.primary,
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 22,
+    padding: 21,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
@@ -167,8 +167,8 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   emptySub: { fontSize: 13, color: theme.pages.vetRedemptions.textSecondary, textAlign: 'center', paddingHorizontal: 16 },
 
   card: {
-    backgroundColor: theme.pages.vetRedemptions.card, borderRadius: 14, borderWidth: 1.5, borderColor: theme.domain.reward.gold,
-    padding: 14, marginBottom: 12,
+    backgroundColor: theme.pages.vetRedemptions.card, borderRadius: 18, borderWidth: 1.5, borderColor: theme.domain.reward.gold,
+    padding: 17, marginBottom: 14, elevation: 2,
   },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
   cardIconWrap: {

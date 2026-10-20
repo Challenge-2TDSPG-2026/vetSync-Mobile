@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { EmptyState } from '../../components/ui/EmptyState';
 import type { AppTheme } from '../../constants/theme';
+import { VetPageIntro } from '../../components/vet/VetPageIntro';
 
 type Filtro = 'todos' | 'pendentes' | 'atendidos';
 
@@ -42,8 +43,7 @@ export default function VetPacientesScreen() {
       contentContainerStyle={s.content}
       refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} />}
     >
-      <Text style={s.title}>Pacientes</Text>
-      <Text style={s.subtitle}>Busque pelo pet, tutor ou raça e acompanhe pendências de retorno.</Text>
+      <VetPageIntro eyebrow="CUIDADO CONTÍNUO" title="Seus pacientes" description="Encontre rapidamente os pets da sua clínica e acompanhe os retornos." icon="paw-outline" />
       <View style={s.search}>
         <Ionicons name="search-outline" size={19} color={theme.colors.textSecondary} />
         <TextInput
@@ -93,21 +93,21 @@ export default function VetPacientesScreen() {
 
 const styles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: 16, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 44 },
   loading: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background, gap: 10 },
   loadingText: { color: theme.colors.textSecondary },
   title: { fontSize: 25, fontWeight: '800', color: theme.colors.text },
   subtitle: { color: theme.colors.textSecondary, fontSize: 13, marginTop: 5, marginBottom: 16 },
-  search: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: theme.pages.vetPatients.searchField.background, borderWidth: 1, borderColor: theme.pages.vetPatients.searchField.border, borderRadius: 12, paddingHorizontal: 12, height: 46 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.pages.vetPatients.searchField.background, borderWidth: 1, borderColor: theme.pages.vetPatients.searchField.border, borderRadius: 15, paddingHorizontal: 15, height: 52, elevation: 1 },
   searchInput: { flex: 1, color: theme.colors.text, fontSize: 14 },
-  filters: { flexDirection: 'row', gap: 8, marginVertical: 14 },
+  filters: { flexDirection: 'row', gap: 8, marginVertical: 16, flexWrap: 'wrap' },
   filter: { borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: theme.pages.vetPatients.filterChip.border, backgroundColor: theme.pages.vetPatients.filterChip.background },
   filterActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   filterText: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '700' },
   filterTextActive: { color: theme.colors.onPrimary },
   count: { color: theme.colors.textSecondary, fontSize: 12, marginBottom: 9 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: theme.pages.vetPatients.patientCard.background, borderWidth: 1, borderColor: theme.pages.vetPatients.patientCard.border, borderRadius: 14, padding: 14, marginBottom: 9 },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.colors.successBackground, justifyContent: 'center', alignItems: 'center' },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.pages.vetPatients.patientCard.background, borderWidth: 1, borderColor: theme.pages.vetPatients.patientCard.border, borderRadius: 18, padding: 15, marginBottom: 11, elevation: 2 },
+  avatar: { width: 48, height: 48, borderRadius: 17, backgroundColor: theme.colors.successBackground, justifyContent: 'center', alignItems: 'center' },
   cardBody: { flex: 1 },
   petName: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
   meta: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 3 },

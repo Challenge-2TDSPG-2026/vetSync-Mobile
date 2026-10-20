@@ -8,6 +8,7 @@ import { confirmar } from '../../utils/alert';
 import { mostrarToast } from '../../components/ui/Toast';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
+import { VetPageIntro } from '../../components/vet/VetPageIntro';
 
 // Convenção do Java: 1=segunda ... 7=domingo (não é a mesma do Date.getDay() do JS)
 const DIAS_SEMANA = [
@@ -113,6 +114,7 @@ export default function DisponibilidadeScreen() {
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
+      <VetPageIntro eyebrow="ORGANIZAÇÃO" title="Sua agenda" description="Configure seus horários semanais e bloqueie períodos em que não estará disponível." icon="time-outline" />
 
       {dicaVisivel && (
         <DicaTela
@@ -237,13 +239,13 @@ export default function DisponibilidadeScreen() {
 
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.pages.vetAvailability.background },
-  content: { padding: 16, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 44 },
 
   secLabel: {
     fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase',
     color: theme.pages.vetAvailability.textSecondary, marginBottom: 10, marginTop: 4, paddingLeft: 2,
   },
-  card: { backgroundColor: theme.pages.vetAvailability.card, borderRadius: 14, borderWidth: 1, borderColor: theme.pages.vetAvailability.border, padding: 16, marginBottom: 20 },
+  card: { backgroundColor: theme.pages.vetAvailability.card, borderRadius: 18, borderWidth: 1, borderColor: theme.pages.vetAvailability.border, padding: 18, marginBottom: 22, elevation: 2 },
 
   diasRow: { flexDirection: 'row', gap: 6, marginBottom: 14, flexWrap: 'wrap' },
   diaBtn: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 8, backgroundColor: theme.pages.vetAvailability.cardSecondary, borderWidth: 1, borderColor: theme.pages.vetAvailability.border },

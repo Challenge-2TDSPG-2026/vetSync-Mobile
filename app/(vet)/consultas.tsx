@@ -17,6 +17,7 @@ import { mensagemDeErro } from '../../services/api/errorMessages';
 import { ETAPA_VISUAL, ehPendenteDeConfirmacao, formatarDataEHora } from '../../utils/solicitacao';
 import type { Evento } from '../../types';
 import type { AppTheme } from '../../constants/theme';
+import { VetPageIntro } from '../../components/vet/VetPageIntro';
 
 export default function ConsultasScreen() {
   const router = useRouter();
@@ -64,6 +65,7 @@ export default function ConsultasScreen() {
         contentContainerStyle={s.content}
         refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.vetAppointments.card} />}
       >
+        <VetPageIntro eyebrow="AGENDA CLÍNICA" title="Consultas" description="Acompanhe solicitações, confirme horários e acesse a ficha de cada paciente." icon="calendar-outline" />
         {dicaVisivel && (
           <DicaTela
             titulo="Suas consultas"
@@ -180,20 +182,20 @@ export default function ConsultasScreen() {
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
 
-  content: { padding: 16, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 44 },
   empty: { alignItems: 'center', paddingVertical: 56 },
   emptyTitle: { fontSize: 15, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
   emptySub: { fontSize: 13, color: theme.colors.textSecondary, textAlign: 'center' },
 
-  card: { backgroundColor: theme.pages.vetAppointments.card, borderWidth: 1, borderColor: theme.pages.vetAppointments.border, borderRadius: 12, overflow: 'hidden', marginBottom: 10 },
-  cardRow: { flexDirection: 'row', alignItems: 'flex-start', padding: 14, gap: 12, borderBottomWidth: 1, borderBottomColor: theme.pages.vetAppointments.border },
-  eventoIcone: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  card: { backgroundColor: theme.pages.vetAppointments.card, borderWidth: 1, borderColor: theme.pages.vetAppointments.border, borderRadius: 18, overflow: 'hidden', marginBottom: 13, elevation: 2 },
+  cardRow: { flexDirection: 'row', alignItems: 'flex-start', padding: 17, gap: 13, borderBottomWidth: 1, borderBottomColor: theme.pages.vetAppointments.border },
+  eventoIcone: { width: 46, height: 46, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   eventoInfo: { flex: 1 },
-  eventoTitulo: { fontSize: 14, fontWeight: '700', color: theme.colors.text },
-  eventoMeta: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 3 },
+  eventoTitulo: { fontSize: 15, fontWeight: '800', color: theme.colors.text },
+  eventoMeta: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 5 },
   eventoObs: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 4, fontStyle: 'italic' },
 
-  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 10, backgroundColor: theme.pages.vetAppointments.cardSecondary },
+  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 13, backgroundColor: theme.pages.vetAppointments.cardSecondary },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 11, fontWeight: '700' },
   acoes: { flexDirection: 'row', alignItems: 'center', gap: 8 },

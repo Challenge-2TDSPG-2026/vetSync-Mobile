@@ -320,13 +320,13 @@ function StatCard({ styles, valor, label, accentColor }: { styles: ReturnType<ty
 
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: 20, paddingBottom: 32 },
+  content: { padding: 20, paddingBottom: 44 },
   loadingContainer: { flex: 1, backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' },
 
   welcome: {
     backgroundColor: theme.pages.vetDashboard.heroBackground,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 22,
+    padding: 22,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
@@ -344,11 +344,11 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
   statCard: {
     flex: 1, backgroundColor: theme.pages.vetDashboard.statsCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.statsCard.border,
-    borderRadius: 12, padding: 14, borderBottomWidth: 3,
+    borderRadius: 17, padding: 16, borderBottomWidth: 3, elevation: 2,
   },
   statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 6 },
   statVal: { fontSize: 26, fontWeight: '700', lineHeight: 28 },
-  resumoCard: { backgroundColor: theme.pages.vetDashboard.summaryCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.summaryCard.border, borderRadius: 16, padding: 16, marginBottom: 16 },
+  resumoCard: { backgroundColor: theme.pages.vetDashboard.summaryCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.summaryCard.border, borderRadius: 19, padding: 18, marginBottom: 16, elevation: 2 },
   resumoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   resumoEyebrow: { fontSize: 10, color: theme.colors.primary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
   resumoTitle: { fontSize: 15, color: theme.colors.text, fontWeight: '700', marginTop: 3 },
@@ -357,7 +357,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   resumoValue: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
   resumoLabel: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 3 },
   resumoDivider: { width: 1, height: 34, backgroundColor: theme.pages.vetDashboard.summaryCard.divider, marginHorizontal: 14 },
-  ocupacaoCard: { backgroundColor: theme.pages.vetDashboard.summaryCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.summaryCard.border, borderRadius: 16, padding: 16, marginBottom: 16 },
+  ocupacaoCard: { backgroundColor: theme.pages.vetDashboard.summaryCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.summaryCard.border, borderRadius: 19, padding: 18, marginBottom: 16, elevation: 2 },
   ocupacaoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   ocupacaoEyebrow: { fontSize: 10, color: theme.colors.primary, fontWeight: '800', letterSpacing: 0.7 },
   ocupacaoTitle: { fontSize: 15, color: theme.colors.text, fontWeight: '800', marginTop: 4 },
@@ -366,7 +366,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   ocupacaoFill: { height: '100%', borderRadius: 5 },
   ocupacaoHint: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 8 },
   quickActions: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  quickAction: { flex: 1, backgroundColor: theme.pages.vetDashboard.quickActionCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.quickActionCard.border, borderRadius: 12, padding: 11, alignItems: 'center', gap: 7 },
+  quickAction: { flex: 1, backgroundColor: theme.pages.vetDashboard.quickActionCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.quickActionCard.border, borderRadius: 16, padding: 13, alignItems: 'center', gap: 8, elevation: 1 },
   quickIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
   quickLabel: { fontSize: 10, color: theme.colors.text, fontWeight: '700', textAlign: 'center' },
 
@@ -377,7 +377,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   },
   alertaResgatesText: { flex: 1, fontSize: 13, fontWeight: '700', color: theme.colors.onPrimary },
 
-  card: { backgroundColor: theme.pages.vetDashboard.eventListCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.eventListCard.border, borderRadius: 16, marginBottom: 16, overflow: 'hidden' },
+  card: { backgroundColor: theme.pages.vetDashboard.eventListCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.eventListCard.border, borderRadius: 19, marginBottom: 16, overflow: 'hidden', elevation: 2 },
   cardHead: {
     paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.pages.vetDashboard.eventListCard.border,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.pages.vetDashboard.eventListCard.headerBackground,

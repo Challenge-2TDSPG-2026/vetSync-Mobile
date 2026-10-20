@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useRelatorioClinica } from '../../hooks/useRelatorios';
 import type { AppTheme } from '../../constants/theme';
+import { VetPageIntro } from '../../components/vet/VetPageIntro';
 
 function intervaloMesAtual() {
   const hoje = new Date();
@@ -35,8 +36,7 @@ export default function VetRelatoriosScreen() {
         <Ionicons name="arrow-back" size={21} color={theme.colors.primary} />
         <Text style={s.backButtonText}>Voltar</Text>
       </Pressable>
-      <Text style={s.title}>Resumo da clínica</Text>
-      <Text style={s.subtitle}>Indicadores de {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}.</Text>
+      <VetPageIntro eyebrow="VISÃO DO NEGÓCIO" title="Relatórios" description={`Indicadores da clínica para ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}.`} icon="bar-chart-outline" />
       {isLoading ? <ActivityIndicator color={theme.colors.primary} style={s.loading} /> : null}
       {isError ? <Text style={s.error}>Não foi possível carregar os relatórios. Tente novamente mais tarde.</Text> : null}
       {data ? (
@@ -59,15 +59,13 @@ function Metric({ styles: s, theme, label, value, accent, wide }: { styles: Retu
 
 const styles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: 16, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 44 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14, paddingVertical: 4 },
   backButtonText: { color: theme.colors.primary, fontSize: 15, fontWeight: '700' },
-  title: { color: theme.colors.text, fontSize: 24, fontWeight: '800' },
-  subtitle: { color: theme.colors.textSecondary, marginTop: 4, marginBottom: 18 },
   loading: { marginTop: 30 },
   error: { color: theme.colors.danger, backgroundColor: theme.colors.dangerBackground, borderRadius: 10, padding: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  metricCard: { width: '48%', backgroundColor: theme.pages.vetReports.card, borderRadius: 14, padding: 15, borderWidth: 1, borderColor: theme.pages.vetReports.border, marginBottom: 10 },
+  metricCard: { width: '48%', backgroundColor: theme.pages.vetReports.card, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: theme.pages.vetReports.border, marginBottom: 12, elevation: 2 },
   metricWide: { width: '100%' },
   metricValue: { fontSize: 22, fontWeight: '800', color: theme.pages.vetReports.primary },
   metricLabel: { color: theme.pages.vetReports.textSecondary, fontSize: 11, marginTop: 5, fontWeight: '700' },
