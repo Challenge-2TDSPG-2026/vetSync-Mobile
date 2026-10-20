@@ -18,7 +18,14 @@ export default function SobreAppScreen() {
 
   return (
     <View style={styles.container}>
-      <IllustratedPageHero
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: Math.max(insets.bottom, 18) + 28 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <IllustratedPageHero
         image={require('../assets/images/about.png')}
         title="Sobre o VetSync"
         subtitle="Conheça a versão instalada e identifique o código usado para criá-la."
@@ -27,14 +34,6 @@ export default function SobreAppScreen() {
         simple={modoSimples}
         onBack={() => router.back()}
       />
-
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: Math.max(insets.bottom, 18) + 28 },
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
         <View style={styles.brandCard}>
           <View style={styles.logo}>
             <Ionicons name="paw" size={38} color={theme.colors.onPrimary} />

@@ -156,7 +156,12 @@ export default function AcessoCompartilhadoScreen() {
 
   return (
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <IllustratedPageHero
+      <ScrollView
+        contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <IllustratedPageHero
         image={require('../../assets/images/sharedAccess.png')}
         title="Acesso compartilhado"
         subtitle="Escolha quem pode acompanhar cada pet e quais ações essa pessoa pode fazer."
@@ -165,12 +170,6 @@ export default function AcessoCompartilhadoScreen() {
         simple={modoSimples}
         onBack={() => router.back()}
       />
-
-      <ScrollView
-        contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
         <PetSwitcher />
 
         {!petAtivo ? (

@@ -49,7 +49,11 @@ export default function PetsCadastradosScreen() {
 
   return (
     <View style={s.container}>
-      <IllustratedPageHero
+      <ScrollView
+        contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <IllustratedPageHero
         image={require('../assets/images/registeredPets.png')}
         title="Pets cadastrados"
         subtitle="Consulte a identificação dos seus pets e mantenha suas fotos atualizadas."
@@ -59,11 +63,6 @@ export default function PetsCadastradosScreen() {
         onBack={() => router.back()}
         backLabel="Voltar para configurações"
       />
-
-      <ScrollView
-        contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
-        showsVerticalScrollIndicator={false}
-      >
         <View style={s.infoNotice}>
           <Ionicons name="information-circle-outline" size={21} color={theme.colors.primary} />
           <Text style={[s.infoNoticeText, modoSimples && sSimples.infoNoticeText]}>
