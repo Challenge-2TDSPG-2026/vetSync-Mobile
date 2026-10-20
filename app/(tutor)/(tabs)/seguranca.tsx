@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, ImageBackground, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../../context/AuthContext';
@@ -157,35 +158,66 @@ export default function SegurancaScreen() {
 
   return (
     <View style={s.container}>
-      <View style={[s.header, { paddingTop: Math.max(insets.top, 12) }]}>
-        <Pressable
-          style={s.backButton}
-          onPress={() => router.replace('/(tutor)/(tabs)/perfil')}
-          accessibilityRole="button"
-          accessibilityLabel="Voltar para conta"
-        >
-          <Ionicons name="arrow-back" size={23} color={theme.components.header.icon} />
-        </Pressable>
-        <Text style={[s.title, modoSimples && sSimples.title]}>Segurança</Text>
-      </View>
-
       <ScrollView
         contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
         showsVerticalScrollIndicator={false}
       >
+        <ImageBackground
+          source={require('../../../assets/images/security.png')}
+          style={s.hero}
+          imageStyle={s.heroImage}
+          resizeMode="cover"
+          accessibilityLabel="Veterinária cuidando de um pet em uma clínica"
+        >
+          <LinearGradient
+            colors={['rgba(5, 25, 18, 0.18)', 'rgba(5, 25, 18, 0.34)', 'rgba(5, 25, 18, 0.94)']}
+            locations={[0, 0.42, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+          <Pressable
+            style={[s.backButton, { top: Math.max(insets.top, 14) }]}
+            onPress={() => router.replace('/(tutor)/(tabs)/perfil')}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar para conta"
+          >
+            <Ionicons name="arrow-back" size={22} color={theme.colors.text} />
+          </Pressable>
+          <View style={s.heroContent}>
+            <View style={s.heroIcon}>
+              <Ionicons name="shield-checkmark" size={modoSimples ? 30 : 24} color={theme.colors.primary} />
+            </View>
+            <Text style={[s.heroEyebrow, modoSimples && sSimples.heroEyebrow]}>SUA CONTA VETSYNC</Text>
+            <Text style={[s.heroTitle, modoSimples && sSimples.heroTitle]}>Segurança e acesso</Text>
+            <Text style={[s.heroSubtitle, modoSimples && sSimples.heroSubtitle]}>
+              Gerencie como você entra e protege sua conta neste aparelho.
+            </Text>
+          </View>
+        </ImageBackground>
+
+        <View style={s.body}>
         <View style={s.intro}>
           <View style={s.introIcon}>
-            <Ionicons name="shield-checkmark-outline" size={28} color={theme.colors.primary} />
+            <Ionicons name="lock-closed-outline" size={25} color={theme.colors.primary} />
           </View>
           <View style={s.introCopy}>
-            <Text style={[s.introTitle, modoSimples && sSimples.introTitle]}>Proteja seu acesso</Text>
+            <Text style={[s.introTitle, modoSimples && sSimples.introTitle]}>
+              {biometria.ativada ? 'Login biométrico ativado' : 'Proteja seu acesso'}
+            </Text>
             <Text style={[s.introText, modoSimples && sSimples.introText]}>
-              Ajuste como você entra no VetSync neste aparelho.
+              {biometria.ativada
+                ? `Você pode entrar com ${biometria.nome} neste aparelho.`
+                : 'Escolha os métodos de acesso que funcionam melhor para você.'}
+            </Text>
+          </View>
+          <View style={[s.statusBadge, biometria.ativada ? s.statusBadgeOn : s.statusBadgeOff]}>
+            <View style={[s.statusDot, { backgroundColor: biometria.ativada ? theme.colors.success : theme.colors.textMuted }]} />
+            <Text style={[s.statusText, { color: biometria.ativada ? theme.colors.success : theme.colors.textSecondary }]}>
+              {biometria.ativada ? 'ATIVA' : 'SENHA'}
             </Text>
           </View>
         </View>
 
-        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Login no aparelho</Text>
+        <SectionHeader icon="finger-print-outline" title="Acesso neste aparelho" styles={s} simples={modoSimples} />
         <View style={s.card}>
           <View style={[s.row, modoSimples && sSimples.row]}>
             <View style={[s.rowIcon, modoSimples && sSimples.rowIcon]}>
@@ -221,7 +253,7 @@ export default function SegurancaScreen() {
           ) : null}
         </View>
 
-        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Conta Google</Text>
+        <SectionHeader icon="logo-google" title="Acesso com Google" styles={s} simples={modoSimples} />
         <View style={s.card}>
           <View style={[s.row, modoSimples && sSimples.row]}>
             <View style={[s.rowIcon, modoSimples && sSimples.rowIcon]}>
@@ -268,7 +300,7 @@ export default function SegurancaScreen() {
           ) : null}
         </View>
 
-        <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Senha</Text>
+        <SectionHeader icon="key-outline" title="Senha da conta" styles={s} simples={modoSimples} />
         <View style={s.card}>
           <Pressable
             style={({ pressed }) => [s.row, modoSimples && sSimples.row, pressed && s.pressed]}
@@ -294,6 +326,15 @@ export default function SegurancaScreen() {
               <Ionicons name="chevron-forward" size={modoSimples ? 27 : 20} color={theme.colors.textMuted} />
             )}
           </Pressable>
+        </View>
+        <View style={s.securityTip}>
+          <View style={s.tipIcon}>
+            <Ionicons name="information-circle-outline" size={20} color={theme.colors.info} />
+          </View>
+          <Text style={[s.tipText, modoSimples && sSimples.noticeText]}>
+            A biometria é protegida pelo seu aparelho. Se ela não estiver disponível, você ainda pode entrar com e-mail e senha.
+          </Text>
+        </View>
         </View>
       </ScrollView>
 
@@ -358,6 +399,27 @@ export default function SegurancaScreen() {
   );
 }
 
+function SectionHeader({
+  icon,
+  title,
+  styles,
+  simples,
+}: {
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  title: string;
+  styles: ReturnType<typeof createStyles>;
+  simples: boolean;
+}) {
+  return (
+    <View style={styles.sectionHeading}>
+      <View style={styles.sectionIcon}>
+        <Ionicons name={icon} size={simples ? 22 : 18} color={styles.sectionIconColor.color} />
+      </View>
+      <Text style={[styles.sectionTitle, simples && sSimples.sectionTitle]}>{title}</Text>
+    </View>
+  );
+}
+
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.colors.background },
@@ -371,42 +433,80 @@ function createStyles(theme: AppTheme) {
       borderBottomWidth: 1,
       borderBottomColor: theme.components.header.border,
     },
-    backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
+    backButton: {
+      position: 'absolute',
+      left: 18,
+      zIndex: 2,
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 15,
+      backgroundColor: theme.pages.shared.cardElevated,
+      borderWidth: 1,
+      borderColor: theme.pages.shared.border,
+    },
     title: { color: theme.components.header.title, fontSize: 20, fontWeight: '800' },
-    content: { paddingHorizontal: 18, paddingTop: 24 },
+    content: { paddingBottom: 28 },
+    hero: { height: 300, justifyContent: 'flex-end', backgroundColor: theme.pages.shared.heroBackground },
+    heroImage: { width: '100%', height: '100%' },
+    heroContent: { paddingHorizontal: 22, paddingTop: 85, paddingBottom: 24 },
+    heroIcon: {
+      width: 48,
+      height: 48,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 16,
+      backgroundColor: theme.pages.shared.cardElevated,
+      marginBottom: 12,
+    },
+    heroEyebrow: { color: '#d8f1df', fontSize: 10, fontWeight: '900', letterSpacing: 1.4 },
+    heroTitle: { color: '#ffffff', fontSize: 28, fontWeight: '900', letterSpacing: -0.7, marginTop: 4 },
+    heroSubtitle: { color: '#f0f6f1', fontSize: 13, lineHeight: 19, marginTop: 5, maxWidth: 430 },
+    body: { paddingHorizontal: 20, paddingTop: 22 },
     intro: {
       flexDirection: 'row',
+      alignItems: 'center',
       gap: 13,
       padding: 16,
-      borderRadius: 21,
-      backgroundColor: theme.colors.successBackground,
-      marginBottom: 25,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.pages.shared.border,
+      backgroundColor: theme.pages.shared.card,
+      marginBottom: 26,
     },
-    introIcon: { paddingTop: 2 },
+    introIcon: {
+      width: 45,
+      height: 45,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 15,
+      backgroundColor: theme.colors.successBackground,
+    },
     introCopy: { flex: 1 },
     introTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '800' },
     introText: { color: theme.colors.textSecondary, fontSize: 13, lineHeight: 19, marginTop: 3 },
+    statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 6, borderRadius: 999 },
+    statusBadgeOn: { backgroundColor: theme.colors.successBackground },
+    statusBadgeOff: { backgroundColor: theme.pages.shared.cardSecondary },
+    statusDot: { width: 6, height: 6, borderRadius: 3 },
+    statusText: { fontSize: 9, fontWeight: '900', letterSpacing: 0.4 },
+    sectionHeading: { flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 11 },
+    sectionIcon: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: theme.colors.successBackground },
+    sectionIconColor: { color: theme.colors.primary },
     sectionTitle: {
-      color: theme.colors.textSecondary,
-      fontSize: 12,
+      flex: 1,
+      color: theme.colors.text,
+      fontSize: 17,
       fontWeight: '800',
-      letterSpacing: 0.85,
-      textTransform: 'uppercase',
-      marginBottom: 10,
-      paddingLeft: 2,
     },
     card: {
       overflow: 'hidden',
-      borderRadius: 22,
+      borderRadius: 20,
       borderWidth: 1,
-      borderColor: theme.pages.tutorProfile.border,
-      backgroundColor: theme.pages.tutorProfile.card,
-      marginBottom: 28,
-      shadowColor: theme.colors.text,
-      shadowOpacity: 0.05,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 2,
+      borderColor: theme.pages.shared.border,
+      backgroundColor: theme.pages.shared.card,
+      marginBottom: 25,
     },
     row: { flexDirection: 'row', alignItems: 'center', gap: 13, padding: 18 },
     rowIcon: {
@@ -415,11 +515,22 @@ function createStyles(theme: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 14,
-      backgroundColor: theme.pages.tutorProfile.cardSecondary,
+      backgroundColor: theme.pages.shared.cardSecondary,
     },
     rowCopy: { flex: 1, minWidth: 0 },
     socialAction: { paddingHorizontal: 16, paddingBottom: 14 },
     retryGoogle: { paddingHorizontal: 18, paddingBottom: 16, paddingTop: 2 },
+    securityTip: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 9,
+      padding: 14,
+      borderRadius: 16,
+      backgroundColor: theme.colors.infoBackground,
+      marginTop: -5,
+    },
+    tipIcon: { paddingTop: 1 },
+    tipText: { flex: 1, color: theme.colors.textSecondary, fontSize: 12, lineHeight: 18 },
     modalOverlay: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: 'rgba(0,0,0,0.48)' },
     modalCard: { width: '100%', maxWidth: 460, alignSelf: 'center', padding: 20, borderRadius: 22, backgroundColor: theme.pages.tutorProfile.card },
     modalTitle: { color: theme.colors.text, fontSize: 19, fontWeight: '800' },
@@ -446,6 +557,9 @@ function createStyles(theme: AppTheme) {
 
 const sSimples = StyleSheet.create({
   title: { fontSize: 27 },
+  heroEyebrow: { fontSize: 13 },
+  heroTitle: { fontSize: 32 },
+  heroSubtitle: { fontSize: 17, lineHeight: 24 },
   introTitle: { fontSize: 22 },
   introText: { fontSize: 17, lineHeight: 23 },
   sectionTitle: { fontSize: 18 },
