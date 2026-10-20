@@ -26,7 +26,6 @@
       },
       "package": "com.vetsync.app",
       "permissions": [
-        "SCHEDULE_EXACT_ALARM",
         "POST_NOTIFICATIONS",
         "android.permission.READ_CALENDAR",
         "android.permission.WRITE_CALENDAR"
