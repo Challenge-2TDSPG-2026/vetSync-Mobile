@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 import { useTheme } from '../../../context/ThemeContext';
@@ -20,7 +20,7 @@ type ItemMenu = {
 
 /** Itens da barra lateral do veterinário, na ordem pedida. */
 const ITENS: ItemMenu[] = [
-  { label: 'SIA · Assistente veterinário', icon: 'sparkles-outline', href: '/(tutor)/assistente' },
+  { label: 'SIA · Assistente veterinário', icon: 'sparkles-outline', rota: 'sia' },
   { label: 'Consultas', icon: 'medkit-outline', rota: 'consultas' },
   { label: 'Pacientes', icon: 'paw-outline', rota: 'pacientes' },
   { label: 'Disponibilidade', icon: 'calendar-outline', rota: 'disponibilidade' },
@@ -55,7 +55,7 @@ export function VetDesktopSidebar({ state, navigation }: SidebarProps) {
         accessibilityLabel="Ir para o painel inicial"
       >
         <View style={s.brandIcon}>
-          <Ionicons name="add" size={20} color={theme.colors.onPrimary} />
+          <Image source={LOGO} style={s.brandLogo} resizeMode="contain" accessibilityLabel="VetSync" />
         </View>
         <Text style={s.brandText}>Painel Vet</Text>
       </Pressable>
@@ -90,6 +90,8 @@ export function VetDesktopSidebar({ state, navigation }: SidebarProps) {
   );
 }
 
+const LOGO = require('../../../assets/logo.png');
+
 const SIDEBAR_BG = '#0C2418';
 const SIDEBAR_TEXTO = '#CFE3D8';
 const SIDEBAR_HOVER = '#15382A';
@@ -98,7 +100,8 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     sidebar: { width: 248, backgroundColor: SIDEBAR_BG, paddingVertical: 24, paddingHorizontal: 16 },
     brand: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingBottom: 24 },
-    brandIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary },
+    brandIcon: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: SIDEBAR_HOVER },
+    brandLogo: { width: 26, height: 32 },
     brandText: { fontSize: 18, fontWeight: '800', color: '#FFFFFF' },
     nav: { gap: 4 },
     item: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 11, paddingHorizontal: 12, borderRadius: 10 },
