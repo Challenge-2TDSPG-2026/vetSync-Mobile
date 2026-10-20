@@ -19,7 +19,7 @@ export default function SobreAppScreen() {
   return (
     <View style={styles.container}>
       <IllustratedPageHero
-        image={require('../assets/images/About.png')}
+        image={require('../assets/images/about.png')}
         title="Sobre o VetSync"
         subtitle="Conheça a versão instalada e identifique o código usado para criá-la."
         icon="information-circle-outline"
