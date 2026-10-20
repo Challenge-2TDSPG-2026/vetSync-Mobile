@@ -78,6 +78,11 @@ export default function AgendaScreen() {
     return eventosComStatus;
   }, [eventosComStatus, filtro]);
 
+  const eventosNoMes = useMemo(() => eventosComStatus.filter(e => {
+    const data = parseDataEvento(e.data);
+    return data.getMonth() === mesRef.getMonth() && data.getFullYear() === mesRef.getFullYear();
+  }).length, [eventosComStatus, mesRef]);
+
   const marcadores = useMemo(() => {
     const mapa: Record<string, string[]> = {};
     for (const e of eventosFiltrados) {
@@ -182,6 +187,16 @@ export default function AgendaScreen() {
         contentContainerStyle={s.scrollContent}
         refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.agenda.card} />}
       >
+
+        <View style={s.hero}>
+          <View style={s.heroCopy}>
+            <View style={s.heroEyebrow}><View style={s.heroDot} /><Text style={s.heroEyebrowText}>CUIDADO EM DIA</Text></View>
+            <Text style={[s.heroTitle, modoSimples && sSimples.heroTitle]}>Agenda</Text>
+            <Text style={[s.heroSubtitle, modoSimples && sSimples.heroSubtitle]}>Cada cuidado, no momento certo.</Text>
+          </View>
+          <View style={s.heroIcon}><Ionicons name="calendar" size={30} color={theme.colors.onPrimary} /></View>
+          {!modoSimples && <View style={s.heroSummary}><Text style={s.heroSummaryValue}>{eventosNoMes}</Text><Text style={s.heroSummaryLabel}>compromissos neste mês</Text></View>}
+        </View>
 
         <PetSwitcher />
 
@@ -455,7 +470,7 @@ export default function AgendaScreen() {
 
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const createStyles = (theme: AppTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background },
+  container: { flex: 1, backgroundColor: theme.pages.agenda.background },
 
   filtroBar: { flexGrow: 0, flexShrink: 0, minHeight: 68, backgroundColor: theme.colors.background },
   filtroContent: { alignItems: 'center', paddingHorizontal: 18, paddingVertical: 10, gap: 8 },
@@ -478,7 +493,18 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   filtroText: { fontSize: 13, fontWeight: '700', color: theme.colors.text },
   filtroTextAtivo: { color: theme.colors.onPrimary },
 
-  scrollContent: { paddingHorizontal: 18, paddingTop: 6, paddingBottom: 108 },
+  scrollContent: { paddingHorizontal: 18, paddingTop: 12, paddingBottom: 108 },
+  hero: { minHeight: 158, borderRadius: 26, padding: 22, marginBottom: 16, overflow: 'hidden', backgroundColor: theme.pages.agenda.primary, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', shadowColor: theme.pages.agenda.primary, shadowOpacity: theme.mode === 'dark' ? 0 : 0.2, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 4 },
+  heroCopy: { flex: 1, zIndex: 1 },
+  heroEyebrow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 },
+  heroDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#91E2B5' },
+  heroEyebrowText: { color: 'rgba(255,255,255,0.72)', fontSize: 10, fontWeight: '800', letterSpacing: 1.4 },
+  heroTitle: { color: '#ffffff', fontSize: 32, fontWeight: '800', letterSpacing: -0.8 },
+  heroSubtitle: { color: 'rgba(255,255,255,0.78)', fontSize: 13, marginTop: 4 },
+  heroIcon: { width: 52, height: 52, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' },
+  heroSummary: { position: 'absolute', left: 22, bottom: 16, flexDirection: 'row', alignItems: 'baseline', gap: 7 },
+  heroSummaryValue: { color: '#ffffff', fontSize: 18, fontWeight: '800' },
+  heroSummaryLabel: { color: 'rgba(255,255,255,0.68)', fontSize: 11, fontWeight: '600' },
 
   diaHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8,
@@ -611,6 +637,8 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
 
 /** Modo simples: ~35% maior que o padrão, com bem menos conteúdo por tela. */
 const sSimples = StyleSheet.create({
+  heroTitle: { fontSize: 38 },
+  heroSubtitle: { fontSize: 17, marginTop: 7 },
   filtroBtn: { paddingHorizontal: 22, paddingVertical: 14 },
   filtroText: { fontSize: 19 },
 
