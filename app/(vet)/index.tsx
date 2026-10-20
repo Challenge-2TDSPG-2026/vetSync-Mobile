@@ -15,8 +15,16 @@ import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 import type { AppTheme } from '../../constants/theme';
+import { useVetDesktop } from '../../components/vet/desktop/useVetDesktop';
+import { VetDashboardDesktop } from '../../components/vet/desktop/VetDashboardDesktop';
 
+/** Desktop (web larga) usa o painel novo; mobile mantem o layout atual. */
 export default function VetDashboardScreen() {
+  const desktop = useVetDesktop();
+  return desktop ? <VetDashboardDesktop /> : <VetDashboardMobile />;
+}
+
+function VetDashboardMobile() {
   const router = useRouter();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);

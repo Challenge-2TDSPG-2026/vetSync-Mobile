@@ -2,14 +2,19 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { VetSyncTabBar } from '../../components/navigation/VetSyncTabBar';
 import { useTheme } from '../../context/ThemeContext';
+import { useVetDesktop } from '../../components/vet/desktop/useVetDesktop';
+import { VetDesktopSidebar } from '../../components/vet/desktop/VetDesktopSidebar';
+import { VetDesktopTopBar } from '../../components/vet/desktop/VetDesktopTopBar';
 
 export default function VetTabsLayout() {
   const { theme } = useTheme();
+  const desktop = useVetDesktop();
 
   return (
     <Tabs
-      tabBar={props => <VetSyncTabBar {...props} />}
+      tabBar={props => (desktop ? <VetDesktopSidebar {...props} /> : <VetSyncTabBar {...props} />)}
       screenOptions={{
+        ...(desktop ? { tabBarPosition: 'left' as const, header: () => <VetDesktopTopBar /> } : {}),
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textSecondary,
         animation: 'fade',
