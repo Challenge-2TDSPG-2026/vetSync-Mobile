@@ -316,3 +316,12 @@ export async function limparSessaoPersistida(): Promise<void> {
     excluirDoSecureStore(CHAVE_SESSAO_SEGURA),
   ]);
 }
+
+/**
+ * Descarta a sessao "comum" salva no aparelho sem mexer nas configuracoes de biometria.
+ * Usada na abertura do app para que o usuario sempre passe pela tela de login.
+ */
+export async function descartarSessaoSimplesPersistida(): Promise<void> {
+  definirSessaoEmMemoria(null);
+  await removerSessaoSimples();
+}

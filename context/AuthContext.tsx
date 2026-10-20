@@ -11,6 +11,7 @@ import { assinarExpiracaoSessao } from '../services/api/sessionEvents';
 import {
   ativarBiometria,
   desativarBiometria,
+  descartarSessaoSimplesPersistida,
   EstadoBiometria,
   limparSessaoPersistida,
   marcarConviteBiometriaComoVisto,
@@ -112,10 +113,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function restaurarSessao() {
       try {
-        const salva = await restaurarSessaoPersistida();
-        const sessaoRestaurada = validarSessao(salva) ? salva : null;
-        setSessao(sessaoRestaurada);
-        await atualizarEstadoBiometria(sessaoRestaurada?.idUsuario);
+        // O app sempre abre na tela de login: nao restaura a sessao automaticamente.
+        // Com biometria ativada, a sessao protegida continua salva e so e lida em entrarComBiometria().
+        const estadoInicial = await obterEstadoBiometria();
+        if (!estadoInicial.ativada) await descartarSessaoSimplesPersistida();
+        setSessao(null);
+        await atualizarEstadoBiometria();
       } catch {
         setSessao(null);
         setErro('Não foi possível restaurar sua sessão. Entre novamente.');
