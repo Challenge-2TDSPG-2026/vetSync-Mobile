@@ -21,6 +21,7 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import { mostrarToast } from '../../../components/ui/Toast';
 import { DicaTela } from '../../../components/ui/DicaTela';
+import { mensagemDeErro } from '../../../services/api/errorMessages';
 import { confirmar } from '../../../utils/alert';
 import { META_CONSULTAS_RECOMPENSA } from '../../../constants/gamification';
 import type { Recompensa } from '../../../types';
@@ -40,7 +41,9 @@ export default function RecompensasScreen() {
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-recompensas');
   const [mostrarCatalogoCompleto, setMostrarCatalogoCompleto] = useState(false);
 
-  const { data: catalogo = [], isLoading: carregandoCatalogo } = useCatalogoRecompensas(autenticado);
+  const catalogoQuery = useCatalogoRecompensas(autenticado);
+  const catalogo = catalogoQuery.data ?? [];
+  const carregandoCatalogo = catalogoQuery.isLoading;
   const { data: saldoPontos = 0 } = useSaldoRecompensas(autenticado);
   const { data: resgates = [], isLoading: carregandoResgates } = useMeusResgates(autenticado);
   const resgatarMutation = useResgatar();
@@ -186,12 +189,25 @@ export default function RecompensasScreen() {
 
       {carregandoCatalogo ? (
         <SkeletonList linhas={2} />
+      ) : catalogoQuery.isError ? (
+        <EmptyState
+          icon="cloud-offline-outline"
+          title="Não foi possível carregar os benefícios"
+          subtitle={mensagemDeErro(catalogoQuery.error, 'Confira sua conexão e tente novamente.')}
+          accentColor={theme.colors.danger}
+          actionLabel="Tentar novamente"
+          actionLoading={catalogoQuery.isFetching}
+          onAction={() => void catalogoQuery.refetch()}
+        />
       ) : catalogo.length === 0 ? (
         <EmptyState
           icon="ribbon-outline"
           title="Nenhum benefício disponível no momento"
-          subtitle="Novas recompensas aparecerão aqui em breve."
+          subtitle="A clínica ainda não tem benefícios ativos para resgate. Atualize o catálogo para verificar novamente."
           accentColor={theme.domain.reward.gold}
+          actionLabel="Atualizar catálogo"
+          actionLoading={catalogoQuery.isFetching}
+          onAction={() => void catalogoQuery.refetch()}
         />
       ) : (
         <>

@@ -10,6 +10,7 @@ import { useAccessibility } from '../../context/AccessibilityContext';
 import { ApiError } from '../../services/api/httpClient';
 import { carteiraCompartilhadaService, type CarteiraCompartilhadaAtiva } from '../../services/carteiraCompartilhadaService';
 import { confirmar } from '../../utils/alert';
+import { formatarDataPtBr } from '../../utils/formatarDataPtBr';
 import { mostrarToast } from '../ui/Toast';
 import { PetFoto } from '../pet-foto/PetFoto';
 import { BotaoCarteiraPdf } from './BotaoCarteiraPdf';
@@ -180,17 +181,12 @@ type CompartilhamentoQrProps = {
   onRevogar: () => void;
 };
 
-function formatarExpiracao(valor: string) {
-  const data = new Date(valor);
-  if (Number.isNaN(data.getTime())) return 'em breve';
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(data);
-}
-
 function CompartilhamentoQr({ carteira, urlPublica, carregando, gerando, revogando, simples, onGerar, onAbrir, onRevogar }: CompartilhamentoQrProps) {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const ocupado = gerando || revogando;
   const textoBotao = carteira ? 'Gerar novo QR Code' : 'Gerar QR Code temporário';
+  const expiracao = carteira ? formatarDataPtBr(carteira.expiraEm, true) : null;
   return <View style={[s.shareCard, simples && sSimples.shareCard]}>
     <View style={s.shareHeading}>
       <View style={[s.shareIcon, simples && sSimples.shareIcon]}><Ionicons name="qr-code-outline" size={simples ? 31 : 23} color={theme.colors.primary} /></View>
@@ -200,8 +196,8 @@ function CompartilhamentoQr({ carteira, urlPublica, carregando, gerando, revogan
       {urlPublica ? <View style={s.qrContent}>
         <View style={s.qrBox} accessibilityLabel="QR Code da carteira pública"><QRCode value={urlPublica} size={simples ? 184 : 148} color={theme.pages.vaccinationWallet.qrCard.qrColor} backgroundColor={theme.pages.vaccinationWallet.modal.card} quietZone={8} ecl="M" /></View>
         <Text style={[s.qrReady, simples && sSimples.qrReady]}>QR Code pronto para compartilhar</Text>
-      </View> : carteira ? <View style={s.shareNotice}><Ionicons name="information-circle-outline" size={19} color={theme.colors.info} /><Text style={s.shareNoticeText}>Há um QR ativo até {formatarExpiracao(carteira.expiraEm)}. Por segurança, ele só é mostrado no momento da geração.</Text></View> : <Text style={[s.shareEmpty, simples && sSimples.shareEmpty]}>Gere um QR temporário para que outra pessoa consulte a carteira de vacinação.</Text>}
-      {carteira && <Text style={[s.shareExpiry, simples && sSimples.shareExpiry]}>Expira em {formatarExpiracao(carteira.expiraEm)}.</Text>}
+      </View> : carteira ? <View style={s.shareNotice}><Ionicons name="information-circle-outline" size={19} color={theme.colors.info} /><Text style={s.shareNoticeText}>{expiracao ? `Há um QR ativo até ${expiracao}. Por segurança, ele só é mostrado no momento da geração.` : 'A API não informou quando este QR expira. Gere um novo QR Code para obter um prazo confirmado.'}</Text></View> : <Text style={[s.shareEmpty, simples && sSimples.shareEmpty]}>Gere um QR temporário para que outra pessoa consulte a carteira de vacinação.</Text>}
+      {carteira && <Text style={[s.shareExpiry, simples && sSimples.shareExpiry]}>{expiracao ? `Expira em ${expiracao}.` : 'Data de expiração não informada.'}</Text>}
       <Pressable style={[s.sharePrimary, simples && sSimples.sharePrimary, ocupado && s.buttonDisabled]} onPress={onGerar} disabled={ocupado} accessibilityLabel={textoBotao}>
         {gerando ? <ActivityIndicator color={theme.colors.onPrimary} /> : <><Ionicons name="qr-code" size={19} color={theme.colors.onPrimary} /><Text style={[s.sharePrimaryText, simples && sSimples.sharePrimaryText]}>{textoBotao}</Text></>}
       </Pressable>

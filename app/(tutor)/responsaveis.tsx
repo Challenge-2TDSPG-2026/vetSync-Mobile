@@ -24,6 +24,7 @@ import {
   useRevogarResponsavel,
 } from '../../hooks/useResponsaveis';
 import { confirmar } from '../../utils/alert';
+import { formatarDataPtBr } from '../../utils/formatarDataPtBr';
 import { mostrarToast } from '../../components/ui/Toast';
 import type { AppTheme } from '../../constants/theme';
 
@@ -49,10 +50,13 @@ export default function ResponsaveisScreen() {
     try {
       const convite = await criarConvite.mutateAsync({ email: emailNormalizado, permissao });
       setEmail('');
+      const expiracao = formatarDataPtBr(convite.expiraEm);
       mostrarToast(
         'sucesso',
         'Convite enviado',
-        `O convite para ${convite.email} expira em ${formatarData(convite.expiraEm)}.`,
+        expiracao
+          ? `O convite para ${convite.email} expira em ${expiracao}.`
+          : `O convite para ${convite.email} foi criado, mas a API não informou quando ele expira.`,
       );
     } catch (erro) {
       mostrarToast(
@@ -307,11 +311,6 @@ function PermissionOption({
       />
     </Pressable>
   );
-}
-
-function formatarData(data: string): string {
-  const valor = new Date(data);
-  return Number.isNaN(valor.getTime()) ? 'em breve' : valor.toLocaleDateString('pt-BR');
 }
 
 const createStyles = (theme: AppTheme) =>

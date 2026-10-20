@@ -299,25 +299,20 @@ function QuickAccessCard({
   title: string;
   description: string;
   color: string;
-  onPress?: () => void;
+  onPress: () => void;
   simples: boolean;
 }) {
   return (
     <Pressable
-      disabled={!onPress}
       style={({ pressed }) => [
         styles.quickAccessCard,
         simples && sSimples.quickAccessCard,
-        !onPress && styles.actionDisabled,
         pressed && styles.cardPressed,
       ]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={title}
-      accessibilityHint={
-        onPress ? `Abre ${title.toLocaleLowerCase('pt-BR')}` : 'Indisponível no momento'
-      }
-      accessibilityState={{ disabled: !onPress }}
+      accessibilityHint={`Abre ${title.toLocaleLowerCase('pt-BR')}`}
     >
       <View
         style={[
@@ -360,7 +355,7 @@ function AccountShortcut({
   icon: IconName;
   title: string;
   description: string;
-  onPress?: () => void;
+  onPress: () => void;
   simples: boolean;
 }) {
   return (
@@ -369,15 +364,11 @@ function AccountShortcut({
       style={[
         styles.accountShortcut,
         simples && sSimples.accountShortcut,
-        !onPress && styles.actionDisabled,
       ]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={title}
-      accessibilityHint={
-        onPress ? `Abre ${title.toLocaleLowerCase('pt-BR')}` : 'Indisponível no momento'
-      }
-      accessibilityState={{ disabled: !onPress }}
+      accessibilityHint={`Abre ${title.toLocaleLowerCase('pt-BR')}`}
     >
       <View style={[styles.shortcutIcon, simples && sSimples.shortcutIcon]}>
         <Ionicons name={icon} size={simples ? 28 : 20} color={theme.colors.primary} />
@@ -388,11 +379,7 @@ function AccountShortcut({
           {description}
         </Text>
       </View>
-      {onPress ? (
-        <Ionicons name="chevron-forward" size={simples ? 27 : 20} color={theme.colors.textMuted} />
-      ) : (
-        <Text style={[styles.comingSoon, simples && sSimples.comingSoon]}>Em breve</Text>
-      )}
+      <Ionicons name="chevron-forward" size={simples ? 27 : 20} color={theme.colors.textMuted} />
     </Pressable>
   );
 }
@@ -530,7 +517,6 @@ const createStyles = (theme: AppTheme) =>
       lineHeight: 13,
       marginTop: 3,
     },
-    actionDisabled: { opacity: 0.55 },
     cardPressed: { opacity: 0.78, transform: [{ scale: 0.98 }] },
 
     accountShortcut: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
@@ -549,12 +535,6 @@ const createStyles = (theme: AppTheme) =>
       fontSize: 12,
       marginTop: 3,
       lineHeight: 17,
-    },
-    comingSoon: {
-      color: theme.colors.textMuted,
-      fontSize: 10,
-      fontWeight: '800',
-      textTransform: 'uppercase',
     },
 
     ajudaTela: { flex: 1, backgroundColor: theme.colors.background },
@@ -643,7 +623,6 @@ const sSimples = StyleSheet.create({
   shortcutIcon: { width: 58, height: 58, borderRadius: 18 },
   shortcutTitle: { fontSize: 22 },
   shortcutDescription: { fontSize: 17, lineHeight: 23 },
-  comingSoon: { fontSize: 13 },
   ajudaKicker: { fontSize: 13 },
   ajudaTitulo: { fontSize: 29, lineHeight: 34 },
   ajudaIntroducaoTexto: { fontSize: 18, lineHeight: 25 },

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { AppIcon } from '../AppIcon';
 import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
@@ -16,6 +16,7 @@ interface EmptyStateProps {
   style?: StyleProp<ViewStyle>;
   actionLabel?: string;
   onAction?: () => void;
+  actionLoading?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export function EmptyState({
   style,
   actionLabel,
   onAction,
+  actionLoading = false,
 }: EmptyStateProps) {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
@@ -50,13 +52,21 @@ export function EmptyState({
       {subtitle ? <Text style={s.subtitle}>{subtitle}</Text> : null}
       {actionLabel && onAction ? (
         <Pressable
-          style={[s.action, { backgroundColor: accent }]}
+          style={[s.action, { backgroundColor: accent }, actionLoading && s.actionDisabled]}
           onPress={onAction}
+          disabled={actionLoading}
           accessibilityRole="button"
           accessibilityLabel={actionLabel}
+          accessibilityState={{ disabled: actionLoading, busy: actionLoading }}
         >
-          <Text style={s.actionText}>{actionLabel}</Text>
-          <AppIcon name="arrow-forward" set="Ionicons" size={15} color={theme.colors.onPrimary} />
+          {actionLoading ? (
+            <ActivityIndicator size="small" color={theme.colors.onPrimary} />
+          ) : (
+            <>
+              <Text style={s.actionText}>{actionLabel}</Text>
+              <AppIcon name="arrow-forward" set="Ionicons" size={15} color={theme.colors.onPrimary} />
+            </>
+          )}
         </Pressable>
       ) : null}
     </View>
@@ -77,6 +87,7 @@ function createStyles(theme: AppTheme) {
   title: { fontSize: 14, fontWeight: '700', color: theme.colors.text, marginBottom: 4, textAlign: 'center' },
   subtitle: { fontSize: 12, color: theme.colors.textSecondary, textAlign: 'center', lineHeight: 17 },
   action: { marginTop: 16, minHeight: 42, paddingHorizontal: 16, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 7 },
+  actionDisabled: { opacity: 0.7 },
   actionText: { color: theme.colors.onPrimary, fontSize: 13, fontWeight: '800' },
   });
 }

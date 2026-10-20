@@ -201,19 +201,16 @@ function ConfigItem({
   icon: IconName;
   title: string;
   description: string;
-  onPress?: () => void;
+  onPress: () => void;
 }) {
   return (
     <Pressable
-      style={[styles.item, simples && sSimples.item, !onPress && styles.itemDisabled]}
+      style={[styles.item, simples && sSimples.item]}
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole="button"
-      accessibilityState={{ disabled: !onPress }}
       accessibilityLabel={title}
-      accessibilityHint={
-        onPress ? `Abre ${title.toLocaleLowerCase('pt-BR')}` : 'Indisponível no momento'
-      }
+      accessibilityHint={`Abre ${title.toLocaleLowerCase('pt-BR')}`}
     >
       <View style={[styles.itemIcon, simples && sSimples.itemIcon]}>
         <Ionicons name={icon} size={simples ? 28 : 21} color={styles.itemTitle.color} />
@@ -224,11 +221,7 @@ function ConfigItem({
           {description}
         </Text>
       </View>
-      {onPress ? (
-        <Ionicons name="chevron-forward" size={simples ? 27 : 20} color={styles.chevron.color} />
-      ) : (
-        <Text style={[styles.comingSoon, simples && sSimples.comingSoon]}>Em breve</Text>
-      )}
+      <Ionicons name="chevron-forward" size={simples ? 27 : 20} color={styles.chevron.color} />
     </Pressable>
   );
 }
@@ -303,7 +296,6 @@ const createStyles = (theme: AppTheme) =>
       paddingHorizontal: 15,
       paddingVertical: 17,
     },
-    itemDisabled: { opacity: 0.55 },
     itemIcon: {
       width: 46,
       height: 46,
@@ -321,12 +313,6 @@ const createStyles = (theme: AppTheme) =>
       marginTop: 3,
     },
     chevron: { color: theme.colors.textMuted },
-    comingSoon: {
-      color: theme.colors.textMuted,
-      fontSize: 10,
-      fontWeight: '800',
-      textTransform: 'uppercase',
-    },
     divider: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: theme.pages.tutorProfile.border,
@@ -358,7 +344,6 @@ const sSimples = StyleSheet.create({
   itemIcon: { width: 58, height: 58, borderRadius: 18 },
   itemTitle: { fontSize: 22 },
   itemDescription: { fontSize: 17, lineHeight: 23 },
-  comingSoon: { fontSize: 13 },
   logout: { minHeight: 70 },
   logoutText: { fontSize: 22 },
 });
