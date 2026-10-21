@@ -1,0 +1,240 @@
+name: Android Firebase App Distribution
+
+on:
+  push:
+    branches:
+      - develop
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Versão estável (obrigatória ao executar manualmente na main)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: firebase-app-distribution-android
+  cancel-in-progress: false
+
+jobs:
+  distribute:
+    name: Build and distribute Android APK
+    if: >-
+      github.event_name != 'workflow_dispatch' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check, lint, and format check
+        run: npm run check
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Resolve release version and notes
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION_NAME: ${{ inputs.version_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          VERSION_NAME="$(node <<'NODE'
+          const { expo } = require('./app.json');
+          const baseVersion = expo.version;
+          const { EVENT_NAME, REF, REF_NAME, INPUT_VERSION_NAME, RUN_NUMBER, RUN_ATTEMPT } = process.env;
+          let versionName;
+
+          if (REF.startsWith('refs/tags/v')) {
+            versionName = REF_NAME.slice(1);
+          } else if (REF === 'refs/heads/develop') {
+            versionName = `${baseVersion}-dev.${RUN_NUMBER}.${RUN_ATTEMPT}`;
+          } else if (EVENT_NAME === 'workflow_dispatch' && REF === 'refs/heads/main') {
+            versionName = INPUT_VERSION_NAME?.trim();
+            if (!versionName) {
+              throw new Error('Informe version_name ao executar a distribuição estável manualmente na main.');
+            }
+          } else {
+            throw new Error(`Execução não permitida para a referência ${REF}.`);
+          }
+
+          if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(versionName)) {
+            throw new Error(`Versão inválida: ${versionName}. Use o formato 0.1.0 ou 0.1.0-rc.1.`);
+          }
+
+          process.stdout.write(versionName);
+          NODE
+          )"
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "Versão Android: $VERSION_NAME"
+
+          {
+            echo "VetSync Android $VERSION_NAME"
+            echo "Commit: $GITHUB_SHA"
+            echo "Referência: $GITHUB_REF_NAME"
+            echo
+            echo 'Commits recentes:'
+            git log -5 --format='- %s (%h)'
+          } > "$RUNNER_TEMP/release-notes.txt"
+
+      - name: Validate publication commit hash
+        run: npm run validate:commit-hash
+        env:
+          EXPO_PUBLIC_COMMIT_HASH: ${{ github.sha }}
+          GITHUB_SHA: ${{ github.sha }}
+
+      - name: Validate Firebase authentication configuration
+        env:
+          WIF_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          WIF_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_APP_DISTRIBUTION_SERVICE_ACCOUNT_JSON }}
+          FIREBASE_GROUPS: ${{ vars.FIREBASE_APP_DISTRIBUTION_GROUPS }}
+        run: |
+          if { [ -n "$WIF_PROVIDER" ] && [ -z "$WIF_SERVICE_ACCOUNT" ]; } || { [ -z "$WIF_PROVIDER" ] && [ -n "$WIF_SERVICE_ACCOUNT" ]; }; then
+            echo 'Configure GCP_WORKLOAD_IDENTITY_PROVIDER e GCP_SERVICE_ACCOUNT_EMAIL juntos.' >&2
+            exit 1
+          fi
+          if [ -z "$WIF_PROVIDER" ] && [ -z "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            echo 'Configure WIF (recomendado) ou o secret FIREBASE_APP_DISTRIBUTION_SERVICE_ACCOUNT_JSON.' >&2
+            exit 1
+          fi
+          if [ -z "$FIREBASE_GROUPS" ]; then
+            echo 'Configure a variável FIREBASE_APP_DISTRIBUTION_GROUPS com um alias de grupo existente no Firebase.' >&2
+            exit 1
+          fi
+
+      - name: Build APK with EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          APP_VERSION: ${{ steps.release.outputs.version_name }}
+          EXPO_PUBLIC_COMMIT_HASH: ${{ github.sha }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo 'Configure o secret EXPO_TOKEN antes de executar este workflow.' >&2
+            exit 1
+          fi
+          npx --yes eas-cli@latest build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --wait \
+            --json > "$RUNNER_TEMP/eas-build.json"
+
+      - name: Download completed APK
+        id: download-apk
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          BUILD_ID="$(BUILD_JSON="$RUNNER_TEMP/eas-build.json" node -e "const value = require(process.env.BUILD_JSON); const build = Array.isArray(value) ? value[0] : value; if (!build?.id) process.exit(1); process.stdout.write(build.id)")"
+          npx --yes eas-cli@latest build:view "$BUILD_ID" --json > "$RUNNER_TEMP/eas-build-details.json"
+          node <<'NODE'
+          const fs = require('node:fs');
+          const payload = require(process.env.RUNNER_TEMP + '/eas-build-details.json');
+          const build = Array.isArray(payload) ? payload[0] : payload;
+          const url = build?.artifacts?.buildUrl;
+          if (build?.status !== 'FINISHED' || !url) {
+            throw new Error('O EAS não retornou uma build concluída com URL do APK.');
+          }
+          const versionCode = build.appBuildVersion || 'não informado';
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `build_url=${url}\nversion_code=${versionCode}\n`);
+          console.log(`versionCode EAS: ${versionCode}`);
+          NODE
+          BUILD_JSON="$RUNNER_TEMP/eas-build-details.json" node -e "const payload = require(process.env.BUILD_JSON); const build = Array.isArray(payload) ? payload[0] : payload; process.stdout.write(build.artifacts.buildUrl)" > "$RUNNER_TEMP/apk-url.txt"
+          BUILD_URL="$(cat "$RUNNER_TEMP/apk-url.txt")"
+          VERSION_CODE="$(BUILD_JSON="$RUNNER_TEMP/eas-build-details.json" node -e "const payload = require(process.env.BUILD_JSON); const build = Array.isArray(payload) ? payload[0] : payload; process.stdout.write(String(build.appBuildVersion || 'não informado'))")"
+          curl --fail --location --silent --show-error "$BUILD_URL" --output "$RUNNER_TEMP/vetsync.apk"
+          echo "apk_path=$RUNNER_TEMP/vetsync.apk" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo 'APK EAS baixado com sucesso.'
+
+      - name: Add Android build number to release notes
+        env:
+          VERSION_CODE: ${{ steps.download-apk.outputs.version_code }}
+        run: |
+          echo "versionCode: $VERSION_CODE" >> "$RUNNER_TEMP/release-notes.txt"
+
+      - name: Upload APK artifact
+        if: ${{ always() && steps.download-apk.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: VetSync-Android-${{ steps.release.outputs.version_name }}-${{ github.run_number }}
+          path: ${{ steps.download-apk.outputs.apk_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Authenticate to Google Cloud with Workload Identity Federation
+        if: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && vars.GCP_SERVICE_ACCOUNT_EMAIL != '' }}
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: vetsync-76c0e
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Prepare Firebase service account key fallback
+        if: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER == '' && vars.GCP_SERVICE_ACCOUNT_EMAIL == '' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_APP_DISTRIBUTION_SERVICE_ACCOUNT_JSON }}
+        run: |
+          umask 077
+          CREDENTIALS_FILE="$RUNNER_TEMP/firebase-app-distribution.json"
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$CREDENTIALS_FILE"
+          node -e "JSON.parse(require('node:fs').readFileSync(process.argv[1], 'utf8'))" "$CREDENTIALS_FILE"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$CREDENTIALS_FILE" >> "$GITHUB_ENV"
+
+      - name: Distribute APK to Firebase App Distribution
+        env:
+          FIREBASE_GROUPS: ${{ vars.FIREBASE_APP_DISTRIBUTION_GROUPS }}
+        run: |
+          if [ -z "$FIREBASE_GROUPS" ]; then
+            echo 'Configure a variável FIREBASE_APP_DISTRIBUTION_GROUPS com um alias de grupo existente no Firebase.' >&2
+            exit 1
+          fi
+          npx --yes firebase-tools@latest appdistribution:distribute \
+            "${{ steps.download-apk.outputs.apk_path }}" \
+            --app '1:376247909118:android:334d8f77fb63b6d07903af' \
+            --project 'vetsync-76c0e' \
+            --groups "$FIREBASE_GROUPS" \
+            --release-notes-file "$RUNNER_TEMP/release-notes.txt"
+
+      - name: Record distribution result
+        if: success()
+        env:
+          VERSION_NAME: ${{ steps.release.outputs.version_name }}
+          VERSION_CODE: ${{ steps.download-apk.outputs.version_code }}
+          COMMIT_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          {
+            echo '## Firebase App Distribution'
+            echo
+            echo "- Resultado: APK distribuído com sucesso"
+            echo "- Versão Android: $VERSION_NAME ($VERSION_CODE)"
+            echo "- Commit: `$COMMIT_SHA`"
+            echo "- Referência: `$REF_NAME`"
+            echo '- Artefato APK: disponível na seção Artifacts desta execução por 30 dias'
+          } >> "$GITHUB_STEP_SUMMARY"

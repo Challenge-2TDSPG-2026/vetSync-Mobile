@@ -61,6 +61,7 @@ function resolveBuildNumber(env = process.env, now = new Date()) {
 module.exports = ({ config }) => ({
   ...appJson.expo,
   ...config,
+  version: process.env.APP_VERSION?.trim() || appJson.expo.version,
   extra: {
     ...appJson.expo.extra,
     ...config?.extra,
