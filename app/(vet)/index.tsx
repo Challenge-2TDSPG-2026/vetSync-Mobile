@@ -11,14 +11,44 @@ import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList, SkeletonCard } from '../../components/ui/Skeleton';
-import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
 import { DicaTela } from '../../components/ui/DicaTela';
-import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
+import { STATUS_EXIBICAO_BADGE, parseDataEvento, statusExibicao } from '../../utils/eventoStatus';
 import type { AppTheme } from '../../constants/theme';
 import { useVetDesktop } from '../../components/vet/desktop/useVetDesktop';
 import { VetDashboardDesktop } from '../../components/vet/desktop/VetDashboardDesktop';
 
-/** Desktop (web larga) usa o painel novo; mobile mantem o layout atual. */
+const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+function dataPorExtenso(d: Date) {
+  return `${DIAS[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
+}
+
+function horaCurta(iso: string) {
+  return parseDataEvento(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function mesmoDia(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+/** Texto de quando o atendimento acontece: "em 25 min", "hoje às 14:00", "amanhã às 09:00" ou "23 de outubro às 09:00". */
+function quandoAcontece(iso: string) {
+  const data = parseDataEvento(iso);
+  const agora = new Date();
+  const hora = horaCurta(iso);
+  const minutos = Math.round((data.getTime() - agora.getTime()) / 60000);
+  if (mesmoDia(data, agora)) {
+    if (iso.length > 10 && minutos > 0 && minutos < 60) return `em ${minutos} min`;
+    return iso.length > 10 ? `hoje às ${hora}` : 'hoje';
+  }
+  const amanha = new Date(agora); amanha.setDate(agora.getDate() + 1);
+  const complemento = iso.length > 10 ? ` às ${hora}` : '';
+  if (mesmoDia(data, amanha)) return `amanhã${complemento}`;
+  return `${data.getDate()} de ${MESES[data.getMonth()]}${complemento}`;
+}
+
+/** Desktop (web larga) usa o painel novo; mobile usa o layout focado no próximo atendimento. */
 export default function VetDashboardScreen() {
   const desktop = useVetDesktop();
   return desktop ? <VetDashboardDesktop /> : <VetDashboardMobile />;
@@ -32,399 +62,267 @@ function VetDashboardMobile() {
   const { veterinarioAtivo, eventos, eventosAgendados, eventosDeHoje, pacientes, carregando } = useVet();
   const { data: resgates = [] } = useMeusResgates(true);
   const resgatesPendentes = resgates.filter(r => r.status === 'PENDENTE');
-  const eventosConcluidos = eventos.filter(e => e.status === 'CONCLUIDO');
-  const faturamento = eventosConcluidos.reduce((total, evento) => total + evento.custo, 0);
   const pacientesComPendencia = pacientes.filter(p => p.eventos.some(e => e.status === 'AGENDADO')).length;
-  const atendimentosHojeConcluidos = eventosDeHoje.filter(e => e.status === 'CONCLUIDO').length;
-  const vacinasDeHoje = eventosDeHoje.filter(e => e.nomeTipoEvento.toLocaleLowerCase().includes('vacin') && e.status === 'AGENDADO').length;
   const atrasados = eventos.filter(e => statusExibicao(e) === 'ATRASADO');
-  const ocupacaoHoje = eventosDeHoje.length > 0 ? Math.round((atendimentosHojeConcluidos / eventosDeHoje.length) * 100) : 0;
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-painel');
+
+  const nome = veterinarioAtivo?.nome ?? sessao?.nome ?? 'Veterinário';
+  const iniciais = nome[0]?.toUpperCase() ?? '?';
+
+  const agendadosOrdenados = useMemo(
+    () => [...eventosAgendados].sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime()),
+    [eventosAgendados],
+  );
+  const proximo = agendadosOrdenados.find(e => statusExibicao(e) !== 'ATRASADO');
+  const petDoEvento = (petId: number | string) => pacientes.find(p => String(p.pet.id) === String(petId))?.pet;
+  const petProximo = proximo ? petDoEvento(proximo.petId) : undefined;
+
+  const restoDoDia = useMemo(() => {
+    const ids = new Set<string>();
+    const lista = [...eventosDeHoje, ...atrasados].filter(e => {
+      const chave = String(e.id);
+      if (ids.has(chave) || (proximo && chave === String(proximo.id))) return false;
+      ids.add(chave);
+      return true;
+    });
+    return lista.sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime()).slice(0, 5);
+  }, [eventosDeHoje, atrasados, proximo]);
 
   if (carregando) {
     return (
       <ScrollView style={s.container} contentContainerStyle={s.content}>
-        <SkeletonCard height={84} borderRadius={16} style={{ marginBottom: 20 }} />
-        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
-          <SkeletonCard height={72} borderRadius={12} style={{ flex: 1 }} />
-          <SkeletonCard height={72} borderRadius={12} style={{ flex: 1 }} />
-        </View>
+        <SkeletonCard height={56} borderRadius={16} style={{ marginBottom: 16 }} />
+        <SkeletonCard height={170} borderRadius={22} style={{ marginBottom: 16 }} />
         <SkeletonList linhas={3} />
       </ScrollView>
     );
   }
 
+  const chips = [
+    { label: 'Hoje', valor: eventosDeHoje.length, cor: theme.colors.success, rota: '/(vet)/consultas' as const },
+    { label: 'Atrasados', valor: atrasados.length, cor: theme.colors.danger, rota: '/(vet)/consultas' as const },
+    { label: 'Retornos', valor: pacientesComPendencia, cor: theme.colors.info, rota: '/(vet)/pacientes' as const },
+    { label: 'Resgates', valor: resgatesPendentes.length, cor: theme.colors.warning, rota: '/(vet)/resgates' as const },
+  ];
+
   return (
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
+      showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.vetDashboard.card} />}
     >
-
-      <View style={s.welcome}>
-        <View style={s.welcomeIconWrap}>
-          <AppIcon name="medical-bag" set="MaterialCommunityIcons" size={30} color={theme.pages.vetDashboard.heroText} />
+      <View style={s.topo}>
+        <View style={s.topoTexto}>
+          <Text style={s.data}>{dataPorExtenso(new Date())}</Text>
+          <Text style={s.saudacao} numberOfLines={1}>Olá, {nome}</Text>
         </View>
-        <View style={s.welcomeInfo}>
-          <Text style={s.welcomeNome}>Olá, {veterinarioAtivo?.nome ?? sessao?.nome}</Text>
-          <Text style={s.welcomeSub}>
-            CRMV {veterinarioAtivo?.crmv ?? '—'}{veterinarioAtivo?.nomeClinica ? ` • ${veterinarioAtivo.nomeClinica}` : ''}
-          </Text>
-        </View>
+        <Pressable style={s.avatar} onPress={() => router.push('/(vet)/perfil')} accessibilityRole="button" accessibilityLabel="Abrir minha conta">
+          <Text style={s.avatarText}>{iniciais}</Text>
+        </Pressable>
       </View>
 
       {dicaVisivel && (
         <DicaTela
           titulo="Seu painel"
-          texto="Aqui você acompanha os atendimentos do dia e os próximos agendamentos. Use o menu abaixo pra ver consultas, pacientes e resgates."
+          texto="Aqui você vê o próximo atendimento, o que está pendente e o resto do dia. Use o menu abaixo para consultas, pacientes e resgates."
           accentColor={theme.colors.primary}
           onFechar={fecharDica}
         />
       )}
 
-      <View style={s.statsRow}>
-        <StatCard styles={s} valor={eventosAgendados.length} label="Agendados" accentColor={theme.colors.info} />
-        <StatCard styles={s} valor={eventosDeHoje.length} label="Hoje" accentColor={theme.colors.success} />
-      </View>
-
-      <View style={s.statsRow}>
-        <StatCard styles={s} valor={pacientes.length} label="Pacientes" accentColor={theme.colors.primary} />
-        <StatCard styles={s} valor={eventosConcluidos.length} label="Concluídos" accentColor={theme.domain.event.vaccine} />
-      </View>
-
-      <View style={s.ocupacaoCard}>
-        <View style={s.ocupacaoHeader}>
-          <View>
-            <Text style={s.ocupacaoEyebrow}>AGENDA DE HOJE</Text>
-            <Text style={s.ocupacaoTitle}>{eventosDeHoje.length === 0 ? 'Agenda livre' : `${ocupacaoHoje}% dos atendimentos concluídos`}</Text>
+      {proximo ? (
+        <View style={s.hero}>
+          <Text style={s.heroEyebrow}>PRÓXIMO ATENDIMENTO • {quandoAcontece(proximo.data).toUpperCase()}</Text>
+          <View style={s.heroBody}>
+            <View style={s.heroAvatar}>
+              <AppIcon name="paw" set="Ionicons" size={24} color={theme.pages.vetDashboard.heroText} />
+            </View>
+            <View style={s.heroInfo}>
+              <Text style={s.heroPet} numberOfLines={1}>{petProximo?.nome ?? 'Paciente'}</Text>
+              <Text style={s.heroDetalhe} numberOfLines={2}>
+                {proximo.nomeTipoEvento}{petProximo?.tutor?.nome ? ` • ${petProximo.tutor.nome}` : ''}{proximo.data.length > 10 ? ` • ${horaCurta(proximo.data)}` : ''}
+              </Text>
+            </View>
           </View>
-          <View style={[s.ocupacaoBadge, { backgroundColor: ocupacaoHoje === 100 && eventosDeHoje.length > 0 ? theme.colors.successBackground : theme.colors.infoBackground }]}>
-            <AppIcon name="pulse-outline" set="Ionicons" size={18} color={ocupacaoHoje === 100 && eventosDeHoje.length > 0 ? theme.colors.success : theme.colors.info} />
-          </View>
-        </View>
-        <View style={s.ocupacaoTrack}>
-          <View style={[s.ocupacaoFill, { width: `${ocupacaoHoje}%`, backgroundColor: ocupacaoHoje === 100 && eventosDeHoje.length > 0 ? theme.colors.success : theme.colors.info }]} />
-        </View>
-        <Text style={s.ocupacaoHint}>{eventosDeHoje.length} atendimento{eventosDeHoje.length === 1 ? '' : 's'} hoje • {atendimentosHojeConcluidos} concluído{atendimentosHojeConcluidos === 1 ? '' : 's'}</Text>
-      </View>
-
-      <View style={s.resumoCard}>
-        <View style={s.resumoHeader}>
-          <View>
-            <Text style={s.resumoEyebrow}>Resumo do atendimento</Text>
-            <Text style={s.resumoTitle}>Sua operação em um olhar</Text>
-          </View>
-          <AppIcon name="pulse-outline" set="Ionicons" size={24} color={theme.colors.primary} />
-        </View>
-        <View style={s.resumoMetrics}>
-          <View style={s.resumoMetric}>
-            <Text style={s.resumoValue}>{pacientesComPendencia}</Text>
-            <Text style={s.resumoLabel}>com retorno pendente</Text>
-          </View>
-          <View style={s.resumoDivider} />
-          <View style={s.resumoMetric}>
-            <Text style={s.resumoValue}>R$ {faturamento.toFixed(2).replace('.', ',')}</Text>
-            <Text style={s.resumoLabel}>em consultas concluídas</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={s.quickActions}>
-        <AnimatedPressable
-          style={s.quickAction}
-          onPress={() => router.push('/(vet)/pacientes')}
-          accessibilityRole="button"
-          accessibilityLabel="Ver pacientes"
-        >
-          <View style={[s.quickIcon, { backgroundColor: theme.colors.infoBackground }]}>
-            <AppIcon name="paw" set="Ionicons" size={18} color={theme.colors.info} />
-          </View>
-          <Text style={s.quickLabel}>Ver pacientes</Text>
-        </AnimatedPressable>
-        <AnimatedPressable
-          style={s.quickAction}
-          onPress={() => router.push('/(vet)/disponibilidade')}
-          accessibilityRole="button"
-          accessibilityLabel="Ajustar agenda"
-        >
-          <View style={[s.quickIcon, { backgroundColor: theme.colors.successBackground }]}>
-            <AppIcon name="time-outline" set="Ionicons" size={18} color={theme.colors.success} />
-          </View>
-          <Text style={s.quickLabel}>Ajustar agenda</Text>
-        </AnimatedPressable>
-        <AnimatedPressable
-          style={s.quickAction}
-          onPress={() => router.push('/(vet)/resgates')}
-          accessibilityRole="button"
-          accessibilityLabel="Resgates"
-        >
-          <View style={[s.quickIcon, { backgroundColor: theme.colors.warningBackground }]}>
-            <AppIcon name="gift-outline" set="Ionicons" size={18} color={theme.colors.warning} />
-          </View>
-          <Text style={s.quickLabel}>Resgates</Text>
-        </AnimatedPressable>
-      </View>
-
-      {(eventosDeHoje.length > 0 || atrasados.length > 0) && (
-        <View style={s.prioridadesCard}>
-          <View style={s.prioridadesTituloRow}>
-            <AppIcon name="alert-circle-outline" set="Ionicons" size={20} color={theme.colors.warning} />
-            <Text style={s.prioridadesTitulo}>Atenção de hoje</Text>
-          </View>
-          {eventosDeHoje.length > 0 ? <Text style={s.prioridadesTexto}>{eventosDeHoje.length} atendimento{eventosDeHoje.length === 1 ? '' : 's'} na agenda{vacinasDeHoje ? `, incluindo ${vacinasDeHoje} vacina${vacinasDeHoje === 1 ? '' : 's'}` : ''}.</Text> : null}
-          {atrasados.length > 0 ? <Text style={s.prioridadesTexto}>{atrasados.length} compromisso{atrasados.length === 1 ? '' : 's'} em atraso para revisar.</Text> : null}
-          <Pressable onPress={() => router.push('/(vet)/consultas')} accessibilityRole="button" style={s.prioridadesLink}><Text style={s.prioridadesLinkText}>Abrir agenda</Text><AppIcon name="arrow-forward" set="Ionicons" size={15} color={theme.colors.primary} /></Pressable>
-        </View>
-      )}
-
-      {resgatesPendentes.length > 0 && (
-        <Pressable
-          style={s.alertaResgates}
-          onPress={() => router.push('/(vet)/resgates')}
-          accessibilityRole="button"
-          accessibilityLabel={`${resgatesPendentes.length} resgate${resgatesPendentes.length > 1 ? 's' : ''} aguardando validação`}
-        >
-          <AppIcon name="gift" set="Ionicons" size={18} color={theme.colors.onPrimary} />
-          <Text style={s.alertaResgatesText}>
-            {resgatesPendentes.length} resgate{resgatesPendentes.length > 1 ? 's' : ''} aguardando validação
-          </Text>
-          <AppIcon name="chevron-forward" set="Ionicons" size={16} color={theme.colors.onPrimary} />
-        </Pressable>
-      )}
-
-      <View style={s.card}>
-        <View style={s.cardHead}>
-          <Text style={s.cardTitle} accessibilityRole="header">Próximos agendamentos</Text>
-          <Pressable
-            onPress={() => router.push('/(vet)/consultas')}
-            accessibilityRole="button"
-            accessibilityLabel="Ver todas as consultas"
-          >
-            <Text style={s.linkVer}>Ver todas</Text>
-          </Pressable>
-        </View>
-
-        {eventosAgendados.length === 0 ? (
-          <EmptyState
-            icon="checkmark-done-outline"
-            title="Nenhum atendimento agendado"
-            subtitle="Os próximos atendimentos aparecerão aqui."
-            accentColor={theme.colors.primary}
-            variant="plain"
-            actionLabel="Ver consultas"
-            onAction={() => router.push('/(vet)/consultas')}
-          />
-        ) : (
-          [...eventosAgendados]
-            .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
-            .slice(0, 5)
-            .map((e, idx, arr) => {
-            const visual = obterVisualTipoEvento(e.nomeTipoEvento);
-            const sb = STATUS_EXIBICAO_BADGE[statusExibicao(e)];
-            return (
-              <Pressable
-                key={e.id}
-                style={[s.eventoRow, idx < arr.length - 1 && s.eventoRowBorder]}
-                onPress={() => router.push(`/paciente/${e.petId}`)}
-                accessibilityRole="button"
-                accessibilityLabel={`${e.nomeTipoEvento}, ${formatarDataHoraEvento(e.data)}, ${sb.label}`}
-                accessibilityHint="Abre a ficha do paciente"
-              >
-                <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
-                  <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
-                </View>
-                <View style={s.eventoInfo}>
-                  <Text style={s.eventoTitulo}>{e.nomeTipoEvento}</Text>
-                  <Text style={s.eventoData}>{formatarDataHoraEvento(e.data)}</Text>
-                </View>
-                <View style={[s.badge, { backgroundColor: sb.bg }]}>
-                  <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
-                </View>
-              </Pressable>
-            );
-          })
-        )}
-      </View>
-
-      <View style={s.card}>
-        <View style={s.cardHead}>
-          <Text style={s.cardTitle} accessibilityRole="header">Atendimentos de hoje</Text>
-        </View>
-
-        {eventosDeHoje.length === 0 ? (
-          <EmptyState
-            icon="calendar-outline"
-            title="Nada agendado para hoje"
-            accentColor={theme.colors.info}
-            variant="plain"
-          />
-        ) : (
-          eventosDeHoje.map((e, idx, arr) => {
-            const visual = obterVisualTipoEvento(e.nomeTipoEvento);
-            const sb = STATUS_EXIBICAO_BADGE[statusExibicao(e)];
-            return (
-              <Pressable
-                key={e.id}
-                style={[s.eventoRow, idx < arr.length - 1 && s.eventoRowBorder]}
-                onPress={() => router.push(`/paciente/${e.petId}`)}
-                accessibilityRole="button"
-                accessibilityLabel={`${e.nomeTipoEvento}, ${formatarDataHoraEvento(e.data)}, ${sb.label}`}
-                accessibilityHint="Abre a ficha do paciente"
-              >
-                <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
-                  <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
-                </View>
-                <View style={s.eventoInfo}>
-                  <Text style={s.eventoTitulo}>{e.nomeTipoEvento}</Text>
-                  <Text style={s.eventoData}>{formatarDataHoraEvento(e.data)}</Text>
-                </View>
-                <View style={[s.badge, { backgroundColor: sb.bg }]}>
-                  <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
-                </View>
-              </Pressable>
-            );
-          })
-        )}
-      </View>
-
-      <View style={s.card}>
-        <View style={s.cardHead}>
-          <Text style={s.cardTitle} accessibilityRole="header">Pacientes recentes</Text>
-          <Pressable
-            onPress={() => router.push('/(vet)/pacientes')}
-            accessibilityRole="button"
-            accessibilityLabel="Ver todos os pacientes"
-          >
-            <Text style={s.linkVer}>Ver todos</Text>
-          </Pressable>
-        </View>
-        {pacientes.length === 0 ? (
-          <EmptyState icon="paw-outline" title="Nenhum paciente ainda" accentColor={theme.colors.primary} variant="plain" />
-        ) : (
-          pacientes.slice(0, 3).map(({ pet, eventos: eventosPet }, idx) => (
+          <View style={s.heroActions}>
             <Pressable
-              key={pet.id}
-              style={[s.pacienteRow, idx < Math.min(pacientes.length, 3) - 1 && s.eventoRowBorder]}
-              onPress={() => router.push(`/paciente/${pet.id}`)}
+              style={({ pressed }) => [s.heroPrimary, pressed && s.pressed]}
+              onPress={() => router.push(`/paciente/${proximo.petId}`)}
               accessibilityRole="button"
-              accessibilityLabel={`${pet.nome}, ${pet.tutor?.nome ?? 'tutor não informado'}, ${eventosPet.length} ${eventosPet.length === 1 ? 'evento' : 'eventos'}`}
+              accessibilityLabel={`Iniciar atendimento de ${petProximo?.nome ?? 'paciente'}`}
               accessibilityHint="Abre a ficha do paciente"
             >
-              <View style={s.pacienteAvatar}>
-                <AppIcon name="paw" set="Ionicons" size={16} color={theme.colors.primary} />
-              </View>
-              <View style={s.eventoInfo}>
-                <Text style={s.eventoTitulo}>{pet.nome}</Text>
-                <Text style={s.eventoData}>
-                  {pet.tutor?.nome ?? `Tutor vinculado #${pet.tutor?.id ?? 'não informado'}`}
-                </Text>
-              </View>
-              <Text style={s.pacienteEventos}>{eventosPet.length} {eventosPet.length === 1 ? 'evento' : 'eventos'}</Text>
-              <AppIcon name="chevron-forward" set="Ionicons" size={16} color={theme.colors.textSecondary} />
+              <Text style={s.heroPrimaryText}>Iniciar atendimento</Text>
             </Pressable>
-          ))
+            <Pressable
+              style={({ pressed }) => [s.heroSecondary, pressed && s.pressed]}
+              onPress={() => router.push('/(vet)/consultas')}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir agenda"
+            >
+              <Text style={s.heroSecondaryText}>Agenda</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : (
+        <View style={s.heroVazio}>
+          <Text style={s.heroEyebrow}>PRÓXIMO ATENDIMENTO</Text>
+          <Text style={s.heroVazioTitulo}>Nenhum atendimento agendado</Text>
+          <Text style={s.heroVazioTexto}>Quando houver um novo agendamento, ele aparece aqui em destaque.</Text>
+          <Pressable style={({ pressed }) => [s.heroPrimary, s.heroVazioBtn, pressed && s.pressed]} onPress={() => router.push('/(vet)/consultas')} accessibilityRole="button" accessibilityLabel="Ver consultas">
+            <Text style={s.heroPrimaryText}>Ver consultas</Text>
+          </Pressable>
+        </View>
+      )}
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.chipsScroll} contentContainerStyle={s.chipsContent}>
+        {chips.map(chip => (
+          <Pressable
+            key={chip.label}
+            style={({ pressed }) => [s.chip, pressed && s.pressed]}
+            onPress={() => router.push(chip.rota)}
+            accessibilityRole="button"
+            accessibilityLabel={`${chip.label}: ${chip.valor}`}
+          >
+            <Text style={s.chipLabel}>{chip.label.toUpperCase()}</Text>
+            <Text style={[s.chipValor, { color: chip.valor > 0 || chip.label === 'Hoje' ? chip.cor : theme.colors.textSecondary }]}>{chip.valor}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      <View style={s.secaoHead}>
+        <Text style={s.secaoTitulo} accessibilityRole="header">Resto do dia</Text>
+        <Pressable onPress={() => router.push('/(vet)/consultas')} accessibilityRole="button" accessibilityLabel="Ver agenda">
+          <Text style={s.linkVer}>Ver agenda</Text>
+        </Pressable>
+      </View>
+      <View style={s.card}>
+        {restoDoDia.length === 0 ? (
+          <EmptyState icon="calendar-outline" title="Nada mais para hoje" accentColor={theme.colors.info} variant="plain" />
+        ) : (
+          restoDoDia.map((e, idx) => {
+            const visual = obterVisualTipoEvento(e.nomeTipoEvento);
+            const sb = STATUS_EXIBICAO_BADGE[statusExibicao(e)];
+            const pet = petDoEvento(e.petId);
+            const hora = e.data.length > 10 ? horaCurta(e.data) : '';
+            return (
+              <Pressable
+                key={e.id}
+                style={[s.linha, idx < restoDoDia.length - 1 && s.linhaBorda]}
+                onPress={() => router.push(`/paciente/${e.petId}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${pet?.nome ?? 'Paciente'}, ${e.nomeTipoEvento}, ${sb.label}`}
+                accessibilityHint="Abre a ficha do paciente"
+              >
+                <View style={[s.linhaIcone, { backgroundColor: visual.cor }]}>
+                  <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
+                </View>
+                <View style={s.linhaInfo}>
+                  <Text style={s.linhaTitulo} numberOfLines={1}>{pet?.nome ? `${pet.nome} • ${e.nomeTipoEvento}` : e.nomeTipoEvento}</Text>
+                  <Text style={s.linhaSub} numberOfLines={1}>{[hora, pet?.tutor?.nome].filter(Boolean).join(' • ') || 'Sem horário definido'}</Text>
+                </View>
+                <View style={[s.badge, { backgroundColor: sb.bg }]}>
+                  <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
+                </View>
+              </Pressable>
+            );
+          })
         )}
       </View>
 
+      <View style={s.secaoHead}>
+        <Text style={s.secaoTitulo} accessibilityRole="header">Pacientes recentes</Text>
+        <Pressable onPress={() => router.push('/(vet)/pacientes')} accessibilityRole="button" accessibilityLabel="Ver todos os pacientes">
+          <Text style={s.linkVer}>Ver todos</Text>
+        </Pressable>
+      </View>
+      {pacientes.length === 0 ? (
+        <View style={s.card}>
+          <EmptyState icon="paw-outline" title="Nenhum paciente ainda" accentColor={theme.colors.primary} variant="plain" />
+        </View>
+      ) : (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.pacientesContent}>
+          {pacientes.slice(0, 4).map(({ pet }) => (
+            <Pressable key={pet.id} style={s.pacienteItem} onPress={() => router.push(`/paciente/${pet.id}`)} accessibilityRole="button" accessibilityLabel={`${pet.nome}, abrir ficha`}>
+              <View style={s.pacienteAvatar}>
+                <AppIcon name="paw" set="Ionicons" size={22} color={theme.colors.primary} />
+              </View>
+              <Text style={s.pacienteNome} numberOfLines={1}>{pet.nome}</Text>
+            </Pressable>
+          ))}
+          {pacientes.length > 4 && (
+            <Pressable style={s.pacienteItem} onPress={() => router.push('/(vet)/pacientes')} accessibilityRole="button" accessibilityLabel={`Ver mais ${pacientes.length - 4} pacientes`}>
+              <View style={[s.pacienteAvatar, s.pacienteMais]}>
+                <Text style={s.pacienteMaisText}>+{pacientes.length - 4}</Text>
+              </View>
+              <Text style={s.pacienteNome}>mais</Text>
+            </Pressable>
+          )}
+        </ScrollView>
+      )}
     </ScrollView>
   );
 }
 
-function StatCard({ styles, valor, label, accentColor }: { styles: ReturnType<typeof createStyles>; valor: number; label: string; accentColor: string }) {
-  return (
-    <View style={[styles.statCard, { borderBottomColor: accentColor }]} accessible accessibilityLabel={`${label}: ${valor}`}>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={[styles.statVal, { color: accentColor }]}>{valor}</Text>
-    </View>
-  );
-}
+const createStyles = (theme: AppTheme) => {
+  const page = theme.pages.vetDashboard;
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    content: { padding: 20, paddingBottom: 44 },
 
-const createStyles = (theme: AppTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: 20, paddingBottom: 44 },
-  loadingContainer: { flex: 1, backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' },
+    topo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+    topoTexto: { flex: 1, paddingRight: 12 },
+    data: { fontSize: 12, color: theme.colors.textSecondary },
+    saudacao: { fontSize: 21, fontWeight: '800', color: theme.colors.text, letterSpacing: -0.3, marginTop: 2 },
+    avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: page.heroBackground, alignItems: 'center', justifyContent: 'center' },
+    avatarText: { fontSize: 16, fontWeight: '800', color: theme.colors.brandAccent },
 
-  welcome: {
-    backgroundColor: theme.pages.vetDashboard.heroBackground,
-    borderRadius: 22,
-    padding: 22,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    gap: 14,
-  },
-  welcomeIconWrap: {
-    width: 52, height: 52, borderRadius: 26,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    justifyContent: 'center', alignItems: 'center',
-  },
-  welcomeInfo: { flex: 1 },
-  welcomeNome: { fontSize: 17, fontWeight: '700', color: theme.pages.vetDashboard.heroText, letterSpacing: -0.3 },
-  welcomeSub: { fontSize: 12, color: theme.pages.vetDashboard.heroText, opacity: 0.85, marginTop: 3 },
+    hero: { backgroundColor: page.heroBackground, borderRadius: 22, padding: 18, marginBottom: 14, elevation: 3 },
+    heroEyebrow: { fontSize: 10, fontWeight: '800', letterSpacing: 0.8, color: theme.colors.brandAccent },
+    heroBody: { flexDirection: 'row', alignItems: 'center', gap: 13, marginVertical: 14 },
+    heroAvatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' },
+    heroInfo: { flex: 1 },
+    heroPet: { fontSize: 20, fontWeight: '800', color: page.heroText },
+    heroDetalhe: { fontSize: 12, color: page.heroText, opacity: 0.82, marginTop: 3, lineHeight: 17 },
+    heroActions: { flexDirection: 'row', gap: 10 },
+    heroPrimary: { flex: 1, backgroundColor: theme.colors.brandAccent, borderRadius: 13, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
+    heroPrimaryText: { fontSize: 14, fontWeight: '800', color: '#0a2218' },
+    heroSecondary: { width: 92, backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+    heroSecondaryText: { fontSize: 14, fontWeight: '800', color: page.heroText },
+    heroVazio: { backgroundColor: page.heroBackground, borderRadius: 22, padding: 18, marginBottom: 14 },
+    heroVazioTitulo: { fontSize: 18, fontWeight: '800', color: page.heroText, marginTop: 10 },
+    heroVazioTexto: { fontSize: 12, color: page.heroText, opacity: 0.8, marginTop: 4, lineHeight: 17 },
+    heroVazioBtn: { flex: 0, marginTop: 14 },
 
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
-  statCard: {
-    flex: 1, backgroundColor: theme.pages.vetDashboard.statsCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.statsCard.border,
-    borderRadius: 17, padding: 16, borderBottomWidth: 3, elevation: 2,
-  },
-  statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 6 },
-  statVal: { fontSize: 26, fontWeight: '700', lineHeight: 28 },
-  resumoCard: { backgroundColor: theme.pages.vetDashboard.summaryCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.summaryCard.border, borderRadius: 19, padding: 18, marginBottom: 16, elevation: 2 },
-  resumoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  resumoEyebrow: { fontSize: 10, color: theme.colors.primary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
-  resumoTitle: { fontSize: 15, color: theme.colors.text, fontWeight: '700', marginTop: 3 },
-  resumoMetrics: { flexDirection: 'row', alignItems: 'center' },
-  resumoMetric: { flex: 1 },
-  resumoValue: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
-  resumoLabel: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 3 },
-  resumoDivider: { width: 1, height: 34, backgroundColor: theme.pages.vetDashboard.summaryCard.divider, marginHorizontal: 14 },
-  ocupacaoCard: { backgroundColor: theme.pages.vetDashboard.summaryCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.summaryCard.border, borderRadius: 19, padding: 18, marginBottom: 16, elevation: 2 },
-  ocupacaoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  ocupacaoEyebrow: { fontSize: 10, color: theme.colors.primary, fontWeight: '800', letterSpacing: 0.7 },
-  ocupacaoTitle: { fontSize: 15, color: theme.colors.text, fontWeight: '800', marginTop: 4 },
-  ocupacaoBadge: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  ocupacaoTrack: { height: 9, borderRadius: 5, overflow: 'hidden', backgroundColor: theme.pages.vetDashboard.quickActionCard.background, marginTop: 15 },
-  ocupacaoFill: { height: '100%', borderRadius: 5 },
-  ocupacaoHint: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 8 },
-  quickActions: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  prioridadesCard: { backgroundColor: theme.pages.vetDashboard.card, borderColor: theme.pages.vetDashboard.border, borderWidth: 1, borderRadius: 16, padding: 15, marginBottom: 18 },
-  prioridadesTituloRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 7 },
-  prioridadesTitulo: { color: theme.colors.text, fontSize: 14, fontWeight: '800' },
-  prioridadesTexto: { color: theme.colors.textSecondary, fontSize: 12, lineHeight: 18, marginBottom: 3 },
-  prioridadesLink: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, paddingTop: 8 },
-  prioridadesLinkText: { color: theme.colors.primary, fontWeight: '700', fontSize: 12 },
-  quickAction: { flex: 1, backgroundColor: theme.pages.vetDashboard.quickActionCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.quickActionCard.border, borderRadius: 16, padding: 13, alignItems: 'center', gap: 8, elevation: 1 },
-  quickIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
-  quickLabel: { fontSize: 10, color: theme.colors.text, fontWeight: '700', textAlign: 'center' },
+    chipsScroll: { marginHorizontal: -20, marginBottom: 6 },
+    chipsContent: { paddingHorizontal: 20, gap: 8 },
+    chip: { backgroundColor: page.card, borderWidth: 1, borderColor: page.border, borderRadius: 16, paddingVertical: 10, paddingHorizontal: 16, elevation: 1 },
+    chipLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, color: theme.colors.textSecondary },
+    chipValor: { fontSize: 20, fontWeight: '800', marginTop: 2 },
 
-  alertaResgates: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: theme.domain.reward.gold, borderRadius: 12,
-    paddingHorizontal: 16, paddingVertical: 13, marginBottom: 20,
-  },
-  alertaResgatesText: { flex: 1, fontSize: 13, fontWeight: '700', color: theme.colors.onPrimary },
+    secaoHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18, marginBottom: 10 },
+    secaoTitulo: { fontSize: 15, fontWeight: '800', color: theme.colors.text },
+    linkVer: { fontSize: 13, fontWeight: '600', color: theme.colors.primary },
 
-  card: { backgroundColor: theme.pages.vetDashboard.eventListCard.background, borderWidth: 1, borderColor: theme.pages.vetDashboard.eventListCard.border, borderRadius: 19, marginBottom: 16, overflow: 'hidden', elevation: 2 },
-  cardHead: {
-    paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.pages.vetDashboard.eventListCard.border,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.pages.vetDashboard.eventListCard.headerBackground,
-  },
-  cardTitle: { fontSize: 14, fontWeight: '700', color: theme.colors.text },
-  linkVer: { fontSize: 13, color: theme.colors.primary, fontWeight: '600' },
+    card: { backgroundColor: page.card, borderRadius: 18, borderWidth: 1, borderColor: page.border, overflow: 'hidden', elevation: 1 },
+    linha: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14 },
+    linhaBorda: { borderBottomWidth: 1, borderBottomColor: page.border },
+    linhaIcone: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+    linhaInfo: { flex: 1, minWidth: 0 },
+    linhaTitulo: { fontSize: 13, fontWeight: '700', color: theme.colors.text },
+    linhaSub: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 2 },
+    badge: { borderRadius: 20, paddingHorizontal: 9, paddingVertical: 3 },
+    badgeText: { fontSize: 11, fontWeight: '700' },
 
-  eventoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, gap: 12 },
-  eventoRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.pages.vetDashboard.border },
-  eventoIcone: { width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center' },
-  eventoInfo: { flex: 1 },
-  eventoTitulo: { fontSize: 13, fontWeight: '600', color: theme.colors.text },
-  eventoData: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 2 },
-  badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20 },
-  badgeText: { fontSize: 11, fontWeight: '700' },
-  pacienteRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
-  pacienteAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: theme.colors.successBackground, justifyContent: 'center', alignItems: 'center' },
-  pacienteEventos: { fontSize: 10, color: theme.colors.textSecondary, marginRight: 2 },
+    pacientesContent: { gap: 14, paddingRight: 4 },
+    pacienteItem: { alignItems: 'center', width: 62 },
+    pacienteAvatar: { width: 54, height: 54, borderRadius: 27, backgroundColor: theme.colors.successBackground, alignItems: 'center', justifyContent: 'center' },
+    pacienteMais: { backgroundColor: page.cardSecondary },
+    pacienteMaisText: { fontSize: 16, fontWeight: '800', color: theme.colors.textSecondary },
+    pacienteNome: { fontSize: 11, color: theme.colors.textSecondary, marginTop: 5 },
 
-  empty: { alignItems: 'center', paddingVertical: 28 },
-  emptyTitle: { fontSize: 13, fontWeight: '700', color: theme.colors.text },
-});
+    pressed: { opacity: 0.76, transform: [{ scale: 0.985 }] },
+  });
+};

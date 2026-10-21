@@ -5,24 +5,27 @@ import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useAccessibility } from '../../context/AccessibilityContext';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
-import { AppearancePreferences } from '../../components/AppearancePreferences';
-import type { AppTheme } from '../../constants/theme';
+import type { AppTheme, ThemePreference } from '../../constants/theme';
+
+const TEMAS: { value: ThemePreference; label: string; icon: React.ComponentProps<typeof Ionicons>['name'] }[] = [
+  { value: 'system', label: 'Sistema', icon: 'phone-portrait-outline' },
+  { value: 'light', label: 'Claro', icon: 'sunny-outline' },
+  { value: 'dark', label: 'Escuro', icon: 'moon-outline' },
+];
 
 export default function VetPerfilScreen() {
   const router = useRouter();
-  const { theme } = useTheme();
-  const s = useMemo(() => createStyles(theme), [theme]);
-  const { veterinarioAtivo, pacientes, eventos, eventosDeHoje } = useVet();
+  const { theme, preference, resolvedTheme, setPreference } = useTheme();
+  const { modoSimples } = useAccessibility();
+  const s = useMemo(() => createStyles(theme, modoSimples), [theme, modoSimples]);
+  const { veterinarioAtivo } = useVet();
   const { sessao, logout } = useAuth();
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-perfil');
-
-  function handleSair() {
-    setModalSairVisivel(true);
-  }
 
   async function confirmarLogout() {
     setModalSairVisivel(false);
@@ -30,88 +33,91 @@ export default function VetPerfilScreen() {
     router.replace('/login');
   }
 
-  const iniciais = (veterinarioAtivo?.nome ?? sessao?.nome ?? '?')[0]?.toUpperCase() ?? '?';
-  const atendimentosConcluidos = eventos.filter(evento => evento.status === 'CONCLUIDO').length;
+  const nome = veterinarioAtivo?.nome ?? sessao?.nome ?? 'Veterinário';
+  const iniciais = nome[0]?.toUpperCase() ?? '?';
+  const crmv = veterinarioAtivo?.crmv;
+  const especialidade = veterinarioAtivo?.especialidade;
+  const subtitulo = [crmv ? `CRMV ${crmv}` : null, especialidade].filter(Boolean).join(' · ') || 'Médico-veterinário';
+
+  const dados: [string, string][] = [
+    ['E-mail', sessao?.email ?? '–'],
+    ['CRMV', crmv ?? '–'],
+    ['Especialidade', especialidade ?? 'Não informada'],
+  ];
 
   return (
     <>
-      <ScrollView style={s.container} contentContainerStyle={s.content}>
-
-        <View style={s.banner}>
+      <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <View style={s.profile}>
           <View style={s.avatar}>
             <Text style={s.avatarText}>{iniciais}</Text>
           </View>
-          <View style={s.bannerInfo}>
-            <Text style={s.bannerNome}>{veterinarioAtivo?.nome ?? sessao?.nome}</Text>
-            <Text style={s.bannerRole}>Médico-veterinário{veterinarioAtivo?.especialidade ? ` · ${veterinarioAtivo.especialidade}` : ''}</Text>
-            <Text style={s.bannerEmail}>{sessao?.email}</Text>
-          </View>
+          <Text style={s.nome}>{nome}</Text>
+          <Text style={s.subtitulo}>{subtitulo}</Text>
+          {veterinarioAtivo?.nomeClinica ? (
+            <View style={s.clinicChip}>
+              <Ionicons name="business-outline" size={13} color={theme.colors.success} />
+              <Text style={s.clinicChipText}>{veterinarioAtivo.nomeClinica}</Text>
+            </View>
+          ) : null}
         </View>
 
         {dicaVisivel && (
           <DicaTela
-            titulo="Seu perfil"
-            texto="Aqui você vê seus dados profissionais e um resumo dos seus pacientes e agendamentos."
+            titulo="Sua conta"
+            texto="Aqui você vê seus dados profissionais, ajusta a aparência do app e sai da conta."
             accentColor={theme.colors.primary}
             onFechar={fecharDica}
           />
         )}
 
-        <View style={s.statsRow}>
-          <StatCard styles={s} valor={pacientes.length} label="Pacientes" />
-          <StatCard styles={s} valor={eventosDeHoje.length} label="Hoje" />
-          <StatCard styles={s} valor={atendimentosConcluidos} label="Concluídos" />
-        </View>
-
-        <Text style={s.secLabel}>Suporte ao tutor</Text>
-        <View style={s.actionGroup}>
-          <ActionRow styles={s} icon="sparkles" title="Assistente veterinário SIA" description="Estruture orientações, retornos e comunicação clínica." onPress={() => router.push('/(tutor)/assistente')} />
-          <ActionRow styles={s} icon="paw-outline" title="Localizar um paciente" description="Acesse o histórico para orientar o tutor com contexto." onPress={() => router.push('/(vet)/pacientes')} />
-          <ActionRow styles={s} icon="calendar-outline" title="Acompanhar consultas" description="Revise solicitações e próximos atendimentos." onPress={() => router.push('/(vet)/consultas')} last />
-        </View>
-
-        <Text style={s.secLabel}>Gestão da clínica</Text>
-        <View style={s.actionGroup}>
-          <ActionRow styles={s} icon="time-outline" title="Disponibilidade" description="Edite horários de atendimento e bloqueios." onPress={() => router.push('/(vet)/disponibilidade')} />
-          <ActionRow styles={s} icon="gift-outline" title="Resgates de tutores" description="Valide benefícios pendentes do programa de fidelidade." onPress={() => router.push('/(vet)/resgates')} />
-          <ActionRow styles={s} icon="analytics-outline" title="Relatórios da clínica" description="Acompanhe consultas, faturamento e retornos." onPress={() => router.push('/(vet)/relatorios')} last />
-        </View>
-
-        <AppearancePreferences />
-
-        <Pressable style={s.reportButton} onPress={() => router.push('/sobre-app')} accessibilityRole="button">
-          <Ionicons name="information-circle-outline" size={19} color={theme.colors.primary} />
-          <View style={s.reportCopy}>
-            <Text style={s.reportTitle}>Sobre o App</Text>
-            <Text style={s.reportDescription}>Versão e commit de referência.</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
-        </Pressable>
-
         <Text style={s.secLabel}>Dados profissionais</Text>
         <View style={s.card}>
-          {[
-            ['CRMV', veterinarioAtivo?.crmv ?? '–'],
-            ['Clínica', veterinarioAtivo?.nomeClinica ?? '–'],
-            ['Especialidade', veterinarioAtivo?.especialidade ?? 'Não informada'],
-            ['E-mail de acesso', sessao?.email ?? '–'],
-            ['Perfil', 'Veterinário'],
-          ].map(([label, valor], i, arr) => (
-            <View key={label}>
-              <View style={s.infoRow}>
-                <Text style={s.infoLabel}>{label}</Text>
-                <Text style={s.infoValor}>{valor}</Text>
-              </View>
-              {i < arr.length - 1 && <View style={s.divisor} />}
+          {dados.map(([label, valor], i) => (
+            <View key={label} style={[s.infoRow, i < dados.length - 1 && s.infoRowDivider]}>
+              <Text style={s.infoLabel}>{label}</Text>
+              <Text style={s.infoValor} numberOfLines={1}>{valor}</Text>
             </View>
           ))}
         </View>
 
-        <Pressable style={s.btnSair} onPress={handleSair}>
-          <Ionicons name="log-out-outline" size={16} color={theme.colors.onPrimary} />
-          <Text style={s.btnSairText}>Sair da conta</Text>
+        <Text style={s.secLabel}>Aparência</Text>
+        <View style={s.segmented} accessibilityRole="radiogroup">
+          {TEMAS.map(opcao => {
+            const selecionado = preference === opcao.value;
+            return (
+              <Pressable
+                key={opcao.value}
+                style={[s.segment, selecionado && s.segmentSelected]}
+                onPress={() => void setPreference(opcao.value)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: selecionado }}
+                accessibilityLabel={`Aparência ${opcao.label}`}
+              >
+                <Ionicons name={opcao.icon} size={modoSimples ? 20 : 15} color={selecionado ? theme.colors.onPrimary : theme.colors.textSecondary} />
+                <Text style={[s.segmentText, selecionado && s.segmentTextSelected]}>{opcao.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        {preference === 'system' && (
+          <Text style={s.hint}>Seguindo o dispositivo. Atualmente: {resolvedTheme === 'dark' ? 'escuro' : 'claro'}.</Text>
+        )}
+
+        <Text style={[s.secLabel, s.secSpaced]}>Geral</Text>
+        <Pressable style={({ pressed }) => [s.card, s.linkRow, pressed && s.pressed]} onPress={() => router.push('/sobre-app')} accessibilityRole="button" accessibilityLabel="Sobre o App">
+          <View style={s.linkIcon}><Ionicons name="information-circle-outline" size={20} color={theme.colors.primary} /></View>
+          <View style={s.linkCopy}>
+            <Text style={s.linkTitle}>Sobre o app</Text>
+            <Text style={s.linkDescription}>Versão e commit de referência.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
         </Pressable>
 
+        <Pressable style={({ pressed }) => [s.btnSair, pressed && s.pressed]} onPress={() => setModalSairVisivel(true)} accessibilityRole="button" accessibilityLabel="Sair da conta">
+          <Ionicons name="log-out-outline" size={18} color={theme.colors.danger} />
+          <Text style={s.btnSairText}>Sair da conta</Text>
+        </Pressable>
       </ScrollView>
       <LogoutConfirmationModal
         visivel={modalSairVisivel}
@@ -122,65 +128,43 @@ export default function VetPerfilScreen() {
   );
 }
 
-function StatCard({ styles, valor, label }: { styles: ReturnType<typeof createStyles>; valor: number; label: string }) {
-  return (
-    <View style={styles.statCard}>
-      <Text style={styles.statVal}>{valor}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
+const createStyles = (theme: AppTheme, simples: boolean) => {
+  const page = theme.pages.vetProfile;
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    content: { padding: 20, paddingBottom: 44 },
 
-function ActionRow({ styles, icon, title, description, onPress, last }: { styles: ReturnType<typeof createStyles>; icon: React.ComponentProps<typeof Ionicons>['name']; title: string; description: string; onPress: () => void; last?: boolean }) {
-  return (
-    <Pressable style={[styles.actionRow, last && styles.actionRowLast]} onPress={onPress} accessibilityRole="button" accessibilityLabel={title}>
-      <View style={styles.actionIcon}><Ionicons name={icon} size={19} color={styles.actionIconColor.color} /></View>
-      <View style={styles.actionCopy}>
-        <Text style={styles.actionTitle}>{title}</Text>
-        <Text style={styles.actionDescription}>{description}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={18} color={styles.chevronColor.color} />
-    </Pressable>
-  );
-}
+    profile: { alignItems: 'center', paddingTop: 6, paddingBottom: 8 },
+    avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: page.heroBackground, alignItems: 'center', justifyContent: 'center', elevation: 3 },
+    avatarText: { fontSize: 30, fontWeight: '800', color: theme.colors.brandAccent },
+    nome: { fontSize: simples ? 26 : 21, fontWeight: '800', color: theme.colors.text, marginTop: 12, textAlign: 'center', letterSpacing: -0.3 },
+    subtitulo: { fontSize: simples ? 17 : 13, color: theme.colors.textSecondary, marginTop: 4, textAlign: 'center' },
+    clinicChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.colors.successBackground, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, marginTop: 10 },
+    clinicChipText: { fontSize: simples ? 15 : 12, fontWeight: '700', color: theme.colors.success },
 
-const createStyles = (theme: AppTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: 20, paddingBottom: 44 },
+    secLabel: { fontSize: simples ? 15 : 11, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 10, marginTop: 18, paddingLeft: 2 },
+    secSpaced: { marginTop: 24 },
+    card: { backgroundColor: page.card, borderRadius: 18, borderWidth: 1, borderColor: page.border, paddingHorizontal: 16, elevation: 1 },
+    infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 16, paddingVertical: simples ? 17 : 14 },
+    infoRowDivider: { borderBottomWidth: 1, borderBottomColor: page.border },
+    infoLabel: { fontSize: simples ? 17 : 13, color: theme.colors.textSecondary },
+    infoValor: { flexShrink: 1, fontSize: simples ? 17 : 13, fontWeight: '700', color: theme.colors.text },
 
-  banner: { backgroundColor: theme.pages.vetProfile.heroBackground, borderRadius: 22, padding: 22, flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 18, minHeight: 112, elevation: 3 },
-  avatar: { width: 58, height: 58, borderRadius: 20, backgroundColor: theme.pages.vetProfile.heroAccent, justifyContent: 'center', alignItems: 'center' },
-  avatarText: { fontSize: 18, fontWeight: '700', color: theme.colors.onPrimary },
-  bannerInfo: { flex: 1 },
-  bannerNome: { fontSize: 16, fontWeight: '700', color: theme.pages.vetProfile.heroText },
-  bannerRole: { fontSize: 12, color: theme.pages.vetProfile.heroText, opacity: 0.9, marginTop: 4, fontWeight: '700' },
-  bannerEmail: { fontSize: 11, color: theme.pages.vetProfile.heroText, opacity: 0.68, marginTop: 3 },
+    segmented: { flexDirection: 'row', backgroundColor: page.cardSecondary, borderRadius: 14, padding: 4, gap: 4, borderWidth: 1, borderColor: page.border },
+    segment: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: simples ? 15 : 10, borderRadius: 11 },
+    segmentSelected: { backgroundColor: theme.colors.primary },
+    segmentText: { fontSize: simples ? 16 : 12, fontWeight: '700', color: theme.colors.textSecondary },
+    segmentTextSelected: { color: theme.colors.onPrimary },
+    hint: { fontSize: simples ? 15 : 11, color: theme.colors.textSecondary, marginTop: 8, paddingLeft: 2 },
 
-  statsRow: { flexDirection: 'row', gap: 9, marginBottom: 24 },
-  statCard: { flex: 1, backgroundColor: theme.pages.vetProfile.card, borderWidth: 1, borderColor: theme.pages.vetProfile.border, borderRadius: 17, paddingVertical: 15, paddingHorizontal: 7, alignItems: 'center', elevation: 2 },
-  statVal: { fontSize: 22, fontWeight: '700', color: theme.colors.primary },
-  statLabel: { fontSize: 10, color: theme.colors.textSecondary, fontWeight: '700', marginTop: 4, textTransform: 'uppercase' },
+    linkRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
+    linkIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: page.cardSecondary, alignItems: 'center', justifyContent: 'center' },
+    linkCopy: { flex: 1 },
+    linkTitle: { fontSize: simples ? 18 : 14, fontWeight: '800', color: theme.colors.text },
+    linkDescription: { fontSize: simples ? 15 : 11, color: theme.colors.textSecondary, marginTop: 3 },
 
-  secLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase', color: theme.colors.textSecondary, marginBottom: 10, marginTop: 4, paddingLeft: 2 },
-  actionGroup: { backgroundColor: theme.pages.vetProfile.card, borderRadius: 18, borderWidth: 1, borderColor: theme.pages.vetProfile.border, paddingHorizontal: 14, marginBottom: 22, elevation: 1 },
-  actionRow: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 1, borderBottomColor: theme.pages.vetProfile.border },
-  actionRowLast: { borderBottomWidth: 0 },
-  actionIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: theme.colors.successBackground, alignItems: 'center', justifyContent: 'center' },
-  actionIconColor: { color: theme.colors.primary },
-  actionCopy: { flex: 1 },
-  actionTitle: { fontSize: 13, fontWeight: '800', color: theme.colors.text },
-  actionDescription: { fontSize: 10, lineHeight: 14, color: theme.colors.textSecondary, marginTop: 3 },
-  chevronColor: { color: theme.colors.textMuted },
-  card: { backgroundColor: theme.pages.vetProfile.card, borderRadius: 16, borderWidth: 1, borderColor: theme.pages.vetProfile.border, paddingHorizontal: 16, marginBottom: 22 },
-  divisor: { height: 1, backgroundColor: theme.pages.vetProfile.border },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 13 },
-  infoLabel: { fontSize: 13, color: theme.colors.textSecondary },
-  infoValor: { fontSize: 13, fontWeight: '600', color: theme.colors.text },
-
-  btnSair: { backgroundColor: theme.colors.danger, paddingVertical: 14, borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
-  btnSairText: { color: theme.colors.onPrimary, fontSize: 14, fontWeight: '700' },
-  reportButton: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.pages.vetProfile.card, borderWidth: 1, borderColor: theme.pages.vetProfile.border, borderRadius: 14, padding: 14, marginBottom: 22 },
-  reportCopy: { flex: 1 },
-  reportTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '700' },
-  reportDescription: { color: theme.colors.textSecondary, fontSize: 11, marginTop: 3 },
-});
+    btnSair: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 26, paddingVertical: simples ? 18 : 14, borderRadius: 14, borderWidth: 1.5, borderColor: theme.colors.danger },
+    btnSairText: { fontSize: simples ? 18 : 14, fontWeight: '800', color: theme.colors.danger },
+    pressed: { opacity: 0.76, transform: [{ scale: 0.985 }] },
+  });
+};
