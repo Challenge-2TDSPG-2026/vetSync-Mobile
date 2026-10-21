@@ -18,7 +18,7 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 ### Pendente desta frente
 
-- [ ] Testar login/ações no site publicado e liberar CORS no backend Java (Render) para https://vetsync-76c0e.web.app e https://vetsync-76c0e.firebaseapp.com.
+- [x] Testar login/ações no site publicado e liberar CORS no backend Java (Render) para https://vetsync-76c0e.web.app e https://vetsync-76c0e.firebaseapp.com.
 - [ ] Cadastrar EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (Secrets do GitHub) e autorizar a URL do site no cliente OAuth do Google.
 - [x] Confirmar lint no CI; `.github/workflows/ci.yml` executa `npm run lint` junto com typecheck, testes, formatação e build.
 
