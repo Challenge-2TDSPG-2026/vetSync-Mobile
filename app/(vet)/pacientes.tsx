@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +25,12 @@ export default function VetPacientesScreen() {
   const [especie, setEspecie] = useState('todas');
   const [raca, setRaca] = useState('');
   const [periodoAtendimento, setPeriodoAtendimento] = useState<PeriodoAtendimento>('qualquer');
+  const [agora, setAgora] = useState<number | null>(null);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setAgora(Date.now()), 0);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const pacientesFiltrados = useMemo(() => {
     const termo = busca.trim().toLocaleLowerCase();
@@ -40,8 +46,8 @@ export default function VetPacientesScreen() {
       const correspondeEspecie = especie === 'todas' || pet.especie === especie;
       const correspondeRaca = !raca.trim() || pet.raca.toLocaleLowerCase().includes(raca.trim().toLocaleLowerCase());
       const ultimaData = eventos.filter(e => e.status === 'CONCLUIDO').reduce((max, e) => Math.max(max, new Date(e.data).getTime()), 0);
-      const diasDesde = ultimaData ? (Date.now() - ultimaData) / 86_400_000 : null;
-      const correspondePeriodo = periodoAtendimento === 'qualquer'
+      const diasDesde = ultimaData && agora !== null ? (agora - ultimaData) / 86_400_000 : null;
+      const correspondePeriodo = agora === null || periodoAtendimento === 'qualquer'
         || (periodoAtendimento === 'semHistorico' && diasDesde === null)
         || (periodoAtendimento === '30dias' && diasDesde !== null && diasDesde <= 30)
         || (periodoAtendimento === '90dias' && diasDesde !== null && diasDesde <= 90);
@@ -53,7 +59,7 @@ export default function VetPacientesScreen() {
       const maisRecente = (eventos: typeof a.eventos) => eventos.reduce((max, evento) => Math.max(max, new Date(evento.data).getTime()), 0);
       return maisRecente(b.eventos) - maisRecente(a.eventos);
     });
-  }, [busca, especie, filtro, ordenacao, pacientes, periodoAtendimento, raca]);
+  }, [agora, busca, especie, filtro, ordenacao, pacientes, periodoAtendimento, raca]);
 
   if (carregando) {
     return <View style={s.loading}><ActivityIndicator color={theme.colors.primary} /><Text style={s.loadingText}>Carregando pacientes...</Text></View>;

@@ -11,7 +11,7 @@ import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { DicaTela } from '../../components/ui/DicaTela';
-import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
+import { STATUS_EXIBICAO_BADGE, formatarDataHoraEvento, parseDataEvento, statusExibicao } from '../../utils/eventoStatus';
 import { useConfirmarEvento, useRecusarEvento } from '../../hooks/useEventos';
 import { mostrarToast } from '../../components/ui/Toast';
 import { mensagemDeErro } from '../../services/api/errorMessages';
@@ -20,7 +20,6 @@ import type { Evento } from '../../types';
 import type { AppTheme } from '../../constants/theme';
 import { VetPageIntro } from '../../components/vet/VetPageIntro';
 import { usePerfilSaudePet } from '../../hooks/useRelatorios';
-import { parseDataEvento } from '../../utils/eventoStatus';
 
 type FiltroAgenda = 'todas' | 'hoje' | 'proximas' | 'pendentes' | 'confirmadas' | 'semana';
 

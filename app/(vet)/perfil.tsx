@@ -15,7 +15,7 @@ export default function VetPerfilScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
-  const { veterinarioAtivo, pacientes, eventosAgendados, eventos, eventosDeHoje } = useVet();
+  const { veterinarioAtivo, pacientes, eventos, eventosDeHoje } = useVet();
   const { sessao, logout } = useAuth();
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-perfil');
