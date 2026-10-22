@@ -30,7 +30,7 @@ export default function LoginScreen() {
 
   function validarConta(): boolean {
     const e: Record<string, string> = {};
-    if (!email.trim() || !email.includes('@')) e.email = 'E-mail inválido';
+    if (!email.trim()) e.email = 'Informe seu e-mail ou CRMV';
     if (!senha.trim()) e.senha = 'Informe sua senha';
     setErrosConta(e);
     return Object.keys(e).length === 0;
@@ -131,11 +131,11 @@ export default function LoginScreen() {
       subtitle="Consultas, vacinas e lembretes do seu pet, sempre à mão."
     >
           <AuthField
-            label="E-mail"
+            label="E-mail ou CRMV"
             icon="mail-outline"
             value={email}
             onChangeText={setEmail}
-            placeholder="voce@email.com"
+            placeholder="voce@email.com ou SP-12345"
             keyboardType="email-address"
             autoCapitalize="none"
             textContentType="username"
