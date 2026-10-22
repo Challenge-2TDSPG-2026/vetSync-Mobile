@@ -9,6 +9,8 @@ import { useAccessibility } from '../../context/AccessibilityContext';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
+import { VetAvatar } from '../../components/vet/VetAvatar';
+import { EditarFotoVetModal } from '../../components/vet/EditarFotoVetModal';
 import type { AppTheme, ThemePreference } from '../../constants/theme';
 
 const TEMAS: { value: ThemePreference; label: string; icon: React.ComponentProps<typeof Ionicons>['name'] }[] = [
@@ -25,6 +27,7 @@ export default function VetPerfilScreen() {
   const { veterinarioAtivo } = useVet();
   const { sessao, logout } = useAuth();
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
+  const [fotoAberta, setFotoAberta] = useState(false);
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-perfil');
 
   async function confirmarLogout() {
@@ -34,7 +37,6 @@ export default function VetPerfilScreen() {
   }
 
   const nome = veterinarioAtivo?.nome ?? sessao?.nome ?? 'Veterinário';
-  const iniciais = nome[0]?.toUpperCase() ?? '?';
   const crmv = veterinarioAtivo?.crmv;
   const especialidade = veterinarioAtivo?.especialidade;
   const subtitulo = [crmv ? `CRMV ${crmv}` : null, especialidade].filter(Boolean).join(' · ') || 'Médico-veterinário';
@@ -49,9 +51,10 @@ export default function VetPerfilScreen() {
     <>
       <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.profile}>
-          <View style={s.avatar}>
-            <Text style={s.avatarText}>{iniciais}</Text>
-          </View>
+          <VetAvatar nome={nome} size={80} mostrarCamera onPress={() => setFotoAberta(true)} accessibilityLabel="Alterar minha foto" />
+          <Pressable onPress={() => setFotoAberta(true)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Alterar foto">
+            <Text style={s.alterarFoto}>Alterar foto</Text>
+          </Pressable>
           <Text style={s.nome}>{nome}</Text>
           <Text style={s.subtitulo}>{subtitulo}</Text>
           {veterinarioAtivo?.nomeClinica ? (
@@ -119,6 +122,7 @@ export default function VetPerfilScreen() {
           <Text style={s.btnSairText}>Sair da conta</Text>
         </Pressable>
       </ScrollView>
+      <EditarFotoVetModal visivel={fotoAberta} nome={nome} onFechar={() => setFotoAberta(false)} />
       <LogoutConfirmationModal
         visivel={modalSairVisivel}
         onFechar={() => setModalSairVisivel(false)}
@@ -135,8 +139,7 @@ const createStyles = (theme: AppTheme, simples: boolean) => {
     content: { padding: 20, paddingBottom: 44 },
 
     profile: { alignItems: 'center', paddingTop: 6, paddingBottom: 8 },
-    avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: page.heroBackground, alignItems: 'center', justifyContent: 'center', elevation: 3 },
-    avatarText: { fontSize: 30, fontWeight: '800', color: theme.colors.brandAccent },
+    alterarFoto: { fontSize: simples ? 16 : 12, fontWeight: '700', color: theme.colors.primary, marginTop: 8 },
     nome: { fontSize: simples ? 26 : 21, fontWeight: '800', color: theme.colors.text, marginTop: 12, textAlign: 'center', letterSpacing: -0.3 },
     subtitulo: { fontSize: simples ? 17 : 13, color: theme.colors.textSecondary, marginTop: 4, textAlign: 'center' },
     clinicChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.colors.successBackground, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, marginTop: 10 },

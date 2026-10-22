@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
@@ -7,11 +7,15 @@ import { useTheme } from '../../context/ThemeContext';
 import { useMeusResgates } from '../../hooks/useRecompensas';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
+import { useAtendimentoVet } from '../../hooks/useAtendimentoVet';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList, SkeletonCard } from '../../components/ui/Skeleton';
 import { DicaTela } from '../../components/ui/DicaTela';
+import { VetAvatar } from '../../components/vet/VetAvatar';
+import { confirmar } from '../../utils/alert';
+import { formatarHora } from '../../utils/atendimentoVet';
 import { STATUS_EXIBICAO_BADGE, parseDataEvento, statusExibicao } from '../../utils/eventoStatus';
 import type { AppTheme } from '../../constants/theme';
 import { useVetDesktop } from '../../components/vet/desktop/useVetDesktop';
@@ -66,28 +70,60 @@ function VetDashboardMobile() {
   const atrasados = eventos.filter(e => statusExibicao(e) === 'ATRASADO');
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-painel');
+  const { atendimento, carregado: atendimentoCarregado, iniciar: iniciarAtendimento, encerrar: encerrarAtendimento } = useAtendimentoVet();
 
   const nome = veterinarioAtivo?.nome ?? sessao?.nome ?? 'Veterinário';
-  const iniciais = nome[0]?.toUpperCase() ?? '?';
 
   const agendadosOrdenados = useMemo(
     () => [...eventosAgendados].sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime()),
     [eventosAgendados],
   );
-  const proximo = agendadosOrdenados.find(e => statusExibicao(e) !== 'ATRASADO');
+  const eventoEmAndamento = atendimento ? eventosAgendados.find(e => String(e.id) === atendimento.eventoId) : undefined;
+  // Só atendimentos já confirmados pela clínica podem ser iniciados (o backend recusa concluir os demais).
+  const proximo = agendadosOrdenados.find(
+    e => statusExibicao(e) !== 'ATRASADO' && e.statusConfirmacao !== 'PENDENTE' && e.statusConfirmacao !== 'RECUSADO',
+  );
+  const eventoHero = eventoEmAndamento ?? proximo;
+  const emAtendimento = Boolean(eventoEmAndamento && atendimento);
+  const podeIniciar = Boolean(proximo && mesmoDia(parseDataEvento(proximo.data), new Date()));
   const petDoEvento = (petId: number | string) => pacientes.find(p => String(p.pet.id) === String(petId))?.pet;
-  const petProximo = proximo ? petDoEvento(proximo.petId) : undefined;
+  const petProximo = eventoHero ? petDoEvento(eventoHero.petId) : undefined;
 
   const restoDoDia = useMemo(() => {
     const ids = new Set<string>();
     const lista = [...eventosDeHoje, ...atrasados].filter(e => {
       const chave = String(e.id);
-      if (ids.has(chave) || (proximo && chave === String(proximo.id))) return false;
+      if (ids.has(chave) || (eventoHero && chave === String(eventoHero.id))) return false;
       ids.add(chave);
       return true;
     });
     return lista.sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime()).slice(0, 5);
-  }, [eventosDeHoje, atrasados, proximo]);
+  }, [eventosDeHoje, atrasados, eventoHero]);
+
+  // Se o atendimento em andamento foi concluído ou cancelado por outro caminho, limpa o estado local.
+  useEffect(() => {
+    if (!carregando && atendimentoCarregado && atendimento && !eventoEmAndamento) void encerrarAtendimento();
+  }, [carregando, atendimentoCarregado, atendimento, eventoEmAndamento, encerrarAtendimento]);
+
+  function pedirInicioAtendimento() {
+    if (!proximo) return;
+    const nomePet = petProximo?.nome ?? 'o paciente';
+    confirmar(
+      'Iniciar atendimento?',
+      `Tudo o que você escrever no bloco de notas será adicionado à ficha de ${nomePet} ao concluir o atendimento. O tutor poderá ver essas informações.`,
+      [
+        { texto: 'Cancelar', estilo: 'cancel' },
+        {
+          texto: 'Iniciar',
+          aoConfirmar: () => {
+            void iniciarAtendimento({ eventoId: String(proximo.id), petId: String(proximo.petId) }).then(() =>
+              router.push(`/atendimento/${proximo.id}`),
+            );
+          },
+        },
+      ],
+    );
+  }
 
   if (carregando) {
     return (
@@ -118,9 +154,7 @@ function VetDashboardMobile() {
           <Text style={s.data}>{dataPorExtenso(new Date())}</Text>
           <Text style={s.saudacao} numberOfLines={1}>Olá, {nome}</Text>
         </View>
-        <Pressable style={s.avatar} onPress={() => router.push('/(vet)/perfil')} accessibilityRole="button" accessibilityLabel="Abrir minha conta">
-          <Text style={s.avatarText}>{iniciais}</Text>
-        </Pressable>
+        <VetAvatar nome={nome} size={44} onPress={() => router.push('/(vet)/perfil')} accessibilityLabel="Abrir minha conta" />
       </View>
 
       {dicaVisivel && (
@@ -132,9 +166,13 @@ function VetDashboardMobile() {
         />
       )}
 
-      {proximo ? (
+      {eventoHero ? (
         <View style={s.hero}>
-          <Text style={s.heroEyebrow}>PRÓXIMO ATENDIMENTO • {quandoAcontece(proximo.data).toUpperCase()}</Text>
+          <Text style={s.heroEyebrow}>
+            {emAtendimento && atendimento
+              ? `EM ATENDIMENTO • DESDE ${formatarHora(new Date(atendimento.inicioISO))}`
+              : `PRÓXIMO ATENDIMENTO • ${quandoAcontece(eventoHero.data).toUpperCase()}`}
+          </Text>
           <View style={s.heroBody}>
             <View style={s.heroAvatar}>
               <AppIcon name="paw" set="Ionicons" size={24} color={theme.pages.vetDashboard.heroText} />
@@ -142,19 +180,23 @@ function VetDashboardMobile() {
             <View style={s.heroInfo}>
               <Text style={s.heroPet} numberOfLines={1}>{petProximo?.nome ?? 'Paciente'}</Text>
               <Text style={s.heroDetalhe} numberOfLines={2}>
-                {proximo.nomeTipoEvento}{petProximo?.tutor?.nome ? ` • ${petProximo.tutor.nome}` : ''}{proximo.data.length > 10 ? ` • ${horaCurta(proximo.data)}` : ''}
+                {eventoHero.nomeTipoEvento}{petProximo?.tutor?.nome ? ` • ${petProximo.tutor.nome}` : ''}{eventoHero.data.length > 10 ? ` • ${horaCurta(eventoHero.data)}` : ''}
               </Text>
             </View>
           </View>
           <View style={s.heroActions}>
             <Pressable
               style={({ pressed }) => [s.heroPrimary, pressed && s.pressed]}
-              onPress={() => router.push(`/paciente/${proximo.petId}`)}
+              onPress={() => {
+                if (emAtendimento) router.push(`/atendimento/${eventoHero.id}`);
+                else if (podeIniciar) pedirInicioAtendimento();
+                else router.push(`/paciente/${eventoHero.petId}`);
+              }}
               accessibilityRole="button"
-              accessibilityLabel={`Iniciar atendimento de ${petProximo?.nome ?? 'paciente'}`}
-              accessibilityHint="Abre a ficha do paciente"
+              accessibilityLabel={`${emAtendimento ? 'Continuar' : podeIniciar ? 'Iniciar' : 'Ver ficha do'} atendimento de ${petProximo?.nome ?? 'paciente'}`}
+              accessibilityHint={emAtendimento ? 'Abre o bloco de notas do atendimento' : podeIniciar ? 'Abre o bloco de notas do atendimento' : 'Abre a ficha do paciente'}
             >
-              <Text style={s.heroPrimaryText}>Iniciar atendimento</Text>
+              <Text style={s.heroPrimaryText}>{emAtendimento ? 'Continuar atendimento' : podeIniciar ? 'Iniciar atendimento' : 'Ver ficha'}</Text>
             </Pressable>
             <Pressable
               style={({ pressed }) => [s.heroSecondary, pressed && s.pressed]}
@@ -276,8 +318,6 @@ const createStyles = (theme: AppTheme) => {
     topoTexto: { flex: 1, paddingRight: 12 },
     data: { fontSize: 12, color: theme.colors.textSecondary },
     saudacao: { fontSize: 21, fontWeight: '800', color: theme.colors.text, letterSpacing: -0.3, marginTop: 2 },
-    avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: page.heroBackground, alignItems: 'center', justifyContent: 'center' },
-    avatarText: { fontSize: 16, fontWeight: '800', color: theme.colors.brandAccent },
 
     hero: { backgroundColor: page.heroBackground, borderRadius: 22, padding: 18, marginBottom: 14, elevation: 3 },
     heroEyebrow: { fontSize: 10, fontWeight: '800', letterSpacing: 0.8, color: theme.colors.brandAccent },
