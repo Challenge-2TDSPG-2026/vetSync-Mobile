@@ -73,63 +73,9 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 - [x] Avaliar a remoção do token no logout ou quando ele se tornar inválido.
   - _O token registrado é removido pelo endpoint `DELETE /notificacoes/dispositivos/{token}` durante o logout. Se a remoção falhar, ele permanece armazenado para nova tentativa no próximo login._
 
-## Prioridade 2 — Validação funcional completa
+## Cobertura de testes
 
-### Fluxo do tutor
-
-_Validações manuais ainda não realizadas._
-
-- [ ] Validar login com backend real.
-- [ ] Validar cadastro de usuário.
-- [ ] Validar recuperação e redefinição de senha.
-- [ ] Validar vínculo com clínica.
-- [ ] Validar cadastro de pet.
-- [ ] Validar edição dos dados do pet.
-- [ ] Validar inclusão e edição da foto do pet.
-- [ ] Validar criação de evento.
-- [ ] Validar edição e exclusão de evento.
-- [ ] Validar conclusão de evento.
-- [ ] Validar inclusão do evento no calendário.
-- [ ] Validar agendamento de lembretes locais.
-- [ ] Validar carteira de vacinação.
-- [ ] Validar geração e compartilhamento do PDF da carteira.
-- [ ] Validar histórico de cuidados.
-- [ ] Validar responsáveis e compartilhamento de acesso.
-- [ ] Validar recompensas e resgates.
-- [ ] Validar assistente.
-- [ ] Validar tela de notificações manualmente em dispositivo/build nativo.
-  - _A correção da lista foi coberta por testes automatizados; ainda falta validar a tela com a API e o aplicativo executando em dispositivo._
-- [ ] Validar biometria.
-- [ ] Validar modo simples.
-- [ ] Validar tema claro e escuro.
-- [ ] Validar logout e novo login.
-
-### Fluxo do veterinário
-
-_Validações manuais ainda não realizadas._
-
-- [ ] Validar login como veterinário.
-- [ ] Validar dashboard do veterinário.
-- [ ] Validar lista de pacientes.
-- [ ] Validar busca e filtros de pacientes.
-- [ ] Validar detalhes do paciente.
-- [ ] Validar consultas.
-- [ ] Validar disponibilidade.
-- [ ] Validar perfil do veterinário.
-- [ ] Validar relatórios.
-- [ ] Validar resgates pendentes.
-
-### Estados e qualidade de uso
-
-_Validações manuais ainda não realizadas._
-
-- [ ] Testar estados de carregamento.
-- [ ] Testar estados vazios.
-- [ ] Testar mensagens de erro.
-- [ ] Testar perda e recuperação de conexão.
-- [ ] Confirmar que nenhuma tela principal é apenas visual.
-- [ ] Confirmar que não existem fluxos interrompidos ou botões sem ação.
-- [ ] Confirmar que telas entregues nas sprints anteriores continuam disponíveis.
+A matriz completa de testes manuais de tutor, veterinario, autenticacao, permissoes, notificacoes e estados do aplicativo esta em [docs/testes.md](../testes.md). Registre a execucao nesse documento.
 
 ## Prioridade 3 — Qualidade técnica
 
@@ -145,35 +91,11 @@ _Validações manuais ainda não realizadas._
 - [ ] Padronizar endpoints e exemplos da documentação.
 - [ ] Revisar mensagens de erro e evitar falhas silenciosas.
 
-### Validação automatizada
+### Validacao automatizada, build e ambiente
 
-- [x] Instalar dependências com `npm ci`.
-  - _Executado localmente e no workflow de deploy; verificado em 15/10/2026._
-- [x] Executar `npm run typecheck`.
-  - _0 erros, verificado em 15/10/2026 no commit `1e0e044`._
-- [x] Executar `npm run lint`.
-  - _0 erros e 6 avisos de regras de hooks/importação/estilo; executado em 15/10/2026._
-- [x] Executar `npm test`. **(novo 14/10)**
-  - _42 suítes / 281 testes passando (14/10)._
-- [x] Executar `npm run build`. **(novo 14/10)**
-  - _expo export -p web gera 46 arquivos; deploy no Firebase Hosting verde._
-- [x] Corrigir os erros de lint encontrados sem alterar funcionalidades não relacionadas.
-- [x] Reexecutar todas as validações após as correções.
-  - _Último resultado registrado: typecheck, lint, build web e suíte completa executados em 19/10/2026; 43 suítes / 287 testes, typecheck sem erros, build web concluído e lint sem erros (6 avisos preexistentes). Ainda não há registro de execução para o commit atual `d695aef`._
+Os comandos, criterios automatizados e casos de validacao em dispositivos estao centralizados em [docs/testes.md](../testes.md).
 
-### Build e ambiente
-
-- [ ] Validar o aplicativo em build nativo, não apenas no Expo Go.
-- [x] Confirmar as permissões de calendário, câmera, fotos e notificações.
-  - _Permissões e descrições configuradas em `app.json`; o teste de concessão efetiva ainda depende de build nativo/dispositivo._
-- [x] Confirmar o `projectId` do Expo usado no build.
-  - _Project ID `65c847ac-eddf-4dc7-9be0-446b1105c4c1`, configurado em `app.json`._
-- [x] Registrar a versão e o `versionCode` declarados no código atual.
-  - _`app.json` declara versão `0.1.4` e `versionCode` `3`. Esses dados diferem do APK documentado (`0.1.0`, build `3`); a versão final da entrega ainda precisa ser definida._
-- [ ] Confirmar que as variáveis de ambiente necessárias estão configuradas.
-  - _OAuth web confirmado pelo responsável. O acesso à API Java apresenta erro no token e ainda precisa ser validado/corrigido._
-- [x] Guardar os dados do build publicado para referência da equipe.
-  - _Versão `0.1.0`, build `3`, commit `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`, Firebase App Distribution no projeto `vetsync-76c0e`._
+Ultima execucao registrada em 19/10/2026: typecheck sem erros, lint sem erros (seis avisos), build web concluido e 43 suites/287 testes passando. O resultado e historico; nao ha registro de execucao para o commit `d695aef`.
 
 ## Prioridade 4 — Documentação e apresentação
 
