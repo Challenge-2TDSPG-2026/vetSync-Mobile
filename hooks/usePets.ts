@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { petService } from '../services/petService';
+import { invalidarImagem } from '../services/imagemCache';
 import type { ArquivoUpload } from '../services/api/httpClient';
 import type { Pet } from '../types';
 import { petKeys } from './queryKeys';
@@ -70,12 +71,22 @@ export function useRemoverPet() {
   });
 }
 
+/** Descarta a cópia local da foto antiga/nova para as telas buscarem a imagem atualizada. */
+function descartarFotoEmCache(queryClient: QueryClient, petAtualizado: Pet) {
+  const anterior =
+    queryClient.getQueryData<Pet>(petKeys.detalhe(petAtualizado.id))?.fotoUrl ??
+    queryClient.getQueryData<Pet[]>(petKeys.all)?.find(pet => pet.id === petAtualizado.id)?.fotoUrl;
+  void invalidarImagem(anterior);
+  if (petAtualizado.fotoUrl !== anterior) void invalidarImagem(petAtualizado.fotoUrl);
+}
+
 export function useEnviarFotoPet() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ idPet, arquivo }: { idPet: string; arquivo: ArquivoUpload }) =>
       petService.enviarFoto(idPet, arquivo),
     onSuccess: (petAtualizado) => {
+      descartarFotoEmCache(queryClient, petAtualizado);
       queryClient.setQueryData<Pet[]>(petKeys.all, (antigos = []) =>
         antigos.map(pet => (pet.id === petAtualizado.id ? petAtualizado : pet))
       );
@@ -91,6 +102,7 @@ export function useRemoverFotoPet() {
   return useMutation({
     mutationFn: (idPet: string) => petService.removerFoto(idPet),
     onSuccess: (petAtualizado) => {
+      descartarFotoEmCache(queryClient, petAtualizado);
       queryClient.setQueryData<Pet[]>(petKeys.all, (antigos = []) =>
         antigos.map(pet => (pet.id === petAtualizado.id ? petAtualizado : pet))
       );
