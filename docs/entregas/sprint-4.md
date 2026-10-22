@@ -1,6 +1,6 @@
 # Checklist da Entrega — 4º Sprint
 
-> VetSync Mobile · Challenge 2026 · atualizado em 19/10/2026 · branch `main`
+> VetSync Mobile · Challenge 2026 · atualizado em 22/10/2026 · branch `main` · revisão do repositório no commit `d695aefbbcd5057cbcc6228497d57d102a04377e`
 
 Legenda: `[x]` feito · `[ ]` pendente · **(novo 14/10)** = concluído na atualização anterior.
 
@@ -10,7 +10,7 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 - [x] `firebase init hosting` e `firebase init hosting:github` concluídos; o secret `FIREBASE_SERVICE_ACCOUNT_VETSYNC_76C0E` está configurado no GitHub.
 - [x] `firebase.json` usa `dist` como diretório público e rewrite `**` para `/index.html`; `.firebaserc` aponta para `vetsync-76c0e`.
-- [x] Workflows de merge e pull request usam `actions/setup-node@v4`, Node 20, cache npm, `npm ci` e `expo export --platform web`.
+- [x] Existem workflows separados para CI, deploy no Firebase Hosting (merge e pull request) e distribuição Android; o CI atual usa Node 22 e `npm ci`.
 - [x] O workflow de merge injeta `EXPO_PUBLIC_COMMIT_HASH`, `EXPO_PUBLIC_BUILD_NUMBER` e `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`.
 - [x] Deploy automático na branch `main` concluído com sucesso no commit `1e0e044` (workflow [38735005163](https://github.com/Challenge-2TDSPG-2026/vetSync-Mobile/actions/runs/38735005163)).
 - [x] Site publicado: https://vetsync-76c0e.web.app
@@ -18,8 +18,10 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 ### Pendente desta frente
 
-- [x] Testar login/ações no site publicado e liberar CORS no backend Java (Render) para https://vetsync-76c0e.web.app e https://vetsync-76c0e.firebaseapp.com.
-- [ ] Cadastrar EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (Secrets do GitHub) e autorizar a URL do site no cliente OAuth do Google.
+- [ ] Validar login/ações no site publicado; há erro no token da API Java. _A configuração OAuth foi confirmada pelo responsável._
+- [x] Liberar CORS no backend Java (Render) para https://vetsync-76c0e.web.app e https://vetsync-76c0e.firebaseapp.com.
+- [x] Configurar `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` nos Secrets do GitHub e autorizar a URL do site no cliente OAuth do Google.
+  - _Confirmado pelo responsável. O login/fluxo web ainda apresenta erro relacionado ao token da API Java; não é pendência de configuração OAuth._
 - [x] Confirmar lint no CI; `.github/workflows/ci.yml` executa `npm run lint` junto com typecheck, testes, formatação e build.
 
 ## Prioridade 1 — Itens críticos da avaliação
@@ -46,11 +48,11 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 - [x] Adicionar o e-mail institucional do professor como tester.
   - _Testers cadastrados e convidados: `proflucas.santos@fiap.com.br` e `pf2275@fiap.com.br`._
 - [x] Confirmar o recebimento do convite pelo professor.
-- [x] Testar a instalação e a execução do aplicativo publicado.
+- [ ] Testar a instalação e a execução do aplicativo publicado.
 - [x] Registrar a versão publicada, o build e o hash do commit.
   - _Versão `0.1.0`, build `3`, commit publicado `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`._
 - [ ] Garantir que o código entregue no repositório seja o mesmo usado no APK publicado.
-  - _O APK foi gerado a partir do commit `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`; conferir e consolidar as alterações locais antes da entrega final._
+  - _O repositório atual está no commit `d695aefbbcd5057cbcc6228497d57d102a04377e` e declara versão `0.1.4`; o README registra o APK como versão `0.1.0`, build `3`, commit `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`. O objeto desse commit publicado não está disponível no clone atual, então não foi possível comparar os códigos. A divergência de versão confirma que o estado atual não está documentado como o APK publicado._
 
 ### Notificações reais
 
@@ -67,12 +69,15 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 - [ ] Testar recebimento com o aplicativo em background.
 - [ ] Testar um cenário realista, como lembrete de vacina, consulta ou retorno.
 - [ ] Confirmar que a notificação tem impacto real no fluxo do aplicativo.
+  - _Responsável informou que ainda não realizou testes manuais._
 - [x] Avaliar a remoção do token no logout ou quando ele se tornar inválido.
   - _O token registrado é removido pelo endpoint `DELETE /notificacoes/dispositivos/{token}` durante o logout. Se a remoção falhar, ele permanece armazenado para nova tentativa no próximo login._
 
 ## Prioridade 2 — Validação funcional completa
 
 ### Fluxo do tutor
+
+_Validações manuais ainda não realizadas._
 
 - [ ] Validar login com backend real.
 - [ ] Validar cadastro de usuário.
@@ -101,6 +106,8 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 
 ### Fluxo do veterinário
 
+_Validações manuais ainda não realizadas._
+
 - [ ] Validar login como veterinário.
 - [ ] Validar dashboard do veterinário.
 - [ ] Validar lista de pacientes.
@@ -113,6 +120,8 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 - [ ] Validar resgates pendentes.
 
 ### Estados e qualidade de uso
+
+_Validações manuais ainda não realizadas._
 
 - [ ] Testar estados de carregamento.
 - [ ] Testar estados vazios.
@@ -150,7 +159,7 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
   - _expo export -p web gera 46 arquivos; deploy no Firebase Hosting verde._
 - [x] Corrigir os erros de lint encontrados sem alterar funcionalidades não relacionadas.
 - [x] Reexecutar todas as validações após as correções.
-  - _Typecheck, lint, build web e suíte completa executados em 19/10/2026. Resultado: 43 suítes / 287 testes passando, typecheck sem erros, build web concluído e lint sem erros (6 avisos preexistentes)._
+  - _Último resultado registrado: typecheck, lint, build web e suíte completa executados em 19/10/2026; 43 suítes / 287 testes, typecheck sem erros, build web concluído e lint sem erros (6 avisos preexistentes). Ainda não há registro de execução para o commit atual `d695aef`._
 
 ### Build e ambiente
 
@@ -159,10 +168,10 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
   - _Permissões e descrições configuradas em `app.json`; o teste de concessão efetiva ainda depende de build nativo/dispositivo._
 - [x] Confirmar o `projectId` do Expo usado no build.
   - _Project ID `65c847ac-eddf-4dc7-9be0-446b1105c4c1`, configurado em `app.json`._
-- [x] Confirmar o `version` e o `versionCode` finais.
-  - _Versão `0.1.0` e `versionCode` `3`, alinhados ao APK publicado._
+- [x] Registrar a versão e o `versionCode` declarados no código atual.
+  - _`app.json` declara versão `0.1.4` e `versionCode` `3`. Esses dados diferem do APK documentado (`0.1.0`, build `3`); a versão final da entrega ainda precisa ser definida._
 - [ ] Confirmar que as variáveis de ambiente necessárias estão configuradas.
-  - _EXPO_PUBLIC_API_BASE_URL aponta para a API Azure no `.env`, `.env.example`, fallback do app e workflow do Hosting. Pendente: EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID no GitHub Secret e URLs autorizadas no cliente OAuth._
+  - _OAuth web confirmado pelo responsável. O acesso à API Java apresenta erro no token e ainda precisa ser validado/corrigido._
 - [x] Guardar os dados do build publicado para referência da equipe.
   - _Versão `0.1.0`, build `3`, commit `0ea78bea6930a7d7b5b0896c89db676cd7a58ac`, Firebase App Distribution no projeto `vetsync-76c0e`._
 
@@ -184,6 +193,7 @@ _Não é um item do checklist original (a entrega pede o Firebase App Distributi
 ### Vídeo final
 
 - [ ] Gravar o vídeo a partir da mesma versão publicada.
+- Link do vídeo: _[inserir aqui quando estiver publicado]_.
 - [ ] Demonstrar login e fluxo principal do tutor.
 - [ ] Demonstrar cadastro/seleção de pet.
 - [ ] Demonstrar criação de evento.
