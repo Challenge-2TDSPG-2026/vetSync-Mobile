@@ -1,10 +1,10 @@
+import { EmojiFilteredTextInput } from './EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
 import {
   Platform,
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
   type TextInputProps,
 } from 'react-native';
@@ -65,7 +65,7 @@ export function AuthField({
           color={focused ? theme.colors.primary : theme.colors.textSecondary}
           style={styles.leadingIcon}
         />
-        <TextInput
+        <EmojiFilteredTextInput
           {...inputProps}
           style={styles.input}
           placeholderTextColor={theme.colors.placeholder}

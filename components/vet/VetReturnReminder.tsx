@@ -1,6 +1,12 @@
+import { EmojiFilteredTextInput } from '../ui/EmojiFilteredTextInput';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { mostrarToast } from '../ui/Toast';
 
@@ -41,7 +47,7 @@ export function VetReturnReminder({ petId }: { petId: string }) {
     {salvo ? <Text style={s.value}>Próximo retorno sugerido: {new Date(`${salvo}T12:00:00`).toLocaleDateString('pt-BR')}</Text> : <Text style={s.hint}>Nenhum retorno pessoal registrado.</Text>}
     <Text style={s.hint}>Este lembrete fica salvo apenas neste dispositivo e não é enviado ao tutor.</Text>
     <View style={s.row}>
-      <TextInput value={data} onChangeText={v => setData(v.replace(/\D/g, '').slice(0, 8).replace(/^(\d{2})(\d)/, '$1/$2').replace(/^(\d{2}\/\d{2})(\d)/, '$1/$2'))} placeholder="DD/MM/AAAA" keyboardType="numeric" maxLength={10} style={s.input} placeholderTextColor={theme.pages.petDetails.textSecondary} accessibilityLabel="Data sugerida para retorno" />
+      <EmojiFilteredTextInput value={data} onChangeText={v => setData(v.replace(/\D/g, '').slice(0, 8).replace(/^(\d{2})(\d)/, '$1/$2').replace(/^(\d{2}\/\d{2})(\d)/, '$1/$2'))} placeholder="DD/MM/AAAA" keyboardType="numeric" maxLength={10} style={s.input} placeholderTextColor={theme.pages.petDetails.textSecondary} accessibilityLabel="Data sugerida para retorno" />
       <Pressable style={s.button} onPress={() => void salvar()} accessibilityRole="button" accessibilityLabel="Salvar lembrete de retorno"><Text style={s.buttonText}>Salvar</Text></Pressable>
     </View>
   </View>;

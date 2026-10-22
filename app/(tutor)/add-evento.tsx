@@ -1,9 +1,20 @@
-import { useTheme } from '../../context/ThemeContext';
-import { withAlpha, type AppTheme } from '../../constants/theme';
-import React, { useMemo, useState } from 'react';
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import {
-  View, Text, TextInput, ScrollView, Pressable,
-  StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
+  useTheme } from '../../context/ThemeContext';
+import { withAlpha,
+  type AppTheme } from '../../constants/theme';
+import React,
+  { useMemo,
+  useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -306,7 +317,7 @@ export default function AddEventoScreen() {
               <View style={{ flex: 1 }}>
                 <View style={[s.inputWrap, erros.data && s.inputWrapErro]}>
                   <AppIcon name="calendar-outline" set="Ionicons" size={16} color={theme.pages.addEvent.textSecondary} style={{ marginRight: 8 }} />
-                  <TextInput
+                  <EmojiFilteredTextInput
                     style={s.fiInput}
                     value={data}
                     onChangeText={v => setData(formatarData(v))}
@@ -321,7 +332,7 @@ export default function AddEventoScreen() {
               <View style={{ width: 118 }}>
                 <View style={[s.inputWrap, erros.hora && s.inputWrapErro]}>
                   <AppIcon name="time-outline" set="Ionicons" size={16} color={theme.pages.addEvent.textSecondary} style={{ marginRight: 8 }} />
-                  <TextInput
+                  <EmojiFilteredTextInput
                     style={s.fiInput}
                     value={hora}
                     onChangeText={v => setHora(formatarHora(v))}
@@ -342,7 +353,7 @@ export default function AddEventoScreen() {
               <Text style={s.secaoTitulo}>Observação</Text>
             </View>
             <View style={[s.inputWrap, s.inputWrapTextarea]}>
-              <TextInput
+              <EmojiFilteredTextInput
                 style={[s.fiInput, s.fiTextarea]}
                 value={observacao}
                 onChangeText={setObservacao}

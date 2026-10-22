@@ -1,5 +1,15 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePet } from '../../context/PetContext';
@@ -95,7 +105,7 @@ export default function AgendarServicoScreen() {
         </Pressable>)}</View>
 
         <Text style={[s.heading, { color: theme.colors.text }]}>Data</Text>
-        <TextInput value={data} onChangeText={setData} placeholder="AAAA-MM-DD" placeholderTextColor={theme.colors.placeholder}
+        <EmojiFilteredTextInput value={data} onChangeText={setData} placeholder="AAAA-MM-DD" placeholderTextColor={theme.colors.placeholder}
           keyboardType="numbers-and-punctuation" style={[s.input, card, { color: theme.colors.text }]} />
         <Text style={[s.help, { color: theme.colors.textSecondary }]}>Use o formato AAAA-MM-DD.</Text>
 
@@ -111,7 +121,7 @@ export default function AgendarServicoScreen() {
           style={{ marginTop: 12 }}><Text style={{ color: theme.colors.primary, fontWeight: '700', textDecorationLine: 'underline' }}>Sem horário bom? Avise-me quando surgir uma vaga</Text></Pressable>}
 
         <Text style={[s.heading, { color: theme.colors.text }]}>Observação (opcional)</Text>
-        <TextInput multiline value={observacao} onChangeText={setObservacao} maxLength={500}
+        <EmojiFilteredTextInput multiline value={observacao} onChangeText={setObservacao} maxLength={500}
           placeholder="Conte o que a clínica precisa saber" placeholderTextColor={theme.colors.placeholder}
           style={[s.input, s.observacao, card, { color: theme.colors.text }]} />
         <Pressable disabled={!slot || !idPet || salvando} onPress={confirmar}

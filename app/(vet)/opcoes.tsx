@@ -1,5 +1,12 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext';
@@ -81,7 +88,7 @@ export default function VetOpcoesScreen() {
 
       <View style={s.search}>
         <Ionicons name="search-outline" size={18} color={theme.colors.textSecondary} />
-        <TextInput
+        <EmojiFilteredTextInput
           style={s.searchInput}
           value={busca}
           onChangeText={setBusca}

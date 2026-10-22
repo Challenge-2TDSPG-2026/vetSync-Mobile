@@ -1,6 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { EmojiFilteredTextInput } from '../ui/EmojiFilteredTextInput';
+import {
+  useEffect,
+  useMemo,
+  useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { useRacas } from '../../hooks/useRacas';
 import type { Pet } from '../../types';
@@ -34,7 +42,7 @@ export function RacaSelector({ especie, raca, onChange }: Props) {
     <>
       <View style={[estilos.inputWrap, !especie && estilos.inputWrapDesativado]}>
         <Ionicons name="search-outline" size={18} color={theme.colors.textSecondary} style={estilos.icone} />
-        <TextInput
+        <EmojiFilteredTextInput
           style={estilos.campo}
           value={raca}
           onChangeText={onChange}

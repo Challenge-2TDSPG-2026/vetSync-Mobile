@@ -1,3 +1,4 @@
+import { EmojiFilteredTextInput } from '../../../components/ui/EmojiFilteredTextInput';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -7,7 +8,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -661,13 +661,13 @@ function Campo({
   onBlur?: () => void;
   error?: string;
 } & Pick<
-  React.ComponentProps<typeof TextInput>,
+  React.ComponentProps<typeof EmojiFilteredTextInput>,
   'autoCapitalize' | 'keyboardType' | 'maxLength' | 'placeholder'
 >) {
   return (
     <View style={styles.field}>
       <Text style={[styles.label, simples && sSimples.label]}>{label}</Text>
-      <TextInput
+      <EmojiFilteredTextInput
         style={[styles.input, simples && sSimples.input, Boolean(error) && styles.inputError]}
         value={value}
         onChangeText={onChangeText}

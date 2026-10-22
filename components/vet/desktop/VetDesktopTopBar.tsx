@@ -1,5 +1,11 @@
+import { EmojiFilteredTextInput } from '../../ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LogoutConfirmationModal } from '../../LogoutConfirmationModal';
@@ -38,7 +44,7 @@ export function VetDesktopTopBar() {
     <View style={s.bar}>
       <View style={s.search}>
         <Ionicons name="search-outline" size={16} color={theme.colors.textSecondary} />
-        <TextInput
+        <EmojiFilteredTextInput
           value={busca}
           onChangeText={setBusca}
           onSubmitEditing={() => router.push('/(vet)/pacientes')}

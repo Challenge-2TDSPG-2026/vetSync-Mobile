@@ -1,3 +1,4 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
 import {
   ImageBackground,
@@ -5,7 +6,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -207,7 +207,7 @@ export default function AjudaScreen() {
         <View style={styles.body}>
           <View style={styles.searchBox}>
             <Ionicons name="search-outline" size={20} color={theme.colors.textMuted} />
-            <TextInput
+            <EmojiFilteredTextInput
               value={busca}
               onChangeText={setBusca}
               placeholder="Buscar uma orientação"

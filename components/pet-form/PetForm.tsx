@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { EmojiFilteredTextInput } from '../ui/EmojiFilteredTextInput';
+import {
+  useEffect,
+  useMemo,
+  useState } from 'react';
 import {
   ActivityIndicator,
   LayoutAnimation,
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -166,7 +169,7 @@ function PetFormFields({ petInicial, perfilSaudeInicial, editando, salvando, onS
       <Text style={estilos.rotulo}>Nome</Text>
       <View style={[estilos.inputWrap, erros.nome && estilos.inputWrapErro]}>
         <Ionicons name="create-outline" size={18} color={theme.colors.textSecondary} style={estilos.icone} />
-        <TextInput style={estilos.campo} value={nome} onChangeText={texto => { setNome(texto); if (erros.nome) setErros(atual => ({ ...atual, nome: '' })); }}
+        <EmojiFilteredTextInput style={estilos.campo} value={nome} onChangeText={texto => { setNome(texto); if (erros.nome) setErros(atual => ({ ...atual, nome: '' })); }}
           placeholder="Como você chama seu pet" placeholderTextColor={theme.colors.placeholder} autoCapitalize="words" returnKeyType="next" />
       </View>
       {!!erros.nome && <Text style={estilos.erro}>{erros.nome}</Text>}
@@ -201,11 +204,11 @@ function PetFormFields({ petInicial, perfilSaudeInicial, editando, salvando, onS
       <View style={estilos.linhaDupla}>
         <View style={estilos.coluna}><Text style={estilos.rotulo}>Nascimento</Text><View style={[estilos.inputWrap, erros.dataNascimento && estilos.inputWrapErro]}>
           <Ionicons name="calendar-outline" size={17} color={theme.colors.textSecondary} style={estilos.iconePequeno} />
-          <TextInput style={estilos.campo} value={dataNascimento} onChangeText={texto => { setDataNascimento(mascaraData(texto)); if (erros.dataNascimento) setErros(atual => ({ ...atual, dataNascimento: '' })); }} placeholder="DD/MM/AAAA" placeholderTextColor={theme.colors.placeholder} keyboardType="number-pad" maxLength={10} />
+          <EmojiFilteredTextInput style={estilos.campo} value={dataNascimento} onChangeText={texto => { setDataNascimento(mascaraData(texto)); if (erros.dataNascimento) setErros(atual => ({ ...atual, dataNascimento: '' })); }} placeholder="DD/MM/AAAA" placeholderTextColor={theme.colors.placeholder} keyboardType="number-pad" maxLength={10} />
         </View></View>
         <View style={estilos.coluna}><Text style={estilos.rotulo}>Peso (kg)</Text><View style={[estilos.inputWrap, erros.peso && estilos.inputWrapErro]}>
           <MaterialCommunityIcons name="weight-kilogram" size={17} color={theme.colors.textSecondary} style={estilos.iconePequeno} />
-          <TextInput style={estilos.campo} value={peso} onChangeText={texto => { setPeso(texto); if (erros.peso) setErros(atual => ({ ...atual, peso: '' })); }} placeholder="Opcional" placeholderTextColor={theme.colors.placeholder} keyboardType="decimal-pad" />
+          <EmojiFilteredTextInput style={estilos.campo} value={peso} onChangeText={texto => { setPeso(texto); if (erros.peso) setErros(atual => ({ ...atual, peso: '' })); }} placeholder="Opcional" placeholderTextColor={theme.colors.placeholder} keyboardType="decimal-pad" />
         </View></View>
       </View>
       {!!erros.dataNascimento && <Text style={estilos.erro}>{erros.dataNascimento}</Text>}
@@ -262,7 +265,7 @@ function CampoSaude({
   return (
     <View style={styles.campoSaudeGrupo}>
       <Text style={styles.rotulo}>{rotulo}</Text>
-      <TextInput
+      <EmojiFilteredTextInput
         style={[styles.campoSaude, expandido && styles.campoSaudeExpandido]}
         value={valor}
         onChangeText={aoMudar}

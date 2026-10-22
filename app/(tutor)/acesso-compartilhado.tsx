@@ -1,3 +1,4 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -7,7 +8,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -246,7 +246,7 @@ export default function AcessoCompartilhadoScreen() {
             <View style={s.card}>
               <View style={s.pad}>
                 <Text style={s.label}>E-mail</Text>
-                <TextInput
+                <EmojiFilteredTextInput
                   value={email}
                   onChangeText={setEmail}
                   placeholder="nome@email.com"

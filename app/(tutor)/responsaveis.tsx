@@ -1,3 +1,4 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,7 +9,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -134,7 +134,7 @@ export default function ResponsaveisScreen() {
             </Text>
 
             <Text style={[s.label, modoSimples && sSimples.label]}>E-mail do responsável</Text>
-            <TextInput
+            <EmojiFilteredTextInput
               value={email}
               onChangeText={setEmail}
               placeholder="nome@email.com"

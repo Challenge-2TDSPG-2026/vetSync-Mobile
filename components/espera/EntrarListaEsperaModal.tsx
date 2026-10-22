@@ -1,5 +1,16 @@
+import { EmojiFilteredTextInput } from '../ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useEntrarListaEspera } from '../../hooks/useListaEspera';
 import { mostrarToast } from '../ui/Toast';
@@ -74,17 +85,17 @@ function ConteudoListaEspera({ alvo, onFechar, onEntrou }: Props & { alvo: AlvoL
           <ScrollView keyboardShouldPersistTaps="handled">
             <Text style={s.rotulo}>Período desejado</Text>
             <View style={s.linha}>
-              <TextInput style={[s.input, s.metade]} value={inicio} onChangeText={setInicio} placeholder="AAAA-MM-DD"
+              <EmojiFilteredTextInput style={[s.input, s.metade]} value={inicio} onChangeText={setInicio} placeholder="AAAA-MM-DD"
                 placeholderTextColor={theme.colors.placeholder} keyboardType="numbers-and-punctuation" accessibilityLabel="Data inicial" />
-              <TextInput style={[s.input, s.metade]} value={fim} onChangeText={setFim} placeholder="AAAA-MM-DD"
+              <EmojiFilteredTextInput style={[s.input, s.metade]} value={fim} onChangeText={setFim} placeholder="AAAA-MM-DD"
                 placeholderTextColor={theme.colors.placeholder} keyboardType="numbers-and-punctuation" accessibilityLabel="Data final" />
             </View>
 
             <Text style={s.rotulo}>Faixa de horário (opcional)</Text>
             <View style={s.linha}>
-              <TextInput style={[s.input, s.metade]} value={horaMin} onChangeText={setHoraMin} placeholder="De 08:00"
+              <EmojiFilteredTextInput style={[s.input, s.metade]} value={horaMin} onChangeText={setHoraMin} placeholder="De 08:00"
                 placeholderTextColor={theme.colors.placeholder} keyboardType="numbers-and-punctuation" maxLength={5} accessibilityLabel="Horário mínimo" />
-              <TextInput style={[s.input, s.metade]} value={horaMax} onChangeText={setHoraMax} placeholder="Até 18:00"
+              <EmojiFilteredTextInput style={[s.input, s.metade]} value={horaMax} onChangeText={setHoraMax} placeholder="Até 18:00"
                 placeholderTextColor={theme.colors.placeholder} keyboardType="numbers-and-punctuation" maxLength={5} accessibilityLabel="Horário máximo" />
             </View>
 

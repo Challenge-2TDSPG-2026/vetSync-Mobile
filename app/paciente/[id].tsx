@@ -1,8 +1,18 @@
-import { useTheme } from '../../context/ThemeContext';
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
+import {
+  useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
-import React, { useMemo, useState } from 'react';
+import React,
+  { useMemo,
+  useState } from 'react';
 import { VetReturnReminder } from '../../components/vet/VetReturnReminder';
-import { View, Text, ScrollView, Pressable, StyleSheet, Modal, TextInput } from 'react-native';
+import { View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  Modal,
+} from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { ESPECIES, obterVisualTipoEvento } from '../../constants';
@@ -245,7 +255,7 @@ export default function FichaPacienteScreen() {
           <View style={s.modalCard}>
             <Text style={s.modalTitulo}>Concluir consulta</Text>
             <Text style={s.modalLabel}>Observações (opcional)</Text>
-            <TextInput
+            <EmojiFilteredTextInput
               style={s.modalInput}
               value={textoModal}
               onChangeText={setTextoModal}

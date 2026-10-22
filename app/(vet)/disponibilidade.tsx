@@ -1,7 +1,17 @@
-import { useTheme } from '../../context/ThemeContext';
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
+import {
+  useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
-import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
+import React,
+  { useState,
+  useMemo } from 'react';
+import { View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import { useVet } from '../../context/VetContext';
 import { AppIcon } from '../../components/AppIcon';
 import { confirmar } from '../../utils/alert';
@@ -139,7 +149,7 @@ export default function DisponibilidadeScreen() {
           ))}
         </View>
         <View style={s.horaRow}>
-          <TextInput
+          <EmojiFilteredTextInput
             style={s.horaInput}
             value={horaInicio}
             onChangeText={v => setHoraInicio(formatarHora(v))}
@@ -149,7 +159,7 @@ export default function DisponibilidadeScreen() {
             maxLength={5}
           />
           <Text style={s.horaSep}>até</Text>
-          <TextInput
+          <EmojiFilteredTextInput
             style={s.horaInput}
             value={horaFim}
             onChangeText={v => setHoraFim(formatarHora(v))}
@@ -186,7 +196,7 @@ export default function DisponibilidadeScreen() {
       <Text style={s.secLabel}>Bloqueios de agenda</Text>
       <View style={s.card}>
         <View style={s.dataRow}>
-          <TextInput
+          <EmojiFilteredTextInput
             style={[s.horaInput, { flex: 1 }]}
             value={dataInicioBloqueio}
             onChangeText={v => setDataInicioBloqueio(formatarDataBR(v))}
@@ -195,7 +205,7 @@ export default function DisponibilidadeScreen() {
             keyboardType="numeric"
             maxLength={10}
           />
-          <TextInput
+          <EmojiFilteredTextInput
             style={[s.horaInput, { flex: 1 }]}
             value={dataFimBloqueio}
             onChangeText={v => setDataFimBloqueio(formatarDataBR(v))}
@@ -205,7 +215,7 @@ export default function DisponibilidadeScreen() {
             maxLength={10}
           />
         </View>
-        <TextInput
+        <EmojiFilteredTextInput
           style={s.motivoInput}
           value={motivoBloqueio}
           onChangeText={setMotivoBloqueio}

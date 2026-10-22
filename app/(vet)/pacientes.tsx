@@ -1,5 +1,14 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useVet } from '../../context/VetContext';
@@ -74,7 +83,7 @@ export default function VetPacientesScreen() {
       <VetPageIntro eyebrow="CUIDADO CONTÃNUO" title="Seus pacientes" description="Encontre rapidamente os pets da sua clÃ­nica e acompanhe os retornos." icon="paw-outline" />
       <View style={s.search}>
         <Ionicons name="search-outline" size={19} color={theme.colors.textSecondary} />
-        <TextInput
+        <EmojiFilteredTextInput
           value={busca}
           onChangeText={setBusca}
           placeholder="Buscar pet, tutor, espÃ©cie ou telefone"
@@ -105,7 +114,7 @@ export default function VetPacientesScreen() {
             </Pressable>
           ))}
         </View>
-        <TextInput value={raca} onChangeText={setRaca} placeholder="Filtrar por raça" placeholderTextColor={theme.colors.textMuted} style={s.racaInput} accessibilityLabel="Filtrar pacientes por raça" />
+        <EmojiFilteredTextInput value={raca} onChangeText={setRaca} placeholder="Filtrar por raça" placeholderTextColor={theme.colors.textMuted} style={s.racaInput} accessibilityLabel="Filtrar pacientes por raça" />
         <Text style={s.advancedLabel}>Último atendimento</Text>
         <View style={s.advancedOptions}>
           {([['qualquer', 'Qualquer período'], ['30dias', 'Até 30 dias'], ['90dias', 'Até 90 dias'], ['semHistorico', 'Sem histórico']] as const).map(([valor, label]) => (

@@ -1,3 +1,4 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -7,7 +8,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -166,7 +166,7 @@ export default function AtendimentoScreen() {
         </View>
 
         <Text style={s.label}>Bloco de notas</Text>
-        <TextInput
+        <EmojiFilteredTextInput
           style={s.input}
           value={emAndamento.notas}
           onChangeText={aoEditar}

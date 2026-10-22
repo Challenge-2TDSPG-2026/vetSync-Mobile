@@ -1,5 +1,11 @@
+import { EmojiFilteredTextInput } from '../ui/EmojiFilteredTextInput';
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  type TextInputProps,
+} from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import type { AppTheme } from '../../constants/theme';
 
@@ -15,7 +21,7 @@ export function CampoFormulario({ rotulo, erro, multilinha, ...entrada }: CampoF
   return (
     <View style={s.grupo}>
       <Text style={s.rotulo}>{rotulo}</Text>
-      <TextInput
+      <EmojiFilteredTextInput
         {...entrada}
         style={[s.input, multilinha && s.multilinha, !!erro && s.inputErro]}
         placeholderTextColor={theme.colors.placeholder}

@@ -1,3 +1,4 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
@@ -10,7 +11,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -457,7 +457,7 @@ export default function AssistenteScreen() {
             >
               <Ionicons name="add" size={25} color={theme.colors.primary} />
             </Pressable>
-            <TextInput
+            <EmojiFilteredTextInput
               value={entrada}
               onChangeText={setEntrada}
               onFocus={() => {

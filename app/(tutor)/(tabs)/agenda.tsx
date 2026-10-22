@@ -1,5 +1,15 @@
+import { EmojiFilteredTextInput } from '../../../components/ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Modal, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  Modal,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePet } from '../../../context/PetContext';
@@ -426,7 +436,7 @@ export default function AgendaScreen() {
             <Text style={[s.modalSub, modoSimples && sSimples.modalSub]}>
               {eventoParaCancelar?.nomeTipoEvento} — {eventoParaCancelar ? formatarDataEvento(eventoParaCancelar.data) : ''}
             </Text>
-            <TextInput
+            <EmojiFilteredTextInput
               style={[s.modalInput, modoSimples && sSimples.modalInput]}
               value={motivoCancelamento}
               onChangeText={setMotivoCancelamento}

@@ -1,5 +1,13 @@
+import { EmojiFilteredTextInput } from '../ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 import { useTheme } from '../../context/ThemeContext';
@@ -196,7 +204,7 @@ function ConteudoCompartilhar({ idPet, nomePet }: { idPet: string; nomePet: stri
           </View>
 
           <Text style={s.rotuloSecao}>Para quem? (opcional)</Text>
-          <TextInput
+          <EmojiFilteredTextInput
             style={s.input}
             value={destinatario}
             onChangeText={setDestinatario}

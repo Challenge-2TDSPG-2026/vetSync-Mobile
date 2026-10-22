@@ -1,5 +1,15 @@
+import { EmojiFilteredTextInput } from '../../ui/EmojiFilteredTextInput';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type NativeSyntheticEvent, type TextInputKeyPressEventData } from 'react-native';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type NativeSyntheticEvent,
+  type TextInputKeyPressEventData,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -94,7 +104,7 @@ export function VetSiaDesktop() {
         </View>
         <View style={s.busca}>
           <Ionicons name="search-outline" size={16} color={theme.colors.textSecondary} />
-          <TextInput
+          <EmojiFilteredTextInput
             value={busca}
             onChangeText={setBusca}
             placeholder="Pesquisar conversas"
@@ -159,7 +169,7 @@ export function VetSiaDesktop() {
 
         <Text style={s.aviso}>A SIA não substitui uma avaliação veterinária.</Text>
         <View style={s.composer}>
-          <TextInput
+          <EmojiFilteredTextInput
             value={entrada}
             onChangeText={setEntrada}
             onKeyPress={aoTeclar}

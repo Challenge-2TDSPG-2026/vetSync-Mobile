@@ -1,6 +1,16 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl, Modal, TextInput, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  RefreshControl,
+  Modal,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useVet } from '../../context/VetContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -219,7 +229,7 @@ export default function ConsultasScreen() {
           <View style={s.modalCard} accessibilityViewIsModal>
             <Text style={s.modalTitulo} accessibilityRole="header">Recusar agendamento</Text>
             <Text style={s.modalSub}>{recusando?.nomeTipoEvento} — {recusando ? formatarDataEHora(recusando.data, recusando.hora) : ''}</Text>
-            <TextInput
+            <EmojiFilteredTextInput
               style={s.modalInput}
               value={motivo}
               onChangeText={setMotivo}

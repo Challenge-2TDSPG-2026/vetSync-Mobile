@@ -1,3 +1,4 @@
+import { EmojiFilteredTextInput } from '../../components/ui/EmojiFilteredTextInput';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,7 +10,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -322,7 +322,7 @@ export default function MensagensClinicaScreen() {
           </ScrollView>
 
           <View style={[styles.composer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-            <TextInput
+            <EmojiFilteredTextInput
               value={texto}
               onChangeText={setTexto}
               placeholder="Escreva sua mensagem..."

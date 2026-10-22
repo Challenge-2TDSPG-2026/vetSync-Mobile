@@ -1,5 +1,14 @@
+import { EmojiFilteredTextInput } from '../ui/EmojiFilteredTextInput';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useReagendarEvento } from '../../hooks/useEventos';
@@ -103,7 +112,7 @@ function ConteudoReagendar({ evento, onFechar, onAvisarVaga }: Props & { evento:
                 </Pressable>
               ))}
             </ScrollView>
-            <TextInput
+            <EmojiFilteredTextInput
               value={data}
               onChangeText={escolherData}
               placeholder="AAAA-MM-DD"
