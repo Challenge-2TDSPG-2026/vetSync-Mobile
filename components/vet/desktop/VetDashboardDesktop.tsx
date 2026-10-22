@@ -9,6 +9,7 @@ import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
 import { obterVisualTipoEvento } from '../../../constants';
 import { AppIcon } from '../../AppIcon';
 import { SkeletonCard } from '../../ui/Skeleton';
+import { PetFoto } from '../../pet-foto/PetFoto';
 import { dataPorExtenso, horaCurta, quandoAcontece } from '../../../utils/agendaVet';
 import { formatarHora } from '../../../utils/atendimentoVet';
 import { STATUS_EXIBICAO_BADGE, statusExibicao } from '../../../utils/eventoStatus';
@@ -105,7 +106,11 @@ export function VetDashboardDesktop() {
                 </Text>
                 <View style={s.heroLinha}>
                   <View style={s.heroAvatar}>
-                    <AppIcon name="paw" set="Ionicons" size={30} color={theme.pages.vetDashboard.heroText} />
+                    {petProximo ? (
+                      <PetFoto pet={petProximo} size={64} color={theme.pages.vetDashboard.heroText} backgroundColor="transparent" />
+                    ) : (
+                      <AppIcon name="paw" set="Ionicons" size={30} color={theme.pages.vetDashboard.heroText} />
+                    )}
                   </View>
                   <View style={s.heroInfo}>
                     <Text style={s.heroPet} numberOfLines={1}>{nomePet}</Text>
@@ -216,9 +221,7 @@ export function VetDashboardDesktop() {
                   accessibilityRole="button"
                   accessibilityLabel={`${pet.nome}, abrir ficha`}
                 >
-                  <View style={s.pacienteAvatar}>
-                    <AppIcon name="paw" set="Ionicons" size={18} color={theme.colors.primary} />
-                  </View>
+                  <PetFoto pet={pet} size={38} color={theme.colors.primary} backgroundColor={theme.colors.successBackground} />
                   <View style={s.linhaInfo}>
                     <Text style={s.celulaForte} numberOfLines={1}>{pet.nome}</Text>
                     <Text style={s.cardHint} numberOfLines={1}>{pet.tutor?.nome ?? 'Tutor não informado'}</Text>

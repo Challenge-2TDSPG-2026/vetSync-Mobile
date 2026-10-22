@@ -12,6 +12,7 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList, SkeletonCard } from '../../components/ui/Skeleton';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { VetAvatar } from '../../components/vet/VetAvatar';
+import { PetFoto } from '../../components/pet-foto/PetFoto';
 import { dataPorExtenso, horaCurta, quandoAcontece } from '../../utils/agendaVet';
 import { formatarHora } from '../../utils/atendimentoVet';
 import { STATUS_EXIBICAO_BADGE, statusExibicao } from '../../utils/eventoStatus';
@@ -89,7 +90,11 @@ function VetDashboardMobile() {
           </Text>
           <View style={s.heroBody}>
             <View style={s.heroAvatar}>
-              <AppIcon name="paw" set="Ionicons" size={24} color={theme.pages.vetDashboard.heroText} />
+              {petProximo ? (
+                <PetFoto pet={petProximo} size={52} color={theme.pages.vetDashboard.heroText} backgroundColor="transparent" />
+              ) : (
+                <AppIcon name="paw" set="Ionicons" size={24} color={theme.pages.vetDashboard.heroText} />
+              )}
             </View>
             <View style={s.heroInfo}>
               <Text style={s.heroPet} numberOfLines={1}>{petProximo?.nome ?? 'Paciente'}</Text>
@@ -198,9 +203,7 @@ function VetDashboardMobile() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.pacientesContent}>
           {pacientes.slice(0, 4).map(({ pet }) => (
             <Pressable key={pet.id} style={s.pacienteItem} onPress={() => router.push(`/paciente/${pet.id}`)} accessibilityRole="button" accessibilityLabel={`${pet.nome}, abrir ficha`}>
-              <View style={s.pacienteAvatar}>
-                <AppIcon name="paw" set="Ionicons" size={22} color={theme.colors.primary} />
-              </View>
+              <PetFoto pet={pet} size={54} color={theme.colors.primary} backgroundColor={theme.colors.successBackground} />
               <Text style={s.pacienteNome} numberOfLines={1}>{pet.nome}</Text>
             </Pressable>
           ))}
