@@ -63,14 +63,6 @@ export default function PetsCadastradosScreen() {
         onBack={() => router.back()}
         backLabel="Voltar para configurações"
       />
-        <View style={s.infoNotice}>
-          <Ionicons name="information-circle-outline" size={21} color={theme.colors.primary} />
-          <Text style={[s.infoNoticeText, modoSimples && sSimples.infoNoticeText]}>
-            A data de cadastro ainda não é enviada pela API. Os demais dados exibidos vêm do
-            cadastro do pet.
-          </Text>
-        </View>
-
         {pets.map((pet) => {
           const especie =
             ESPECIES.find((item) => item.valor === pet.especie)?.label ?? 'Espécie não informada';
@@ -146,7 +138,7 @@ export default function PetsCadastradosScreen() {
                   styles={s}
                   simples={modoSimples}
                   label="Data de cadastro"
-                  value="Não disponível"
+                  value={pet.criadoEm ? formatarData(pet.criadoEm) : 'Não informada'}
                 />
               </View>
             </View>
@@ -228,16 +220,6 @@ const createStyles = (theme: AppTheme) =>
       marginTop: 2,
     },
     content: { paddingHorizontal: 18, paddingTop: 22 },
-    infoNotice: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: 9,
-      borderRadius: 16,
-      backgroundColor: theme.colors.infoBackground,
-      padding: 13,
-      marginBottom: 16,
-    },
-    infoNoticeText: { flex: 1, color: theme.colors.text, fontSize: 12, lineHeight: 18 },
     card: {
       borderRadius: 24,
       borderWidth: 1,
@@ -326,7 +308,6 @@ const createStyles = (theme: AppTheme) =>
 const sSimples = StyleSheet.create({
   title: { fontSize: 31 },
   subtitle: { fontSize: 16, lineHeight: 22 },
-  infoNoticeText: { fontSize: 16, lineHeight: 23 },
   photoButton: { width: 66, height: 66 },
   petName: { fontSize: 23 },
   petMeta: { fontSize: 17 },

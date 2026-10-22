@@ -7,6 +7,7 @@ export interface Pet {
   dataNascimento: string;
   peso: string;
   numero?: string | null;
+  criadoEm?: string | null;
   tutor?: Tutor;
   fotoUrl?: string | null;
 }

@@ -93,8 +93,8 @@ export default function AddPetScreen() {
   }
 
   return (
-    <KeyboardAvoidingView style={estilos.raiz} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView style={estilos.flex} contentContainerStyle={estilos.scroll} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false}>
+    <KeyboardAvoidingView style={estilos.raiz} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView style={estilos.flex} contentContainerStyle={estilos.scroll} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}>
         <LinearGradient colors={[theme.pages.addPet.heroBackground, theme.pages.addPet.heroAccent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={estilos.hero}>
           <MaterialCommunityIcons name="paw" size={190} color={withAlpha(theme.pages.addPet.heroText, 0.05)} style={estilos.pawMarca} />
           <Pressable onPress={() => router.back()} style={estilos.btnFechar} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fechar">

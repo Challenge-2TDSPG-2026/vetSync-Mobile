@@ -17,6 +17,7 @@ export interface PetResponseApi {
   sexo: string | null;
   raca: string | null;
   dtNascimento: string;
+  criadoEm?: string | null;
   idadeAnos: number;
   peso: number | null;
   idTutor: number | null;
@@ -64,6 +65,7 @@ export function paraPetApp(dto: PetResponseApi): Pet {
     sexo: sexoApiParaApp(dto.sexo), raca: dto.raca ?? '', dataNascimento: dto.dtNascimento,
     peso: dto.peso != null ? String(dto.peso) : '',
     numero: dto.numero ?? null,
+    criadoEm: dto.criadoEm ?? null,
     fotoUrl: normalizarFotoUrl(dto.fotoUrl),
     ...(tutor ? { tutor } : {}),
   };
