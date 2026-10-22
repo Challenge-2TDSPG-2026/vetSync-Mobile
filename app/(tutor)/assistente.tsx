@@ -23,6 +23,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { AppIcon } from '../../components/AppIcon';
 import { ApiError } from '../../services/api/httpClient';
 import { iaService, type SiaBlock, type SiaBlockOption } from '../../services/iaService';
+import { siaConversaService } from '../../services/siaConversaService';
 import { mostrarToast } from '../../components/ui/Toast';
 import type { AppTheme } from '../../constants/theme';
 const DURACAO_TRANSICAO_TECLADO = 250;
@@ -34,14 +35,17 @@ type Mensagem = {
   erro?: boolean;
   bloco?: SiaBlock;
   acao?: { id: string; resumo: string; requerConfirmacao: boolean };
+  atalho?: 'preparar' | 'pos';
 };
 
-const SUGESTOES_TUTOR = [
+const SUGESTOES_TUTOR: { icon: 'calendar-outline' | 'heart-outline' | 'document-text-outline'; texto: string; atalho?: 'preparar' | 'pos' }[] = [
   { icon: 'calendar-outline' as const, texto: 'Quero agendar uma consulta para meu pet' },
+  { icon: 'document-text-outline', texto: 'Quero preparar minha consulta', atalho: 'preparar' },
+  { icon: 'heart-outline', texto: 'Quero entender as orientações após a consulta', atalho: 'pos' },
   { icon: 'heart-outline' as const, texto: 'Quero informar como está a recuperação do meu pet' },
 ];
 
-const SUGESTOES_VET = [
+const SUGESTOES_VET: { icon: 'document-text-outline' | 'calendar-outline' | 'pulse-outline'; texto: string; atalho?: 'preparar' | 'pos' }[] = [
   { icon: 'document-text-outline' as const, texto: 'Estruture as orientações de pós-atendimento' },
   { icon: 'calendar-outline' as const, texto: 'Organize um retorno para este paciente' },
   { icon: 'pulse-outline' as const, texto: 'Analise um relato de recuperação pós-cirúrgica' },
@@ -63,8 +67,27 @@ export default function AssistenteScreen() {
   const animacaoSugestoes = useRef(new Animated.Value(1)).current;
   const [entrada, setEntrada] = useState('');
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
+  const [conversaId, setConversaId] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
   const [tecladoVisivel, setTecladoVisivel] = useState(false);
+  useEffect(() => {
+    const idPet = petAtivo?.id;
+    let ativo = true;
+    Promise.resolve().then(() => {
+      if (ativo) { setMensagens([]); setConversaId(null); }
+    });
+    if (!idPet || sessao?.perfil !== 'TUTOR') return () => { ativo = false; };
+    siaConversaService.listar(idPet).then(async (lista) => {
+      const conversa = lista[0];
+      if (!conversa) return;
+      const salvas = await siaConversaService.mensagens(idPet, conversa.id);
+      if (!ativo) return;
+      idRef.current = Math.max(idRef.current, ...salvas.map(item => item.id), 0);
+      setConversaId(conversa.id);
+      setMensagens(salvas.map(item => ({ id: item.id, autoria: item.autoria === 'TUTOR' ? 'usuario' : 'sia', texto: item.texto })));
+    }).catch(() => undefined);
+    return () => { ativo = false; };
+  }, [petAtivo?.id, sessao?.perfil]);
   const nome = sessao?.nome?.trim().split(/\s+/)[0] ?? 'tudo bem';
   const sugestoes = sessao?.perfil === 'VETERINARIO' ? SUGESTOES_VET : SUGESTOES_TUTOR;
   const neblinaHeader: [string, string] =
@@ -167,6 +190,9 @@ export default function AssistenteScreen() {
         ...atuais,
         { id: ++idRef.current, autoria: 'sia', texto: resposta.texto },
       ]);
+      if (conversaId && petAtivo?.id && sessao?.perfil === 'TUTOR') {
+        await siaConversaService.adicionar(petAtivo.id, conversaId, 'SIA', resposta.texto).catch(() => undefined);
+      }
     } catch (erro) {
       const detalhe = erro instanceof Error ? erro.message : 'Não foi possível confirmar a ação.';
       setMensagens((atuais) => [
@@ -185,6 +211,9 @@ export default function AssistenteScreen() {
       ...atuais,
       { id: ++idRef.current, autoria: 'usuario', texto: opcao.rotulo },
     ]);
+    if (conversaId && petAtivo?.id && sessao?.perfil === 'TUTOR') {
+      await siaConversaService.adicionar(petAtivo.id, conversaId, 'TUTOR', opcao.rotulo).catch(() => undefined);
+    }
     try {
       const resposta = await iaService.selecionarBloco(
         mensagem.bloco.sessaoId,
@@ -192,6 +221,9 @@ export default function AssistenteScreen() {
         mensagem.bloco.tipo,
       );
       setMensagens((atuais) => [...atuais, { id: ++idRef.current, autoria: 'sia', ...resposta }]);
+      if (conversaId && petAtivo?.id && sessao?.perfil === 'TUTOR') {
+        await siaConversaService.adicionar(petAtivo.id, conversaId, 'SIA', resposta.texto).catch(() => undefined);
+      }
     } catch (erro) {
       const detalhe =
         erro instanceof ApiError || erro instanceof Error
@@ -218,8 +250,23 @@ export default function AssistenteScreen() {
     setMensagens((atuais) => [...atuais, mensagemUsuario]);
     setCarregando(true);
     try {
+      let idConversa = conversaId;
+      if (sessao?.perfil === 'TUTOR' && petAtivo?.id) {
+        try {
+          if (!idConversa) {
+            idConversa = (await siaConversaService.criar(petAtivo.id)).id;
+            setConversaId(idConversa);
+          }
+          await siaConversaService.adicionar(petAtivo.id, idConversa, 'TUTOR', texto);
+        } catch { /* O chat continua disponível caso o histórico esteja temporariamente indisponível. */ }
+      }
       const resposta = await iaService.perguntar(texto, petAtivo, historico);
-      setMensagens((atuais) => [...atuais, { id: ++idRef.current, autoria: 'sia', ...resposta }]);
+      const atalho = /preparar.{0,20}consulta|resumo.{0,20}consulta/i.test(texto) ? 'preparar'
+        : /orientaç|pós.consulta|pós.atendimento|pos.consulta/i.test(texto) ? 'pos' : undefined;
+      setMensagens((atuais) => [...atuais, { id: ++idRef.current, autoria: 'sia', ...resposta, atalho }]);
+      if (idConversa && petAtivo?.id && sessao?.perfil === 'TUTOR') {
+        await siaConversaService.adicionar(petAtivo.id, idConversa, 'SIA', resposta.texto).catch(() => undefined);
+      }
     } catch (erro) {
       const detalhe =
         erro instanceof ApiError || erro instanceof Error
@@ -292,7 +339,7 @@ export default function AssistenteScreen() {
               <Text style={s.headerSubtitle}>Sync Inteligência Artificial</Text>
             </View>
             <Pressable
-              onPress={() => setMensagens([])}
+              onPress={() => { setMensagens([]); setConversaId(null); }}
               disabled={mensagens.length === 0 || carregando}
               hitSlop={10}
               style={[s.headerButton, (mensagens.length === 0 || carregando) && s.disabled]}
@@ -342,7 +389,7 @@ export default function AssistenteScreen() {
                   {sugestoes.map((item) => (
                     <Pressable
                       key={item.texto}
-                      onPress={() => enviar(item.texto)}
+                      onPress={() => item.atalho ? router.push({ pathname: '/(tutor)/jornada-sia', params: { tipo: item.atalho } }) : enviar(item.texto)}
                       style={({ pressed }) => [s.suggestion, pressed && s.pressed]}
                     >
                       <View style={s.suggestionIcon}>
@@ -393,6 +440,11 @@ export default function AssistenteScreen() {
                       disabled={carregando}
                     >
                       <Text style={s.confirmActionText}>Confirmar ação</Text>
+                    </Pressable>
+                  )}
+                  {item.atalho && (
+                    <Pressable style={s.confirmAction} onPress={() => router.push({ pathname: '/(tutor)/jornada-sia', params: { tipo: item.atalho } })}>
+                      <Text style={s.confirmActionText}>{item.atalho === 'preparar' ? 'Preparar resumo' : 'Ver orientações registradas'}</Text>
                     </Pressable>
                   )}
                   {item.bloco && (
