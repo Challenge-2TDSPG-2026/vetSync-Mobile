@@ -182,6 +182,10 @@ campos conhecidos.
 | `PATCH` | `/pets/{idPet}/acessos/{idAcesso}` |
 | `GET` | `/pets/{idPet}/convites` |
 | `POST` | `/convites/{token}/aceitar` |
+| `GET` | `/convites/recebidos` |
+| `POST` | `/convites/recebidos/{idConvite}/aceitar` |
+| `POST` | `/convites/recebidos/{idConvite}/recusar` |
+| `POST` | `/convites/{token}/aceitar-logado` |
 | `DELETE` | `/pets/{idPet}/convites/{idConvite}` |
 
 ## Saúde, medicamentos e prontuário

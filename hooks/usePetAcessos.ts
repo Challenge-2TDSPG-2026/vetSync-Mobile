@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { petAcessoService, type PermissaoPet, type RelacaoPet } from '../services/petAcessoService';
 import { petAtividadeService } from '../services/petAtividadeService';
 import { ApiError } from '../services/api/httpClient';
+import { petKeys } from './queryKeys';
 
 export const petAcessoKeys = {
   acessos: (idPet: string) => ['pets', idPet, 'acessos'] as const,
   atividades: (idPet: string) => ['pets', idPet, 'atividades'] as const,
+  convitesRecebidos: ['convites', 'recebidos'] as const,
 };
 
 export function useAcessosPet(idPet: string | null) {
@@ -47,5 +49,32 @@ export function useAtividadesPet(idPet: string | null) {
     enabled: Boolean(idPet),
     retry: (tentativas, erro) =>
       !(erro instanceof ApiError && (erro.status === 404 || erro.status === 501)) && tentativas < 1,
+  });
+}
+
+export function useConvitesRecebidos() {
+  return useQuery({
+    queryKey: petAcessoKeys.convitesRecebidos,
+    queryFn: petAcessoService.listarConvitesRecebidos,
+  });
+}
+
+/** Aceitar libera novos pets para a conta, então a lista de pets também precisa recarregar. */
+export function useAceitarConviteRecebido() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (idConvite: string) => petAcessoService.aceitarConviteRecebido(idConvite),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: petAcessoKeys.convitesRecebidos });
+      void queryClient.invalidateQueries({ queryKey: petKeys.all });
+    },
+  });
+}
+
+export function useRecusarConviteRecebido() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (idConvite: string) => petAcessoService.recusarConviteRecebido(idConvite),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: petAcessoKeys.convitesRecebidos }),
   });
 }
