@@ -3,6 +3,9 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 import { useTheme } from '../../../context/ThemeContext';
+import { useVet } from '../../../context/VetContext';
+import { useMeusResgates } from '../../../hooks/useRecompensas';
+import { statusExibicao } from '../../../utils/eventoStatus';
 import type { AppTheme } from '../../../constants/theme';
 
 type TabBarRenderer = NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>;
@@ -13,18 +16,30 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 type ItemMenu = {
   label: string;
   icon: IconName;
-  /** Nome da rota dentro de (vet); ausente = item de navegação externa (SIA). */
-  rota?: string;
-  href?: '/(tutor)/assistente';
+  /** Nome da rota dentro de (vet). */
+  rota: string;
 };
 
-/** Itens da barra lateral do veterinário, na ordem pedida. */
-const ITENS: ItemMenu[] = [
-  { label: 'SIA · Assistente veterinário', icon: 'sparkles-outline', rota: 'sia' },
-  { label: 'Consultas', icon: 'medkit-outline', rota: 'consultas' },
-  { label: 'Pacientes', icon: 'paw-outline', rota: 'pacientes' },
-  { label: 'Disponibilidade', icon: 'calendar-outline', rota: 'disponibilidade' },
-  { label: 'Resgates', icon: 'gift-outline', rota: 'resgates' },
+type GrupoMenu = { titulo?: string; itens: ItemMenu[] };
+
+/** Mesma organização da tela Opções do mobile: SIA em destaque e grupos Atendimento e Clínica. */
+const GRUPOS: GrupoMenu[] = [
+  { itens: [{ label: 'SIA · Assistente veterinário', icon: 'sparkles-outline', rota: 'sia' }] },
+  {
+    titulo: 'Atendimento',
+    itens: [
+      { label: 'Consultas', icon: 'medkit-outline', rota: 'consultas' },
+      { label: 'Pacientes', icon: 'paw-outline', rota: 'pacientes' },
+      { label: 'Disponibilidade', icon: 'calendar-outline', rota: 'disponibilidade' },
+    ],
+  },
+  {
+    titulo: 'Clínica',
+    itens: [
+      { label: 'Resgates', icon: 'gift-outline', rota: 'resgates' },
+      { label: 'Relatórios', icon: 'bar-chart-outline', rota: 'relatorios' },
+    ],
+  },
 ];
 
 /** Barra lateral fixa do painel do veterinário (somente desktop). */
@@ -32,14 +47,17 @@ export function VetDesktopSidebar({ state, navigation }: SidebarProps) {
   const router = useRouter();
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
+  const { eventos } = useVet();
+  const { data: resgates = [] } = useMeusResgates(true);
   const rotaAtiva = state.routes[state.index]?.name;
 
+  // Selos de pendência, iguais aos da tela Opções do mobile.
+  const selos: Record<string, number> = {
+    consultas: eventos.filter(e => statusExibicao(e) === 'ATRASADO').length,
+    resgates: resgates.filter(r => r.status === 'PENDENTE').length,
+  };
+
   const irPara = (item: ItemMenu) => {
-    if (item.href) {
-      router.push(item.href);
-      return;
-    }
-    if (!item.rota) return;
     const route = state.routes.find(r => r.name === item.rota);
     if (!route) return;
     const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
@@ -61,30 +79,37 @@ export function VetDesktopSidebar({ state, navigation }: SidebarProps) {
       </Pressable>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.nav}>
-        {ITENS.map(item => {
-          const ativo = !!item.rota && item.rota === rotaAtiva;
-          return (
-            <Pressable
-              key={item.label}
-              onPress={() => irPara(item)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: ativo }}
-              accessibilityLabel={item.label}
-              style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
-                s.item,
-                ativo && s.itemAtivo,
-                !ativo && (hovered || pressed) && s.itemHover,
-              ]}
-            >
-              <Ionicons
-                name={item.icon}
-                size={18}
-                color={ativo ? theme.colors.onPrimary : SIDEBAR_TEXTO}
-              />
-              <Text style={[s.itemText, ativo && s.itemTextAtivo]}>{item.label}</Text>
-            </Pressable>
-          );
-        })}
+        {GRUPOS.map((grupo, indice) => (
+          <View key={grupo.titulo ?? `grupo-${indice}`} style={s.grupo}>
+            {grupo.titulo ? <Text style={s.grupoTitulo}>{grupo.titulo}</Text> : null}
+            {grupo.itens.map(item => {
+              const ativo = item.rota === rotaAtiva;
+              const selo = selos[item.rota] ?? 0;
+              return (
+                <Pressable
+                  key={item.label}
+                  onPress={() => irPara(item)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: ativo }}
+                  accessibilityLabel={selo > 0 ? `${item.label}, ${selo} pendente${selo === 1 ? '' : 's'}` : item.label}
+                  style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+                    s.item,
+                    ativo && s.itemAtivo,
+                    !ativo && (hovered || pressed) && s.itemHover,
+                  ]}
+                >
+                  <Ionicons name={item.icon} size={18} color={ativo ? theme.colors.onPrimary : SIDEBAR_TEXTO} />
+                  <Text style={[s.itemText, ativo && s.itemTextAtivo]}>{item.label}</Text>
+                  {selo > 0 ? (
+                    <View style={s.selo}>
+                      <Text style={s.seloTexto}>{selo > 99 ? '99+' : selo}</Text>
+                    </View>
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </View>
+        ))}
       </ScrollView>
     </View>
   );
@@ -103,11 +128,15 @@ function createStyles(theme: AppTheme) {
     brandIcon: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: SIDEBAR_HOVER },
     brandLogo: { width: 26, height: 32 },
     brandText: { fontSize: 18, fontWeight: '800', color: '#FFFFFF' },
-    nav: { gap: 4 },
+    nav: { gap: 18 },
+    grupo: { gap: 4 },
+    grupoTitulo: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase', color: '#7FA793', paddingHorizontal: 12, paddingBottom: 4 },
     item: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 11, paddingHorizontal: 12, borderRadius: 10 },
     itemAtivo: { backgroundColor: theme.colors.primary },
     itemHover: { backgroundColor: SIDEBAR_HOVER },
     itemText: { flex: 1, fontSize: 14, lineHeight: 18, fontWeight: '500', color: SIDEBAR_TEXTO },
     itemTextAtivo: { color: theme.colors.onPrimary, fontWeight: '700' },
+    selo: { minWidth: 22, height: 22, borderRadius: 11, paddingHorizontal: 6, backgroundColor: theme.colors.danger, alignItems: 'center', justifyContent: 'center' },
+    seloTexto: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
   });
 }

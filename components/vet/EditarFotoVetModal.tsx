@@ -6,6 +6,7 @@ import { SaveFormat, manipulateAsync } from 'expo-image-manipulator';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useVetFoto } from '../../hooks/useVetFoto';
+import { useVetDesktop } from './desktop/useVetDesktop';
 import { confirmar } from '../../utils/alert';
 import { mostrarToast } from '../ui/Toast';
 import { RecortadorFoto } from '../pet-foto/RecortadorFoto';
@@ -21,6 +22,7 @@ export function EditarFotoVetModal({ visivel, nome, onFechar }: Props) {
 function EditarFotoVetModalAberto({ nome, onFechar }: { nome: string; onFechar: () => void }) {
   const { theme } = useTheme();
   const { modoSimples } = useAccessibility();
+  const desktop = useVetDesktop();
   const { fotoUri, salvarFoto, removerFoto } = useVetFoto();
   const [uriOriginal, setUriOriginal] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -86,9 +88,9 @@ function EditarFotoVetModalAberto({ nome, onFechar }: { nome: string; onFechar: 
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={desativado ? undefined : onFechar} statusBarTranslucent>
-      <View style={[s.backdrop, { backgroundColor: theme.colors.overlay }]}>
+      <View style={[s.backdrop, desktop && s.backdropDesktop, { backgroundColor: theme.colors.overlay }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={desativado ? undefined : onFechar} accessibilityLabel="Fechar" />
-        <View style={[s.sheet, { backgroundColor: theme.pages.shared.card }]} accessibilityViewIsModal>
+        <View style={[s.sheet, desktop && s.sheetDesktop, { backgroundColor: theme.pages.shared.card }]} accessibilityViewIsModal>
           <View style={[s.handle, { backgroundColor: theme.pages.shared.border }]} />
           <View style={s.header}>
             <View>
@@ -159,6 +161,8 @@ function EditarFotoVetModalAberto({ nome, onFechar }: { nome: string; onFechar: 
 
 const s = StyleSheet.create({
   backdrop: { flex: 1, justifyContent: 'flex-end' },
+  backdropDesktop: { justifyContent: 'center', alignItems: 'center' },
+  sheetDesktop: { width: 480, borderRadius: 24, paddingBottom: 12 },
   sheet: { borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: 24, maxHeight: '92%' },
   handle: { width: 44, height: 5, borderRadius: 3, alignSelf: 'center', marginTop: 10 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 22, paddingTop: 14, paddingBottom: 6 },

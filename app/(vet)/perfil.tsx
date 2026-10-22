@@ -10,18 +10,13 @@ import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { LogoutConfirmationModal } from '../../components/LogoutConfirmationModal';
 import { VetAvatar } from '../../components/vet/VetAvatar';
+import { VetAparenciaSegmentada } from '../../components/vet/VetAparenciaSegmentada';
 import { EditarFotoVetModal } from '../../components/vet/EditarFotoVetModal';
-import type { AppTheme, ThemePreference } from '../../constants/theme';
-
-const TEMAS: { value: ThemePreference; label: string; icon: React.ComponentProps<typeof Ionicons>['name'] }[] = [
-  { value: 'system', label: 'Sistema', icon: 'phone-portrait-outline' },
-  { value: 'light', label: 'Claro', icon: 'sunny-outline' },
-  { value: 'dark', label: 'Escuro', icon: 'moon-outline' },
-];
+import type { AppTheme } from '../../constants/theme';
 
 export default function VetPerfilScreen() {
   const router = useRouter();
-  const { theme, preference, resolvedTheme, setPreference } = useTheme();
+  const { theme } = useTheme();
   const { modoSimples } = useAccessibility();
   const s = useMemo(() => createStyles(theme, modoSimples), [theme, modoSimples]);
   const { veterinarioAtivo } = useVet();
@@ -85,27 +80,7 @@ export default function VetPerfilScreen() {
         </View>
 
         <Text style={s.secLabel}>Aparência</Text>
-        <View style={s.segmented} accessibilityRole="radiogroup">
-          {TEMAS.map(opcao => {
-            const selecionado = preference === opcao.value;
-            return (
-              <Pressable
-                key={opcao.value}
-                style={[s.segment, selecionado && s.segmentSelected]}
-                onPress={() => void setPreference(opcao.value)}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: selecionado }}
-                accessibilityLabel={`Aparência ${opcao.label}`}
-              >
-                <Ionicons name={opcao.icon} size={modoSimples ? 20 : 15} color={selecionado ? theme.colors.onPrimary : theme.colors.textSecondary} />
-                <Text style={[s.segmentText, selecionado && s.segmentTextSelected]}>{opcao.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        {preference === 'system' && (
-          <Text style={s.hint}>Seguindo o dispositivo. Atualmente: {resolvedTheme === 'dark' ? 'escuro' : 'claro'}.</Text>
-        )}
+        <VetAparenciaSegmentada />
 
         <Text style={[s.secLabel, s.secSpaced]}>Geral</Text>
         <Pressable style={({ pressed }) => [s.card, s.linkRow, pressed && s.pressed]} onPress={() => router.push('/sobre-app')} accessibilityRole="button" accessibilityLabel="Sobre o App">
@@ -153,12 +128,6 @@ const createStyles = (theme: AppTheme, simples: boolean) => {
     infoLabel: { fontSize: simples ? 17 : 13, color: theme.colors.textSecondary },
     infoValor: { flexShrink: 1, fontSize: simples ? 17 : 13, fontWeight: '700', color: theme.colors.text },
 
-    segmented: { flexDirection: 'row', backgroundColor: page.cardSecondary, borderRadius: 14, padding: 4, gap: 4, borderWidth: 1, borderColor: page.border },
-    segment: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: simples ? 15 : 10, borderRadius: 11 },
-    segmentSelected: { backgroundColor: theme.colors.primary },
-    segmentText: { fontSize: simples ? 16 : 12, fontWeight: '700', color: theme.colors.textSecondary },
-    segmentTextSelected: { color: theme.colors.onPrimary },
-    hint: { fontSize: simples ? 15 : 11, color: theme.colors.textSecondary, marginTop: 8, paddingLeft: 2 },
 
     linkRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
     linkIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: page.cardSecondary, alignItems: 'center', justifyContent: 'center' },

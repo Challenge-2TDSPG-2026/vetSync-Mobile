@@ -1,56 +1,23 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useVet } from '../../context/VetContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { useMeusResgates } from '../../hooks/useRecompensas';
 import { useRecarregarDados } from '../../hooks/useRecarregarDados';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
-import { useAtendimentoVet } from '../../hooks/useAtendimentoVet';
+import { useHomeVet } from '../../hooks/useHomeVet';
 import { obterVisualTipoEvento } from '../../constants';
 import { AppIcon } from '../../components/AppIcon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SkeletonList, SkeletonCard } from '../../components/ui/Skeleton';
 import { DicaTela } from '../../components/ui/DicaTela';
 import { VetAvatar } from '../../components/vet/VetAvatar';
-import { confirmar } from '../../utils/alert';
+import { dataPorExtenso, horaCurta, quandoAcontece } from '../../utils/agendaVet';
 import { formatarHora } from '../../utils/atendimentoVet';
-import { STATUS_EXIBICAO_BADGE, parseDataEvento, statusExibicao } from '../../utils/eventoStatus';
+import { STATUS_EXIBICAO_BADGE, statusExibicao } from '../../utils/eventoStatus';
 import type { AppTheme } from '../../constants/theme';
 import { useVetDesktop } from '../../components/vet/desktop/useVetDesktop';
 import { VetDashboardDesktop } from '../../components/vet/desktop/VetDashboardDesktop';
-
-const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-
-function dataPorExtenso(d: Date) {
-  return `${DIAS[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
-}
-
-function horaCurta(iso: string) {
-  return parseDataEvento(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-}
-
-function mesmoDia(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-/** Texto de quando o atendimento acontece: "em 25 min", "hoje às 14:00", "amanhã às 09:00" ou "23 de outubro às 09:00". */
-function quandoAcontece(iso: string) {
-  const data = parseDataEvento(iso);
-  const agora = new Date();
-  const hora = horaCurta(iso);
-  const minutos = Math.round((data.getTime() - agora.getTime()) / 60000);
-  if (mesmoDia(data, agora)) {
-    if (iso.length > 10 && minutos > 0 && minutos < 60) return `em ${minutos} min`;
-    return iso.length > 10 ? `hoje às ${hora}` : 'hoje';
-  }
-  const amanha = new Date(agora); amanha.setDate(agora.getDate() + 1);
-  const complemento = iso.length > 10 ? ` às ${hora}` : '';
-  if (mesmoDia(data, amanha)) return `amanhã${complemento}`;
-  return `${data.getDate()} de ${MESES[data.getMonth()]}${complemento}`;
-}
 
 /** Desktop (web larga) usa o painel novo; mobile usa o layout focado no próximo atendimento. */
 export default function VetDashboardScreen() {
@@ -63,67 +30,14 @@ function VetDashboardMobile() {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
   const { sessao } = useAuth();
-  const { veterinarioAtivo, eventos, eventosAgendados, eventosDeHoje, pacientes, carregando } = useVet();
-  const { data: resgates = [] } = useMeusResgates(true);
-  const resgatesPendentes = resgates.filter(r => r.status === 'PENDENTE');
-  const pacientesComPendencia = pacientes.filter(p => p.eventos.some(e => e.status === 'AGENDADO')).length;
-  const atrasados = eventos.filter(e => statusExibicao(e) === 'ATRASADO');
+  const {
+    carregando, veterinarioAtivo, eventosDeHoje, atrasados, pacientes, pacientesComPendencia, resgatesPendentes,
+    atendimento, eventoHero, emAtendimento, podeIniciar, petProximo, petDoEvento, restoDoDia, acionarHero,
+  } = useHomeVet();
   const { atualizando, aoAtualizar } = useRecarregarDados();
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('vet-painel');
-  const { atendimento, carregado: atendimentoCarregado, iniciar: iniciarAtendimento, encerrar: encerrarAtendimento } = useAtendimentoVet();
 
   const nome = veterinarioAtivo?.nome ?? sessao?.nome ?? 'Veterinário';
-
-  const agendadosOrdenados = useMemo(
-    () => [...eventosAgendados].sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime()),
-    [eventosAgendados],
-  );
-  const eventoEmAndamento = atendimento ? eventosAgendados.find(e => String(e.id) === atendimento.eventoId) : undefined;
-  // Só atendimentos já confirmados pela clínica podem ser iniciados (o backend recusa concluir os demais).
-  const proximo = agendadosOrdenados.find(
-    e => statusExibicao(e) !== 'ATRASADO' && e.statusConfirmacao !== 'PENDENTE' && e.statusConfirmacao !== 'RECUSADO',
-  );
-  const eventoHero = eventoEmAndamento ?? proximo;
-  const emAtendimento = Boolean(eventoEmAndamento && atendimento);
-  const podeIniciar = Boolean(proximo && mesmoDia(parseDataEvento(proximo.data), new Date()));
-  const petDoEvento = (petId: number | string) => pacientes.find(p => String(p.pet.id) === String(petId))?.pet;
-  const petProximo = eventoHero ? petDoEvento(eventoHero.petId) : undefined;
-
-  const restoDoDia = useMemo(() => {
-    const ids = new Set<string>();
-    const lista = [...eventosDeHoje, ...atrasados].filter(e => {
-      const chave = String(e.id);
-      if (ids.has(chave) || (eventoHero && chave === String(eventoHero.id))) return false;
-      ids.add(chave);
-      return true;
-    });
-    return lista.sort((a, b) => parseDataEvento(a.data).getTime() - parseDataEvento(b.data).getTime()).slice(0, 5);
-  }, [eventosDeHoje, atrasados, eventoHero]);
-
-  // Se o atendimento em andamento foi concluído ou cancelado por outro caminho, limpa o estado local.
-  useEffect(() => {
-    if (!carregando && atendimentoCarregado && atendimento && !eventoEmAndamento) void encerrarAtendimento();
-  }, [carregando, atendimentoCarregado, atendimento, eventoEmAndamento, encerrarAtendimento]);
-
-  function pedirInicioAtendimento() {
-    if (!proximo) return;
-    const nomePet = petProximo?.nome ?? 'o paciente';
-    confirmar(
-      'Iniciar atendimento?',
-      `Tudo o que você escrever no bloco de notas será adicionado à ficha de ${nomePet} ao concluir o atendimento. O tutor poderá ver essas informações.`,
-      [
-        { texto: 'Cancelar', estilo: 'cancel' },
-        {
-          texto: 'Iniciar',
-          aoConfirmar: () => {
-            void iniciarAtendimento({ eventoId: String(proximo.id), petId: String(proximo.petId) }).then(() =>
-              router.push(`/atendimento/${proximo.id}`),
-            );
-          },
-        },
-      ],
-    );
-  }
 
   if (carregando) {
     return (
@@ -139,7 +53,7 @@ function VetDashboardMobile() {
     { label: 'Hoje', valor: eventosDeHoje.length, cor: theme.colors.success, rota: '/(vet)/consultas' as const },
     { label: 'Atrasados', valor: atrasados.length, cor: theme.colors.danger, rota: '/(vet)/consultas' as const },
     { label: 'Retornos', valor: pacientesComPendencia, cor: theme.colors.info, rota: '/(vet)/pacientes' as const },
-    { label: 'Resgates', valor: resgatesPendentes.length, cor: theme.colors.warning, rota: '/(vet)/resgates' as const },
+    { label: 'Resgates', valor: resgatesPendentes, cor: theme.colors.warning, rota: '/(vet)/resgates' as const },
   ];
 
   return (
@@ -187,11 +101,7 @@ function VetDashboardMobile() {
           <View style={s.heroActions}>
             <Pressable
               style={({ pressed }) => [s.heroPrimary, pressed && s.pressed]}
-              onPress={() => {
-                if (emAtendimento) router.push(`/atendimento/${eventoHero.id}`);
-                else if (podeIniciar) pedirInicioAtendimento();
-                else router.push(`/paciente/${eventoHero.petId}`);
-              }}
+              onPress={acionarHero}
               accessibilityRole="button"
               accessibilityLabel={`${emAtendimento ? 'Continuar' : podeIniciar ? 'Iniciar' : 'Ver ficha do'} atendimento de ${petProximo?.nome ?? 'paciente'}`}
               accessibilityHint={emAtendimento ? 'Abre o bloco de notas do atendimento' : podeIniciar ? 'Abre o bloco de notas do atendimento' : 'Abre a ficha do paciente'}
