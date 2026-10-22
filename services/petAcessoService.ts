@@ -24,6 +24,17 @@ export interface AcessoPet {
   dtConcedido: string;
 }
 
+export interface ConviteRecebido {
+  idConvite: string;
+  nomeTutorOrigem: string;
+  nomePet: string;
+  todosPets: boolean;
+  relacao: RelacaoPet;
+  permissao: PermissaoPet;
+  expiraEm: string;
+}
+
+type ConviteRecebidoApi = Omit<ConviteRecebido, 'idConvite'> & { idConvite: number };
 type ConvitePetApi = Omit<ConvitePet, 'idConvite'> & { idConvite: number };
 type AcessoPetApi = Omit<AcessoPet, 'idAcesso' | 'idTutor'> & { idAcesso: number; idTutor: number };
 
@@ -44,6 +55,20 @@ export const petAcessoService = {
   }): Promise<ConvitePet> {
     const resposta = await api.post<ConvitePetApi>(`/pets/${idPet}/convites`, dados);
     return paraConviteApp(resposta);
+  },
+
+  /** Convites pendentes enviados ao e-mail da conta logada (quem já tem conta aceita aqui, sem cadastro). */
+  async listarConvitesRecebidos(): Promise<ConviteRecebido[]> {
+    const resposta = await api.get<ConviteRecebidoApi[]>('/convites/recebidos');
+    return resposta.map((c) => ({ ...c, idConvite: String(c.idConvite) }));
+  },
+
+  async aceitarConviteRecebido(idConvite: string): Promise<void> {
+    await api.post(`/convites/recebidos/${idConvite}/aceitar`, {});
+  },
+
+  async recusarConviteRecebido(idConvite: string): Promise<void> {
+    await api.post(`/convites/recebidos/${idConvite}/recusar`, {});
   },
 
   async listarAcessos(idPet: string): Promise<AcessoPet[]> {

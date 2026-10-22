@@ -15,6 +15,7 @@ import { AppIcon } from '../../../components/AppIcon';
 import { PetFoto } from '../../../components/pet-foto/PetFoto';
 import { EditarFotoModal } from '../../../components/pet-foto/EditarFotoModal';
 import { PetSwitcher } from '../../../components/PetSwitcher';
+import { ConvitesRecebidosCard } from '../../../components/ConvitesRecebidosCard';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import { DicaTela } from '../../../components/ui/DicaTela';
@@ -144,6 +145,8 @@ export default function DashboardScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.home.background} />}
     >
+
+      <ConvitesRecebidosCard />
 
       <PetSwitcher />
 

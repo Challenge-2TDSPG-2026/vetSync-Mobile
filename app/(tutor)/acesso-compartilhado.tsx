@@ -123,6 +123,7 @@ export default function AcessoCompartilhadoScreen() {
         'Não foi possível enviar o convite',
         mensagemDeErro(erro, 'Tente novamente em instantes.', {
           403: 'Somente o tutor proprietário pode convidar cuidadores.',
+          409: 'Você não pode convidar a si mesmo, ou essa pessoa já tem acesso a este pet.',
         }),
       );
     }

@@ -43,4 +43,26 @@ describe('petAcessoService', () => {
 
     expect(api.delete).toHaveBeenCalledWith('/pets/12/acessos/4');
   });
+
+  it('lista convites recebidos convertendo idConvite para string', async () => {
+    (api.get as jest.Mock).mockResolvedValue([{
+      idConvite: 3, nomeTutorOrigem: 'Ana', nomePet: 'Luna', todosPets: false,
+      relacao: 'CUIDADOR', permissao: 'LEITURA', expiraEm: '2026-10-25T00:00:00',
+    }]);
+
+    const convites = await petAcessoService.listarConvitesRecebidos();
+
+    expect(api.get).toHaveBeenCalledWith('/convites/recebidos');
+    expect(convites[0].idConvite).toBe('3');
+  });
+
+  it('aceita e recusa convite recebido pelo id', async () => {
+    (api.post as jest.Mock).mockResolvedValue({});
+
+    await petAcessoService.aceitarConviteRecebido('3');
+    await petAcessoService.recusarConviteRecebido('4');
+
+    expect(api.post).toHaveBeenCalledWith('/convites/recebidos/3/aceitar', {});
+    expect(api.post).toHaveBeenCalledWith('/convites/recebidos/4/recusar', {});
+  });
 });

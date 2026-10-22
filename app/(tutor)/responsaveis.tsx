@@ -129,8 +129,8 @@ export default function ResponsaveisScreen() {
           <Text style={[s.sectionTitle, modoSimples && sSimples.sectionTitle]}>Enviar convite</Text>
           <View style={s.card}>
             <Text style={[s.cardIntro, modoSimples && sSimples.cardIntro]}>
-              A pessoa receberá um e-mail para criar a conta e terá acesso aos seus pets atuais e
-              futuros.
+              A pessoa receberá um e-mail: se ainda não tiver conta, cria uma; se já tiver, aceita o
+              convite dentro do app. Ela terá acesso aos seus pets atuais e futuros.
             </Text>
 
             <Text style={[s.label, modoSimples && sSimples.label]}>E-mail do responsável</Text>
