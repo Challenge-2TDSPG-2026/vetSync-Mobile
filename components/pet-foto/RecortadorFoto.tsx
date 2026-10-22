@@ -16,6 +16,8 @@ type Props = {
 };
 
 const TAMANHO_FINAL = 720;
+/** Lado máximo da cópia de trabalho: o recorte final é 720px, então não precisa processar a foto em resolução total. */
+const LADO_TRABALHO = 2048;
 const STAGE_MAX = 360;
 const MARGEM_MOLDURA = 28;
 const ZOOM_MIN = 1;
@@ -155,7 +157,16 @@ function RecortadorFotoConteudo({ uriOriginal, onConcluir, onCancelar, formato =
 
       // Lê as dimensões REAIS do arquivo (podem diferir das de Image.getSize por causa de EXIF/orientação).
       // Se o crop usar medidas fora da imagem real, o módulo nativo lança "crop rectangle is outside source image".
-      const real = await manipulateAsync(uriOriginal, [], { compress: 1, format: SaveFormat.JPEG });
+      // Já reduz a foto aqui: re-codificar a imagem inteira em resolução máxima era o que deixava o recorte lento.
+      const maiorLado = Math.max(dimensoesImagem.largura, dimensoesImagem.altura);
+      const reduzir = maiorLado > LADO_TRABALHO;
+      const real = await manipulateAsync(
+        uriOriginal,
+        reduzir
+          ? [{ resize: dimensoesImagem.largura >= dimensoesImagem.altura ? { width: LADO_TRABALHO } : { height: LADO_TRABALHO } }]
+          : [],
+        { compress: 0.92, format: SaveFormat.JPEG }
+      );
       const largReal = real.width;
       const altReal = real.height;
 

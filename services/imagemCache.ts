@@ -92,6 +92,23 @@ async function baixar(url: string, token: string): Promise<Response | null> {
   }
 }
 
+async function gravarNativo(url: string, bytes: Uint8Array, ext: string): Promise<string> {
+  const mapa = await carregarIndice();
+  const chave = chaveDe(url);
+  const entrada = mapa[chave];
+  pasta().create({ idempotent: true, intermediates: true });
+  const arquivo = new File(pasta(), `${chave}.${ext}`);
+  if (!arquivo.exists) arquivo.create();
+  arquivo.write(bytes);
+  if (entrada && entrada.ext !== ext) {
+    const antigo = new File(pasta(), `${chave}.${entrada.ext}`);
+    if (antigo.exists) antigo.delete();
+  }
+  mapa[chave] = { t: Date.now(), ext };
+  salvarIndice();
+  return arquivo.uri;
+}
+
 async function obterNativo(url: string, token: string): Promise<string | null> {
   const mapa = await carregarIndice();
   const chave = chaveDe(url);
@@ -106,15 +123,7 @@ async function obterNativo(url: string, token: string): Promise<string | null> {
 
   try {
     const bytes = new Uint8Array(await resposta.arrayBuffer());
-    const ext = extensaoDe(resposta.headers.get('content-type'));
-    pasta().create({ idempotent: true, intermediates: true });
-    const arquivo = new File(pasta(), `${chave}.${ext}`);
-    if (!arquivo.exists) arquivo.create();
-    arquivo.write(bytes);
-    if (entrada && entrada.ext !== ext && arquivoAtual?.exists) arquivoAtual.delete();
-    mapa[chave] = { t: Date.now(), ext };
-    salvarIndice();
-    return arquivo.uri;
+    return await gravarNativo(url, bytes, extensaoDe(resposta.headers.get('content-type')));
   } catch {
     return temCopia && arquivoAtual ? arquivoAtual.uri : null;
   }
@@ -168,6 +177,34 @@ export function obterImagem(url: string, token: string): Promise<string | null> 
     .finally(() => emAndamento.delete(url));
   emAndamento.set(url, tarefa);
   return tarefa;
+}
+
+/**
+ * Usa uma imagem que já está no aparelho (a foto recém-recortada) como a foto da URL, na hora e sem baixar nada.
+ * Assim a troca de foto aparece instantaneamente, em vez de esperar o envio e depois baixar a foto de novo.
+ */
+export async function definirImagemLocal(url: string, uriLocal: string): Promise<void> {
+  if (!url) return;
+  liberarUri(memoria.get(url));
+  memoria.set(url, uriLocal);
+  emAndamento.delete(url);
+  avisar(url);
+
+  try {
+    const resposta = await fetch(uriLocal);
+    if (ehWeb) {
+      const blob = await resposta.blob();
+      const cache = await abrirCacheWeb();
+      const cabecalhos = { 'Content-Type': blob.type, [CABECALHO_SALVO_EM]: String(Date.now()) };
+      await cache?.put(url, new Response(blob, { headers: cabecalhos }));
+    } else {
+      const bytes = new Uint8Array(await resposta.arrayBuffer());
+      const salvo = await gravarNativo(url, bytes, extensaoDe(resposta.headers.get('content-type') ?? 'image/jpeg'));
+      if (memoria.get(url) === uriLocal) memoria.set(url, salvo); // troca o arquivo temporário pela cópia salva
+    }
+  } catch {
+    // Sem a cópia salva a foto continua aparecendo nesta sessão e é baixada de novo na próxima.
+  }
 }
 
 /** Descarta a cópia de uma foto (ao trocar ou remover) e avisa as telas abertas para buscarem a nova. */
