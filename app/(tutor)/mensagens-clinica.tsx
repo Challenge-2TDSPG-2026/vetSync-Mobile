@@ -746,8 +746,9 @@ function createStyles(theme: AppTheme) {
       paddingHorizontal: 14,
       paddingTop: 11,
       paddingBottom: 10,
-      fontSize: 14,
-      lineHeight: 20,
+      // 16px evita o zoom automático do Safari/iOS ao focar o campo na web.
+      fontSize: 16,
+      lineHeight: 22,
     },
     sendButton: {
       width: 46,
