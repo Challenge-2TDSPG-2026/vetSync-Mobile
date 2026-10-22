@@ -11,8 +11,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "635744596949-06rd8l65l6sr4982ur77rc10aj2rpp5v.apps.googleusercontent.com",
-        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "635744596949-dv63adb9civbfmb489l7r92u0o7u41ks.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "376247909118-rsnkr6278dkcs34iuhpca21i09okgk71.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "376247909118-f4j894136r1sb4976siosvmt977b0onq.apps.googleusercontent.com",
         "EXPO_PUBLIC_API_BASE_URL": "https://app-vetsync-rm563197.azurewebsites.net"
       }
     }

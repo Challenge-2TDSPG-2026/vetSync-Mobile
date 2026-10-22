@@ -2,11 +2,14 @@
   "expo": {
     "name": "VetSync",
     "slug": "vetsync",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "automatic",
-    "scheme": ["vetsync", "com.vetsync.app"],
+    "scheme": [
+      "vetsync",
+      "com.vetsync.app"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vetsync.app",
@@ -85,8 +88,11 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "65c847ac-eddf-4dc7-9be0-446b1105c4c1"
-      }
-    }
+        "projectId": "e7ffd478-6bd5-4fa6-9df2-1132d2671176"
+      },
+      "commitHash": "3402d87eb69c4f4819122e62aeb9cf2abb8ec545",
+      "buildNumber": "local"
+    },
+    "owner": "vetsync"
   }
 }
