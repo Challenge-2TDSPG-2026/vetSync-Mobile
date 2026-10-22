@@ -10,6 +10,13 @@ const CHAVE_SESSAO_PROTEGIDA = 'vetsync.sessao_protegida';
 // sem exigir biometria. Chaves separadas evitam regravar um item protegido com opções diferentes.
 const CHAVE_SESSAO_SEGURA = 'vetsync.sessao';
 
+function opcoesSessaoProtegida(nome: string) {
+  return {
+    requireAuthentication: true,
+    authenticationPrompt: `Confirme ${nome} para acessar sua conta VetSync`,
+  } as const;
+}
+
 export interface SessaoProtegida {
   token: string;
   idUsuario: number;
@@ -206,9 +213,11 @@ export async function salvarSessaoAposLogin(sessao: SessaoProtegida): Promise<vo
   }
 
   try {
-    await SecureStore.setItemAsync(CHAVE_SESSAO_PROTEGIDA, JSON.stringify(sessao), {
-      requireAuthentication: true,
-    });
+    await SecureStore.setItemAsync(
+      CHAVE_SESSAO_PROTEGIDA,
+      JSON.stringify(sessao),
+      opcoesSessaoProtegida('sua biometria'),
+    );
     await removerSessaoSimples();
     definirSessaoEmMemoria(sessao);
   } catch {
@@ -220,9 +229,10 @@ export async function salvarSessaoAposLogin(sessao: SessaoProtegida): Promise<vo
 export async function restaurarSessaoPersistida(): Promise<SessaoProtegida | null> {
   if (await biometriaEstaAtivada()) {
     try {
-      const valor = await SecureStore.getItemAsync(CHAVE_SESSAO_PROTEGIDA, {
-        requireAuthentication: true,
-      });
+      const valor = await SecureStore.getItemAsync(
+        CHAVE_SESSAO_PROTEGIDA,
+        opcoesSessaoProtegida('sua biometria'),
+      );
       if (!valor) return null;
       const sessao: unknown = JSON.parse(valor);
       if (!validarSessaoProtegida(sessao)) {
@@ -269,9 +279,11 @@ export async function ativarBiometria(sessao: SessaoProtegida): Promise<void> {
     throw new Error('Não foi possível confirmar sua biometria.');
   }
 
-  await SecureStore.setItemAsync(CHAVE_SESSAO_PROTEGIDA, JSON.stringify(sessao), {
-    requireAuthentication: true,
-  });
+  await SecureStore.setItemAsync(
+    CHAVE_SESSAO_PROTEGIDA,
+    JSON.stringify(sessao),
+    opcoesSessaoProtegida(estado.nome),
+  );
   try {
     await AsyncStorage.multiSet([
       [STORAGE_KEYS.BIOMETRIA_ATIVADA, 'true'],
