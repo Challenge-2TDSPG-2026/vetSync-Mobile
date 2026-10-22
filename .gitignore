@@ -50,4 +50,6 @@ logs/
 # Build outputs
 android/
 ios/
-dist 
+dist/
+output/
+tmp/
