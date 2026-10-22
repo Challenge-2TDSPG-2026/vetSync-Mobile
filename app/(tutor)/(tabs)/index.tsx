@@ -214,7 +214,7 @@ export default function DashboardScreen() {
 
         <View style={s.welcomeInfo}>
           <Text style={s.welcomeEyebrow}>CUIDADO DIÁRIO</Text>
-          <Text style={[s.welcomeNome, modoSimples && sSimples.welcomeNome]}>Como está {artigoPet} {nomePet}?</Text>
+          <Text style={[s.welcomeNome, modoSimples && sSimples.welcomeNome]} numberOfLines={2} ellipsizeMode="tail">Como está {artigoPet} {nomePet}?</Text>
           {!modoSimples && <Text style={s.welcomeSub}>Acompanhe cada cuidado e mantenha a saúde em dia.</Text>}
         </View>
       </LinearGradient>
