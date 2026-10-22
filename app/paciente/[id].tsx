@@ -23,6 +23,7 @@ import { DicaTela } from '../../components/ui/DicaTela';
 import { useDicaPrimeiraVisita } from '../../hooks/useDicaPrimeiraVisita';
 import { STATUS_EXIBICAO_BADGE, formatarDataEvento, formatarDataHoraEvento, statusExibicao } from '../../utils/eventoStatus';
 import { ProntuarioClinicoVet } from '../../components/prontuario/ProntuarioClinicoVet';
+import { SiaResumosCompartilhados } from '../../components/vet/SiaResumosCompartilhados';
 import { usePerfilSaudePet } from '../../hooks/useRelatorios';
 import { useAuth } from '../../context/AuthContext';
 
@@ -190,6 +191,7 @@ export default function FichaPacienteScreen() {
         {pet && (
           <ProntuarioClinicoVet idPet={pet.id} nomePet={pet.nome} eventos={eventosParaProntuario} habilitado={autenticado} />
         )}
+        {pet && <SiaResumosCompartilhados eventos={eventosParaProntuario} />}
 
         <Text style={s.secLabel}>Histórico Clínico</Text>
 
