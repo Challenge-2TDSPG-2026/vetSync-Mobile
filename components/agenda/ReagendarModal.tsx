@@ -11,10 +11,12 @@ import {
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { usePet } from '../../context/PetContext';
 import { useReagendarEvento } from '../../hooks/useEventos';
 import { useServicosClinica, useSlotsServico } from '../../hooks/useSlotsServico';
 import { mostrarToast } from '../ui/Toast';
 import { mensagemDeErro } from '../../services/api/errorMessages';
+import { reagendarLembretesEvento } from '../../services/lembreteEventoService';
 import { encontrarServicoPorNome } from '../../utils/planoNavegacao';
 import { filtrarSlotsDoEvento, proximosDias, rotuloDia } from '../../utils/reagendamento';
 import { formatarDataEHora } from '../../utils/solicitacao';
@@ -41,6 +43,7 @@ export function ReagendarModal({ evento, onFechar, onAvisarVaga }: Props) {
 function ConteudoReagendar({ evento, onFechar, onAvisarVaga }: Props & { evento: Evento }) {
   const { theme } = useTheme();
   const { autenticado } = useAuth();
+  const { pets } = usePet();
   const s = useMemo(() => createStyles(theme), [theme]);
   const reagendar = useReagendarEvento();
   const dias = useMemo(() => proximosDias(14), []);
@@ -72,7 +75,14 @@ function ConteudoReagendar({ evento, onFechar, onAvisarVaga }: Props & { evento:
   async function confirmar() {
     if (!evento || !hora) return;
     try {
-      await reagendar.mutateAsync({ id: evento.id, data, hora });
+      const novo = await reagendar.mutateAsync({ id: evento.id, data, hora });
+      try {
+        // Os avisos de 24h/30min antes precisam acompanhar o novo horário.
+        const atualizado: Evento = { ...evento, data: novo.data, hora: novo.hora ?? hora };
+        await reagendarLembretesEvento(atualizado, pets.find(p => p.id === evento.petId) ?? null);
+      } catch {
+        // Falha ao recriar lembretes locais não deve bloquear o reagendamento.
+      }
       mostrarToast('sucesso', 'Horário alterado', `Novo horário: ${formatarDataEHora(data, hora)}.`);
       onFechar();
     } catch (erro) {

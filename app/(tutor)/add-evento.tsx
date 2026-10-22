@@ -19,6 +19,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { usePet } from '../../context/PetContext';
+import { LEMBRETES_PADRAO, OPCOES_LEMBRETE } from '../../utils/lembretesEvento';
 import { useTiposEvento, useVeterinarios, useAgendarEvento } from '../../hooks/useEventos';
 import { obterVisualTipoEvento } from '../../constants';
 import { ESPECIALIDADES_VET } from '../../constants/vet';
@@ -75,7 +76,7 @@ export default function AddEventoScreen() {
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
   const [observacao, setObservacao] = useState('');
-  const [lembretesSelecionados, setLembretesSelecionados] = useState<number[]>([7, 1]);
+  const [lembretesSelecionados, setLembretesSelecionados] = useState<number[]>(LEMBRETES_PADRAO);
   const [erros, setErros] = useState<Record<string, string>>({});
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('add-evento');
 
@@ -90,11 +91,11 @@ export default function AddEventoScreen() {
     });
   }
 
-  function alternarLembrete(diasAntes: number) {
+  function alternarLembrete(minutosAntes: number) {
     setLembretesSelecionados(atual => (
-      atual.includes(diasAntes)
-        ? atual.filter(dias => dias !== diasAntes)
-        : [...atual, diasAntes].sort((a, b) => a - b)
+      atual.includes(minutosAntes)
+        ? atual.filter(minutos => minutos !== minutosAntes)
+        : [...atual, minutosAntes].sort((a, b) => b - a)
     ));
   }
 
@@ -372,17 +373,13 @@ export default function AddEventoScreen() {
             </View>
             <Text style={s.lembreteAjuda}>Escolha quando deseja ser avisado sobre este evento.</Text>
             <View style={s.lembreteOpcoes}>
-              {[
-                { dias: 0, label: 'No dia' },
-                { dias: 1, label: '1 dia antes' },
-                { dias: 7, label: '7 dias antes' },
-              ].map(opcao => {
-                const selecionado = lembretesSelecionados.includes(opcao.dias);
+              {OPCOES_LEMBRETE.map(opcao => {
+                const selecionado = lembretesSelecionados.includes(opcao.minutos);
                 return (
                   <Pressable
-                    key={opcao.dias}
+                    key={opcao.minutos}
                     style={[s.lembreteOpcao, selecionado && s.lembreteOpcaoSelecionada]}
-                    onPress={() => alternarLembrete(opcao.dias)}
+                    onPress={() => alternarLembrete(opcao.minutos)}
                     accessibilityRole="button"
                     accessibilityState={{ selected: selecionado }}
                     accessibilityLabel={`${opcao.label}${selecionado ? ', selecionado' : ''}`}

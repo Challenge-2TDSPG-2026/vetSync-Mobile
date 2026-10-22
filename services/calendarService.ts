@@ -2,7 +2,14 @@ import * as Calendar from 'expo-calendar';
 import { Platform } from 'react-native';
 import type * as NotificationsModule from 'expo-notifications';
 import type { Evento, Pet } from '../types';
-import { parseDataEvento } from '../utils/eventoStatus';
+import {
+  LEMBRETES_PADRAO,
+  calcularDisparoLembrete,
+  corpoLembrete,
+  dataHoraDoEvento,
+  idLembrete,
+  tituloLembrete,
+} from '../utils/lembretesEvento';
 
 let notifications: typeof NotificationsModule | null | undefined;
 
@@ -74,7 +81,7 @@ export async function adicionarEventoAoCalendario(evento: Evento, pet?: Pet | nu
   if (!ok) return null;
 
   const calendarioId = await obterOuCriarCalendarioId();
-  const inicio = parseDataEvento(evento.data);
+  const inicio = dataHoraDoEvento(evento);
   const fim = new Date(inicio.getTime() + 60 * 60 * 1000);
 
   return Calendar.createEventAsync(calendarioId, {
@@ -92,10 +99,14 @@ export async function removerEventoDoCalendario(calendarEventId: string): Promis
   } catch {}
 }
 
+/**
+ * Agenda notificações locais antes do horário exato do evento (data + hora).
+ * Por padrão avisa 24 horas e 30 minutos antes. Lembretes cujo horário já passou são ignorados.
+ */
 export async function agendarLembretes(
   evento: Evento,
   pet: Pet | null,
-  diasAntes: number[] = [7, 1],
+  minutosAntes: number[] = LEMBRETES_PADRAO,
 ): Promise<string[]> {
   const notificacoes = obterNotificacoes();
   if (!notificacoes) return [];
@@ -103,19 +114,17 @@ export async function agendarLembretes(
   const ok = await pedirPermissaoNotificacao();
   if (!ok) return [];
 
-  const dataEvento = parseDataEvento(evento.data);
   const ids: string[] = [];
 
-  for (const dias of diasAntes) {
-    const disparo = new Date(dataEvento);
-    disparo.setDate(disparo.getDate() - dias);
-    disparo.setHours(9, 0, 0, 0);
-    if (disparo.getTime() <= Date.now()) continue;
+  for (const minutos of minutosAntes) {
+    const disparo = calcularDisparoLembrete(evento, minutos);
+    if (Number.isNaN(disparo.getTime()) || disparo.getTime() <= Date.now()) continue;
 
     const id = await notificacoes.scheduleNotificationAsync({
+      identifier: idLembrete(String(evento.id), minutos),
       content: {
-        title: dias === 0 ? 'Evento hoje' : `Evento em ${dias} dia${dias > 1 ? 's' : ''}`,
-        body: `${evento.nomeTipoEvento}${pet ? ` — ${pet.nome}` : ''}`,
+        title: tituloLembrete(minutos),
+        body: corpoLembrete(evento, pet?.nome),
         data: {
           tipo: 'EVENTO_PROXIMO',
           referenciaTipo: 'EVENTO',

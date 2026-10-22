@@ -184,33 +184,71 @@ describe('calendarService', () => {
       expect(mockScheduleNotificationAsync).not.toHaveBeenCalled();
     });
 
-    it('agenda um lembrete por dia informado, pulando disparos que já ficariam no passado', async () => {
+    it('agenda por padrão os avisos de 24 horas e 30 minutos antes do horário exato do evento', async () => {
       const { agendarLembretes } = carregarCalendarService();
       mockRequestPermissionsAsyncNotif.mockResolvedValue({ status: 'granted' });
-      mockScheduleNotificationAsync.mockResolvedValue('lembrete-1-dia');
+      mockScheduleNotificationAsync.mockImplementation(async ({ identifier }: { identifier: string }) => identifier);
 
-      // Evento daqui a 5 dias: o lembrete de "7 dias antes" já ficaria no passado e deve ser pulado.
-      const eventoEm5Dias: Evento = {
+      const inicio = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      inicio.setSeconds(0, 0);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const evento: Evento = {
         ...eventoFuturo,
-        data: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+        data: `${inicio.getFullYear()}-${pad(inicio.getMonth() + 1)}-${pad(inicio.getDate())}`,
+        hora: `${pad(inicio.getHours())}:${pad(inicio.getMinutes())}`,
       };
 
-      const ids = await agendarLembretes(eventoEm5Dias, petLuna, [7, 1]);
+      const ids = await agendarLembretes(evento, petLuna);
+
+      expect(ids).toEqual(['evento-1-lembrete-1440', 'evento-1-lembrete-30']);
+      expect(mockScheduleNotificationAsync).toHaveBeenCalledTimes(2);
+
+      const [aviso24h, aviso30min] = mockScheduleNotificationAsync.mock.calls.map(([arg]) => arg);
+      expect(aviso24h.content.title).toBe('Evento em 24 horas');
+      expect(aviso24h.trigger.date.getTime()).toBe(inicio.getTime() - 24 * 60 * 60 * 1000);
+      expect(aviso30min.content.title).toBe('Evento em 30 minutos');
+      expect(aviso30min.trigger.date.getTime()).toBe(inicio.getTime() - 30 * 60 * 1000);
+      expect(aviso30min.content.body).toBe(`Vacina V10 — Luna às ${evento.hora}`);
+      expect(aviso30min.content.data).toEqual({
+        tipo: 'EVENTO_PROXIMO',
+        referenciaTipo: 'EVENTO',
+        referenciaId: String(eventoFuturo.id),
+        petId: String(petLuna.id),
+      });
+    });
+
+    it('pula os avisos cujo horário já passou (evento daqui a 10 horas não recebe o de 24h)', async () => {
+      const { agendarLembretes } = carregarCalendarService();
+      mockRequestPermissionsAsyncNotif.mockResolvedValue({ status: 'granted' });
+      mockScheduleNotificationAsync.mockResolvedValue('lembrete-30-min');
+
+      const eventoEm10Horas: Evento = {
+        ...eventoFuturo,
+        data: new Date(Date.now() + 10 * 60 * 60 * 1000).toISOString(),
+        hora: undefined,
+      };
+
+      const ids = await agendarLembretes(eventoEm10Horas, petLuna);
 
       expect(mockScheduleNotificationAsync).toHaveBeenCalledTimes(1);
       expect(mockScheduleNotificationAsync).toHaveBeenCalledWith(expect.objectContaining({
-        content: expect.objectContaining({
-          title: 'Evento em 1 dia',
-          body: 'Vacina V10 — Luna',
-          data: {
-            tipo: 'EVENTO_PROXIMO',
-            referenciaTipo: 'EVENTO',
-            referenciaId: String(eventoFuturo.id),
-            petId: String(petLuna.id),
-          },
-        }),
+        content: expect.objectContaining({ title: 'Evento em 30 minutos', body: 'Vacina V10 — Luna' }),
       }));
-      expect(ids).toEqual(['lembrete-1-dia']);
+      expect(ids).toEqual(['lembrete-30-min']);
+    });
+
+    it('não agenda nada quando o evento começa em menos de 30 minutos', async () => {
+      const { agendarLembretes } = carregarCalendarService();
+      mockRequestPermissionsAsyncNotif.mockResolvedValue({ status: 'granted' });
+
+      const eventoEm10Minutos: Evento = {
+        ...eventoFuturo,
+        data: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+        hora: undefined,
+      };
+
+      await expect(agendarLembretes(eventoEm10Minutos, petLuna)).resolves.toEqual([]);
+      expect(mockScheduleNotificationAsync).not.toHaveBeenCalled();
     });
   });
 
