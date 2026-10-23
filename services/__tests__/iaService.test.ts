@@ -1,6 +1,7 @@
 import { apiRequest } from '../api/httpClient';
 import { iaService } from '../iaService';
 import type { Pet } from '../../types';
+import { IA_API_BASE_URL } from '../../constants/api';
 
 jest.mock('../api/httpClient', () => ({
   apiRequest: jest.fn(),
@@ -32,7 +33,7 @@ describe('iaService', () => {
           pet_ativo: { id: '12', nome: 'Luna', especie: 'cachorro', raca: 'Vira-lata' },
         },
       },
-      baseUrl: 'https://vetsync-ia.onrender.com',
+      baseUrl: IA_API_BASE_URL,
       timeoutMs: 60_000,
     });
     expect(resposta).toEqual({ texto: 'Olá! Como posso ajudar a Luna hoje?' });
@@ -73,7 +74,7 @@ describe('iaService', () => {
       method: 'POST',
       path: '/api/v1/ia/orquestrador/agendamentos/sessoes/sessao%20com%20espa%C3%A7o/selecoes',
       body: { opcaoId: 'opcao-12' },
-      baseUrl: 'https://vetsync-ia.onrender.com',
+      baseUrl: IA_API_BASE_URL,
       timeoutMs: 60_000,
     });
     expect(resposta).toEqual({

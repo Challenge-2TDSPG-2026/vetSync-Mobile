@@ -4,9 +4,18 @@ import { assinarExpiracaoSessao } from '../sessionEvents';
 import { definirSessaoEmMemoria } from '../../biometriaService';
 
 const mockNetInfoFetch = jest.fn();
+const mockFileSlice = jest.fn();
+const mockFileConstructor = jest.fn().mockImplementation((uri: string) => ({
+  uri,
+  size: 123,
+  slice: mockFileSlice,
+}));
 jest.mock('@react-native-community/netinfo', () => ({
   __esModule: true,
   default: { fetch: (...args: unknown[]) => mockNetInfoFetch(...args) },
+}));
+jest.mock('expo-file-system', () => ({
+  File: function File(uri: string) { return mockFileConstructor(uri); },
 }));
 
 describe('apiRequest', () => {
@@ -20,6 +29,7 @@ describe('apiRequest', () => {
       perfil: 'TUTOR',
     });
     mockNetInfoFetch.mockResolvedValue({ isConnected: true, isInternetReachable: true });
+    mockFileSlice.mockReturnValue({ tipo: 'blob-nativo' });
   });
 
   afterEach(() => {
@@ -92,7 +102,7 @@ describe('apiRequest', () => {
     );
   });
 
-  it('no nativo anexa o arquivo por uri, sem baixar o blob antes', async () => {
+  it('no nativo anexa o File do Expo como blob, sem baixar o arquivo antes', async () => {
     const append = jest.fn();
     globalThis.FormData = jest.fn(() => ({ append })) as unknown as typeof FormData;
     globalThis.fetch = jest.fn().mockResolvedValue({
@@ -107,11 +117,9 @@ describe('apiRequest', () => {
       tipoMime: 'image/jpeg',
     });
 
-    expect(append).toHaveBeenCalledWith('foto', {
-      uri: 'file:///foto.jpg',
-      name: 'foto-pet.jpg',
-      type: 'image/jpeg',
-    });
+    expect(mockFileConstructor).toHaveBeenCalledWith('file:///foto.jpg');
+    expect(mockFileSlice).toHaveBeenCalledWith(0, 123, 'image/jpeg');
+    expect(append).toHaveBeenCalledWith('foto', { tipo: 'blob-nativo' }, 'foto-pet.jpg');
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
