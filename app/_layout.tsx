@@ -18,6 +18,7 @@ import { AccessibilityProvider } from '../context/AccessibilityContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { mostrarToast, ToastHost } from '../components/ui/Toast';
 import { AtivarBiometriaModal } from '../components/auth/AtivarBiometriaModal';
+import { GoogleAuthSessionProvider } from '../components/auth/GoogleAuthSessionProvider';
 import { AppSplashGate } from '../components/animated-splash';
 import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
@@ -97,6 +98,19 @@ function RootNavigator() {
 
   useEffect(() => {
     if (carregando) return;
+
+    const inGoogleOAuthRedirect = segments.includes('oauthredirect') || pathname === '/oauthredirect';
+    if (inGoogleOAuthRedirect) {
+      if (!autenticado) return;
+      if (ehVeterinario) {
+        router.replace('/(vet)');
+      } else if (ehTutor) {
+        if (!sessao?.temVinculoAtivo) router.replace('/vinculo-clinica');
+        else if (!onboardingConcluido) router.replace('/(tutor)/add-pet');
+        else router.replace('/(tutor)/(tabs)');
+      }
+      return;
+    }
 
     const inLogin =
       segments.includes('login') || pathname === '/login' || pathname.startsWith('/login');
@@ -204,6 +218,7 @@ function RootNavigator() {
         }}
       >
         <Stack.Screen name="login" options={TRANSICAO_PAGINA} />
+        <Stack.Screen name="oauthredirect" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="cadastro" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="cadastro-google" options={TRANSICAO_PAGINA} />
         <Stack.Screen name="vinculo-clinica" options={TRANSICAO_PAGINA} />
@@ -347,16 +362,18 @@ function ThemedRootLayout() {
       >
         <AccessibilityProvider>
           <AuthProvider>
-            <PetProvider>
-              <VetProvider>
-                <RootNavigator />
-                <PushNotificationRegistration />
-                <NotificationTapHandler />
-                <BiometricEnrollmentPrompt />
-                <ToastHost />
-                <AppSplashGate />
-              </VetProvider>
-            </PetProvider>
+            <GoogleAuthSessionProvider>
+              <PetProvider>
+                <VetProvider>
+                  <RootNavigator />
+                  <PushNotificationRegistration />
+                  <NotificationTapHandler />
+                  <BiometricEnrollmentPrompt />
+                  <ToastHost />
+                  <AppSplashGate />
+                </VetProvider>
+              </PetProvider>
+            </GoogleAuthSessionProvider>
           </AuthProvider>
         </AccessibilityProvider>
       </PersistQueryClientProvider>

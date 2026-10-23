@@ -1,15 +1,11 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
 import { AppIcon } from '../AppIcon';
 import { mostrarToast } from '../ui/Toast';
 import { useTheme } from '../../context/ThemeContext';
-import { GOOGLE_CLIENT_IDS, loginGoogleDisponivel } from '../../constants/googleAuth';
+import { loginGoogleDisponivel } from '../../constants/googleAuth';
+import { useGoogleAuthSession } from './GoogleAuthSessionProvider';
 import type { AppTheme } from '../../constants/theme';
-
-// Necessário na web: fecha a janela de login do Google e devolve o resultado para o app.
-WebBrowser.maybeCompleteAuthSession();
 
 type BotaoGoogleProps = {
   /** Recebe o id_token do Google. A validação de verdade é feita pela API; o app não decodifica nada. */
@@ -54,36 +50,12 @@ function BotaoGoogleIndisponivel({ desabilitado = false, label, mostrarDivisor }
 }
 
 function BotaoGoogleAtivo({ onIdToken, onErro, desabilitado = false, label, mostrarDivisor }: BotaoGoogleProps) {
-  const ultimaRespostaTratada = useRef<unknown>(null);
-
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    webClientId: GOOGLE_CLIENT_IDS.web,
-    androidClientId: GOOGLE_CLIENT_IDS.android,
-    iosClientId: GOOGLE_CLIENT_IDS.ios,
-    selectAccount: true,
-  });
-
-  useEffect(() => {
-    if (!response || ultimaRespostaTratada.current === response) return;
-    ultimaRespostaTratada.current = response;
-
-    if (response.type === 'success') {
-      const idToken = response.params?.id_token;
-      if (typeof idToken === 'string' && idToken) {
-        void onIdToken(idToken);
-      } else {
-        onErro('Não recebemos a confirmação do Google. Tente novamente.');
-      }
-    } else if (response.type === 'error') {
-      onErro('O Google não conseguiu concluir o login. Tente novamente.');
-    }
-    // 'cancel' e 'dismiss': a pessoa fechou a janela, não é erro.
-  }, [response, onIdToken, onErro]);
+  const googleAuth = useGoogleAuthSession();
 
   return (
     <BotaoGoogleVisual
-      onPress={() => void promptAsync()}
-      desabilitado={desabilitado || !request}
+      onPress={() => googleAuth.iniciar({ onIdToken, onErro })}
+      desabilitado={desabilitado || !googleAuth.pronta}
       label={label}
       mostrarDivisor={mostrarDivisor}
     />
