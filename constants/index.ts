@@ -15,6 +15,7 @@ export const STORAGE_KEYS = {
   BIOMETRIA_USUARIO: '@vetsync:biometria_usuario',
   BIOMETRIA_CONVITE_USUARIO: '@vetsync:biometria_convite_usuario',
   CACHE_OFFLINE: '@vetsync:cache_offline',
+  CACHE_IMAGENS: '@vetsync:cache_imagens',
 };
 
 export const XP_POR_EVENTO = 10;

@@ -1,5 +1,6 @@
 import type {
   AtendimentoProntuario,
+  DadosExame,
   ExameProntuario,
   FiltrosProntuario,
   OrientacaoProntuario,
@@ -167,6 +168,53 @@ export function contarPorTipo(prontuario: Prontuario): Record<FiltroLinhaDoTempo
     ORIENTACAO: prontuario.orientacoes.length,
     RECEITA: prontuario.receitas.length,
     EXAME: prontuario.exames.length,
+  };
+}
+
+// ------------------------------------------------------------------ prontuário anterior (enviado pelo tutor)
+
+/**
+ * O backend ainda não tem um registro próprio para consultas passadas, então elas são guardadas como
+ * exame com este prefixo no nome. Toda a conversão fica aqui: quando existir um endpoint próprio,
+ * só estas funções (e o serviço) precisam mudar.
+ */
+export const PREFIXO_PRONTUARIO_ANTERIOR = 'Prontuário anterior · ';
+
+export interface DadosConsultaAnterior {
+  /** AAAA-MM-DD */
+  dataIso: string;
+  motivo: string;
+  clinica?: string;
+  veterinario?: string;
+  diagnostico?: string;
+  conduta?: string;
+  observacoes?: string;
+}
+
+const LIMITE_NOME_EXAME = 120;
+
+export function ehProntuarioAnterior(exame: Pick<ExameProntuario, 'nome'>): boolean {
+  return exame.nome.startsWith(PREFIXO_PRONTUARIO_ANTERIOR);
+}
+
+/** Nome do exame sem o prefixo de controle (o que a pessoa digitou como motivo). */
+export function tituloProntuarioAnterior(exame: Pick<ExameProntuario, 'nome'>): string {
+  return ehProntuarioAnterior(exame) ? exame.nome.slice(PREFIXO_PRONTUARIO_ANTERIOR.length) : exame.nome;
+}
+
+export function montarDadosConsultaAnterior(dados: DadosConsultaAnterior): DadosExame {
+  const motivo = dados.motivo.trim().slice(0, LIMITE_NOME_EXAME - PREFIXO_PRONTUARIO_ANTERIOR.length);
+  const linhas = [
+    dados.veterinario?.trim() ? `Veterinário: ${dados.veterinario.trim()}` : null,
+    dados.diagnostico?.trim() ? `Diagnóstico: ${dados.diagnostico.trim()}` : null,
+    dados.conduta?.trim() ? `Conduta / tratamento: ${dados.conduta.trim()}` : null,
+  ].filter((linha): linha is string => linha !== null);
+  return {
+    nome: `${PREFIXO_PRONTUARIO_ANTERIOR}${motivo}`,
+    laboratorio: dados.clinica?.trim() || undefined,
+    resultadoEm: dados.dataIso,
+    resultado: linhas.length ? linhas.join('\n') : undefined,
+    interpretacao: dados.observacoes?.trim() || undefined,
   };
 }
 

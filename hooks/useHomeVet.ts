@@ -58,7 +58,7 @@ export function useHomeVet() {
     const nomePet = petProximo?.nome ?? 'o paciente';
     confirmar(
       'Iniciar atendimento?',
-      `Tudo o que você escrever no bloco de notas será adicionado à ficha de ${nomePet} ao concluir o atendimento. O tutor poderá ver essas informações.`,
+      `Tudo o que você escrever no bloco de notas será adicionado ao prontuário clínico de ${nomePet} ao concluir o atendimento. O tutor poderá ver essas informações.`,
       [
         { texto: 'Cancelar', estilo: 'cancel' },
         {
@@ -73,7 +73,7 @@ export function useHomeVet() {
     );
   }
 
-  /** Ação do botão principal do card em destaque: continuar, iniciar (no dia) ou abrir a ficha. */
+  /** Ação do botão principal do card em destaque: continuar, iniciar (no dia) ou abrir o prontuário clínico. */
   function acionarHero() {
     if (!eventoHero) return;
     if (emAtendimento) router.push(`/atendimento/${eventoHero.id}`);

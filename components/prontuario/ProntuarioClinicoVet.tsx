@@ -8,7 +8,7 @@ import { mostrarToast } from '../ui/Toast';
 import { useProntuario, useRemoverExame, useRemoverOrientacao } from '../../hooks/useProntuario';
 import { compartilhamentoNativoService } from '../../services/compartilhamentoNativoService';
 import type { ExameProntuario } from '../../services/prontuarioService';
-import { montarItensProntuario, type ItemProntuario } from '../../utils/prontuario';
+import { ehProntuarioAnterior, montarItensProntuario, type ItemProntuario } from '../../utils/prontuario';
 import { NovaOrientacaoModal } from './NovaOrientacaoModal';
 import { ProntuarioLinhaDoTempo } from './ProntuarioLinhaDoTempo';
 import { RegistrarExameModal } from './RegistrarExameModal';
@@ -26,7 +26,7 @@ const SECOES_VET = ['ORIENTACOES', 'EXAMES'] as const;
 const LIMITE_RECENTES = 4;
 const FILTROS_VET = { secoes: [...SECOES_VET] };
 
-/** Registro de orientações e exames na ficha do paciente (a visão completa fica com o tutor). */
+/** Registro de orientações e exames no prontuário clínico do paciente (a visão completa fica com o tutor). */
 export function ProntuarioClinicoVet({ idPet, nomePet, eventos, habilitado }: ProntuarioClinicoVetProps) {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
@@ -42,7 +42,10 @@ export function ProntuarioClinicoVet({ idPet, nomePet, eventos, habilitado }: Pr
     () => (prontuario.data ? montarItensProntuario(prontuario.data) : []),
     [prontuario.data]
   );
-  const recentes = itens.slice(0, LIMITE_RECENTES);
+  // O que o tutor enviou de consultas antigas fica em destaque e completo; o restante mostra só os mais recentes.
+  const anteriores = useMemo(() => itens.filter(item => item.tipo === 'EXAME' && ehProntuarioAnterior(item.exame)), [itens]);
+  const registrosClinica = useMemo(() => itens.filter(item => !anteriores.includes(item)), [itens, anteriores]);
+  const recentes = registrosClinica.slice(0, LIMITE_RECENTES);
 
   async function baixarLaudo(exame: ExameProntuario) {
     setBaixandoId(exame.id);
@@ -83,13 +86,21 @@ export function ProntuarioClinicoVet({ idPet, nomePet, eventos, habilitado }: Pr
     }
   }
 
+  // O prontuário anterior pertence a quem enviou (o tutor): o veterinário só consulta.
+  const renderRemover = (item: ItemProntuario) => item.tipo === 'EXAME' && ehProntuarioAnterior(item.exame) ? null : (
+    <Pressable style={s.remover} onPress={() => pedirRemocao(item)} accessibilityRole="button" accessibilityLabel="Remover item">
+      <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
+      <Text style={s.removerTexto}>Remover</Text>
+    </Pressable>
+  );
+
   return (
     <View style={s.card}>
       <View style={s.topo}>
         <Ionicons name="document-text-outline" size={20} color={theme.colors.primary} />
-        <Text style={s.titulo}>Prontuário</Text>
+        <Text style={s.titulo}>Prontuário clínico</Text>
       </View>
-      <Text style={s.descricao}>Registre orientações e resultados de exames. O tutor passa a ver no prontuário do app.</Text>
+      <Text style={s.descricao}>Registre orientações e resultados de exames. O tutor passa a ver no prontuário clínico do app.</Text>
 
       <View style={s.acoes}>
         <Pressable style={s.acao} onPress={() => setOrientacaoAberta(true)} accessibilityRole="button" accessibilityLabel="Nova orientação">
@@ -106,26 +117,26 @@ export function ProntuarioClinicoVet({ idPet, nomePet, eventos, habilitado }: Pr
         <ActivityIndicator color={theme.colors.primary} style={s.carregando} />
       ) : prontuario.isError ? (
         <Text style={s.vazio}>Não foi possível carregar os registros agora.</Text>
-      ) : recentes.length === 0 ? (
-        <Text style={s.vazio}>Nenhuma orientação ou exame registrado ainda.</Text>
+      ) : itens.length === 0 ? (
+        <Text style={s.vazio}>Nenhuma orientação, exame ou prontuário anterior registrado ainda.</Text>
       ) : (
-        <View style={s.lista}>
-          <Text style={s.subtitulo}>Registros recentes</Text>
-          <ProntuarioLinhaDoTempo
-            itens={recentes}
-            onBaixarLaudo={baixarLaudo}
-            baixandoExameId={baixandoId}
-            renderAcoes={item => (
-              <Pressable style={s.remover} onPress={() => pedirRemocao(item)} accessibilityRole="button" accessibilityLabel="Remover item">
-                <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
-                <Text style={s.removerTexto}>Remover</Text>
-              </Pressable>
-            )}
-          />
-          {itens.length > LIMITE_RECENTES ? (
-            <Text style={s.mais}>+ {itens.length - LIMITE_RECENTES} registros mais antigos no prontuário do tutor.</Text>
+        <>
+          {anteriores.length > 0 ? (
+            <View style={s.lista}>
+              <Text style={s.subtitulo}>Prontuário anterior enviado pelo tutor</Text>
+              <ProntuarioLinhaDoTempo itens={anteriores} onBaixarLaudo={baixarLaudo} baixandoExameId={baixandoId} renderAcoes={renderRemover} />
+            </View>
           ) : null}
-        </View>
+          {recentes.length > 0 ? (
+            <View style={s.lista}>
+              <Text style={s.subtitulo}>Registros recentes</Text>
+              <ProntuarioLinhaDoTempo itens={recentes} onBaixarLaudo={baixarLaudo} baixandoExameId={baixandoId} renderAcoes={renderRemover} />
+              {registrosClinica.length > LIMITE_RECENTES ? (
+                <Text style={s.mais}>+ {registrosClinica.length - LIMITE_RECENTES} registros mais antigos no prontuário clínico do tutor.</Text>
+              ) : null}
+            </View>
+          ) : null}
+        </>
       )}
 
       <NovaOrientacaoModal visivel={orientacaoAberta} idPet={idPet} nomePet={nomePet} eventos={eventos} onFechar={() => setOrientacaoAberta(false)} />

@@ -4,16 +4,20 @@ import {
   chaveFiltros,
   contarPorTipo,
   dataBrParaIso,
+  ehProntuarioAnterior,
   formatarDataHoraProntuario,
   formatarDataProntuario,
   inicioDoPeriodo,
   mascaraDataBr,
+  montarDadosConsultaAnterior,
+  PREFIXO_PRONTUARIO_ANTERIOR,
   montarItensProntuario,
   montarQueryProntuario,
   nomeSeguroArquivo,
   resumoSecoes,
   situacaoCompartilhamento,
   slugDoPet,
+  tituloProntuarioAnterior,
   TODAS_AS_SECOES,
   validarArquivoLaudo,
 } from '../prontuario';
@@ -150,5 +154,47 @@ describe('laudos e nomes de arquivo', () => {
   it('gera slug do pet', () => {
     expect(slugDoPet('Thor Ávila')).toBe('thor-avila');
     expect(slugDoPet('!!!')).toBe('pet');
+  });
+});
+
+describe('prontuário anterior enviado pelo tutor', () => {
+  const dados = {
+    dataIso: '2025-05-20',
+    motivo: ' Otite ',
+    clinica: ' Clínica Bichos ',
+    veterinario: 'Dr. Paulo',
+    diagnostico: 'Otite externa',
+    conduta: 'Gotas por 7 dias',
+    observacoes: 'Retorno em 15 dias',
+  };
+
+  it('guarda a consulta como exame com o prefixo de controle', () => {
+    expect(montarDadosConsultaAnterior(dados)).toEqual({
+      nome: `${PREFIXO_PRONTUARIO_ANTERIOR}Otite`,
+      laboratorio: 'Clínica Bichos',
+      resultadoEm: '2025-05-20',
+      resultado: 'Veterinário: Dr. Paulo\nDiagnóstico: Otite externa\nConduta / tratamento: Gotas por 7 dias',
+      interpretacao: 'Retorno em 15 dias',
+    });
+  });
+
+  it('omite o que não foi preenchido', () => {
+    const resultado = montarDadosConsultaAnterior({ dataIso: '2025-05-20', motivo: 'Check-up' });
+    expect(resultado.laboratorio).toBeUndefined();
+    expect(resultado.resultado).toBeUndefined();
+    expect(resultado.interpretacao).toBeUndefined();
+  });
+
+  it('respeita o limite de 120 caracteres do nome do exame', () => {
+    const { nome } = montarDadosConsultaAnterior({ dataIso: '2025-05-20', motivo: 'x'.repeat(300) });
+    expect(nome.length).toBe(120);
+  });
+
+  it('reconhece e limpa o prefixo, sem confundir exames comuns', () => {
+    const anterior = { nome: `${PREFIXO_PRONTUARIO_ANTERIOR}Otite` };
+    expect(ehProntuarioAnterior(anterior)).toBe(true);
+    expect(tituloProntuarioAnterior(anterior)).toBe('Otite');
+    expect(ehProntuarioAnterior({ nome: 'Hemograma completo' })).toBe(false);
+    expect(tituloProntuarioAnterior({ nome: 'Hemograma completo' })).toBe('Hemograma completo');
   });
 });

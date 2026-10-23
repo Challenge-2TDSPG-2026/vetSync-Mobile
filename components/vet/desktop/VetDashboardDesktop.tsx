@@ -9,6 +9,7 @@ import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
 import { obterVisualTipoEvento } from '../../../constants';
 import { AppIcon } from '../../AppIcon';
 import { SkeletonCard } from '../../ui/Skeleton';
+import { PetFoto } from '../../pet-foto/PetFoto';
 import { dataPorExtenso, horaCurta, quandoAcontece } from '../../../utils/agendaVet';
 import { formatarHora } from '../../../utils/atendimentoVet';
 import { STATUS_EXIBICAO_BADGE, statusExibicao } from '../../../utils/eventoStatus';
@@ -52,7 +53,7 @@ export function VetDashboardDesktop() {
     { label: 'Resgates', valor: resgatesPendentes, icon: 'gift-outline', cor: theme.colors.warning, fundo: theme.colors.warningBackground, rota: '/(vet)/resgates' },
   ];
 
-  const rotuloBotao = emAtendimento ? 'Continuar atendimento' : podeIniciar ? 'Iniciar atendimento' : 'Ver ficha';
+  const rotuloBotao = emAtendimento ? 'Continuar atendimento' : podeIniciar ? 'Iniciar atendimento' : 'Ver prontuário clínico';
   const nomePet = petProximo?.nome ?? 'Paciente';
 
   return (
@@ -105,7 +106,11 @@ export function VetDashboardDesktop() {
                 </Text>
                 <View style={s.heroLinha}>
                   <View style={s.heroAvatar}>
-                    <AppIcon name="paw" set="Ionicons" size={30} color={theme.pages.vetDashboard.heroText} />
+                    {petProximo ? (
+                      <PetFoto pet={petProximo} size={64} color={theme.pages.vetDashboard.heroText} backgroundColor="transparent" />
+                    ) : (
+                      <AppIcon name="paw" set="Ionicons" size={30} color={theme.pages.vetDashboard.heroText} />
+                    )}
                   </View>
                   <View style={s.heroInfo}>
                     <Text style={s.heroPet} numberOfLines={1}>{nomePet}</Text>
@@ -119,7 +124,7 @@ export function VetDashboardDesktop() {
                       onPress={acionarHero}
                       accessibilityRole="button"
                       accessibilityLabel={`${rotuloBotao} de ${nomePet}`}
-                      accessibilityHint={emAtendimento || podeIniciar ? 'Abre o bloco de notas do atendimento' : 'Abre a ficha do paciente'}
+                      accessibilityHint={emAtendimento || podeIniciar ? 'Abre o bloco de notas do atendimento' : 'Abre o prontuário clínico do paciente'}
                     >
                       <Text style={s.heroPrimaryText}>{rotuloBotao}</Text>
                     </Pressable>
@@ -127,9 +132,9 @@ export function VetDashboardDesktop() {
                       style={({ pressed }) => [s.heroSecondary, pressed && s.pressed]}
                       onPress={() => router.push(`/paciente/${eventoHero.petId}`)}
                       accessibilityRole="button"
-                      accessibilityLabel={`Abrir ficha de ${nomePet}`}
+                      accessibilityLabel={`Abrir prontuário clínico de ${nomePet}`}
                     >
-                      <Text style={s.heroSecondaryText}>Ficha</Text>
+                      <Text style={s.heroSecondaryText}>Prontuário clínico</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -176,7 +181,7 @@ export function VetDashboardDesktop() {
                       onPress={() => router.push(`/paciente/${e.petId}`)}
                       accessibilityRole="button"
                       accessibilityLabel={`${pet?.nome ?? 'Paciente'}, ${e.nomeTipoEvento}, ${sb.label}`}
-                      accessibilityHint="Abre a ficha do paciente"
+                      accessibilityHint="Abre o prontuário clínico do paciente"
                     >
                       <View style={[s.linhaIcone, { backgroundColor: visual.cor }]}>
                         <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
@@ -214,11 +219,9 @@ export function VetDashboardDesktop() {
                   style={({ pressed }) => [s.linha, pressed && s.pressed]}
                   onPress={() => router.push(`/paciente/${pet.id}`)}
                   accessibilityRole="button"
-                  accessibilityLabel={`${pet.nome}, abrir ficha`}
+                  accessibilityLabel={`${pet.nome}, abrir prontuário clínico`}
                 >
-                  <View style={s.pacienteAvatar}>
-                    <AppIcon name="paw" set="Ionicons" size={18} color={theme.colors.primary} />
-                  </View>
+                  <PetFoto pet={pet} size={38} color={theme.colors.primary} backgroundColor={theme.colors.successBackground} />
                   <View style={s.linhaInfo}>
                     <Text style={s.celulaForte} numberOfLines={1}>{pet.nome}</Text>
                     <Text style={s.cardHint} numberOfLines={1}>{pet.tutor?.nome ?? 'Tutor não informado'}</Text>

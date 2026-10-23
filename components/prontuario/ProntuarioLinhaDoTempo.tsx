@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { withAlpha, type AppTheme } from '../../constants/theme';
 import type { ExameProntuario } from '../../services/prontuarioService';
-import { formatarDataProntuario, type ItemProntuario } from '../../utils/prontuario';
+import { ehProntuarioAnterior, formatarDataProntuario, tituloProntuarioAnterior, type ItemProntuario } from '../../utils/prontuario';
 
 interface ProntuarioLinhaDoTempoProps {
   itens: ItemProntuario[];
@@ -17,8 +17,11 @@ interface ProntuarioLinhaDoTempoProps {
 
 type IconeNome = React.ComponentProps<typeof Ionicons>['name'];
 
-function visualDoTipo(tipo: ItemProntuario['tipo'], theme: AppTheme): { icone: IconeNome; cor: string; rotulo: string } {
-  switch (tipo) {
+function visualDoTipo(item: ItemProntuario, theme: AppTheme): { icone: IconeNome; cor: string; rotulo: string } {
+  if (item.tipo === 'EXAME' && ehProntuarioAnterior(item.exame)) {
+    return { icone: 'folder-open-outline', cor: theme.colors.brandAccent, rotulo: 'Prontuário anterior' };
+  }
+  switch (item.tipo) {
     case 'ATENDIMENTO': return { icone: 'medkit-outline', cor: theme.colors.primary, rotulo: 'Atendimento' };
     case 'ORIENTACAO': return { icone: 'chatbubble-ellipses-outline', cor: theme.colors.info, rotulo: 'Orientação' };
     case 'RECEITA': return { icone: 'document-text-outline', cor: theme.colors.warning, rotulo: 'Receita' };
@@ -33,7 +36,8 @@ export function ProntuarioLinhaDoTempo({ itens, onBaixarLaudo, baixandoExameId, 
   return (
     <View>
       {itens.map(item => {
-        const visual = visualDoTipo(item.tipo, theme);
+        const visual = visualDoTipo(item, theme);
+        const anterior = item.tipo === 'EXAME' && ehProntuarioAnterior(item.exame);
         const acoes = renderAcoes?.(item);
         return (
           <View key={`${item.tipo}-${item.id}`} style={s.card} accessibilityRole="summary">
@@ -54,13 +58,13 @@ export function ProntuarioLinhaDoTempo({ itens, onBaixarLaudo, baixandoExameId, 
                 onPress={() => onBaixarLaudo(item.exame)}
                 disabled={baixandoExameId === item.exame.id}
                 accessibilityRole="button"
-                accessibilityLabel={`Baixar laudo de ${item.exame.nome}`}
+                accessibilityLabel={anterior ? 'Abrir arquivo do prontuário anterior' : `Baixar laudo de ${item.exame.nome}`}
               >
                 {baixandoExameId === item.exame.id
                   ? <ActivityIndicator size="small" color={theme.colors.primary} />
                   : <Ionicons name="download-outline" size={18} color={theme.colors.primary} />}
                 <Text style={s.botaoLaudoTexto} numberOfLines={1}>
-                  {baixandoExameId === item.exame.id ? 'Baixando...' : 'Baixar laudo'}
+                  {baixandoExameId === item.exame.id ? 'Baixando...' : anterior ? 'Baixar arquivo do prontuário' : 'Baixar laudo'}
                 </Text>
               </Pressable>
             ) : null}
@@ -77,7 +81,7 @@ function tituloDoItem(item: ItemProntuario): string {
     case 'ATENDIMENTO': return item.atendimento.tipo ?? 'Atendimento';
     case 'ORIENTACAO': return item.orientacao.titulo;
     case 'RECEITA': return item.receita.medicamento;
-    default: return item.exame.nome;
+    default: return tituloProntuarioAnterior(item.exame);
   }
 }
 
@@ -133,7 +137,18 @@ function corpoDoItem(item: ItemProntuario, s: Estilos): React.ReactNode {
           ) : null}
         </>
       );
-    default:
+    default: {
+      if (ehProntuarioAnterior(item.exame)) {
+        return (
+          <>
+            <Campo estilos={s} rotulo="Registro da consulta" valor={item.exame.resultado} />
+            <Campo estilos={s} rotulo="Observações" valor={item.exame.interpretacao} />
+            {!item.exame.resultado && !item.exame.interpretacao && !item.exame.temArquivo ? (
+              <Text style={s.campoValor}>Sem detalhes registrados.</Text>
+            ) : null}
+          </>
+        );
+      }
       return (
         <>
           <Campo estilos={s} rotulo="Resultado" valor={item.exame.resultado} />
@@ -143,6 +158,7 @@ function corpoDoItem(item: ItemProntuario, s: Estilos): React.ReactNode {
           ) : null}
         </>
       );
+    }
   }
 }
 
