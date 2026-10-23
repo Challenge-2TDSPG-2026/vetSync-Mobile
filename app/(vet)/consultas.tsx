@@ -113,7 +113,7 @@ export default function ConsultasScreen() {
         contentContainerStyle={s.content}
         refreshControl={<RefreshControl refreshing={atualizando} onRefresh={aoAtualizar} tintColor={theme.colors.primary} colors={[theme.colors.primary]} progressBackgroundColor={theme.pages.vetAppointments.card} />}
       >
-        <VetPageIntro eyebrow="AGENDA CLÍNICA" title="Consultas" description="Acompanhe solicitações, confirme horários e acesse a ficha de cada paciente." icon="calendar-outline" />
+        <VetPageIntro eyebrow="AGENDA CLÍNICA" title="Consultas" description="Acompanhe solicitações, confirme horários e acesse o prontuário clínico de cada paciente." icon="calendar-outline" />
         {dicaVisivel && (
           <DicaTela
             titulo="Suas consultas"
@@ -167,7 +167,7 @@ export default function ConsultasScreen() {
             return (
               <React.Fragment key={item.id}>
               {modoSemana || filtroAgenda === 'semana' ? (novoDia ? <Text style={s.diaSemanaLabel}>{dataItem.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}</Text> : null) : null}
-              <Pressable style={s.card} onPress={() => router.push(`/paciente/${item.petId}`)} accessibilityRole="button" accessibilityLabel={`${item.nomeTipoEvento}, paciente ${petResumo?.pet.nome ?? 'sem nome'}, ${item.hora ?? ''}. Abrir ficha`}>
+              <Pressable style={s.card} onPress={() => router.push(`/paciente/${item.petId}`)} accessibilityRole="button" accessibilityLabel={`${item.nomeTipoEvento}, paciente ${petResumo?.pet.nome ?? 'sem nome'}, ${item.hora ?? ''}. Abrir prontuário clínico`}>
                 <View style={s.cardRow}>
                   <View style={[s.eventoIcone, { backgroundColor: visual.cor }]}>
                     <AppIcon name={visual.icon} set={visual.iconSet} size={18} color={theme.colors.onPrimary} />
@@ -185,8 +185,8 @@ export default function ConsultasScreen() {
                     <Text style={[s.badgeText, { color: sb.color }]}>{sb.label}</Text>
                   </View>
                   <View style={s.acoes}>
-                    <Pressable style={s.btnEtapa} accessibilityRole="button" accessibilityLabel={etapasLocais[item.id] === 'EM_ATENDIMENTO' ? 'Abrir ficha do atendimento em andamento' : etapasLocais[item.id] === 'CHEGOU' ? 'Paciente chegou, toque para iniciar atendimento' : 'Marcar chegada do paciente'} onPress={() => void avançarEtapa(item.id, item.petId)}>
-                      <Text style={s.btnEtapaText}>{etapasLocais[item.id] === 'EM_ATENDIMENTO' ? 'Abrir ficha' : etapasLocais[item.id] === 'CHEGOU' ? 'Chegou · iniciar' : 'Marcar chegada'}</Text>
+                    <Pressable style={s.btnEtapa} accessibilityRole="button" accessibilityLabel={etapasLocais[item.id] === 'EM_ATENDIMENTO' ? 'Abrir prontuário clínico do atendimento em andamento' : etapasLocais[item.id] === 'CHEGOU' ? 'Paciente chegou, toque para iniciar atendimento' : 'Marcar chegada do paciente'} onPress={() => void avançarEtapa(item.id, item.petId)}>
+                      <Text style={s.btnEtapaText}>{etapasLocais[item.id] === 'EM_ATENDIMENTO' ? 'Abrir prontuário clínico' : etapasLocais[item.id] === 'CHEGOU' ? 'Chegou · iniciar' : 'Marcar chegada'}</Text>
                     </Pressable>
                     {pendente && (
                       <>
@@ -213,7 +213,7 @@ export default function ConsultasScreen() {
                       </>
                     )}
                     <Pressable style={s.btnFicha} onPress={() => router.push(`/paciente/${item.petId}`)}>
-                      <Text style={s.btnFichaText}>Ver ficha</Text>
+                      <Text style={s.btnFichaText}>Ver prontuário clínico</Text>
                     </Pressable>
                   </View>
                 </View>

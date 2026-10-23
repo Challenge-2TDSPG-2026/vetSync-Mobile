@@ -53,7 +53,7 @@ export function VetDashboardDesktop() {
     { label: 'Resgates', valor: resgatesPendentes, icon: 'gift-outline', cor: theme.colors.warning, fundo: theme.colors.warningBackground, rota: '/(vet)/resgates' },
   ];
 
-  const rotuloBotao = emAtendimento ? 'Continuar atendimento' : podeIniciar ? 'Iniciar atendimento' : 'Ver ficha';
+  const rotuloBotao = emAtendimento ? 'Continuar atendimento' : podeIniciar ? 'Iniciar atendimento' : 'Ver prontuário clínico';
   const nomePet = petProximo?.nome ?? 'Paciente';
 
   return (
@@ -124,7 +124,7 @@ export function VetDashboardDesktop() {
                       onPress={acionarHero}
                       accessibilityRole="button"
                       accessibilityLabel={`${rotuloBotao} de ${nomePet}`}
-                      accessibilityHint={emAtendimento || podeIniciar ? 'Abre o bloco de notas do atendimento' : 'Abre a ficha do paciente'}
+                      accessibilityHint={emAtendimento || podeIniciar ? 'Abre o bloco de notas do atendimento' : 'Abre o prontuário clínico do paciente'}
                     >
                       <Text style={s.heroPrimaryText}>{rotuloBotao}</Text>
                     </Pressable>
@@ -132,9 +132,9 @@ export function VetDashboardDesktop() {
                       style={({ pressed }) => [s.heroSecondary, pressed && s.pressed]}
                       onPress={() => router.push(`/paciente/${eventoHero.petId}`)}
                       accessibilityRole="button"
-                      accessibilityLabel={`Abrir ficha de ${nomePet}`}
+                      accessibilityLabel={`Abrir prontuário clínico de ${nomePet}`}
                     >
-                      <Text style={s.heroSecondaryText}>Ficha</Text>
+                      <Text style={s.heroSecondaryText}>Prontuário clínico</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -181,7 +181,7 @@ export function VetDashboardDesktop() {
                       onPress={() => router.push(`/paciente/${e.petId}`)}
                       accessibilityRole="button"
                       accessibilityLabel={`${pet?.nome ?? 'Paciente'}, ${e.nomeTipoEvento}, ${sb.label}`}
-                      accessibilityHint="Abre a ficha do paciente"
+                      accessibilityHint="Abre o prontuário clínico do paciente"
                     >
                       <View style={[s.linhaIcone, { backgroundColor: visual.cor }]}>
                         <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
@@ -219,7 +219,7 @@ export function VetDashboardDesktop() {
                   style={({ pressed }) => [s.linha, pressed && s.pressed]}
                   onPress={() => router.push(`/paciente/${pet.id}`)}
                   accessibilityRole="button"
-                  accessibilityLabel={`${pet.nome}, abrir ficha`}
+                  accessibilityLabel={`${pet.nome}, abrir prontuário clínico`}
                 >
                   <PetFoto pet={pet} size={38} color={theme.colors.primary} backgroundColor={theme.colors.successBackground} />
                   <View style={s.linhaInfo}>

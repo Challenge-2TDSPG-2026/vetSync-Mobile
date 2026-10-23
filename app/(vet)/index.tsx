@@ -108,10 +108,10 @@ function VetDashboardMobile() {
               style={({ pressed }) => [s.heroPrimary, pressed && s.pressed]}
               onPress={acionarHero}
               accessibilityRole="button"
-              accessibilityLabel={`${emAtendimento ? 'Continuar' : podeIniciar ? 'Iniciar' : 'Ver ficha do'} atendimento de ${petProximo?.nome ?? 'paciente'}`}
-              accessibilityHint={emAtendimento ? 'Abre o bloco de notas do atendimento' : podeIniciar ? 'Abre o bloco de notas do atendimento' : 'Abre a ficha do paciente'}
+              accessibilityLabel={`${emAtendimento ? 'Continuar' : podeIniciar ? 'Iniciar' : 'Ver prontuário clínico do'} atendimento de ${petProximo?.nome ?? 'paciente'}`}
+              accessibilityHint={emAtendimento ? 'Abre o bloco de notas do atendimento' : podeIniciar ? 'Abre o bloco de notas do atendimento' : 'Abre o prontuário clínico do paciente'}
             >
-              <Text style={s.heroPrimaryText}>{emAtendimento ? 'Continuar atendimento' : podeIniciar ? 'Iniciar atendimento' : 'Ver ficha'}</Text>
+              <Text style={s.heroPrimaryText}>{emAtendimento ? 'Continuar atendimento' : podeIniciar ? 'Iniciar atendimento' : 'Ver prontuário clínico'}</Text>
             </Pressable>
             <Pressable
               style={({ pressed }) => [s.heroSecondary, pressed && s.pressed]}
@@ -171,7 +171,7 @@ function VetDashboardMobile() {
                 onPress={() => router.push(`/paciente/${e.petId}`)}
                 accessibilityRole="button"
                 accessibilityLabel={`${pet?.nome ?? 'Paciente'}, ${e.nomeTipoEvento}, ${sb.label}`}
-                accessibilityHint="Abre a ficha do paciente"
+                accessibilityHint="Abre o prontuário clínico do paciente"
               >
                 <View style={[s.linhaIcone, { backgroundColor: visual.cor }]}>
                   <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.colors.onPrimary} />
@@ -202,7 +202,7 @@ function VetDashboardMobile() {
       ) : (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.pacientesContent}>
           {pacientes.slice(0, 4).map(({ pet }) => (
-            <Pressable key={pet.id} style={s.pacienteItem} onPress={() => router.push(`/paciente/${pet.id}`)} accessibilityRole="button" accessibilityLabel={`${pet.nome}, abrir ficha`}>
+            <Pressable key={pet.id} style={s.pacienteItem} onPress={() => router.push(`/paciente/${pet.id}`)} accessibilityRole="button" accessibilityLabel={`${pet.nome}, abrir prontuário clínico`}>
               <PetFoto pet={pet} size={54} color={theme.colors.primary} backgroundColor={theme.colors.successBackground} />
               <Text style={s.pacienteNome} numberOfLines={1}>{pet.nome}</Text>
             </Pressable>

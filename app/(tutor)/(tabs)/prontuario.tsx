@@ -11,19 +11,23 @@ import { PetSwitcher } from '../../../components/PetSwitcher';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { mostrarToast } from '../../../components/ui/Toast';
 import { CompartilharProntuarioModal } from '../../../components/prontuario/CompartilharProntuarioModal';
+import { EnviarProntuarioAnteriorModal } from '../../../components/prontuario/EnviarProntuarioAnteriorModal';
 import { IllustratedPageHero } from '../../../components/ui/IllustratedPageHero';
 import { ProntuarioLinhaDoTempo } from '../../../components/prontuario/ProntuarioLinhaDoTempo';
 import { useRecarregarDados } from '../../../hooks/useRecarregarDados';
-import { useProntuario } from '../../../hooks/useProntuario';
+import { useProntuario, useRemoverProntuarioAnterior } from '../../../hooks/useProntuario';
 import { ApiError } from '../../../services/api/httpClient';
 import { compartilhamentoNativoService } from '../../../services/compartilhamentoNativoService';
 import { prontuarioPdfService } from '../../../services/prontuarioPdfService';
+import { confirmar } from '../../../utils/alert';
 import type { ExameProntuario } from '../../../services/prontuarioService';
 import {
   contarPorTipo,
+  ehProntuarioAnterior,
   FILTROS_LINHA_DO_TEMPO,
   montarItensProntuario,
   type FiltroLinhaDoTempo,
+  type ItemProntuario,
 } from '../../../utils/prontuario';
 
 export default function ProntuarioScreen() {
@@ -37,6 +41,8 @@ export default function ProntuarioScreen() {
 
   const [filtro, setFiltro] = useState<FiltroLinhaDoTempo>('TUDO');
   const [compartilhando, setCompartilhando] = useState(false);
+  const [enviandoAnterior, setEnviandoAnterior] = useState(false);
+  const removerAnterior = useRemoverProntuarioAnterior(petAtivo?.id ?? null);
   const [exportando, setExportando] = useState(false);
   const [baixandoExameId, setBaixandoExameId] = useState<string | null>(null);
 
@@ -58,6 +64,24 @@ export default function ProntuarioScreen() {
     } finally {
       setExportando(false);
     }
+  }
+
+  function pedirRemocaoAnterior(item: ItemProntuario) {
+    if (item.tipo !== 'EXAME') return;
+    const idExame = item.exame.id;
+    confirmar('Remover prontuário anterior?', 'O registro e o arquivo anexado deixam de aparecer para você e para o veterinário.', [
+      { texto: 'Cancelar', estilo: 'cancel' },
+      {
+        texto: 'Remover',
+        estilo: 'destructive',
+        aoConfirmar: () => {
+          removerAnterior.mutateAsync(idExame).then(
+            () => mostrarToast('sucesso', 'Prontuário anterior removido'),
+            erro => mostrarToast('erro', 'Não foi possível remover', erro instanceof Error ? erro.message : undefined),
+          );
+        },
+      },
+    ]);
   }
 
   async function baixarLaudo(exame: ExameProntuario) {
@@ -131,6 +155,17 @@ export default function ProntuarioScreen() {
           </Pressable>
         </View>
 
+        <Pressable
+          style={[s.enviarAnterior, modoSimples && ss.acao]}
+          onPress={() => setEnviandoAnterior(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Enviar prontuário anterior"
+          accessibilityHint="Anexe um prontuário de consultas passadas para o veterinário ver"
+        >
+          <Ionicons name="cloud-upload-outline" size={modoSimples ? 24 : 19} color={theme.colors.primary} />
+          <Text style={[s.enviarAnteriorTexto, modoSimples && ss.acaoTexto]}>Enviar prontuário anterior</Text>
+        </Pressable>
+
         {prontuario.isLoading ? (
           <View style={s.estadoCard}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -179,7 +214,19 @@ export default function ProntuarioScreen() {
                 subtitle="Quando a clínica registrar atendimentos, orientações, receitas e exames, eles aparecerão aqui."
               />
             ) : (
-              <ProntuarioLinhaDoTempo itens={itens} onBaixarLaudo={baixarLaudo} baixandoExameId={baixandoExameId} />
+              <ProntuarioLinhaDoTempo
+                itens={itens}
+                onBaixarLaudo={baixarLaudo}
+                baixandoExameId={baixandoExameId}
+                renderAcoes={item =>
+                  item.tipo === 'EXAME' && ehProntuarioAnterior(item.exame) && !item.exame.veterinario ? (
+                    <Pressable style={s.removerAnterior} onPress={() => pedirRemocaoAnterior(item)} accessibilityRole="button" accessibilityLabel="Remover prontuário anterior">
+                      <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
+                      <Text style={s.removerAnteriorTexto}>Remover</Text>
+                    </Pressable>
+                  ) : null
+                }
+              />
             )}
 
             <View style={s.aviso}>
@@ -197,6 +244,12 @@ export default function ProntuarioScreen() {
         idPet={petAtivo.id}
         nomePet={petAtivo.nome}
         onFechar={() => setCompartilhando(false)}
+      />
+      <EnviarProntuarioAnteriorModal
+        visivel={enviandoAnterior}
+        idPet={petAtivo.id}
+        nomePet={petAtivo.nome}
+        onFechar={() => setEnviandoAnterior(false)}
       />
     </View>
   );
@@ -222,6 +275,10 @@ function createStyles(theme: AppTheme) {
     acaoPrimariaTexto: { color: theme.colors.onPrimary, fontSize: 14, fontWeight: '800' },
     acaoSecundaria: { flex: 1, minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 999, borderWidth: 1.5, borderColor: theme.colors.primary },
     acaoSecundariaTexto: { color: theme.colors.primary, fontSize: 14, fontWeight: '800' },
+    enviarAnterior: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16, borderRadius: 14, borderWidth: 1, borderStyle: 'dashed', borderColor: theme.colors.primary },
+    removerAnterior: { alignSelf: 'flex-start', minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
+    removerAnteriorTexto: { color: theme.colors.danger, fontSize: 13, fontWeight: '700' },
+    enviarAnteriorTexto: { color: theme.colors.primary, fontSize: 14, fontWeight: '800' },
     desabilitado: { opacity: 0.55 },
     estadoCard: { minHeight: 200, alignItems: 'center', justifyContent: 'center', padding: 26, borderRadius: 22, backgroundColor: page.card, borderWidth: 1, borderColor: page.border },
     estadoTitulo: { color: page.text, fontSize: 17, fontWeight: '800', textAlign: 'center', marginTop: 12 },

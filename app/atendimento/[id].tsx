@@ -69,7 +69,7 @@ export default function AtendimentoScreen() {
   function pedirConclusao() {
     confirmar(
       'Concluir atendimento?',
-      `Suas anotações serão adicionadas à ficha de ${pet?.nome ?? 'o paciente'} e o tutor poderá vê-las. Depois de concluído, não dá para editar.`,
+      `Suas anotações serão adicionadas ao prontuário clínico de ${pet?.nome ?? 'o paciente'} e o tutor poderá vê-las. Depois de concluído, não dá para editar.`,
       [
         { texto: 'Continuar escrevendo', estilo: 'cancel' },
         { texto: 'Concluir', aoConfirmar: () => void concluir() },
@@ -88,7 +88,7 @@ export default function AtendimentoScreen() {
       );
       await concluirEvento(String(evento.id), observacao);
       await encerrar();
-      mostrarToast('sucesso', 'Atendimento concluído', `A ficha de ${pet?.nome ?? 'o paciente'} foi atualizada.`);
+      mostrarToast('sucesso', 'Atendimento concluído', `O prontuário clínico de ${pet?.nome ?? 'o paciente'} foi atualizado.`);
       router.replace('/(vet)');
     } catch (e) {
       setErro(mensagemDeErro(e, 'Não foi possível concluir o atendimento. Suas anotações continuam salvas.'));
@@ -97,7 +97,7 @@ export default function AtendimentoScreen() {
   }
 
   function pedirDescarte() {
-    confirmar('Descartar atendimento?', 'As anotações serão apagadas e nada será adicionado à ficha do pet.', [
+    confirmar('Descartar atendimento?', 'As anotações serão apagadas e nada será adicionado ao prontuário clínico do pet.', [
       { texto: 'Voltar', estilo: 'cancel' },
       {
         texto: 'Descartar',
@@ -161,7 +161,7 @@ export default function AtendimentoScreen() {
         <View style={s.aviso}>
           <Ionicons name="information-circle-outline" size={18} color={theme.colors.info} />
           <Text style={s.avisoTexto}>
-            Tudo o que você escrever será adicionado à ficha de {pet?.nome ?? 'o paciente'} ao concluir. O tutor poderá ver.
+            Tudo o que você escrever será adicionado ao prontuário clínico de {pet?.nome ?? 'o paciente'} ao concluir. O tutor poderá ver.
           </Text>
         </View>
 
