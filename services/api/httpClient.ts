@@ -1,5 +1,6 @@
 import NetInfo from '@react-native-community/netinfo';
 import { Platform } from 'react-native';
+import { File } from 'expo-file-system';
 import { API_BASE_URL } from '../../constants/api';
 import { obterTokenDaSessaoEmMemoria } from '../biometriaService';
 import { notificarExpiracaoSessao } from './sessionEvents';
@@ -196,11 +197,11 @@ async function uploadMultipart<T>(
       const blob = await arquivoResposta.blob();
       formData.append(campo, blob, arquivo.nome);
     } else {
-      formData.append(campo, {
-        uri: arquivo.uri,
-        name: arquivo.nome,
-        type: arquivo.tipoMime,
-      } as unknown as Blob);
+      // Expo SDK 57 usa FormData/Blob padrão no fetch nativo. Anexar o objeto
+      // { uri, name, type } do React Native não representa um arquivo nesse formato.
+      const arquivoNativo = new File(arquivo.uri);
+      const blob = arquivoNativo.slice(0, arquivoNativo.size, arquivo.tipoMime);
+      formData.append(campo, blob, arquivo.nome);
     }
 
     resposta = await fetch(`${API_BASE_URL}${path}`, {
