@@ -6,6 +6,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -157,20 +158,22 @@ export default function AcessoCompartilhadoScreen() {
 
   return (
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <StatusBar barStyle="light-content" backgroundColor={theme.pages.shared.heroBackground} />
       <ScrollView
         contentContainerStyle={[s.content, { paddingBottom: Math.max(insets.bottom, 18) + 28 }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <IllustratedPageHero
-        image={require('../../assets/images/sharedAccess.png')}
-        title="Acesso compartilhado"
-        subtitle="Escolha quem pode acompanhar cada pet e quais ações essa pessoa pode fazer."
-        icon="people-outline"
-        accessibilityLabel="Tutor e veterinária compartilhando o cuidado de um pet"
-        simple={modoSimples}
-        onBack={() => router.back()}
-      />
+          image={require('../../assets/images/sharedAccess.png')}
+          title="Acesso compartilhado"
+          subtitle="Escolha quem pode acompanhar cada pet e quais ações essa pessoa pode fazer."
+          icon="people-outline"
+          accessibilityLabel="Tutor e veterinária compartilhando o cuidado de um pet"
+          simple={modoSimples}
+          onBack={() => router.back()}
+          compactControls
+        />
         <PetSwitcher />
 
         {!petAtivo ? (
