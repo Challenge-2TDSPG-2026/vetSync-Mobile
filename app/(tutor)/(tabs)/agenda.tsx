@@ -204,7 +204,7 @@ export default function AgendaScreen() {
             <Text style={[s.heroTitle, modoSimples && sSimples.heroTitle]}>Agenda</Text>
             <Text style={[s.heroSubtitle, modoSimples && sSimples.heroSubtitle]}>Cada cuidado, no momento certo.</Text>
           </View>
-          <View style={s.heroIcon}><Ionicons name="calendar" size={30} color={theme.colors.onPrimary} /></View>
+          <View style={s.heroIcon}><Ionicons name="calendar" size={30} color={theme.pages.agenda.heroText} /></View>
           {!modoSimples && <View style={s.heroSummary}><Text style={s.heroSummaryValue}>{eventosNoMes}</Text><Text style={s.heroSummaryLabel}>compromissos neste mês</Text></View>}
         </View>
 
@@ -504,7 +504,7 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   filtroTextAtivo: { color: theme.colors.onPrimary },
 
   scrollContent: { paddingHorizontal: 18, paddingTop: 12, paddingBottom: 108 },
-  hero: { minHeight: 158, borderRadius: 26, padding: 22, marginBottom: 16, overflow: 'hidden', backgroundColor: theme.pages.agenda.primary, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', shadowColor: theme.pages.agenda.primary, shadowOpacity: theme.mode === 'dark' ? 0 : 0.2, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 4 },
+  hero: { minHeight: 158, borderRadius: 26, padding: 22, marginBottom: 16, overflow: 'hidden', backgroundColor: theme.mode === 'dark' ? theme.pages.agenda.heroBackground : theme.pages.agenda.primary, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', shadowColor: theme.mode === 'dark' ? theme.pages.agenda.heroBackground : theme.pages.agenda.primary, shadowOpacity: theme.mode === 'dark' ? 0 : 0.2, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 4 },
   heroCopy: { flex: 1, zIndex: 1 },
   heroEyebrow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 },
   heroDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#91E2B5' },

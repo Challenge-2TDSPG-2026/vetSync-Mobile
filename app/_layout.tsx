@@ -18,7 +18,6 @@ import { AccessibilityProvider } from '../context/AccessibilityContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { mostrarToast, ToastHost } from '../components/ui/Toast';
 import { AtivarBiometriaModal } from '../components/auth/AtivarBiometriaModal';
-import { OfflineBanner } from '../components/ui/OfflineBanner';
 import { AppSplashGate } from '../components/animated-splash';
 import { createNavigationTheme } from '../constants/theme';
 import { lockFontScaling } from '../utils/lockFontScaling';
@@ -350,7 +349,6 @@ function ThemedRootLayout() {
           <AuthProvider>
             <PetProvider>
               <VetProvider>
-                <OfflineBanner />
                 <RootNavigator />
                 <PushNotificationRegistration />
                 <NotificationTapHandler />
