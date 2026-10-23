@@ -101,3 +101,13 @@ export function useRemoverExame(idPet: string | null) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: prontuarioKeys.raiz(idPet ?? '') }),
   });
 }
+
+/** Usa o registro de exame que representa uma consulta anterior até existir um endpoint próprio. */
+export function useEnviarProntuarioAnterior(idPet: string | null) {
+  return useRegistrarExame(idPet);
+}
+
+/** Remove o registro de exame usado para representar uma consulta anterior. */
+export function useRemoverProntuarioAnterior(idPet: string | null) {
+  return useRemoverExame(idPet);
+}
