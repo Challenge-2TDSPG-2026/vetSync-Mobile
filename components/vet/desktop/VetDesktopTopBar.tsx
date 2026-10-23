@@ -14,12 +14,8 @@ import { useTheme } from '../../../context/ThemeContext';
 import { useVet } from '../../../context/VetContext';
 import type { AppTheme } from '../../../constants/theme';
 import { VetDesktopProfilePanel } from './VetDesktopProfilePanel';
-
-function iniciais(nome?: string | null): string {
-  if (!nome) return 'VT';
-  const partes = nome.trim().split(/\s+/);
-  return ((partes[0]?.[0] ?? '') + (partes.length > 1 ? partes[partes.length - 1][0] : '')).toUpperCase() || 'VT';
-}
+import { VetAvatar } from '../VetAvatar';
+import { EditarFotoVetModal } from '../EditarFotoVetModal';
 
 /** Barra superior do painel do veterinário (somente desktop): busca e perfil. */
 export function VetDesktopTopBar() {
@@ -31,6 +27,7 @@ export function VetDesktopTopBar() {
   const [busca, setBusca] = useState('');
   const [perfilAberto, setPerfilAberto] = useState(false);
   const [sairVisivel, setSairVisivel] = useState(false);
+  const [fotoAberta, setFotoAberta] = useState(false);
 
   const nome = veterinarioAtivo?.nome ?? sessao?.nome ?? '';
 
@@ -62,9 +59,7 @@ export function VetDesktopTopBar() {
         accessibilityState={{ expanded: perfilAberto }}
         accessibilityLabel="Abrir perfil do veterinário"
       >
-        <View style={s.avatar}>
-          <Text style={s.avatarText}>{iniciais(nome)}</Text>
-        </View>
+        <VetAvatar nome={nome || 'Veterinário'} size={40} />
         <View>
           <Text style={s.perfilNome}>{nome}</Text>
           <Text style={s.perfilCrmv}>CRMV {veterinarioAtivo?.crmv ?? '—'}</Text>
@@ -79,7 +74,12 @@ export function VetDesktopTopBar() {
           setPerfilAberto(false);
           setSairVisivel(true);
         }}
+        onAlterarFoto={() => {
+          setPerfilAberto(false);
+          setFotoAberta(true);
+        }}
       />
+      <EditarFotoVetModal visivel={fotoAberta} nome={nome || 'Veterinário'} onFechar={() => setFotoAberta(false)} />
       <LogoutConfirmationModal
         visivel={sairVisivel}
         onFechar={() => setSairVisivel(false)}
@@ -96,8 +96,6 @@ function createStyles(theme: AppTheme) {
     search: { width: 360, height: 40, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: p.border, backgroundColor: p.cardSecondary },
     searchInput: { flex: 1, fontSize: 14, color: theme.colors.text, paddingVertical: 0, outlineStyle: 'none' } as object,
     perfil: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    avatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary },
-    avatarText: { fontSize: 14, fontWeight: '700', color: theme.colors.onPrimary },
     perfilNome: { fontSize: 14, fontWeight: '600', color: theme.colors.text },
     perfilCrmv: { fontSize: 12, color: theme.colors.textSecondary },
   });
