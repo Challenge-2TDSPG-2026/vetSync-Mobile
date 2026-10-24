@@ -206,8 +206,8 @@ function Resumo({ styles, valor, rotulo, cor, simples }: { styles: ReturnType<ty
 
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: 18, paddingBottom: 36 },
-  cabecalho: { marginBottom: 18 },
+  content: { paddingHorizontal: 18, paddingBottom: 36 },
+  cabecalho: { marginTop: 18, marginBottom: 18 },
   titulo: { color: theme.colors.text, fontSize: 25, fontWeight: '800', letterSpacing: -0.5 },
   descricao: { color: theme.colors.textSecondary, fontSize: 14, lineHeight: 20, marginTop: 6, maxWidth: 330 },
 

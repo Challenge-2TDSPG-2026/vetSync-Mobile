@@ -105,7 +105,9 @@ export default function RecompensasScreen() {
         accessibilityLabel="Tutor e veterinária comemorando os cuidados de um pet"
         simple={modoSimples}
       />
-      <PetSwitcher />
+      <View style={s.afterHero}>
+        <PetSwitcher />
+      </View>
 
       {dicaVisivel && (
         <DicaTela
@@ -342,7 +344,8 @@ export default function RecompensasScreen() {
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 42 },
+  content: { paddingHorizontal: 18, paddingBottom: 42 },
+  afterHero: { marginTop: 18 },
 
   banner: {
     borderRadius: 28,

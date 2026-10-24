@@ -331,27 +331,21 @@ const s = StyleSheet.create({
 });
 
 function ThemedRootLayout() {
-  const { theme, isDark, carregando } = useTheme();
+  const { theme, carregando } = useTheme();
 
   // A árvore de rotas só é liberada após restaurar a preferência persistida.
   // Assim evitamos renderizar telas no tema errado antes do AsyncStorage responder.
   if (carregando) {
     return (
       <View style={[s.themeBootstrap, { backgroundColor: theme.colors.background }]}>
-        <StatusBar
-          barStyle={isDark ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.colors.background}
-        />
+        <StatusBar barStyle="light-content" />
       </View>
     );
   }
 
   return (
     <NavigationThemeProvider value={createNavigationTheme(theme)}>
-      <StatusBar
-        barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.colors.background}
-      />
+      <StatusBar barStyle="light-content" />
       <PersistQueryClientProvider
         client={queryClient}
         persistOptions={{

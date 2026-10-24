@@ -71,7 +71,9 @@ export default function HistoricoScreen() {
         accessibilityLabel="Tutor conversando com a equipe veterinária sobre os cuidados do pet"
         simple={modoSimples}
       />
-      <PetSwitcher />
+      <View style={s.afterHero}>
+        <PetSwitcher />
+      </View>
 
       {dicaVisivel && (
         <DicaTela
@@ -226,7 +228,8 @@ function StatCard({ styles, simpleStyles, valor, label, accentColor, simples }: 
 /** Tamanhos "padrão" do app (antes chamados de modo idoso — agora são a base de todo mundo). */
 const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.pages.history.background },
-  content: { padding: 16, paddingBottom: 36 },
+  content: { paddingHorizontal: 18, paddingBottom: 36 },
+  afterHero: { marginTop: 18 },
 
   statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 18 },
   statCard: {
