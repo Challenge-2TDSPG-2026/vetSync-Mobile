@@ -33,6 +33,8 @@ interface RequestOptions {
   autenticado?: boolean;
   baseUrl?: string;
   timeoutMs?: number;
+  /** Somente a API Java é autoridade para encerrar a sessão do aplicativo. */
+  encerrarSessaoEm401?: boolean;
 }
 
 export interface ArquivoUpload {
@@ -97,7 +99,7 @@ function construirErro(status: number, corpo: any): ApiError {
   return new ApiError(status, mensagemPadraoPorStatus(status), 'http');
 }
 
-async function interpretarResposta<T>(resposta: Response, autenticado: boolean): Promise<T> {
+async function interpretarResposta<T>(resposta: Response, autenticado: boolean, encerrarSessaoEm401: boolean): Promise<T> {
   if (resposta.status === 204) return undefined as T;
 
   const texto = await resposta.text();
@@ -108,7 +110,7 @@ async function interpretarResposta<T>(resposta: Response, autenticado: boolean):
     corpo = texto;
   }
 
-  if (resposta.status === 401 && autenticado) {
+  if (resposta.status === 401 && autenticado && encerrarSessaoEm401) {
     notificarExpiracaoSessao();
     throw new ApiError(401, 'Sua sessão expirou. Entre novamente.', 'http');
   }
@@ -140,6 +142,7 @@ export async function apiRequest<T = unknown>({
   autenticado = true,
   baseUrl = API_BASE_URL,
   timeoutMs = 60_000,
+  encerrarSessaoEm401 = baseUrl === API_BASE_URL,
 }: RequestOptions): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
@@ -170,7 +173,7 @@ export async function apiRequest<T = unknown>({
     clearTimeout(timeout);
   }
 
-  return interpretarResposta<T>(resposta, autenticado);
+  return interpretarResposta<T>(resposta, autenticado, encerrarSessaoEm401);
 }
 
 async function uploadMultipart<T>(
@@ -222,7 +225,7 @@ async function uploadMultipart<T>(
     clearTimeout(timeout);
   }
 
-  return interpretarResposta<T>(resposta, autenticado);
+  return interpretarResposta<T>(resposta, autenticado, true);
 }
 
 export const api = {

@@ -57,6 +57,29 @@ describe('apiRequest', () => {
     cancelarAssinatura();
   });
 
+  it('preserva a sessão Java quando apenas a IA rejeita o token', async () => {
+    const aoExpirar = jest.fn();
+    const cancelarAssinatura = assinarExpiracaoSessao(aoExpirar);
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      status: 401,
+      ok: false,
+      text: jest.fn().mockResolvedValue(JSON.stringify({ detail: 'Token de autenticação inválido' })),
+    } as Partial<Response>) as typeof fetch;
+
+    await expect(apiRequest({
+      method: 'POST',
+      path: '/api/v1/ia/orquestrador/processar',
+      baseUrl: 'https://app-vetsync-ia.azurewebsites.net',
+      body: { message: 'Olá' },
+    })).rejects.toMatchObject({
+      status: 401,
+      message: 'Token de autenticação inválido',
+    });
+
+    expect(aoExpirar).not.toHaveBeenCalled();
+    cancelarAssinatura();
+  });
+
   it('envia a foto no campo multipart esperado pelo Java', async () => {
     const append = jest.fn();
     globalThis.FormData = jest.fn(() => ({ append })) as unknown as typeof FormData;
