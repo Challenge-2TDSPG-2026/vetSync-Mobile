@@ -56,6 +56,7 @@ onlineManager.setEventListener((setOnline) =>
 );
 
 const ROTAS_FORA_DO_GRUPO = [
+  '+not-found',
   'evento',
   'paciente',
   'cadastro',
@@ -137,7 +138,7 @@ function RootNavigator() {
     );
 
     if (!autenticado) {
-      if (!inLogin && !inCadastro && !inRecuperacaoSenha && !inVinculoClinica) router.replace('/login');
+      if (!inLogin && !inCadastro && !inRecuperacaoSenha && !inVinculoClinica && !inRotaLivre) router.replace('/login');
       return;
     }
 
