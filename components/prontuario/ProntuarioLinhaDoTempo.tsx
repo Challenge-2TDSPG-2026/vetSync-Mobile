@@ -165,17 +165,17 @@ function corpoDoItem(item: ItemProntuario, s: Estilos): React.ReactNode {
 function createStyles(theme: AppTheme) {
   const page = theme.pages.shared;
   return StyleSheet.create({
-    card: { marginBottom: 12, padding: 16, borderRadius: 18, backgroundColor: page.card, borderWidth: 1, borderColor: page.border },
+    card: { marginBottom: 13, padding: 17, borderRadius: 21, backgroundColor: page.card, borderWidth: 1, borderColor: page.border, shadowColor: '#10271c', shadowOpacity: theme.mode === 'dark' ? 0 : 0.055, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 1 },
     topo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    icone: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+    icone: { width: 46, height: 46, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
     topoTexto: { flex: 1, minWidth: 0 },
-    tipo: { fontSize: 10, fontWeight: '800', letterSpacing: 0.8 },
-    titulo: { color: page.text, fontSize: 16, fontWeight: '800', marginTop: 1 },
-    meta: { color: page.textSecondary, fontSize: 12, marginTop: 2 },
-    campo: { marginTop: 12 },
+    tipo: { fontSize: 9, fontWeight: '900', letterSpacing: 1 },
+    titulo: { color: page.text, fontSize: 16, fontWeight: '900', marginTop: 2, letterSpacing: -0.2 },
+    meta: { color: page.textSecondary, fontSize: 12, marginTop: 4 },
+    campo: { marginTop: 14, paddingTop: 11, borderTopWidth: 1, borderTopColor: page.border },
     campoRotulo: { color: page.textSecondary, fontSize: 11, fontWeight: '700', marginBottom: 3 },
     campoValor: { color: page.text, fontSize: 14, lineHeight: 20 },
-    botaoLaudo: { marginTop: 14, minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, borderWidth: 1, borderColor: theme.colors.primary },
+    botaoLaudo: { marginTop: 14, minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 14, borderWidth: 1, borderColor: withAlpha(theme.colors.primary, 0.35), backgroundColor: withAlpha(theme.colors.primary, theme.mode === 'dark' ? 0.12 : 0.045) },
     botaoLaudoTexto: { color: theme.colors.primary, fontSize: 13, fontWeight: '800' },
     desabilitado: { opacity: 0.6 },
   });
