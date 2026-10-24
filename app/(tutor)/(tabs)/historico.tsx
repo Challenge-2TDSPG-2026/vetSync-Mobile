@@ -33,14 +33,14 @@ export default function HistoricoScreen() {
   const { visivel: dicaVisivel, fechar: fecharDica } = useDicaPrimeiraVisita('tutor-historico');
 
   const eventosComStatus = useMemo(
-    () => eventos.map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
+    () => eventos
+      .filter(e => e.status === 'CONCLUIDO' || e.status === 'CANCELADO')
+      .map(e => ({ ...e, statusExibicao: statusExibicao(e) })),
     [eventos]
   );
   const total = eventosComStatus.length;
   const concluidos = eventosComStatus.filter(e => e.statusExibicao === 'CONCLUIDO').length;
   const cancelados = eventosComStatus.filter(e => e.statusExibicao === 'CANCELADO').length;
-  const emAberto = total - concluidos - cancelados;
-  const progresso = total > 0 ? concluidos / total : 0;
 
   const agrupados = useMemo(() => {
     const mapa: Record<string, typeof eventosComStatus> = {};
@@ -55,8 +55,6 @@ export default function HistoricoScreen() {
     return mapa;
   }, [eventosComStatus]);
 
-  const pct = Math.round(progresso * 100);
-
   return (
     <ScrollView
       style={s.container}
@@ -70,6 +68,8 @@ export default function HistoricoScreen() {
         icon="time-outline"
         accessibilityLabel="Tutor conversando com a equipe veterinária sobre os cuidados do pet"
         simple={modoSimples}
+        height={modoSimples ? 240 : 196}
+        compactControls
       />
       <View style={s.afterHero}>
         <PetSwitcher />
@@ -89,36 +89,8 @@ export default function HistoricoScreen() {
       <View style={[s.statsRow, modoSimples && sSimples.statsRow]}>
         <StatCard styles={s} simpleStyles={sSimples} valor={total} label="Total" accentColor={theme.pages.history.info} simples={modoSimples} />
         {!modoSimples && <StatCard styles={s} simpleStyles={sSimples} valor={concluidos} label="Realizados" accentColor={theme.pages.history.success} />}
-        {!modoSimples && <StatCard styles={s} simpleStyles={sSimples} valor={emAberto} label="Em aberto" accentColor={theme.pages.history.warning} />}
+        {!modoSimples && <StatCard styles={s} simpleStyles={sSimples} valor={cancelados} label="Cancelados" accentColor={theme.pages.history.warning} />}
       </View>
-
-      {/* Taxa de conclusão — some no modo simples */}
-      {!modoSimples && (
-        <View
-          style={s.progressoCard}
-          accessible
-          accessibilityRole="progressbar"
-          accessibilityLabel="Taxa de conclusão"
-          accessibilityValue={{ min: 0, max: 100, now: pct, text: `${pct}%` }}
-        >
-          <View style={s.progressoHead}>
-            <View>
-              <Text style={s.progressoLbl}>Taxa de conclusão</Text>
-              <Text style={s.progressoPct}>{pct}%</Text>
-            </View>
-            <View style={s.progressoMeta}>
-              <Text style={s.progressoMetaText}>{concluidos} realizados</Text>
-              <Text style={s.progressoMetaText}>{emAberto} em aberto</Text>
-            </View>
-          </View>
-          <View style={s.barraTrack}>
-            <View style={[s.barraFill, { width: `${pct}%` as any }]} />
-          </View>
-          <Text style={s.progressoHint}>
-            {total} evento{total !== 1 ? 's' : ''} no total{cancelados > 0 ? ` · ${cancelados} cancelado${cancelados !== 1 ? 's' : ''}` : ''}
-          </Text>
-        </View>
-      )}
 
       {carregandoEventos ? (
         <SkeletonList linhas={4} comIcone={false} />
@@ -126,7 +98,7 @@ export default function HistoricoScreen() {
         <EmptyState
           icon="document-text-outline"
           title="Nenhum evento registrado ainda"
-          subtitle="Adicione eventos para ver o histórico clínico"
+          subtitle="Consultas e eventos concluídos ou cancelados aparecerão aqui."
           accentColor={theme.pages.history.info}
           variant="plain"
         />
@@ -141,13 +113,6 @@ export default function HistoricoScreen() {
             </View>
 
             <View style={s.tabelaCard}>
-              {!modoSimples && (
-                <View style={s.tabelaHead}>
-                  <Text style={[s.thText, { flex: 2 }]}>Evento</Text>
-                  <Text style={[s.thText, { flex: 1, textAlign: 'center' }]}>Data</Text>
-                  <Text style={[s.thText, { flex: 1, textAlign: 'right' }]}>Status</Text>
-                </View>
-              )}
               {evts.map((evento, idx) => {
                 const visual = obterVisualTipoEvento(evento.nomeTipoEvento);
                 const sb = STATUS_EXIBICAO_BADGE[evento.statusExibicao];
@@ -184,19 +149,18 @@ export default function HistoricoScreen() {
                     accessible
                     accessibilityLabel={`${evento.nomeTipoEvento}, com ${evento.nomeVeterinario}, ${formatarDataCurta(evento.data)}, ${sb.label}`}
                   >
-                    <View style={[s.tdEvento, { flex: 2 }]}>
+                    <View style={s.tdEvento}>
                       <View style={[s.rowIcone, { backgroundColor: visual.cor }]}>
                         <AppIcon name={visual.icon} set={visual.iconSet} size={16} color={theme.pages.history.white} />
                       </View>
-                      <View>
-                        <Text style={s.rowTitulo} numberOfLines={1}>{evento.nomeTipoEvento}</Text>
+                      <View style={s.rowDetalhes}>
+                        <Text style={s.rowTitulo} numberOfLines={2}>{evento.nomeTipoEvento}</Text>
                         <Text style={s.rowVet} numberOfLines={1}>{evento.nomeVeterinario}</Text>
                       </View>
                     </View>
 
-                    <Text style={[s.tdData, { flex: 1 }]}>{formatarDataCurta(evento.data)}</Text>
-
-                    <View style={[s.tdStatus, { flex: 1 }]}>
+                    <View style={s.rowMeta}>
+                      <Text style={s.tdData}>{formatarDataCurta(evento.data)}</Text>
                       <View style={[s.statusBadge, { backgroundColor: sb.bg }]}>
                         <Text style={[s.statusText, { color: sb.color }]}>{sb.label}</Text>
                       </View>
@@ -231,30 +195,20 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   content: { paddingHorizontal: 18, paddingBottom: 36 },
   afterHero: { marginTop: 18 },
 
-  statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 18 },
+  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 18 },
   statCard: {
-    minWidth: '47%',
-    flexBasis: '47%',
+    minWidth: 0,
+    flexBasis: 0,
     flexGrow: 1,
     backgroundColor: theme.pages.history.statsCard.background,
     borderWidth: 1,
     borderColor: theme.pages.history.statsCard.border,
     borderRadius: 12,
-    padding: 14,
+    padding: 10,
     borderBottomWidth: 3,
   },
-  statLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: theme.pages.history.textSecondary, marginBottom: 6 },
-  statVal: { fontSize: 30, fontWeight: '700', lineHeight: 32 },
-
-  progressoCard: { backgroundColor: theme.pages.history.primary, borderRadius: 16, padding: 24, marginBottom: 26 },
-  progressoHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15 },
-  progressoLbl: { fontSize: 13, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: 'rgba(168,230,199,0.8)', marginBottom: 4 },
-  progressoPct: { fontSize: 42, fontWeight: '700', color: theme.pages.history.white, lineHeight: 46 },
-  progressoMeta: { alignItems: 'flex-end', gap: 4 },
-  progressoMetaText: { fontSize: 14, color: 'rgba(255,255,255,0.65)' },
-  barraTrack: { height: 12, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 6, overflow: 'hidden', marginBottom: 11 },
-  barraFill: { height: '100%', backgroundColor: theme.pages.history.success, borderRadius: 6 },
-  progressoHint: { fontSize: 14, color: 'rgba(255,255,255,0.5)' },
+  statLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', color: theme.pages.history.textSecondary, marginBottom: 4 },
+  statVal: { fontSize: 27, fontWeight: '700', lineHeight: 31 },
 
   empty: { alignItems: 'center', paddingVertical: 56 },
   emptyIcon: { marginBottom: 12 },
@@ -268,25 +222,17 @@ const createStyles = (theme: AppTheme) => StyleSheet.create({
   mesBadgeText: { fontSize: 11, fontWeight: '700', color: theme.pages.history.textSecondary },
 
   tabelaCard: { backgroundColor: theme.pages.history.tableCard.background, borderRadius: 12, borderWidth: 1, borderColor: theme.pages.history.tableCard.border, overflow: 'hidden' },
-  tabelaHead: {
-    flexDirection: 'row',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: theme.pages.history.cardSecondary,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.pages.history.tableCard.border,
-  },
-  thText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase', color: theme.pages.history.textSecondary },
-  tabelaRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12 },
+  tabelaRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 12 },
   tabelaRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.pages.history.border },
 
-  tdEvento: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  rowIcone: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+  tdEvento: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  rowIcone: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
+  rowDetalhes: { flex: 1, minWidth: 0 },
   rowTitulo: { fontSize: 13, fontWeight: '600', color: theme.pages.history.text, marginBottom: 2 },
   rowVet: { fontSize: 10, color: theme.pages.history.textSecondary },
 
-  tdData: { fontSize: 12, fontWeight: '600', color: theme.pages.history.textSecondary, textAlign: 'center' },
-  tdStatus: { alignItems: 'flex-end' },
+  rowMeta: { alignItems: 'flex-end', gap: 5, flexShrink: 0 },
+  tdData: { fontSize: 12, fontWeight: '600', color: theme.pages.history.textSecondary },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
   statusText: { fontSize: 11, fontWeight: '700' },
 });
